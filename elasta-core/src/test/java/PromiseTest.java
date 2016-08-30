@@ -1,4 +1,4 @@
-import elasta.promise.impl.Promises;
+import elasta.core.promise.impl.Promises;
 import org.junit.Test;
 
 /**
