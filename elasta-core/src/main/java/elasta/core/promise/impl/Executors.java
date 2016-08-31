@@ -1,7 +1,6 @@
 package elasta.core.promise.impl;
 
 import elasta.core.promise.intfs.*;
-import elasta.promise.intfs.*;
 
 /**
  * Created by Jango on 8/25/2016.

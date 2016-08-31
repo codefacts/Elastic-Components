@@ -6,7 +6,6 @@ import elasta.core.intfs.RunnableUnchecked;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.*;
-import elasta.touple.*;
 
 import java.util.Collection;
 import java.util.Collections;
