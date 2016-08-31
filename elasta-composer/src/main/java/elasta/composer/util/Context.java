@@ -156,4 +156,8 @@ public class Context {
         Object val = this.map.get(key);
         return val == null && !this.map.containsKey(key) ? def : (Boolean) val;
     }
+
+    public static void main(String[] args) {
+
+    }
 }

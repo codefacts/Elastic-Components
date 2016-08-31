@@ -1,30 +1,28 @@
 package elasta.composer.util;
 
-import static io.crm.ErrorCodeHelper.*;
-
 /**
  * Created by shahadat on 2/28/16.
  */
 public enum ErrorCodes {
 
-    VALIDATION_ERROR(validation(), "validation.error", validationHttp()),
-    INVALID_TYPE_VALIDATION_ERROR(validation(), "invalid.type.validation.error", validationHttp()),
-    INVALID_RANGE_VALIDATION_ERROR(validation(), "invalid.range.validation.error", validationHttp()),
-    NULL_VALIDATION_ERROR(validation(), "null.validation.error", validationHttp()),
-    INVALID_VALUE_VALIDATION_ERROR(validation(), "invalid.value.validation.error", validationHttp()),
-    PATTERN_VALIDATION_ERROR(validation(), "pattern.validation.error", validationHttp()),
-    MAX_LENGTH_VALIDATION_ERROR(validation(), "max.length.validation.error", validationHttp()),
-    MIN_LENGTH_VALIDATION_ERROR(validation(), "min.length.validation.error", validationHttp()),
-    LENGTH_VALIDATION_ERROR(validation(), "length.validation.error", validationHttp()),
-    INVALID_EMAIL_VALIDATION_ERROR(validation(), "invalid.email.validation.error", validationHttp()),
-    INVALID_PHONE_VALIDATION_ERROR(validation(), "invalid.phone.validation.error", validationHttp()),
-    VALUE_MISSING_VALIDATION_ERROR(validation(), "value.missing.validation.error", validationHttp()),
-    INVALID_SEQUENCE_ORDER_VALIDATION_ERROR(validation(), "invalid.sequence.order.validation.error", validationHttp()),
-    SERVER_ERROR(error(), "server.error", errorHttp()),
-    NOT_FOUND(error(), "not_found.error", errorHttp()),
-    POSITIVE_NUMBER_VALIDATION_ERROR(validation(), "positive.number.validation.error", validationHttp()),
-    NON_ZERO_NUMBER_VALIDATION_ERROR(validation(), "non_zero.number.validation.error", validationHttp()),
-    PASSWORD_MISMATCH(validation(), "password.mismatch.validation.error", validationHttp());
+    VALIDATION_ERROR(ErrorCodeHelper.validation(), "validation.error", ErrorCodeHelper.validationHttp()),
+    INVALID_TYPE_VALIDATION_ERROR(ErrorCodeHelper.validation(), "invalid.type.validation.error", ErrorCodeHelper.validationHttp()),
+    INVALID_RANGE_VALIDATION_ERROR(ErrorCodeHelper.validation(), "invalid.range.validation.error", ErrorCodeHelper.validationHttp()),
+    NULL_VALIDATION_ERROR(ErrorCodeHelper.validation(), "null.validation.error", ErrorCodeHelper.validationHttp()),
+    INVALID_VALUE_VALIDATION_ERROR(ErrorCodeHelper.validation(), "invalid.value.validation.error", ErrorCodeHelper.validationHttp()),
+    PATTERN_VALIDATION_ERROR(ErrorCodeHelper.validation(), "pattern.validation.error", ErrorCodeHelper.validationHttp()),
+    MAX_LENGTH_VALIDATION_ERROR(ErrorCodeHelper.validation(), "max.length.validation.error", ErrorCodeHelper.validationHttp()),
+    MIN_LENGTH_VALIDATION_ERROR(ErrorCodeHelper.validation(), "min.length.validation.error", ErrorCodeHelper.validationHttp()),
+    LENGTH_VALIDATION_ERROR(ErrorCodeHelper.validation(), "length.validation.error", ErrorCodeHelper.validationHttp()),
+    INVALID_EMAIL_VALIDATION_ERROR(ErrorCodeHelper.validation(), "invalid.email.validation.error", ErrorCodeHelper.validationHttp()),
+    INVALID_PHONE_VALIDATION_ERROR(ErrorCodeHelper.validation(), "invalid.phone.validation.error", ErrorCodeHelper.validationHttp()),
+    VALUE_MISSING_VALIDATION_ERROR(ErrorCodeHelper.validation(), "value.missing.validation.error", ErrorCodeHelper.validationHttp()),
+    INVALID_SEQUENCE_ORDER_VALIDATION_ERROR(ErrorCodeHelper.validation(), "invalid.sequence.order.validation.error", ErrorCodeHelper.validationHttp()),
+    SERVER_ERROR(ErrorCodeHelper.error(), "server.error", ErrorCodeHelper.errorHttp()),
+    NOT_FOUND(ErrorCodeHelper.error(), "not_found.error", ErrorCodeHelper.errorHttp()),
+    POSITIVE_NUMBER_VALIDATION_ERROR(ErrorCodeHelper.validation(), "positive.number.validation.error", ErrorCodeHelper.validationHttp()),
+    NON_ZERO_NUMBER_VALIDATION_ERROR(ErrorCodeHelper.validation(), "non_zero.number.validation.error", ErrorCodeHelper.validationHttp()),
+    PASSWORD_MISMATCH(ErrorCodeHelper.validation(), "password.mismatch.validation.error", ErrorCodeHelper.validationHttp());
 
     private final int code;
     private final String messageCode;
