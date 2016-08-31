@@ -1,3 +1,5 @@
 rootProject.name = 'elasta'
+include 'elasta-core'
+include 'elasta-pipeline'
 include 'elasta-composer'
 
