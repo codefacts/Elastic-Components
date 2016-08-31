@@ -1,4 +1,4 @@
-package elasta.composer.pipelines;
+package elasta.composer.transformation.impl.json.object;
 
 import elasta.composer.transformation.Transform;
 import io.vertx.core.json.JsonArray;
