@@ -1,9 +1,9 @@
 package elasta.composer.validator;
 
 import com.google.common.collect.ImmutableList;
-import io.crm.promise.Promises;
-import io.crm.promise.intfs.Promise;
-import io.crm.util.Context;
+import elasta.composer.util.Context;
+import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Promise;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class ValidationPipelineDeferred<T> {
 
     public Promise<List<ValidationResult>> validate(T jsonObject, Context context) {
 
-        if (list.isEmpty()) return Promises.from(null);
+        if (list.isEmpty()) return Promises.just(null);
 
         final ImmutableList.Builder<ValidationResult> builder = ImmutableList.<ValidationResult>builder();
 

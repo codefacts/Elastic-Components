@@ -1,11 +1,11 @@
 package elasta.composer.validator.impl.type;
 
-import io.crm.MessageBundle;
-import io.crm.validator.ValidationResult;
-import io.crm.validator.Validator;
+import elasta.composer.util.MessageBundle;
+import elasta.composer.validator.ValidationResult;
+import elasta.composer.validator.Validator;
 import io.vertx.core.json.JsonObject;
 
-import static io.crm.util.Util.as;
+import static elasta.composer.util.Util.as;
 
 /**
  * Created by shahadat on 3/1/16.

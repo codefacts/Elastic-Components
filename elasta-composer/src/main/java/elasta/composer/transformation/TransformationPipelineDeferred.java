@@ -1,8 +1,8 @@
 package elasta.composer.transformation;
 
-import io.crm.promise.Promises;
-import io.crm.promise.intfs.Promise;
-import io.crm.util.Context;
+import elasta.composer.util.Context;
+import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Promise;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class TransformationPipelineDeferred<T, R> implements TransformDeferred<T
         try {
 
             if (list.size() <= 0) {
-                return Promises.from((R) val);
+                return Promises.just((R) val);
             }
 
             Promise<Object> promise;
@@ -38,7 +38,7 @@ public class TransformationPipelineDeferred<T, R> implements TransformDeferred<T
             return (Promise<R>) promise;
 
         } catch (Exception ex) {
-            return Promises.fromError(ex);
+            return Promises.error(ex);
         }
     }
 }

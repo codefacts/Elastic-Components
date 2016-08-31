@@ -1,9 +1,9 @@
 package elasta.composer.validator.impl;
 
-import io.crm.ErrorCodes;
-import io.crm.MessageBundle;
-import io.crm.validator.ValidationResult;
-import io.crm.validator.Validator;
+import elasta.composer.util.ErrorCodes;
+import elasta.composer.util.MessageBundle;
+import elasta.composer.validator.ValidationResult;
+import elasta.composer.validator.Validator;
 import io.vertx.core.json.JsonObject;
 
 import java.util.regex.Pattern;

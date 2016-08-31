@@ -1,8 +1,8 @@
 package elasta.composer.endpoints;
 
-import io.crm.promise.Promises;
-import io.crm.promise.intfs.Defer;
-import io.crm.util.ExceptionUtil;
+import elasta.composer.util.ExceptionUtil;
+import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Defer;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
@@ -42,8 +42,8 @@ final public class HttpEndPoint implements Endpoint<Buffer> {
             HttpClientRequest request = httpClient.requestAbs(
                 HttpMethod.valueOf(headers.get(METHOD)),
                 headers.get(URI),
-                response -> response.exceptionHandler(defer::fail)
-                    .bodyHandler(defer::complete));
+                response -> response.exceptionHandler(defer::reject)
+                    .bodyHandler(defer::resolve));
 
             headers.remove(METHOD).remove(URI);
 
@@ -54,10 +54,10 @@ final public class HttpEndPoint implements Endpoint<Buffer> {
 
             request
                 .write(message.body())
-                .exceptionHandler(defer::fail)
+                .exceptionHandler(defer::reject)
                 .end();
         } catch (Exception ex) {
-            defer.fail(ex);
+            defer.reject(ex);
         }
 
         defer.promise()

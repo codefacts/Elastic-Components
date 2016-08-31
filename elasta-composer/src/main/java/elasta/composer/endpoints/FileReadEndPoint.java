@@ -1,9 +1,9 @@
 package elasta.composer.endpoints;
 
-import io.crm.promise.Promises;
-import io.crm.promise.intfs.Defer;
-import io.crm.util.ExceptionUtil;
-import io.crm.util.Util;
+import elasta.composer.util.ExceptionUtil;
+import elasta.composer.util.Util;
+import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Defer;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.file.FileSystem;

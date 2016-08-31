@@ -1,8 +1,8 @@
 package elasta.composer.transformation;
 
-import io.crm.promise.Promises;
-import io.crm.promise.intfs.Promise;
-import io.crm.util.Context;
+import elasta.composer.util.Context;
+import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class JsonTransformationPipelineDeferred implements TransformDeferred<Jso
         try {
 
             if (list.size() <= 0) {
-                return Promises.from(val);
+                return Promises.just(val);
             }
 
             Promise<JsonObject> promise;
@@ -38,7 +38,7 @@ public class JsonTransformationPipelineDeferred implements TransformDeferred<Jso
             return promise;
 
         } catch (Exception ex) {
-            return Promises.fromError(ex);
+            return Promises.error(ex);
         }
     }
 }

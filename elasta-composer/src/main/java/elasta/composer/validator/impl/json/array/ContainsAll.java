@@ -1,10 +1,10 @@
 package elasta.composer.validator.impl.json.array;
 
-import io.crm.ErrorCodes;
-import io.crm.MessageBundle;
-import io.crm.validator.ValidationResult;
-import io.crm.validator.ValidationResultBuilder;
-import io.crm.validator.Validator;
+import elasta.composer.util.ErrorCodes;
+import elasta.composer.util.MessageBundle;
+import elasta.composer.validator.ValidationResult;
+import elasta.composer.validator.ValidationResultBuilder;
+import elasta.composer.validator.Validator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

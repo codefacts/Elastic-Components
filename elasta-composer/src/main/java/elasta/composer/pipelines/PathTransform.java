@@ -1,6 +1,6 @@
 package elasta.composer.pipelines;
 
-import io.crm.transformation.Transform;
+import elasta.composer.transformation.Transform;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

@@ -2,8 +2,6 @@ package elasta.composer.validator;
 
 import io.vertx.core.json.JsonObject;
 
-import static io.crm.util.Util.or;
-
 /**
  * Created by shahadat on 2/28/16.
  */
@@ -23,6 +21,10 @@ public class ValidationResult<T> {
 
     public String getField() {
         return or(field, "");
+    }
+
+    private <T> T or(T field, T s) {
+        return field == null ? s : field;
     }
 
     public T getValue() {
