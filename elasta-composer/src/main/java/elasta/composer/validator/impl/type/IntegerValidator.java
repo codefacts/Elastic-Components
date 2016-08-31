@@ -1,11 +1,10 @@
 package elasta.composer.validator.impl.type;
 
-import io.crm.MessageBundle;
-import io.crm.validator.ValidationResult;
-import io.crm.validator.Validator;
+import elasta.composer.util.MessageBundle;
+import elasta.composer.util.Util;
+import elasta.composer.validator.ValidationResult;
+import elasta.composer.validator.Validator;
 import io.vertx.core.json.JsonObject;
-
-import static io.crm.util.Util.as;
 
 /**
  * Created by shahadat on 2/28/16.
@@ -15,7 +14,7 @@ public class IntegerValidator implements Validator<JsonObject> {
 
     public IntegerValidator(MessageBundle messageBundle, String field) {
         typeValidator = new TypeValidator(messageBundle, field,
-            jsonObject -> as(jsonObject.getValue(field), Integer.class),
+            jsonObject -> Util.as(jsonObject.getValue(field), Integer.class),
             validationResult -> {
                 validationResult.getAdditionals()
                     .put(TypeValidator.TYPE, Types.INTEGER);

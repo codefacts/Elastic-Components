@@ -1,8 +1,8 @@
 package elasta.composer.transformation.impl.json.object;
 
 import com.google.common.collect.ImmutableList;
-import io.crm.transformation.Transform;
-import io.crm.util.SimpleCounter;
+import elasta.composer.transformation.Transform;
+import elasta.composer.util.SimpleCounter;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

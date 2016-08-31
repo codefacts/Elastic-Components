@@ -1,12 +1,11 @@
 package elasta.composer.transformation.impl.json.object;
 
 import elasta.composer.transformation.Transform;
+import elasta.composer.util.Util;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
-
-import static io.crm.util.Util.*;
 
 /**
  * Created by shahadat on 3/1/16.
@@ -16,7 +15,7 @@ public class DefaultValueTransformation implements Transform<JsonObject, JsonObj
 
     public DefaultValueTransformation(JsonObject defaultValue) {
         Objects.requireNonNull(defaultValue, "DefaultValueTransformation: DefaultValue:JsonObject must not be null.");
-        this.defaultValue = toImmutable(defaultValue);
+        this.defaultValue = Util.toImmutable(defaultValue);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class DefaultValueTransformation implements Transform<JsonObject, JsonObj
             if (jsonValue == null) {
                 json.put(key, emptyfy(defVal));
             } else if (jsonValue instanceof JsonObject) {
-                recursive((JsonObject) jsonValue, as(defVal, JsonObject.class));
+                recursive((JsonObject) jsonValue, Util.as(defVal, JsonObject.class));
             }
         });
         return json;

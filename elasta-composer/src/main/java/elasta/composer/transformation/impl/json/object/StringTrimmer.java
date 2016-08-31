@@ -1,6 +1,6 @@
 package elasta.composer.transformation.impl.json.object;
 
-import io.crm.transformation.Transform;
+import elasta.composer.transformation.Transform;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -16,7 +16,8 @@ public class StringTrimmer implements Transform<JsonObject, JsonObject> {
         this.recursiveMerge = new RecursiveMerge(includes, excludes,
             val -> val instanceof String,
             (e, remove) -> e.setValue(e.getValue().toString().trim()),
-            val -> false, (val, rem) -> {});
+            val -> false, (val, rem) -> {
+        });
     }
 
     @Override

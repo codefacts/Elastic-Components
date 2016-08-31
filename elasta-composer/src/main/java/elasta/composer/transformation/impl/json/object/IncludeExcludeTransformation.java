@@ -1,7 +1,7 @@
 package elasta.composer.transformation.impl.json.object;
 
 import com.google.common.collect.ImmutableSet;
-import io.crm.transformation.Transform;
+import elasta.composer.transformation.Transform;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Set;
