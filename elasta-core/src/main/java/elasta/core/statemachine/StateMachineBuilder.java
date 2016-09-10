@@ -15,7 +15,7 @@ public class StateMachineBuilder {
         return new StateMachineBuilder();
     }
 
-    public StateMachineBuilder setInitialState(String initialState) {
+    public StateMachineBuilder initialState(String initialState) {
         this.initialState = initialState;
         return this;
     }

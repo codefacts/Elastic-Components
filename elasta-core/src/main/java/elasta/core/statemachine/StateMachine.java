@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
  */
 public class StateMachine {
     private static final StateTrigger STATE_TRIGGER = StateTrigger.create(null, null);
-    private static final String NEXT = "NEXT";
+    private static final String NEXT = "next";
     private final String initialState;
     private final Map<String, Set<String>> stateEvents;
     private final Map<String, Map<String, String>> eventStateMapByState;
@@ -33,8 +33,8 @@ public class StateMachine {
         try {
             final StateCallbacks<T, Object> stateCallbacks = stateCallbacksMap.get(initialState);
             return execute(stateCallbacks, message)
-                    .mapP(trigger -> executeNext(trigger, initialState))
-                    .map(stateTrigger -> (R) stateTrigger.message);
+                .mapP(trigger -> executeNext(trigger, initialState))
+                .map(stateTrigger -> (R) stateTrigger.message);
         } catch (Throwable ex) {
             return Promises.error(ex);
         }
@@ -44,8 +44,8 @@ public class StateMachine {
         try {
             final StateCallbacks<T, Object> stateCallbacks = stateCallbacksMap.get(state);
             return execute(stateCallbacks, message)
-                    .mapP(trigger -> executeNext(trigger, state))
-                    .map(stateTrigger -> (R) stateTrigger.message);
+                .mapP(trigger -> executeNext(trigger, state))
+                .map(stateTrigger -> (R) stateTrigger.message);
         } catch (Throwable ex) {
             return Promises.error(ex);
         }
@@ -91,34 +91,34 @@ public class StateMachine {
         }
 
         return StateMachine.this.execute(nextStateCallbacks, trigger.message)
-                .mapP(sTrigger -> executeNext(sTrigger, nextState));
+            .mapP(sTrigger -> executeNext(sTrigger, nextState));
     }
 
     private <T, R> Promise<StateTrigger<R>> execute(StateCallbacks<T, R> stateCallbacks, T message) {
         try {
             final Defer<StateTrigger<R>> defer = Promises.defer();
             stateCallbacks.onEnter.apply(message)
-                    .cmp(
-                            promise -> {
-                                if (promise.isError()) {
-                                    defer.reject(promise.err());
-                                    return;
-                                }
-                                final Promise<Void> voidPromise = stateCallbacks.onExit.call();
-                                if (voidPromise == null) {
-                                    defer.resolve(promise.val());
-                                } else {
-                                    voidPromise
-                                            .cmp(p -> {
-                                                if (p.isSuccess()) {
-                                                    defer.resolve(promise.val());
-                                                } else {
-                                                    defer.reject(p.err());
-                                                }
-                                            });
-                                }
-                            })
-                    .err(defer::reject)
+                .cmp(
+                    promise -> {
+                        if (promise.isError()) {
+                            defer.reject(promise.err());
+                            return;
+                        }
+                        final Promise<Void> voidPromise = stateCallbacks.onExit.call();
+                        if (voidPromise == null) {
+                            defer.resolve(promise.val());
+                        } else {
+                            voidPromise
+                                .cmp(p -> {
+                                    if (p.isSuccess()) {
+                                        defer.resolve(promise.val());
+                                    } else {
+                                        defer.reject(p.err());
+                                    }
+                                });
+                        }
+                    })
+                .err(defer::reject)
             ;
             return defer.promise();
         } catch (Throwable e) {
@@ -143,8 +143,8 @@ public class StateMachine {
     }
 
     public static <T, R> StateCallbacks<T, R> exec(
-            FunctionUnchecked<T, Promise<StateTrigger<R>>> onEnter,
-            Callable<Promise<Void>> onExit) {
+        FunctionUnchecked<T, Promise<StateTrigger<R>>> onEnter,
+        Callable<Promise<Void>> onExit) {
         return new StateCallbacks<>(onEnter, onExit);
     }
 
@@ -162,5 +162,17 @@ public class StateMachine {
 
     public static <T> StateTrigger<T> exit() {
         return StateTrigger.create(null, null);
+    }
+
+    public static StateCallbacks execStart(FunctionUnchecked<Object, Promise<StateTrigger<Object>>> startHandler) {
+        return exec(startHandler, null);
+    }
+
+    public static StateCallbacks execEnd(Callable<Promise<Void>> endHandler) {
+        return exec(null, endHandler);
+    }
+
+    public static <T> StateTrigger<T> triggerNext(T val) {
+        return trigger(NEXT, val);
     }
 }

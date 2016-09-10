@@ -2,4 +2,6 @@ rootProject.name = 'elasta'
 include 'elasta-core'
 include 'elasta-pipeline'
 include 'elasta-composer'
+include 'web-utils'
+include 'vertx-utils'
 

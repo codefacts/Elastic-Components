@@ -1,24 +1,27 @@
 package elasta.composer;
 
-import elasta.core.intfs.FunctionUnchecked;
-import elasta.core.promise.impl.Promises;
-import elasta.core.promise.intfs.Promise;
-import elasta.core.statemachine.StateEntry;
-import elasta.core.statemachine.StateMachine;
-import elasta.core.statemachine.StateTrigger;
+import elasta.vertxutils.FailureTuple;
+import elasta.vertxutils.VertxUtils;
+import elasta.webutils.WebUtils;
 import io.vertx.core.Vertx;
-
-import static elasta.core.statemachine.StateEntry.on;
+import io.vertx.core.eventbus.Message;
 
 /**
  * Created by Shahadat on 8/31/2016.
  */
-public class App {
+public interface App {
 
-    public static void main(String[] args) {
+    WebUtils webUtils();
 
-//        final Vertx vertx = Vertx.vertx();
+    VertxUtils vertxUtils();
 
-
+    static App app(Vertx vertx) {
+        return new AppImpl(new WebUtils(), new VertxUtils(vertx,
+            throwable -> {
+                return new FailureTuple(FailureCodes.UNEXPECTED_ERROR.code(), throwable.toString());
+            },
+            (message, message2) -> {
+                message.reply(message2);
+            }));
     }
 }
