@@ -9,8 +9,8 @@ import java.util.Objects;
  */
 final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     private final Executor executor;
-    private SignalImpl<T> signal;
-    private PromiseImpl next;
+    private SignalImpl<T> signal = null;
+    private PromiseImpl next = null;
 
     PromiseImpl() {
         this.executor = null;

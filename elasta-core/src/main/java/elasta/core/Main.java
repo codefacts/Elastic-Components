@@ -11,6 +11,27 @@ public class Main {
     public static void main(String[] args) {
 
         Promises.just("ok")
+            .mapP(val -> {
+                return Promises.just("mapP >> " + val)
+                    .then(val1 -> {
+                        System.out.println("mapP: " + val1);
+                    });
+            })
+            .then(val -> {
+                System.out.println("end: " + val);
+            })
+            .cmp(signal -> {
+                System.out.println(signal);
+            })
+            .err(val -> {
+                val.printStackTrace();
+            })
+        ;
+
+    }
+
+    private static void test7() {
+        Promises.just("ok")
             .then(val -> System.out.println("val: " + val))
             .mapP(s -> Promises.just(s + " then"))
             .then(val -> System.out.println("mapP: " + val))
