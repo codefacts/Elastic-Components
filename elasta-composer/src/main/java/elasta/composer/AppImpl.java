@@ -47,7 +47,7 @@ public class AppImpl implements App {
                 .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
                 .put(ReqCnst.BODY, ctx.getBodyAsJson());
 
-            vertxUtils.sendAndGetJsonObject("/users/find-all", jsonReq)
+            vertxUtils.sendAndReceiveJsonObject("/users/find-all", jsonReq)
                 .then(val -> ctx.response().end(val.encode()))
             ;
 

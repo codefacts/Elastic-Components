@@ -56,11 +56,11 @@ final public class VertxUtils {
         }
     }
 
-    public Promise<JsonObject> sendAndGetJsonObject(String address, Object jsonReq) {
+    public Promise<JsonObject> sendAndReceiveJsonObject(String address, Object jsonReq) {
         return send(address, jsonReq);
     }
 
-    public Promise<JsonArray> sendAndGetJsonArray(String address, Object jsonReq) {
+    public Promise<JsonArray> sendAndReceiveJsonArray(String address, Object jsonReq) {
         return send(address, jsonReq);
     }
 }
