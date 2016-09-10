@@ -13,13 +13,16 @@ public class Main {
         Promises.just("ok")
             .then(val -> System.out.println("val: " + val))
             .mapP(s -> Promises.just(s + " then"))
-            .completeP(
+            .then(val -> System.out.println("mapP: " + val))
+            .cmpP(
                 signal ->
                     Promises
-                        .just(signal.value() + " complete")
-                        .then(val -> System.out.println(val))
+                        .just(signal.val() + " complete")
+                        .then(val -> System.out.println("cmpP: " + val))
                         .map(Promises.toVoid())
-            );
+            )
+            .then(val -> System.out.println("end"))
+        ;
     }
 
     private static void test6() {
@@ -38,8 +41,8 @@ public class Main {
         Promises.just(978)
             .filter(integer -> integer.equals(868))
             .then(val -> System.out.println("Value Got: " + val))
-            .error(Throwable::printStackTrace)
-            .complete(promise -> System.out.println("COmplete"))
+            .err(Throwable::printStackTrace)
+            .cmp(promise -> System.out.println("COmplete"))
         ;
     }
 
@@ -48,21 +51,21 @@ public class Main {
             .filter(o -> true)
             .map(v -> v.toUpperCase())
             .filter(o -> o == "ok")
-            .error(val -> {
+            .err(val -> {
                 System.out.println("error: " + val);
 
             })
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .map(val -> "[" + val + "]")
             .then(p -> System.out.println("p: " + p))
             .filter(o -> false)
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
             .filter(o -> true)
-            .complete(v -> System.out.println("ok: " + v))
+            .cmp(v -> System.out.println("ok: " + v))
         ;
     }
 
@@ -70,17 +73,17 @@ public class Main {
         Promises.just("val")
             .filter(o -> true)
             .filter(o -> true)
-            .error(val -> System.out.println("error: " + val))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
             .filter(o -> false)
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
             .filter(o -> true)
-            .complete(v -> System.out.println("ok: " + v))
+            .cmp(v -> System.out.println("ok: " + v))
         ;
     }
 
@@ -88,57 +91,57 @@ public class Main {
         Promises.error(new NullPointerException("catch it"))
             .filter(o -> false)
             .filter(o -> false)
-            .error(val -> System.out.println("error: " + val))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
             .filter(o -> false)
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
             .filter(o -> true)
-            .complete(v -> System.out.println("ok: " + v))
+            .cmp(v -> System.out.println("ok: " + v))
         ;
     }
 
     public void test2() {
         Promises.error(new NullPointerException("catch it"))
-            .error(val -> System.out.println("error: " + val))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
+            .cmp(v -> System.out.println("ok: " + v))
         ;
     }
 
     public void test1() {
         Promises.empty()
-            .error(val -> System.out.println("error: " + val))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
+            .cmp(v -> System.out.println("ok: " + v))
         ;
 
         Promises.just("value")
-            .error(val -> System.out.println("error: " + val))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
-            .error(val -> System.out.println("error: " + val))
+            .cmp(v -> System.out.println("ok: " + v))
+            .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
-            .complete(v -> System.out.println("ok: " + v))
+            .cmp(v -> System.out.println("ok: " + v))
         ;
     }
 }

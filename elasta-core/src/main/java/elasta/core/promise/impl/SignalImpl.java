@@ -29,17 +29,17 @@ final public class SignalImpl<T> implements Signal<T> {
         return this.type == Signal.Type.ERROR;
     }
 
-    public Throwable error() {
+    public Throwable err() {
         return (type == Type.ERROR) ? (Throwable) value : null;
     }
 
-    public T value() {
+    public T val() {
         return (type == Type.SUCCESS) ? (T) value : null;
     }
 
     @Override
     public T orElse(T defaultValue) {
-        return (this.value() == null) ? defaultValue : this.value();
+        return (this.val() == null) ? defaultValue : this.val();
     }
 
     public static <TT> SignalImpl<TT> success(TT value) {

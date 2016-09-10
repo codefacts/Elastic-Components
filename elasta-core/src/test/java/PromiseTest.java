@@ -8,6 +8,6 @@ public class PromiseTest {
 
     @Test
     public void test1() {
-        Promises.empty().complete(v -> System.out.println());
+        Promises.empty().cmp(v -> System.out.println());
     }
 }

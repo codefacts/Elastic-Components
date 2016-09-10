@@ -14,7 +14,7 @@ final public class Executors {
 
                 try {
 
-                    thenHandler.accept(signal.value());
+                    thenHandler.accept(signal.val());
 
                 } catch (Throwable throwable) {
                     return SignalImpl.error(throwable);
@@ -35,7 +35,7 @@ final public class Executors {
 
                 try {
 
-                    boolean status = filterHandler.test(signal.value());
+                    boolean status = filterHandler.test(signal.val());
 
                     if (status) {
 
@@ -70,7 +70,7 @@ final public class Executors {
 
                     try {
 
-                        final R value = mapHandler.apply(signal.value());
+                        final R value = mapHandler.apply(signal.val());
 
                         return SignalImpl.success(value);
 
@@ -93,7 +93,7 @@ final public class Executors {
 
             if (canExecuteError(signal)) {
 
-                final Throwable error = signal.error();
+                final Throwable error = signal.err();
 
                 try {
 
@@ -135,7 +135,7 @@ final public class Executors {
             if (canExecuteThen(signal)) {
                 try {
 
-                    Promise promise = thenHandler.apply(signal.value());
+                    Promise promise = thenHandler.apply(signal.val());
 
                     return (PromiseImpl) promise.map(o -> signal);
 
@@ -156,7 +156,7 @@ final public class Executors {
 
                     try {
 
-                        Promise testPromise = filterPHandler.test(signal.value());
+                        Promise testPromise = filterPHandler.test(signal.val());
 
                         return (PromiseImpl<SignalImpl<T>>) testPromise.map(testSuccess -> ((Boolean) testSuccess) ? signal : SignalImpl.filtered());
 
@@ -178,7 +178,7 @@ final public class Executors {
             if (canExecuteMap(signal)) {
 
                 try {
-                    Promise<R> promise = mapHandler.apply(signal.value());
+                    Promise<R> promise = mapHandler.apply(signal.val());
 
                     return (PromiseImpl<SignalImpl<R>>) promise.map(SignalImpl::success);
 
@@ -197,7 +197,7 @@ final public class Executors {
 
             if (canExecuteError(signal)) {
 
-                final Throwable error = signal.error();
+                final Throwable error = signal.err();
 
                 try {
 

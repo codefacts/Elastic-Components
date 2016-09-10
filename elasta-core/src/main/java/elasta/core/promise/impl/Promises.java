@@ -66,14 +66,14 @@ final public class Promises {
         Defer<List<T>> defer = defer();
         final SimpleCounter counter = new SimpleCounter(0);
         MutableTpl2<Boolean, Throwable> pStatus = MutableTpls.of(true, null);
-        promises.forEach(pm -> pm.complete(pms -> {
+        promises.forEach(pm -> pm.cmp(pms -> {
             pStatus.t1 &= pms.isSuccess();
-            pStatus.t2 = pStatus.t2 == null ? pms.error() : pStatus.t2;
+            pStatus.t2 = pStatus.t2 == null ? pms.err() : pStatus.t2;
             counter.counter++;
             if (counter.counter == promises.size()) {
                 if (pStatus.t1) {
                     ImmutableList.Builder<T> builder = ImmutableList.builder();
-                    promises.forEach(promise -> builder.add(promise.value()));
+                    promises.forEach(promise -> builder.add(promise.val()));
                     defer.resolve(builder.build());
                 } else {
                     defer.reject(pStatus.t2);
@@ -90,7 +90,7 @@ final public class Promises {
             final ImmutableList.Builder<Promise<T>> builder = ImmutableList.builder();
             final SimpleCounter counter = new SimpleCounter(0);
             promises.forEach(promise -> {
-                final Promise<T> complete = promise.complete(p -> {
+                final Promise<T> complete = promise.cmp(p -> {
                     counter.counter++;
                     if (counter.counter == promises.size()) {
                         defer.resolve(builder.build());
@@ -109,30 +109,30 @@ final public class Promises {
         SimpleCounter counter = new SimpleCounter();
         MutableTpl2<T1, T2> mutableTpl2 = new MutableTpl2<>();
         final int len = 2;
-        t1Promise.complete(t -> {
+        t1Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl2.t1 = t.value();
+                    mutableTpl2.t1 = t.val();
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl2);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t2Promise.complete(t -> {
+        t2Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl2.t2 = t.value();
+                    mutableTpl2.t2 = t.val();
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl2);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
@@ -146,44 +146,44 @@ final public class Promises {
         SimpleCounter counter = new SimpleCounter();
         MutableTpl3<T1, T2, T3> mutableTpl3 = new MutableTpl3<>();
         final int len = 3;
-        t1Promise.complete(t -> {
+        t1Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl3.setT1(t.value());
+                    mutableTpl3.setT1(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl3);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t2Promise.complete(t -> {
+        t2Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl3.setT2(t.value());
+                    mutableTpl3.setT2(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl3);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t3Promise.complete(t -> {
+        t3Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl3.setT3(t.value());
+                    mutableTpl3.setT3(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl3);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
@@ -199,58 +199,58 @@ final public class Promises {
         SimpleCounter counter = new SimpleCounter();
         MutableTpl4<T1, T2, T3, T4> mutableTpl4 = new MutableTpl4<>();
         final int len = 4;
-        t1Promise.complete(t -> {
+        t1Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl4.setT1(t.value());
+                    mutableTpl4.setT1(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t2Promise.complete(t -> {
+        t2Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl4.setT2(t.value());
+                    mutableTpl4.setT2(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t3Promise.complete(t -> {
+        t3Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl4.setT3(t.value());
+                    mutableTpl4.setT3(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t4Promise.complete(t -> {
+        t4Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl4.setT4(t.value());
+                    mutableTpl4.setT4(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
@@ -266,72 +266,72 @@ final public class Promises {
         SimpleCounter counter = new SimpleCounter();
         MutableTpl5<T1, T2, T3, T4, T5> mutableTpl5 = new MutableTpl5<>();
         final int len = 5;
-        t1Promise.complete(t -> {
+        t1Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl5.setT1(t.value());
+                    mutableTpl5.setT1(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t2Promise.complete(t -> {
+        t2Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl5.setT2(t.value());
+                    mutableTpl5.setT2(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t3Promise.complete(t -> {
+        t3Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl5.setT3(t.value());
+                    mutableTpl5.setT3(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t4Promise.complete(t -> {
+        t4Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl5.setT4(t.value());
+                    mutableTpl5.setT4(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });
 
-        t5Promise.complete(t -> {
+        t5Promise.cmp(t -> {
             if (!defer.promise().isComplete()) {
                 if (t.isSuccess()) {
-                    mutableTpl5.setT5(t.value());
+                    mutableTpl5.setT5(t.val());
                     counter.counter++;
                     if (counter.counter == len) {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.error());
+                    defer.reject(t.err());
                 }
             }
         });

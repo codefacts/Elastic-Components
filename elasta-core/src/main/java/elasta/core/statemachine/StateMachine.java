@@ -98,27 +98,27 @@ public class StateMachine {
         try {
             final Defer<StateTrigger<R>> defer = Promises.defer();
             stateCallbacks.onEnter.apply(message)
-                    .complete(
+                    .cmp(
                             promise -> {
                                 if (promise.isError()) {
-                                    defer.reject(promise.error());
+                                    defer.reject(promise.err());
                                     return;
                                 }
                                 final Promise<Void> voidPromise = stateCallbacks.onExit.call();
                                 if (voidPromise == null) {
-                                    defer.resolve(promise.value());
+                                    defer.resolve(promise.val());
                                 } else {
                                     voidPromise
-                                            .complete(p -> {
+                                            .cmp(p -> {
                                                 if (p.isSuccess()) {
-                                                    defer.resolve(promise.value());
+                                                    defer.resolve(promise.val());
                                                 } else {
-                                                    defer.reject(p.error());
+                                                    defer.reject(p.err());
                                                 }
                                             });
                                 }
                             })
-                    .error(defer::reject)
+                    .err(defer::reject)
             ;
             return defer.promise();
         } catch (Throwable e) {

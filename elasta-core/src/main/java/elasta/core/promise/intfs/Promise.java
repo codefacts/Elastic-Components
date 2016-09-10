@@ -6,19 +6,24 @@ package elasta.core.promise.intfs;
 public interface Promise<T> {
 
     Promise<T> filter(FilterHandler<T> predicateUnchecked);
+
     Promise<T> filterP(FilterPHandler<T> predicateUnchecked);
 
     <R> Promise<R> map(MapHandler<T, R> functionUnchecked);
+
     <R> Promise<R> mapP(MapPHandler<T, R> function);
 
     Promise<T> then(ThenHandler<T> thenHandler);
+
     Promise<T> thenP(ThenPHandler<T> thenHandler);
 
-    Promise<T> error(ErrorHandler errorHandler);
-    Promise<T> errorP(ErrorPHandler errorHandler);
+    Promise<T> err(ErrorHandler errorHandler);
 
-    Promise<T> complete(CompleteHandler<T> completeHandler);
-    Promise<T> completeP(CompletePHandler<T> completeHandler);
+    Promise<T> errP(ErrorPHandler errorHandler);
+
+    Promise<T> cmp(CompleteHandler<T> completeHandler);
+
+    Promise<T> cmpP(CompletePHandler<T> completeHandler);
 
     boolean isComplete();
 
@@ -28,9 +33,9 @@ public interface Promise<T> {
 
     boolean isError();
 
-    T value();
+    T val();
 
     T orElse(T t);
 
-    Throwable error();
+    Throwable err();
 }

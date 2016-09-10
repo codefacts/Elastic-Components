@@ -11,11 +11,11 @@ public interface Signal<T> {
 
     boolean isError();
 
-    T value();
+    T val();
 
     T orElse(T t);
 
-    Throwable error();
+    Throwable err();
 
     enum Type {
         SUCCESS, ERROR, FILTERED

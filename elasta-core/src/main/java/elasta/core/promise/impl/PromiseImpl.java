@@ -77,7 +77,7 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
-    public Promise<T> error(ErrorHandler errorHandler) {
+    public Promise<T> err(ErrorHandler errorHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.errorExecutor(errorHandler));
 
@@ -85,7 +85,7 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
-    public Promise<T> errorP(ErrorPHandler errorPHandler) {
+    public Promise<T> errP(ErrorPHandler errorPHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(errorPHandler));
 
@@ -93,7 +93,7 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
-    public Promise<T> complete(CompleteHandler<T> completeHandler) {
+    public Promise<T> cmp(CompleteHandler<T> completeHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.completeExecutor(completeHandler));
 
@@ -101,7 +101,7 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
-    public Promise<T> completeP(CompletePHandler<T> completePHandler) {
+    public Promise<T> cmpP(CompletePHandler<T> completePHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.deferredCompleteExecutor(completePHandler));
 
@@ -129,18 +129,18 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
-    public T value() {
-        return signal.value();
+    public T val() {
+        return signal.val();
     }
 
     @Override
     public T orElse(T defaultValue) {
-        return (signal.value() == null) ? defaultValue : signal.value();
+        return (signal.val() == null) ? defaultValue : signal.val();
     }
 
     @Override
-    public Throwable error() {
-        return signal.error();
+    public Throwable err() {
+        return signal.err();
     }
 
     public static <T> void reject(final PromiseImpl<T> prevPromise, final Throwable throwable) {
@@ -173,13 +173,14 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
 
                 final PromiseImpl prms = promise;
 
-                signalPromise.complete(retSignal -> {
+                signalPromise.cmp(retSignal -> {
 
                     prms.signal = (SignalImpl) retSignal;
 
                     execute(prms.next, prms.signal);
                 });
 
+                break;
             }
 
         }

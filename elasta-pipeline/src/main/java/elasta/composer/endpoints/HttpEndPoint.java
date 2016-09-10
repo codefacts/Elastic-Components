@@ -62,6 +62,6 @@ final public class HttpEndPoint implements Endpoint<Buffer> {
 
         defer.promise()
             .then(buffer -> message.reply(buffer))
-            .error(e -> ExceptionUtil.fail(message, e));
+            .err(e -> ExceptionUtil.fail(message, e));
     }
 }

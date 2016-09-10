@@ -26,6 +26,6 @@ public class FileReadEndPoint implements Endpoint<String> {
 
         defer.promise()
             .then(buffer -> message.reply(buffer))
-            .error(e -> ExceptionUtil.fail(message, e));
+            .err(e -> ExceptionUtil.fail(message, e));
     }
 }

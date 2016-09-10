@@ -27,6 +27,6 @@ public class FileWriteEndPoint implements Endpoint<Buffer> {
 
         defer.promise()
             .then(v -> message.reply(null))
-            .error(e -> ExceptionUtil.fail(message, e));
+            .err(e -> ExceptionUtil.fail(message, e));
     }
 }
