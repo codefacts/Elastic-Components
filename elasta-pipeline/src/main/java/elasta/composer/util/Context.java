@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * Created by shahadat on 4/27/16.
  */
-public class Context {
+final public class Context {
     protected final Map<String, Object> map;
 
     public Context() {

@@ -10,6 +10,20 @@ import elasta.core.promise.intfs.Promise;
 public class Main {
     public static void main(String[] args) {
 
+        Promises.just("ok")
+            .then(val -> System.out.println("val: " + val))
+            .mapP(s -> Promises.just(s + " then"))
+            .completeP(
+                signal ->
+                    Promises
+                        .just(signal.value() + " complete")
+                        .then(val -> System.out.println(val))
+                        .map(Promises.toVoid())
+            );
+    }
+
+    private static void test6() {
+
         Defer<Object> defer = Promises.defer();
 
         {
@@ -18,7 +32,8 @@ public class Main {
         }
 
         Promise<Object> promise1 = defer.promise();
-        promise1.then(val -> {});
+        promise1.then(val -> {
+        });
 
         Promises.just(978)
             .filter(integer -> integer.equals(868))

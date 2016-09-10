@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import elasta.core.intfs.CallableUnchecked;
 import elasta.core.intfs.RunnableUnchecked;
 import elasta.core.promise.intfs.Defer;
+import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.*;
 
@@ -336,5 +337,9 @@ final public class Promises {
         });
 
         return defer.promise();
+    }
+
+    public static <T> MapHandler<T, Void> toVoid() {
+        return s -> (Void) s;
     }
 }

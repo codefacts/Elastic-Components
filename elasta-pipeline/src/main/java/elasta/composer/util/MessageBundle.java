@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 /**
  * Created by shahadat on 2/28/16.
  */
-public class MessageBundle {
+final public class MessageBundle {
     private final Map<String, String> bundle;
     private static final Pattern pattern = Pattern.compile("\\$\\{[a-zA-Z]\\w*?\\}");
 
