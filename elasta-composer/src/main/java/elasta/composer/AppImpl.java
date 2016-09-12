@@ -41,6 +41,8 @@ public class AppImpl implements App {
 
         Router router = Router.router(vertx);
 
+        registerFilters(router);
+
         router.get("/api/users").handler(ctx -> {
 
             JsonObject jsonReq = new JsonObject()
@@ -68,12 +70,34 @@ public class AppImpl implements App {
 
         });
 
+        router.put("/api/users").handler(BodyHandler.create());
+        router.put("/api/users").handler(ctx -> {
+
+            JsonObject jsonReq = new JsonObject()
+                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
+                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
+                .put(ReqCnst.BODY, ctx.getBodyAsJson());
+
+            vertxUtils.sendAndReceiveJsonObject("/users/update-all-properties", jsonReq)
+                .then(val -> ctx.response().end(val.encode()))
+            ;
+
+        });
+
         vertx.createHttpServer().requestHandler(router::accept).listen(6500);
         System.out.println("started");
+    }
+
+    private static void registerFilters(Router router) {
+        router.route("/api/*").handler(event -> {
+            event.response().putHeader("Content-Type", "application/json");
+            event.next();
+        });
     }
 
     private static void registerEventHandlers(Vertx vertx, App app) {
         vertx.eventBus().consumer("/users/find-all", new FindAllHandler(app)::findAll);
         vertx.eventBus().consumer("/users/create", new CreateHandler(app)::create);
+        vertx.eventBus().consumer("/users/update-all-properties", new UpdateAllProperties(app)::updateAllProperties);
     }
 }
