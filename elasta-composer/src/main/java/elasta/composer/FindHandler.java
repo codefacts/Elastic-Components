@@ -40,7 +40,6 @@ public class FindHandler {
                     }))
                     .build();
 
-
                 return machine.start(message.body());
             });
 

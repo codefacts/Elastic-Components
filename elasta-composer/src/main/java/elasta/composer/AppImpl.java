@@ -1,5 +1,6 @@
 package elasta.composer;
 
+import com.google.common.collect.ImmutableMap;
 import elasta.vertxutils.VertxUtils;
 import elasta.webutils.WebUtils;
 import io.vertx.core.Vertx;
@@ -103,8 +104,11 @@ public class AppImpl implements App {
 
             JsonObject jsonReq = new JsonObject()
                 .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
-                .put(ReqCnst.BODY, ctx.getBodyAsJson());
+                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()));
+
+            if (ctx.getBody().length() > 0) {
+                jsonReq.put(ReqCnst.BODY, ctx.getBodyAsJson());
+            }
 
             vertxUtils.sendAndReceiveJsonObject("/users/delete", jsonReq)
                 .then(val -> ctx.response().end(val.encode()))
@@ -112,13 +116,11 @@ public class AppImpl implements App {
 
         });
 
-        router.get("/api/users/:id").handler(BodyHandler.create());
         router.get("/api/users/:id").handler(ctx -> {
 
             JsonObject jsonReq = new JsonObject()
                 .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
-                .put(ReqCnst.BODY, ctx.getBodyAsJson());
+                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()));
 
             vertxUtils.sendAndReceiveJsonObject("/users/find", jsonReq)
                 .then(val -> ctx.response().end(val.encode()))
