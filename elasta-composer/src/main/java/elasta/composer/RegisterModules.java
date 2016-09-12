@@ -16,7 +16,7 @@ public class RegisterModules {
         moduleSystem.export(Vertx.class, module -> module.export(Vertx.vertx()));
         moduleSystem.export(EventBus.class, module -> module.export(module.require(Vertx.class).eventBus()));
 
-        WebUtilsExporter.get().exportModule(moduleSystem);
+        WebUtilsExporter.get().export(moduleSystem);
         VertxUtilsExporter.get().export(moduleSystem);
 
         new RegisterEventHandlersImpl().register(moduleSystem);

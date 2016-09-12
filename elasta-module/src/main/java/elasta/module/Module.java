@@ -10,4 +10,6 @@ public interface Module<TT> {
     <T> T require(Class<T> tClass, String moduleName);
 
     void export(TT newModule);
+
+    ModuleSystem moduleSystem();
 }

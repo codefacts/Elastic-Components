@@ -2,6 +2,7 @@ package elasta.module.impl;
 
 import elasta.module.ExportScript;
 import elasta.module.Module;
+import elasta.module.ModuleSystem;
 
 import java.util.Map;
 
@@ -29,6 +30,11 @@ public class ModuleImpl<T> implements Module<T> {
     @Override
     public void export(T newModule) {
         this.module = newModule;
+    }
+
+    @Override
+    public ModuleSystem moduleSystem() {
+        return moduleSystem;
     }
 
     public T getModule() {

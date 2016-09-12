@@ -10,20 +10,22 @@ import java.util.List;
 /**
  * Created by Jango on 9/12/2016.
  */
-public class EventUtils {
+public class EventHandlerGenerator {
     final EventBus eventBus;
     final ModuleSystem moduleSystem;
+    final EventNameGenerator eventNameGenerator;
 
-    public EventUtils(EventBus eventBus, ModuleSystem moduleSystem) {
+    public EventHandlerGenerator(EventBus eventBus, ModuleSystem moduleSystem, EventNameGenerator eventNameGenerator) {
         this.eventBus = eventBus;
         this.moduleSystem = moduleSystem;
+        this.eventNameGenerator = eventNameGenerator;
     }
 
     public List<EventSpec> handlerSpecs(String resourceName) {
         ImmutableList.Builder<EventSpec> builder = ImmutableList.builder();
 
-        ReflectionUtils.props(EventHandlers.class).forEach(address -> {
-            builder.add(new EventSpec(address, moduleSystem.require(EventHandler.class, address)));
+        ReflectionUtils.staticFinalProps(EventHandlers.class).forEach(address -> {
+            builder.add(new EventSpec(eventNameGenerator.eventName(address, resourceName), moduleSystem.require(EventHandler.class, address)));
         });
 
         return builder.build();
@@ -34,6 +36,6 @@ public class EventUtils {
     }
 
     public static void main(String[] args) {
-        System.out.println(ReflectionUtils.props(EventHandlers.class));
+        System.out.println(ReflectionUtils.staticFinalProps(EventHandlers.class));
     }
 }

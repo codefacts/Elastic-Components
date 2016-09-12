@@ -5,6 +5,9 @@ import elasta.module.ModuleSystem;
 import elasta.vertxutils.VertxUtils;
 import elasta.webutils.EventHandler;
 import elasta.webutils.EventHandlers;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
 
 /**
  * Created by Jango on 9/12/2016.
@@ -16,32 +19,42 @@ public class RegisterEventHandlersImpl implements RegisterEventHandlers {
         moduleSystem.export(EventHandler.class, EventHandlers.CREATE, module -> {
 
             VertxUtils vertxUtils = module.require(VertxUtils.class);
-            module.export(new CreateHandler(vertxUtils)::create);
+            EventHandler<JsonObject> create = new CreateHandler(vertxUtils)::create;
+            module.export(create);
         });
 
         moduleSystem.export(EventHandler.class, EventHandlers.UPDATE_ALL_PROPERTIES, module -> {
             VertxUtils vertxUtils = module.require(VertxUtils.class);
-            module.export(new UpdateAllPropertiesHandler(vertxUtils)::updateAllProperties);
+            EventHandler<JsonObject> updateAllProperties = new UpdateAllPropertiesHandler(vertxUtils)::updateAllProperties;
+            module.export(updateAllProperties);
         });
 
         moduleSystem.export(EventHandler.class, EventHandlers.UPDATE_SOME_PROPERTIES, module -> {
             VertxUtils vertxUtils = module.require(VertxUtils.class);
-            module.export(new UpdateSomePropertiesHandler(vertxUtils)::updateSomeProperties);
+            EventHandler<JsonObject> updateSomeProperties = new UpdateSomePropertiesHandler(vertxUtils)::updateSomeProperties;
+            module.export(updateSomeProperties);
         });
 
         moduleSystem.export(EventHandler.class, EventHandlers.DELETE, module -> {
             VertxUtils vertxUtils = module.require(VertxUtils.class);
-            module.export(new DeleteHandler(vertxUtils)::delete);
+            EventHandler<JsonObject> delete = new DeleteHandler(vertxUtils)::delete;
+            module.export(delete);
         });
 
         moduleSystem.export(EventHandler.class, EventHandlers.FIND_ALL, module -> {
             VertxUtils vertxUtils = module.require(VertxUtils.class);
-            module.export(new FindAllHandler(vertxUtils)::findAll);
+            EventHandler<JsonObject> findAll = new FindAllHandler(vertxUtils)::findAll;
+            module.export(findAll);
         });
 
         moduleSystem.export(EventHandler.class, EventHandlers.FIND, module -> {
             VertxUtils vertxUtils = module.require(VertxUtils.class);
-            module.export(new FindHandler(vertxUtils)::find);
+            EventHandler<JsonObject> find = new FindHandler(vertxUtils)::find;
+            module.export(find);
         });
+    }
+
+    public static void main(String[] args) {
+        System.out.println("ok");
     }
 }
