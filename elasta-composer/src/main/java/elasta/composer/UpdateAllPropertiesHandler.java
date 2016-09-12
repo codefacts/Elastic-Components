@@ -10,10 +10,10 @@ import static elasta.core.statemachine.StateMachine.next;
 /**
  * Created by Jango on 9/12/2016.
  */
-public class UpdateAllProperties {
+public class UpdateAllPropertiesHandler {
     private final App app;
 
-    public UpdateAllProperties(App app) {
+    public UpdateAllPropertiesHandler(App app) {
         this.app = app;
     }
 
