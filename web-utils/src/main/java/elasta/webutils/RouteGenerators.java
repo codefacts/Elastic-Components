@@ -49,7 +49,7 @@ public class RouteGenerators {
         this.eventNameGenerator = eventNameGenerator;
     }
 
-    public List<RouteSpec> createRoutes(String uriPath, String resourceName) {
+    public List<RouteSpec> makeRoutes(String uriPath, String resourceName) {
         ImmutableList.Builder<RouteSpec> builder = ImmutableList.builder();
 
         final String resourcePath = uriPath + "/" + resourceName;
@@ -74,7 +74,7 @@ public class RouteGenerators {
         return builder.build();
     }
 
-    public void registerRoutesTo(Router router, Collection<RouteSpec> routeSpecs) {
+    public void registerRoutes(Router router, Collection<RouteSpec> routeSpecs) {
         for (RouteSpec routeSpec : routeSpecs) {
             router.route(routeSpec.getHttpMethod(), routeSpec.getUri()).handler(routeSpec.getHandler());
         }

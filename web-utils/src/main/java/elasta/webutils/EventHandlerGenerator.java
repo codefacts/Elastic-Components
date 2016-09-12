@@ -21,7 +21,7 @@ public class EventHandlerGenerator {
         this.eventNameGenerator = eventNameGenerator;
     }
 
-    public List<EventSpec> handlerSpecs(String resourceName) {
+    public List<EventSpec> makeHandlers(String resourceName) {
         ImmutableList.Builder<EventSpec> builder = ImmutableList.builder();
 
         ReflectionUtils.staticFinalProps(EventHandlers.class).forEach(address -> {

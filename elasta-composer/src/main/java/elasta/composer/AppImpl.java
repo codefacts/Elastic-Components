@@ -23,11 +23,11 @@ public class AppImpl implements App {
 
         RouteGenerators routeGenerators = moduleSystem.require(RouteGenerators.class);
 
-        routeGenerators.registerRoutesTo(router, routeGenerators.createRoutes("/api", "users"));
+        routeGenerators.registerRoutes(router, routeGenerators.makeRoutes("/api", "users"));
 
         EventHandlerGenerator eventHandlerGenerator = moduleSystem.require(EventHandlerGenerator.class);
 
-        eventHandlerGenerator.registerHandlers(eventHandlerGenerator.handlerSpecs("users"));
+        eventHandlerGenerator.registerHandlers(eventHandlerGenerator.makeHandlers("users"));
 
         moduleSystem.require(Vertx.class).createHttpServer().requestHandler(router::accept).listen(6500);
         System.out.println("started");
