@@ -7,16 +7,16 @@ public class Main {
     public static void main(String[] args) {
         ModuleSystem moduleSystem = ModuleSystem.create();
 
-        moduleSystem.exportPrototype(module -> {
+        moduleSystem.exportPrototype(String.class, "prop1", module -> {
             module.export("newModule1");
             System.out.println("11");
-        }, String.class, "prop1");
+        });
 
-        moduleSystem.export(module -> {
+        moduleSystem.export(String.class, "prop2", module -> {
             String prop1 = module.require(String.class, "prop1");
             module.export(prop1 + " newModule2");
             System.out.println("11");
-        }, String.class, "prop2");
+        });
 
         String require = moduleSystem.require(String.class);
         System.out.println(require);

@@ -15,6 +15,8 @@ public interface ModuleSystem {
 
     <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue);
 
+    ModuleSystem moduleSystem();
+
     <T> void export(Class<T> moduleClass, ExportScript<T> exportScript);
 
     <T> void export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript);

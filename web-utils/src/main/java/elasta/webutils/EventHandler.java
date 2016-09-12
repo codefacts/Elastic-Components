@@ -1,4 +1,4 @@
-package elasta.composer;
+package elasta.webutils;
 
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;

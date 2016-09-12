@@ -5,17 +5,16 @@ import elasta.module.ModuleSystem;
 /**
  * Created by Jango on 9/12/2016.
  */
-public interface ModuleExporter {
+public interface WebUtilsExporter {
 
     void exportModule(ModuleSystem moduleSystem);
 
-    static ModuleExporter get() {
+    static WebUtilsExporter get() {
         return moduleSystem -> {
 
-            moduleSystem.export(module -> {
+            moduleSystem.export(WebUtils.class, module -> {
                 module.export(new WebUtilsImpl());
-            }, WebUtils.class);
-
+            });
         };
     }
 }

@@ -49,6 +49,11 @@ public class ModuleSystemImpl implements ModuleSystem {
         return module == null ? defaultValue : module;
     }
 
+    @Override
+    public ModuleSystem moduleSystem() {
+        return this;
+    }
+
     private <T> T getOrCreate(Class<T> moduleClass, String moduleName) {
 
         final ModuleSpec moduleSpec = new ModuleSpec(moduleClass, moduleName);

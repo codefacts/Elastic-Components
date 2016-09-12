@@ -1,4 +1,4 @@
-package elasta.composer;
+package elasta.webutils;
 
 import elasta.module.ExportScript;
 

@@ -3,6 +3,8 @@ package elasta.composer;
 import elasta.composer.event.handlers.*;
 import elasta.module.ModuleSystem;
 import elasta.vertxutils.VertxUtils;
+import elasta.webutils.EventHandler;
+import elasta.webutils.EventHandlers;
 
 /**
  * Created by Jango on 9/12/2016.

@@ -1,8 +1,10 @@
 package elasta.composer;
 
-import elasta.composer.event.handlers.*;
+import elasta.module.ModuleSystem;
+import elasta.vertxutils.VertxUtils;
+import elasta.webutils.RouteUtils;
+import elasta.webutils.WebUtils;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
@@ -13,97 +15,27 @@ public class AppImpl implements App {
 
     public static void main(String[] args) {
 
-        registerEventHandlers(vertx, app);
+        ModuleSystem moduleSystem = ModuleSystem.create();
 
-        Router router = Router.router(vertx);
+        new RegisterModules().register(moduleSystem);
+
+        Router router = Router.router(moduleSystem.require(Vertx.class));
 
         registerFilters(router);
 
-        router.get("/api/users").handler(ctx -> {
+        RouteUtils routeUtils = new RouteUtils(
+            (s, httpMethod) -> BodyHandler.create(),
+            RouteUtils.defaultHandlerFactory(
+                moduleSystem.require(VertxUtils.class),
+                moduleSystem.require(WebUtils.class)
+            )
+        );
 
-            JsonObject jsonReq = new JsonObject()
-                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
-                .put(ReqCnst.BODY, ctx.getBodyAsJson());
+        routeUtils.registerRoutesTo(router, routeUtils.createRoutes("/api", "users"));
 
-            vertxUtils.sendAndReceiveJsonObject("/users/find-all", jsonReq)
-                .then(val -> ctx.response().end(val.encode()))
-            ;
 
-        });
 
-        router.post("/api/users").handler(BodyHandler.create());
-        router.post("/api/users").handler(ctx -> {
-
-            JsonObject jsonReq = new JsonObject()
-                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
-                .put(ReqCnst.BODY, ctx.getBodyAsJson());
-
-            vertxUtils.sendAndReceiveJsonObject("/users/create", jsonReq)
-                .then(val -> ctx.response().end(val.encode()))
-            ;
-
-        });
-
-        router.put("/api/users/:id").handler(BodyHandler.create());
-        router.put("/api/users/:id").handler(ctx -> {
-
-            JsonObject jsonReq = new JsonObject()
-                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
-                .put(ReqCnst.BODY, ctx.getBodyAsJson());
-
-            vertxUtils.sendAndReceiveJsonObject("/users/update-all-properties", jsonReq)
-                .then(val -> ctx.response().end(val.encode()))
-            ;
-
-        });
-
-        router.patch("/api/users/:id").handler(BodyHandler.create());
-        router.patch("/api/users/:id").handler(ctx -> {
-
-            JsonObject jsonReq = new JsonObject()
-                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
-                .put(ReqCnst.BODY, ctx.getBodyAsJson());
-
-            vertxUtils.sendAndReceiveJsonObject("/users/update-some-properties", jsonReq)
-                .then(val -> ctx.response().end(val.encode()))
-            ;
-
-        });
-
-        router.delete("/api/users/:id").handler(BodyHandler.create());
-        router.delete("/api/users/:id").handler(ctx -> {
-
-            JsonObject jsonReq = new JsonObject()
-                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()));
-
-            if (ctx.getBody().length() > 0) {
-                jsonReq.put(ReqCnst.BODY, ctx.getBodyAsJson());
-            }
-
-            vertxUtils.sendAndReceiveJsonObject("/users/delete", jsonReq)
-                .then(val -> ctx.response().end(val.encode()))
-            ;
-
-        });
-
-        router.get("/api/users/:id").handler(ctx -> {
-
-            JsonObject jsonReq = new JsonObject()
-                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
-                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()));
-
-            vertxUtils.sendAndReceiveJsonObject("/users/find", jsonReq)
-                .then(val -> ctx.response().end(val.encode()))
-            ;
-
-        });
-
-        vertx.createHttpServer().requestHandler(router::accept).listen(6500);
+        moduleSystem.require(Vertx.class).createHttpServer().requestHandler(router::accept).listen(6500);
         System.out.println("started");
     }
 
@@ -112,14 +44,5 @@ public class AppImpl implements App {
             event.response().putHeader("Content-Type", "application/json");
             event.next();
         });
-    }
-
-    private static void registerEventHandlers(Vertx vertx, App app) {
-        vertx.eventBus().consumer("/users/find-all", new FindAllHandler(app)::findAll);
-        vertx.eventBus().consumer("/users/find", new FindHandler(app)::find);
-        vertx.eventBus().consumer("/users/create", new CreateHandler(app)::create);
-        vertx.eventBus().consumer("/users/update-all-properties", new UpdateAllPropertiesHandler(app)::updateAllProperties);
-        vertx.eventBus().consumer("/users/update-some-properties", new UpdateSomePropertiesHandler(app)::updateSomeProperties);
-        vertx.eventBus().consumer("/users/delete", new DeleteHandler(app)::delete);
     }
 }

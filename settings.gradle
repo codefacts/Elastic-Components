@@ -5,4 +5,5 @@ include 'elasta-composer'
 include 'web-utils'
 include 'vertx-utils'
 include 'elasta-module'
+include 'commons'
 
