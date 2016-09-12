@@ -2,9 +2,11 @@ package elasta.composer;
 
 import elasta.module.ModuleSystem;
 import elasta.vertxutils.VertxUtils;
+import elasta.webutils.EventUtils;
 import elasta.webutils.RouteUtils;
 import elasta.webutils.WebUtils;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 
@@ -33,7 +35,9 @@ public class AppImpl implements App {
 
         routeUtils.registerRoutesTo(router, routeUtils.createRoutes("/api", "users"));
 
+        EventUtils eventUtils = new EventUtils(moduleSystem.require(EventBus.class), moduleSystem);
 
+        eventUtils.registerHandlers(eventUtils.handlerSpecs("users"));
 
         moduleSystem.require(Vertx.class).createHttpServer().requestHandler(router::accept).listen(6500);
         System.out.println("started");

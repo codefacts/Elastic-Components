@@ -19,7 +19,7 @@ public class EventUtils {
         this.moduleSystem = moduleSystem;
     }
 
-    List<EventSpec> handlerSpecs(String resourceName) {
+    public List<EventSpec> handlerSpecs(String resourceName) {
         ImmutableList.Builder<EventSpec> builder = ImmutableList.builder();
 
         ReflectionUtils.props(EventHandlers.class).forEach(address -> {
@@ -29,7 +29,7 @@ public class EventUtils {
         return builder.build();
     }
 
-    void registerHandlers(List<EventSpec> eventSpecs) {
+    public void registerHandlers(List<EventSpec> eventSpecs) {
         eventSpecs.forEach(eventSpec -> eventBus.consumer(eventSpec.address, eventSpec.handler));
     }
 
