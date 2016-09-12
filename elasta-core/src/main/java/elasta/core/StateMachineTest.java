@@ -44,7 +44,7 @@ public class StateMachineTest {
                 System.out.println("start: end");
                 return Promises.empty();
             }))
-            .initialState("start")
+            .startPoint("start")
             .build().start("start", "msg")
             .then(val -> System.out.println("got: " + val))
             .err(e -> e.printStackTrace());

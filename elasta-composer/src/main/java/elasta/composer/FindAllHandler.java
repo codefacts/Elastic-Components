@@ -2,7 +2,6 @@ package elasta.composer;
 
 import elasta.core.promise.impl.Promises;
 import elasta.core.statemachine.StateMachine;
-import elasta.vertxutils.VertxUtils;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -26,7 +25,7 @@ final public class FindAllHandler {
                     .when(StateCnst.START, StateMachine.next(StateCnst.FIND_ALL))
                     .when(StateCnst.FIND_ALL, StateMachine.next(StateCnst.END))
 
-                    .initialState(StateCnst.START)
+                    .startPoint(StateCnst.START)
 
                     .handlers(StateCnst.FIND_ALL, StateMachine.execStart(val -> {
                         return Promises.just(StateMachine.triggerNext(
