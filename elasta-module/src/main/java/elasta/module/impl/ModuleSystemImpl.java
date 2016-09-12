@@ -92,13 +92,12 @@ public class ModuleSystemImpl implements ModuleSystem {
 
     @Override
     public <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass) {
-
-
+        exportPrototype(exportScript, moduleClass, null);
     }
 
     @Override
     public <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName) {
-
+        scriptMap.put(new ModuleSpec(moduleClass, moduleName), new ModuleInfo<>(exportScript, true));
     }
 
     private <T> T createModule(ExportScript<T> exportScript) {
