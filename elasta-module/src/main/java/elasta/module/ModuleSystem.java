@@ -15,6 +15,10 @@ public interface ModuleSystem {
 
     <T> void export(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName);
 
+    <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass);
+
+    <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName);
+
     static ModuleSystem create() {
         return new ModuleSystemImpl();
     }

@@ -15,7 +15,8 @@ import java.util.regex.Pattern;
  */
 public class ModuleSystemImpl implements ModuleSystem {
 
-    private final Map<ModuleSpec, ExportScript> scriptMap = new HashMap<>();
+    private static final boolean DEFALUT_PROTOTYPE = false;
+    private final Map<ModuleSpec, ModuleInfo> scriptMap = new HashMap<>();
     private final Map<ModuleSpec, Object> moduleMap = new HashMap<>();
 
     @Override
@@ -32,33 +33,45 @@ public class ModuleSystemImpl implements ModuleSystem {
 
         final ModuleSpec moduleSpec = new ModuleSpec(moduleClass, moduleName);
 
-        Object module = moduleMap.get(moduleSpec);
+        ModuleInfo moduleInfo = scriptMap.get(moduleSpec);
+
+        if (moduleInfo == null) {
+
+            if (moduleName == null) {
+
+                ModuleSpec spec = scriptMap.keySet().stream()
+                    .filter(ms -> ms.moduleClass == moduleClass)
+                    .findFirst()
+                    .orElseThrow(() -> new ModuleSystemException("No module is found for type: '" + moduleClass.getName() + "'"));
+
+                moduleInfo = scriptMap.get(spec);
+
+            } else {
+                throw new ModuleSystemException("No module is found for type: '" + moduleClass.getName() + "' and name: '" + moduleName + "'");
+            }
+
+        }
+
+        if (moduleInfo.isPrototype) {
+            return (T) createModule(moduleInfo.exportScript);
+        } else {
+            return findModule(moduleSpec, moduleInfo);
+        }
+    }
+
+    private <T> T findModule(ModuleSpec moduleSpec, ModuleInfo moduleInfo) {
+
+        T module = (T) moduleMap.get(moduleSpec);
+        Class moduleClass = moduleSpec.moduleClass;
+        String moduleName = moduleSpec.moduleName;
 
         if (module == null) {
 
-            ExportScript exportScript = scriptMap.get(moduleSpec);
-
-            if (exportScript == null) {
-
-                if (moduleName == null) {
-
-                    ModuleSpec spec = scriptMap.keySet().stream()
-                        .filter(ms -> ms.moduleClass == moduleClass)
-                        .findFirst()
-                        .orElseThrow(() -> new ModuleSystemException("No module is found for type: '" + moduleClass.getName() + "'"));
-
-                    exportScript = scriptMap.get(spec);
-
-                } else {
-                    throw new ModuleSystemException("No module is found for type: '" + moduleClass.getName() + "' and name: '" + moduleName + "'");
-                }
-            }
-
-            module = createModule(exportScript, moduleName);
+            module = (T) createModule(moduleInfo.exportScript);
 
             ensureModuleExportedOrThrow(module, moduleClass, moduleName);
 
-            moduleMap.put(new ModuleSpec(moduleClass, moduleName), module);
+            moduleMap.put(moduleSpec, module);
 
             //Check Default Exists or register this module as default
             moduleMap.putIfAbsent(new ModuleSpec(moduleClass, null), module);
@@ -74,19 +87,29 @@ public class ModuleSystemImpl implements ModuleSystem {
 
     @Override
     public <T> void export(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName) {
-        scriptMap.put(new ModuleSpec(moduleClass, moduleName), exportScript);
+        scriptMap.put(new ModuleSpec(moduleClass, moduleName), new ModuleInfo<>(exportScript, DEFALUT_PROTOTYPE));
     }
 
-    private <T> T createModule(ExportScript<T> exportScript, String moduleName) {
+    @Override
+    public <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass) {
 
-        ModuleImpl<T> module = new ModuleImpl<>(this, moduleName);
+
+    }
+
+    @Override
+    public <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName) {
+
+    }
+
+    private <T> T createModule(ExportScript<T> exportScript) {
+
+        ModuleImpl<T> module = new ModuleImpl<>(this);
 
         exportScript.run(module);
 
         T newModule = module.getModule();
 
         return newModule;
-
     }
 
     private <T> void ensureModuleExportedOrThrow(Object module, Class<T> tClass, String moduleName) {

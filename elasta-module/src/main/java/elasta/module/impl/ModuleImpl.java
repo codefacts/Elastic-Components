@@ -10,17 +10,10 @@ import java.util.Map;
  */
 public class ModuleImpl<T> implements Module<T> {
     private final ModuleSystemImpl moduleSystem;
-    private final String moduleName;
-    private ModuleSpec moduleSpec;
     private T module;
 
     public ModuleImpl(ModuleSystemImpl moduleSystem) {
-        this(moduleSystem, null);
-    }
-
-    public ModuleImpl(ModuleSystemImpl moduleSystem, String moduleName) {
         this.moduleSystem = moduleSystem;
-        this.moduleName = moduleName;
     }
 
     @Override
@@ -35,12 +28,7 @@ public class ModuleImpl<T> implements Module<T> {
 
     @Override
     public void export(T newModule) {
-        this.moduleSpec = new ModuleSpec(newModule.getClass(), moduleName);
         this.module = newModule;
-    }
-
-    public ModuleSpec getModuleSpec() {
-        return moduleSpec;
     }
 
     public T getModule() {
