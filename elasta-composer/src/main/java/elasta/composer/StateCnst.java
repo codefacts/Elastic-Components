@@ -14,4 +14,6 @@ public interface StateCnst {
     String VALIDATION_ERROR = "validation-error";
     String UPDATE_ALL_PROPERTIES = "update-all-properties";
     String UPDATE_SOME_PROPERTIES = "update-some-properties";
+    String DELETE = "delete";
+    String FIND = "find";
 }

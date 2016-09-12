@@ -70,8 +70,8 @@ public class AppImpl implements App {
 
         });
 
-        router.put("/api/users").handler(BodyHandler.create());
-        router.put("/api/users").handler(ctx -> {
+        router.put("/api/users/:id").handler(BodyHandler.create());
+        router.put("/api/users/:id").handler(ctx -> {
 
             JsonObject jsonReq = new JsonObject()
                 .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
@@ -84,8 +84,8 @@ public class AppImpl implements App {
 
         });
 
-        router.patch("/api/users").handler(BodyHandler.create());
-        router.patch("/api/users").handler(ctx -> {
+        router.patch("/api/users/:id").handler(BodyHandler.create());
+        router.patch("/api/users/:id").handler(ctx -> {
 
             JsonObject jsonReq = new JsonObject()
                 .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
@@ -93,6 +93,34 @@ public class AppImpl implements App {
                 .put(ReqCnst.BODY, ctx.getBodyAsJson());
 
             vertxUtils.sendAndReceiveJsonObject("/users/update-some-properties", jsonReq)
+                .then(val -> ctx.response().end(val.encode()))
+            ;
+
+        });
+
+        router.delete("/api/users/:id").handler(BodyHandler.create());
+        router.delete("/api/users/:id").handler(ctx -> {
+
+            JsonObject jsonReq = new JsonObject()
+                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
+                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
+                .put(ReqCnst.BODY, ctx.getBodyAsJson());
+
+            vertxUtils.sendAndReceiveJsonObject("/users/delete", jsonReq)
+                .then(val -> ctx.response().end(val.encode()))
+            ;
+
+        });
+
+        router.get("/api/users/:id").handler(BodyHandler.create());
+        router.get("/api/users/:id").handler(ctx -> {
+
+            JsonObject jsonReq = new JsonObject()
+                .put(ReqCnst.PARAMS, webUtils.toJson(ctx.request().params()))
+                .put(ReqCnst.HEADERS, webUtils.toJson(ctx.request().headers()))
+                .put(ReqCnst.BODY, ctx.getBodyAsJson());
+
+            vertxUtils.sendAndReceiveJsonObject("/users/find", jsonReq)
                 .then(val -> ctx.response().end(val.encode()))
             ;
 
@@ -111,8 +139,10 @@ public class AppImpl implements App {
 
     private static void registerEventHandlers(Vertx vertx, App app) {
         vertx.eventBus().consumer("/users/find-all", new FindAllHandler(app)::findAll);
+        vertx.eventBus().consumer("/users/find", new FindHandler(app)::find);
         vertx.eventBus().consumer("/users/create", new CreateHandler(app)::create);
         vertx.eventBus().consumer("/users/update-all-properties", new UpdateAllPropertiesHandler(app)::updateAllProperties);
         vertx.eventBus().consumer("/users/update-some-properties", new UpdateSomePropertiesHandler(app)::updateSomeProperties);
+        vertx.eventBus().consumer("/users/delete", new DeleteHandler(app)::delete);
     }
 }

@@ -3,6 +3,7 @@ package elasta.composer;
 import elasta.core.promise.impl.Promises;
 import elasta.core.statemachine.StateMachine;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
 
 import static elasta.core.statemachine.StateEntry.on;
 import static elasta.core.statemachine.StateMachine.next;
@@ -17,7 +18,7 @@ public class UpdateAllPropertiesHandler {
         this.app = app;
     }
 
-    public void updateAllProperties(Message message) {
+    public void updateAllProperties(Message<JsonObject> message) {
 
         app.vertxUtils().handleMessage(message,
             (body, headers, address, replyAddress) -> {
