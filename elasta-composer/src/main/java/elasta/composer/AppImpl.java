@@ -1,6 +1,5 @@
 package elasta.composer;
 
-import com.google.common.collect.ImmutableMap;
 import elasta.vertxutils.VertxUtils;
 import elasta.webutils.WebUtils;
 import io.vertx.core.Vertx;

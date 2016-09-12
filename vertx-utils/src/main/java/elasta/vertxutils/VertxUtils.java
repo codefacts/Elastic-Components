@@ -12,55 +12,13 @@ import io.vertx.core.json.JsonObject;
 /**
  * Created by Jango on 9/11/2016.
  */
-final public class VertxUtils {
-    private final Vertx vertx;
-    private final FailureCodeHandler defaultFailureCodeHandler;
-    private final ReplyHandler defaultReplyHandler;
+public interface VertxUtils {
 
-    public VertxUtils(Vertx vertx, FailureCodeHandler defaultFailureCodeHandler, ReplyHandler defaultReplyHandler) {
-        this.vertx = vertx;
-        this.defaultFailureCodeHandler = defaultFailureCodeHandler;
-        this.defaultReplyHandler = defaultReplyHandler;
-    }
+    <T> Promise<T> send(String address, Object message);
 
-    public <T> Promise<T> send(String address, Object message) {
+    <T> void handleMessage(Message<T> message, VertxMessageHandler handler);
 
-        Defer<T> defer = Promises.defer();
+    Promise<JsonObject> sendAndReceiveJsonObject(String address, Object jsonReq);
 
-        vertx.eventBus().send(address, message, (AsyncResult<Message<T>> event) -> {
-            if (event.failed()) {
-                defer.reject(event.cause());
-            } else {
-                defer.resolve(event.result().body());
-            }
-        });
-
-        return defer.promise();
-    }
-
-    public <T> void handleMessage(Message<T> message, VertxMessageHandler handler) {
-        try {
-            handler.handle(message.body(), message.headers(), message.address(), message.replyAddress())
-                .cmp(signal -> {
-                    if (signal.isError()) {
-                        FailureTuple failureTuple = defaultFailureCodeHandler.handleFailure(signal.err());
-                        message.fail(failureTuple.getCode(), failureTuple.getMessageCode());
-                    } else {
-                        defaultReplyHandler.handleReply(message, signal.val());
-                    }
-                })
-            ;
-        } catch (Throwable throwable) {
-            FailureTuple failureTuple = defaultFailureCodeHandler.handleFailure(throwable);
-            message.fail(failureTuple.getCode(), failureTuple.getMessageCode());
-        }
-    }
-
-    public Promise<JsonObject> sendAndReceiveJsonObject(String address, Object jsonReq) {
-        return send(address, jsonReq);
-    }
-
-    public Promise<JsonArray> sendAndReceiveJsonArray(String address, Object jsonReq) {
-        return send(address, jsonReq);
-    }
+    Promise<JsonArray> sendAndReceiveJsonArray(String address, Object jsonReq);
 }
