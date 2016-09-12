@@ -21,12 +21,32 @@ public class ModuleSystemImpl implements ModuleSystem {
 
     @Override
     public <T> T require(Class<T> tClass) {
-        return require(tClass, null);
+        return require(tClass, (String) null);
     }
 
     @Override
     public <T> T require(Class<T> tClass, String moduleName) {
-        return getOrCreate(tClass, moduleName);
+        T module = getOrCreate(tClass, moduleName);
+
+        if (module == null) {
+
+            moduleName = moduleName == null ? "" : (" and name: '" + moduleName + "'");
+
+            throw new ModuleSystemException("No module is found for type: '" + tClass + "'" + moduleName);
+        }
+
+        return module;
+    }
+
+    @Override
+    public <T> T requireOrElse(Class<T> tClass, T defaultValue) {
+        return requireOrElse(tClass, null, defaultValue);
+    }
+
+    @Override
+    public <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue) {
+        T module = getOrCreate(tClass, moduleName);
+        return module == null ? defaultValue : module;
     }
 
     private <T> T getOrCreate(Class<T> moduleClass, String moduleName) {
@@ -42,12 +62,16 @@ public class ModuleSystemImpl implements ModuleSystem {
                 ModuleSpec spec = scriptMap.keySet().stream()
                     .filter(ms -> ms.moduleClass == moduleClass)
                     .findFirst()
-                    .orElseThrow(() -> new ModuleSystemException("No module is found for type: '" + moduleClass.getName() + "'"));
+                    .get();
+
+                if (spec == null) {
+                    return null;
+                }
 
                 moduleInfo = scriptMap.get(spec);
 
             } else {
-                throw new ModuleSystemException("No module is found for type: '" + moduleClass.getName() + "' and name: '" + moduleName + "'");
+                return null;
             }
 
         }
@@ -81,22 +105,22 @@ public class ModuleSystemImpl implements ModuleSystem {
     }
 
     @Override
-    public <T> void export(ExportScript<T> exportScript, Class<T> moduleClass) {
-        export(exportScript, moduleClass, null);
+    public <T> void export(Class<T> moduleClass, ExportScript<T> exportScript) {
+        export(moduleClass, null, exportScript);
     }
 
     @Override
-    public <T> void export(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName) {
+    public <T> void export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript) {
         scriptMap.put(new ModuleSpec(moduleClass, moduleName), new ModuleInfo<>(exportScript, DEFALUT_PROTOTYPE));
     }
 
     @Override
-    public <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass) {
-        exportPrototype(exportScript, moduleClass, null);
+    public <T> void exportPrototype(Class<T> moduleClass, ExportScript<T> exportScript) {
+        exportPrototype(moduleClass, null, exportScript);
     }
 
     @Override
-    public <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName) {
+    public <T> void exportPrototype(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript) {
         scriptMap.put(new ModuleSpec(moduleClass, moduleName), new ModuleInfo<>(exportScript, true));
     }
 

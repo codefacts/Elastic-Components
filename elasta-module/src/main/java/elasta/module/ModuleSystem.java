@@ -11,13 +11,17 @@ public interface ModuleSystem {
 
     <T> T require(Class<T> tClass, String moduleName);
 
-    <T> void export(ExportScript<T> exportScript, Class<T> moduleClass);
+    <T> T requireOrElse(Class<T> tClass, T defaultValue);
 
-    <T> void export(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName);
+    <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue);
 
-    <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass);
+    <T> void export(Class<T> moduleClass, ExportScript<T> exportScript);
 
-    <T> void exportPrototype(ExportScript<T> exportScript, Class<T> moduleClass, String moduleName);
+    <T> void export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript);
+
+    <T> void exportPrototype(Class<T> moduleClass, ExportScript<T> exportScript);
+
+    <T> void exportPrototype(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript);
 
     static ModuleSystem create() {
         return new ModuleSystemImpl();

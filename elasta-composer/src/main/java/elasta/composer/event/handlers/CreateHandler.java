@@ -1,7 +1,9 @@
-package elasta.composer;
+package elasta.composer.event.handlers;
 
+import elasta.composer.StateCnst;
 import elasta.core.promise.impl.Promises;
 import elasta.core.statemachine.StateMachine;
+import elasta.vertxutils.VertxUtils;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
@@ -11,23 +13,23 @@ import static elasta.core.statemachine.StateMachine.next;
 /**
  * Created by Jango on 9/12/2016.
  */
-public class UpdateAllPropertiesHandler {
-    private final App app;
+public class CreateHandler {
+    private final VertxUtils vertxUtils;
 
-    public UpdateAllPropertiesHandler(App app) {
-        this.app = app;
+    public CreateHandler(VertxUtils vertxUtils) {
+        this.vertxUtils = vertxUtils;
     }
 
-    public void updateAllProperties(Message<JsonObject> message) {
+    public void create(Message<JsonObject> message) {
 
-        app.vertxUtils().handleMessage(message,
+        vertxUtils.handleMessage(message,
             (body, headers, address, replyAddress) -> {
 
                 StateMachine machine = StateMachine.builder()
                     .when(StateCnst.START, next(StateCnst.VALIDATE))
-                    .when(StateCnst.VALIDATE, next(StateCnst.UPDATE_ALL_PROPERTIES), on(StateCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
+                    .when(StateCnst.VALIDATE, next(StateCnst.CREATE), on(StateCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
-                    .when(StateCnst.UPDATE_ALL_PROPERTIES, next(StateCnst.END))
+                    .when(StateCnst.CREATE, next(StateCnst.END))
 
                     .startPoint(StateCnst.START)
 
@@ -39,7 +41,7 @@ public class UpdateAllPropertiesHandler {
                         return Promises.just(StateMachine.triggerNext(val));
                     }))
 
-                    .handlers(StateCnst.UPDATE_ALL_PROPERTIES, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.CREATE, StateMachine.execStart(val -> {
                         return Promises.just(StateMachine.triggerNext(val));
                     }))
 

@@ -1,7 +1,6 @@
 package elasta.composer;
 
-import elasta.vertxutils.VertxUtils;
-import elasta.webutils.WebUtils;
+import elasta.composer.event.handlers.*;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -12,30 +11,7 @@ import io.vertx.ext.web.handler.BodyHandler;
  */
 public class AppImpl implements App {
 
-    public final WebUtils webUtils;
-    public final VertxUtils vertxUtils;
-
-    public AppImpl(WebUtils webUtils, VertxUtils vertxUtils) {
-        this.webUtils = webUtils;
-        this.vertxUtils = vertxUtils;
-    }
-
-    @Override
-    public WebUtils webUtils() {
-        return webUtils;
-    }
-
-    @Override
-    public VertxUtils vertxUtils() {
-        return vertxUtils;
-    }
-
     public static void main(String[] args) {
-        final Vertx vertx = Vertx.vertx();
-
-        final App app = App.app(vertx);
-        final WebUtils webUtils = app.webUtils();
-        final VertxUtils vertxUtils = app.vertxUtils();
 
         registerEventHandlers(vertx, app);
 
