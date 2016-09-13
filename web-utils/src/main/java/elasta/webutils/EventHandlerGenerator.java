@@ -24,7 +24,7 @@ public class EventHandlerGenerator {
     public List<EventSpec> makeHandlers(String resourceName) {
         ImmutableList.Builder<EventSpec> builder = ImmutableList.builder();
 
-        ReflectionUtils.staticFinalProps(EventHandlers.class).forEach(address -> {
+        ReflectionUtils.staticFinalValues(EventHandlers.class).forEach(address -> {
             builder.add(new EventSpec(eventNameGenerator.eventName(address, resourceName), moduleSystem.require(EventHandler.class, address)));
         });
 
@@ -36,6 +36,6 @@ public class EventHandlerGenerator {
     }
 
     public static void main(String[] args) {
-        System.out.println(ReflectionUtils.staticFinalProps(EventHandlers.class));
+        System.out.println(ReflectionUtils.staticFinalValues(EventHandlers.class));
     }
 }
