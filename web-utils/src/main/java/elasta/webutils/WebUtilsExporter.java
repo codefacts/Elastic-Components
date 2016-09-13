@@ -52,9 +52,9 @@ public interface WebUtilsExporter {
                         )
                     ));
 
-            moduleSystem.export(CrudOperationBuilder.class,
+            moduleSystem.export(CrudBuilder.class,
                 module ->
-                    module.export((prefixUri, resourceName, router) -> {
+                    module.export((router, prefixUri, resourceName) -> {
                         RouteGenerator routeGenerator = module.require(RouteGenerator.class);
                         EventHandlerGenerator handlerGenerator = module.require(EventHandlerGenerator.class);
 

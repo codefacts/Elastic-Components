@@ -16,7 +16,8 @@ import java.util.function.BiFunction;
  * Created by Jango on 9/12/2016.
  */
 public class RouteGenerator {
-
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=utf-8";
     public static final String HANDLER_FACTORY_MODULE_NAME = "handlerFactoryModuleName";
     public static final String BODY_HANDLER_FACTORY_MODULE_NAME = "bodyHandlerFactoryModuleName";
 
@@ -33,7 +34,11 @@ public class RouteGenerator {
                 }
 
                 vertxUtils.sendAndReceiveJsonObject(address, jsonReq)
-                    .then(val -> ctx.response().end(val.encode()))
+                    .then(
+                        val ->
+                            ctx.response().putHeader(CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
+                                .end(val.encode())
+                    )
                 ;
             };
     }
