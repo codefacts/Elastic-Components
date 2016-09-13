@@ -70,6 +70,18 @@ public interface WebUtilsExporter {
 
                 });
             });
+
+            moduleSystem.export(StateMachineStarter.class, module -> {
+                module.export(
+                    (machine, body, headers, address, replyAddress) ->
+                        machine.start(
+                            body
+                                .put(MsgCnst.MESSAGE_HEADERS, headers)
+                                .put(MsgCnst.MESSAGE_ADDRESS, address)
+                                .put(MsgCnst.MESSAGE_REPLY_ADDRESS, replyAddress)
+                        )
+                );
+            });
         };
     }
 

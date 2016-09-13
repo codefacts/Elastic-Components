@@ -16,7 +16,7 @@ public interface VertxUtils {
 
     <T> Promise<T> send(String address, Object message);
 
-    <T> void handleMessage(Message<T> message, VertxMessageHandler handler);
+    <T, R> void handleMessage(Message<T> message, VertxMessageHandler<T, R> handler);
 
     Promise<JsonObject> sendAndReceiveJsonObject(String address, Object jsonReq);
 

@@ -4,6 +4,7 @@ import elasta.composer.StateCnst;
 import elasta.core.promise.impl.Promises;
 import elasta.core.statemachine.StateMachine;
 import elasta.vertxutils.VertxUtils;
+import elasta.webutils.StateMachineStarter;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -13,9 +14,11 @@ import io.vertx.core.json.JsonObject;
  */
 final public class FindAllHandler {
     final VertxUtils vertxUtils;
+    private final StateMachineStarter stateMachineStarter;
 
-    public FindAllHandler(VertxUtils vertxUtils) {
+    public FindAllHandler(VertxUtils vertxUtils, StateMachineStarter stateMachineStarter) {
         this.vertxUtils = vertxUtils;
+        this.stateMachineStarter = stateMachineStarter;
     }
 
     public void findAll(Message<JsonObject> message) {
@@ -43,7 +46,7 @@ final public class FindAllHandler {
                     .build();
 
 
-                return machine.start(message.body());
+                return stateMachineStarter.startMachine(machine, body, headers, address, replyAddress);
             });
     }
 }

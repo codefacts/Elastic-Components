@@ -4,6 +4,7 @@ import elasta.composer.StateCnst;
 import elasta.core.promise.impl.Promises;
 import elasta.core.statemachine.StateMachine;
 import elasta.vertxutils.VertxUtils;
+import elasta.webutils.StateMachineStarter;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
@@ -15,9 +16,11 @@ import static elasta.core.statemachine.StateMachine.next;
  */
 public class CreateHandler {
     private final VertxUtils vertxUtils;
+    private final StateMachineStarter stateMachineStarter;
 
-    public CreateHandler(VertxUtils vertxUtils) {
+    public CreateHandler(VertxUtils vertxUtils, StateMachineStarter stateMachineStarter) {
         this.vertxUtils = vertxUtils;
+        this.stateMachineStarter = stateMachineStarter;
     }
 
     public void create(Message<JsonObject> message) {
@@ -55,7 +58,7 @@ public class CreateHandler {
                     .build();
 
 
-                return machine.start(message.body());
+                return stateMachineStarter.startMachine(machine, body, headers, address, replyAddress);
             });
 
     }
