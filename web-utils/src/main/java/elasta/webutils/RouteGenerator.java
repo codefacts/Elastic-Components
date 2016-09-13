@@ -15,12 +15,12 @@ import java.util.function.BiFunction;
 /**
  * Created by Jango on 9/12/2016.
  */
-public class RouteGenerators {
+public class RouteGenerator {
 
     public static final String HANDLER_FACTORY_MODULE_NAME = "handlerFactoryModuleName";
     public static final String BODY_HANDLER_FACTORY_MODULE_NAME = "bodyHandlerFactoryModuleName";
 
-    public static RoutingContextHandlerFactory defaultHandlerFactory(VertxUtils vertxUtils, WebUtils webUtils) {
+    public static RequestHandlerFactory defaultHandlerFactory(VertxUtils vertxUtils, WebUtils webUtils) {
         return (address, httpMethod) ->
             ctx -> {
 
@@ -42,8 +42,8 @@ public class RouteGenerators {
     private final BiFunction<String, HttpMethod, Handler<RoutingContext>> handlerFactory;
     private final EventNameGenerator eventNameGenerator;
 
-    public RouteGenerators(BiFunction<String, HttpMethod, Handler<RoutingContext>> bodyHandlerFactory,
-                           BiFunction<String, HttpMethod, Handler<RoutingContext>> handlerFactory, EventNameGenerator eventNameGenerator) {
+    public RouteGenerator(BiFunction<String, HttpMethod, Handler<RoutingContext>> bodyHandlerFactory,
+                          BiFunction<String, HttpMethod, Handler<RoutingContext>> handlerFactory, EventNameGenerator eventNameGenerator) {
         this.bodyHandlerFactory = bodyHandlerFactory;
         this.handlerFactory = handlerFactory;
         this.eventNameGenerator = eventNameGenerator;
