@@ -38,7 +38,7 @@ public class VertxUtilsImpl implements VertxUtils {
         return defer.promise();
     }
 
-    public <T> void handleMessage(Message<T> message, VertxMessageHandler handler) {
+    public <T, R> void handleMessage(Message<T> message, VertxMessageHandler<T, R> handler) {
         try {
             handler.handle(message.body(), message.headers(), message.address(), message.replyAddress())
                 .cmp(signal -> {

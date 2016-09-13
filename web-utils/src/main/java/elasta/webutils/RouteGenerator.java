@@ -39,6 +39,7 @@ public class RouteGenerator {
                             ctx.response().putHeader(CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                                 .end(val.encode())
                     )
+                    .err(ctx::fail)
                 ;
             };
     }

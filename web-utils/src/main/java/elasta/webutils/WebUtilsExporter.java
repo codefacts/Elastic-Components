@@ -76,9 +76,9 @@ public interface WebUtilsExporter {
                     (machine, body, headers, address, replyAddress) ->
                         machine.start(
                             body
-                                .put(MsgCnst.MESSAGE_HEADERS, headers)
-                                .put(MsgCnst.MESSAGE_ADDRESS, address)
-                                .put(MsgCnst.MESSAGE_REPLY_ADDRESS, replyAddress)
+                                .put(MsgCnst.$HEADERS, module.require(WebUtils.class).toJson(headers))
+                                .put(MsgCnst.$ADDRESS, address)
+                                .put(MsgCnst.$REPLY_ADDRESS, replyAddress)
                         )
                 );
             });
