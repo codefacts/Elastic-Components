@@ -3,6 +3,7 @@ package elasta.webutils;
 import elasta.module.ModuleSystem;
 import elasta.vertxutils.VertxUtils;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.BodyHandler;
 
 import java.util.List;
@@ -48,18 +49,19 @@ public interface WebUtilsExporter {
                         new EventHandlerGenerator(
                             module.require(EventBus.class),
                             module.moduleSystem(),
-                            module.require(EventNameGenerator.class)
+                            module.require(EventNameGenerator.class),
+                            module.require(EventHandlerBuilder.class)
                         )
                     ));
 
             moduleSystem.export(CrudBuilder.class,
                 module ->
-                    module.export((router, prefixUri, resourceName) -> {
+                    module.export((router, prefixUri, resourceName, machineMap) -> {
                         RouteGenerator routeGenerator = module.require(RouteGenerator.class);
                         EventHandlerGenerator handlerGenerator = module.require(EventHandlerGenerator.class);
 
                         List<RouteSpec> routeSpecs = routeGenerator.makeRoutes(prefixUri, resourceName);
-                        List<EventSpec> eventSpecs = handlerGenerator.makeHandlers(resourceName);
+                        List<EventSpec> eventSpecs = handlerGenerator.makeHandlers(resourceName, machineMap);
 
                         routeGenerator.registerRoutes(router, routeSpecs);
                         handlerGenerator.registerHandlers(eventSpecs);
@@ -80,6 +82,19 @@ public interface WebUtilsExporter {
                                 .put(MsgCnst.$ADDRESS, address)
                                 .put(MsgCnst.$REPLY_ADDRESS, replyAddress)
                         )
+                );
+            });
+
+            moduleSystem.export(EventHandlerBuilder.class, module -> {
+                module.export(
+                    machine ->
+                        message ->
+                            module.require(VertxUtils.class)
+                                .handleMessage(message,
+                                    (body, headers, address, replyAddress) ->
+                                        module.require(StateMachineStarter.class)
+                                            .startMachine(machine, (JsonObject) body, headers, address, replyAddress)
+                                )
                 );
             });
         };

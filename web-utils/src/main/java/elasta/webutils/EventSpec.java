@@ -1,7 +1,6 @@
 package elasta.webutils;
 
-import io.vertx.core.Handler;
-import io.vertx.core.eventbus.Message;
+import elasta.core.statemachine.StateMachine;
 
 /**
  * Created by Jango on 9/12/2016.

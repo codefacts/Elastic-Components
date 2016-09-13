@@ -61,21 +61,21 @@ public class RouteGenerator {
         final String resourcePath = uriPath + "/" + resourceName;
         final String pathId = uriPath + "/" + resourceName + "/:id";
 
-        builder.add(new RouteSpec(resourcePath, HttpMethod.GET, handlerFactory.apply(eventNameGenerator.eventName(EventHandlers.FIND_ALL, resourceName), HttpMethod.GET)));
+        builder.add(new RouteSpec(resourcePath, HttpMethod.GET, handlerFactory.apply(eventNameGenerator.eventName(EventAddresses.FIND_ALL, resourceName), HttpMethod.GET)));
 
-        builder.add(new RouteSpec(pathId, HttpMethod.GET, handlerFactory.apply(eventNameGenerator.eventName(EventHandlers.FIND, resourceName), HttpMethod.GET)));
+        builder.add(new RouteSpec(pathId, HttpMethod.GET, handlerFactory.apply(eventNameGenerator.eventName(EventAddresses.FIND, resourceName), HttpMethod.GET)));
 
-        builder.add(new RouteSpec(resourcePath, HttpMethod.POST, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventHandlers.CREATE, resourceName), HttpMethod.POST)));
-        builder.add(new RouteSpec(resourcePath, HttpMethod.POST, handlerFactory.apply(eventNameGenerator.eventName(EventHandlers.CREATE, resourceName), HttpMethod.POST)));
+        builder.add(new RouteSpec(resourcePath, HttpMethod.POST, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventAddresses.CREATE, resourceName), HttpMethod.POST)));
+        builder.add(new RouteSpec(resourcePath, HttpMethod.POST, handlerFactory.apply(eventNameGenerator.eventName(EventAddresses.CREATE, resourceName), HttpMethod.POST)));
 
-        builder.add(new RouteSpec(pathId, HttpMethod.PUT, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventHandlers.UPDATE_ALL_PROPERTIES, resourceName), HttpMethod.PUT)));
-        builder.add(new RouteSpec(pathId, HttpMethod.PUT, handlerFactory.apply(eventNameGenerator.eventName(EventHandlers.UPDATE_ALL_PROPERTIES, resourceName), HttpMethod.PUT)));
+        builder.add(new RouteSpec(pathId, HttpMethod.PUT, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventAddresses.UPDATE_ALL_PROPERTIES, resourceName), HttpMethod.PUT)));
+        builder.add(new RouteSpec(pathId, HttpMethod.PUT, handlerFactory.apply(eventNameGenerator.eventName(EventAddresses.UPDATE_ALL_PROPERTIES, resourceName), HttpMethod.PUT)));
 
-        builder.add(new RouteSpec(pathId, HttpMethod.PATCH, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventHandlers.UPDATE_SOME_PROPERTIES, resourceName), HttpMethod.PATCH)));
-        builder.add(new RouteSpec(pathId, HttpMethod.PATCH, handlerFactory.apply(eventNameGenerator.eventName(EventHandlers.UPDATE_SOME_PROPERTIES, resourceName), HttpMethod.PATCH)));
+        builder.add(new RouteSpec(pathId, HttpMethod.PATCH, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventAddresses.UPDATE_SOME_PROPERTIES, resourceName), HttpMethod.PATCH)));
+        builder.add(new RouteSpec(pathId, HttpMethod.PATCH, handlerFactory.apply(eventNameGenerator.eventName(EventAddresses.UPDATE_SOME_PROPERTIES, resourceName), HttpMethod.PATCH)));
 
-        builder.add(new RouteSpec(pathId, HttpMethod.DELETE, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventHandlers.DELETE, resourceName), HttpMethod.DELETE)));
-        builder.add(new RouteSpec(pathId, HttpMethod.DELETE, handlerFactory.apply(eventNameGenerator.eventName(EventHandlers.DELETE, resourceName), HttpMethod.DELETE)));
+        builder.add(new RouteSpec(pathId, HttpMethod.DELETE, bodyHandlerFactory.apply(eventNameGenerator.eventName(EventAddresses.DELETE, resourceName), HttpMethod.DELETE)));
+        builder.add(new RouteSpec(pathId, HttpMethod.DELETE, handlerFactory.apply(eventNameGenerator.eventName(EventAddresses.DELETE, resourceName), HttpMethod.DELETE)));
 
         return builder.build();
     }

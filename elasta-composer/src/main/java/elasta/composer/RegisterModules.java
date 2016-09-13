@@ -1,5 +1,6 @@
 package elasta.composer;
 
+import elasta.composer.util.MessageBundle;
 import elasta.module.ModuleSystem;
 import elasta.vertxutils.VertxUtilsExporter;
 import elasta.webutils.WebUtilsExporter;
@@ -20,5 +21,9 @@ public class RegisterModules {
         VertxUtilsExporter.get().export(moduleSystem);
 
         new RegisterEventHandlersImpl().register(moduleSystem);
+
+        new RegisterStateMachines().register(moduleSystem);
+
+        moduleSystem.export(MessageBundle.class, module -> module.export(new MessageBundle("{}")));
     }
 }
