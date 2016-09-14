@@ -10,7 +10,6 @@ public interface StateCnst {
     String END = "end";
     String CREATE = "create";
     String VALIDATE = "validate";
-    String VALIDATION_FAIL = "validation-fail";
     String VALIDATION_ERROR = "validation-error";
     String UPDATE_ALL_PROPERTIES = "update-all-properties";
     String UPDATE_SOME_PROPERTIES = "update-some-properties";

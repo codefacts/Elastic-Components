@@ -2,16 +2,21 @@ package elasta.composer;
 
 import elasta.composer.util.MessageBundle;
 import elasta.composer.validator.ValidationPipeline;
+import elasta.composer.validator.ValidationResult;
 import elasta.composer.validator.composer.JsonObjectValidatorComposer;
+import elasta.core.promise.impl.Promises;
 import elasta.core.statemachine.StateMachine;
 import elasta.core.statemachine.StateMachineBuilder;
 import elasta.module.ModuleSystem;
 import elasta.webutils.CrudBuilder;
 import elasta.webutils.EventAddresses;
+import elasta.webutils.ReqCnst;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,13 +48,28 @@ public class AppImpl {
     }
 
     private static Map<String, StateMachine> machineMapUsers(ModuleSystem moduleSystem) {
-        StateMachineBuilder builder = moduleSystem.require(StateMachineBuilder.class, EventAddresses.CREATE);
+        StateMachineBuilder machineBuilder = moduleSystem.require(StateMachineBuilder.class, EventAddresses.CREATE);
 
         JsonObjectValidatorComposer composer = new JsonObjectValidatorComposer(new ArrayList<>(), moduleSystem.require(MessageBundle.class));
 
+        composer
+            .field("name", fieldValidatorComposer -> fieldValidatorComposer.notNullEmptyOrWhiteSpace().stringType())
+            .field("email", fieldValidatorComposer -> fieldValidatorComposer.stringType().email().notNullEmptyOrWhiteSpace())
+            .field("phone", fieldValidatorComposer -> fieldValidatorComposer.stringType().phone().notNullEmptyOrWhiteSpace())
+        ;
 
+        ValidationPipeline<JsonObject> validationPipeline = new ValidationPipeline<>(composer.getValidatorList());
 
-        new ValidationPipeline<>(composer.getValidatorList());
+        machineBuilder.handlers(StateCnst.VALIDATE, StateMachine.execStart((JsonObject val) -> {
+            List<ValidationResult> validationResults = validationPipeline.validate(val.getJsonObject(ReqCnst.BODY));
+
+            if (validationResults == null) {
+                return Promises.just(StateMachine.triggerNext(val));
+            } else {
+                return Promises.just(StateMachine.trigger(EventCnst.VALIDATION_FAIL, validationResults));
+            }
+        }));
+
 
         return null;
     }

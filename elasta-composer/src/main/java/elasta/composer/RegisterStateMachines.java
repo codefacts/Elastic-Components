@@ -21,7 +21,7 @@ public class RegisterStateMachines {
             module.export(
                 StateMachine.builder()
                     .when(StateCnst.START, next(StateCnst.VALIDATE))
-                    .when(StateCnst.VALIDATE, next(StateCnst.CREATE), on(StateCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
+                    .when(StateCnst.VALIDATE, next(StateCnst.CREATE), on(EventCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.CREATE, next(StateCnst.END))
 
@@ -102,7 +102,7 @@ public class RegisterStateMachines {
             module.export(
                 StateMachine.builder()
                     .when(StateCnst.START, next(StateCnst.VALIDATE))
-                    .when(StateCnst.VALIDATE, next(StateCnst.UPDATE_ALL_PROPERTIES), on(StateCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
+                    .when(StateCnst.VALIDATE, next(StateCnst.UPDATE_ALL_PROPERTIES), on(EventCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.UPDATE_ALL_PROPERTIES, next(StateCnst.END))
 
@@ -135,7 +135,7 @@ public class RegisterStateMachines {
             module.export(
                 StateMachine.builder()
                     .when(StateCnst.START, next(StateCnst.VALIDATE))
-                    .when(StateCnst.VALIDATE, next(StateCnst.UPDATE_SOME_PROPERTIES), on(StateCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
+                    .when(StateCnst.VALIDATE, next(StateCnst.UPDATE_SOME_PROPERTIES), on(EventCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.UPDATE_SOME_PROPERTIES, next(StateCnst.END))
 
@@ -168,7 +168,7 @@ public class RegisterStateMachines {
             module.export(
                 StateMachine.builder()
                     .when(StateCnst.START, next(StateCnst.VALIDATE))
-                    .when(StateCnst.VALIDATE, next(StateCnst.DELETE), on(StateCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
+                    .when(StateCnst.VALIDATE, next(StateCnst.DELETE), on(EventCnst.VALIDATION_FAIL, StateCnst.VALIDATION_ERROR))
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.DELETE, next(StateCnst.END))
 

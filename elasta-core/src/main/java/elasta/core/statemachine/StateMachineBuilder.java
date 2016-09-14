@@ -1,6 +1,10 @@
 package elasta.core.statemachine;
 
+import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.promise.intfs.Promise;
+
 import java.util.*;
+import java.util.concurrent.Callable;
 
 public class StateMachineBuilder {
     private String initialState;
@@ -45,6 +49,15 @@ public class StateMachineBuilder {
 
     public StateMachineBuilder handlers(String state, StateCallbacks stateCallbacks) {
         this.stateCallbacksMap.put(state, stateCallbacks);
+        return this;
+    }
+
+    public <T, R> StateMachineBuilder handlers(String state, FunctionUnchecked<T, Promise<StateTrigger<R>>> onEnter) {
+        return handlers(state, onEnter, null);
+    }
+
+    public <T, R> StateMachineBuilder handlers(String state, FunctionUnchecked<T, Promise<StateTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
+        this.stateCallbacksMap.put(state, StateMachine.exec(onEnter, onExit));
         return this;
     }
 

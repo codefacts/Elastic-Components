@@ -164,7 +164,7 @@ public class StateMachine {
         return StateTrigger.create(null, null);
     }
 
-    public static StateCallbacks execStart(FunctionUnchecked<Object, Promise<StateTrigger<Object>>> startHandler) {
+    public static <T, R> StateCallbacks execStart(FunctionUnchecked<T, Promise<StateTrigger<R>>> startHandler) {
         return exec(startHandler, null);
     }
 
