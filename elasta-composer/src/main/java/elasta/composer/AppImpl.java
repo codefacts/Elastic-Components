@@ -60,7 +60,7 @@ public class AppImpl {
 
         ValidationPipeline<JsonObject> validationPipeline = new ValidationPipeline<>(composer.getValidatorList());
 
-        machineBuilder.handlers(StateCnst.VALIDATE, StateMachine.execStart((JsonObject val) -> {
+        machineBuilder.handlers(StateCnst.VALIDATE, (JsonObject val) -> {
             List<ValidationResult> validationResults = validationPipeline.validate(val.getJsonObject(ReqCnst.BODY));
 
             if (validationResults == null) {
@@ -68,8 +68,11 @@ public class AppImpl {
             } else {
                 return Promises.just(StateMachine.trigger(EventCnst.VALIDATION_FAIL, validationResults));
             }
-        }));
+        });
 
+        machineBuilder.handlers(StateCnst.CREATE, val -> {
+            
+        });
 
         return null;
     }

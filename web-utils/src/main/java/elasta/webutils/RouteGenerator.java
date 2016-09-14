@@ -1,7 +1,7 @@
 package elasta.webutils;
 
 import com.google.common.collect.ImmutableList;
-import elasta.vertxutils.VertxUtils;
+import elasta.vertxutils.SenderUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -21,7 +21,7 @@ public class RouteGenerator {
     public static final String HANDLER_FACTORY_MODULE_NAME = "handlerFactoryModuleName";
     public static final String BODY_HANDLER_FACTORY_MODULE_NAME = "bodyHandlerFactoryModuleName";
 
-    public static RequestHandlerFactory defaultHandlerFactory(VertxUtils vertxUtils, WebUtils webUtils) {
+    public static RequestHandlerFactory defaultHandlerFactory(SenderUtils senderUtils, WebUtils webUtils) {
         return (address, httpMethod) ->
             ctx -> {
 
@@ -33,7 +33,7 @@ public class RouteGenerator {
                     jsonReq.put(ReqCnst.BODY, ctx.getBodyAsJson());
                 }
 
-                vertxUtils.sendAndReceiveJsonObject(address, jsonReq)
+                senderUtils.sendAndReceiveJsonObject(address, jsonReq)
                     .then(
                         val ->
                             ctx.response().putHeader(CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)

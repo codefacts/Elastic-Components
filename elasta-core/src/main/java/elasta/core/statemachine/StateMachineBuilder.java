@@ -47,7 +47,7 @@ public class StateMachineBuilder {
         return this;
     }
 
-    public StateMachineBuilder handlers(String state, StateCallbacks stateCallbacks) {
+    public StateMachineBuilder exec(String state, StateCallbacks stateCallbacks) {
         this.stateCallbacksMap.put(state, stateCallbacks);
         return this;
     }
@@ -79,7 +79,7 @@ public class StateMachineBuilder {
     public static void main(String[] args) {
         StateMachine.builder()
             .when("", StateMachine.on("", ""))
-            .handlers("", StateMachine.exec().onEnter(null).onExit(null).build())
+            .exec("", StateMachine.exec().onEnter(null).onExit(null).build())
             .build();
     }
 }

@@ -27,25 +27,25 @@ public class RegisterStateMachines {
 
                     .startPoint(StateCnst.START)
 
-                    .handlers(StateCnst.VALIDATE, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.VALIDATION_ERROR, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATION_ERROR, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.CREATE, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.CREATE, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.START, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.START, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.END, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.END, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
             );
         });
 
@@ -58,17 +58,17 @@ public class RegisterStateMachines {
 
                     .startPoint(StateCnst.START)
 
-                    .handlers(StateCnst.FIND_ALL, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.FIND_ALL, val -> {
                         return Promises.just(StateMachine.triggerNext(
                             new JsonObject().put("data", new JsonArray()))
                         );
-                    }))
-                    .handlers(StateCnst.START, StateMachine.execStart(val -> {
+                    })
+                    .handlers(StateCnst.START, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
-                    .handlers(StateCnst.END, StateMachine.execStart(val -> {
+                    })
+                    .handlers(StateCnst.END, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    })));
+                    }));
 
         });
 
@@ -82,17 +82,17 @@ public class RegisterStateMachines {
 
                     .startPoint(StateCnst.START)
 
-                    .handlers(StateCnst.FIND, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.FIND, val -> {
                         return Promises.just(StateMachine.triggerNext(
                             new JsonObject()
                         ));
-                    }))
-                    .handlers(StateCnst.START, StateMachine.execStart(val -> {
+                    })
+                    .handlers(StateCnst.START, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
-                    .handlers(StateCnst.END, StateMachine.execStart(val -> {
+                    })
+                    .handlers(StateCnst.END, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
             );
         });
 
@@ -108,25 +108,25 @@ public class RegisterStateMachines {
 
                     .startPoint(StateCnst.START)
 
-                    .handlers(StateCnst.VALIDATE, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.VALIDATION_ERROR, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATION_ERROR, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.UPDATE_ALL_PROPERTIES, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.UPDATE_ALL_PROPERTIES, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.START, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.START, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.END, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.END, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
             );
         });
 
@@ -141,25 +141,25 @@ public class RegisterStateMachines {
 
                     .startPoint(StateCnst.START)
 
-                    .handlers(StateCnst.VALIDATE, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.VALIDATION_ERROR, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATION_ERROR, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.UPDATE_SOME_PROPERTIES, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.UPDATE_SOME_PROPERTIES, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.START, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.START, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.END, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.END, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
             );
         });
 
@@ -174,25 +174,25 @@ public class RegisterStateMachines {
 
                     .startPoint(StateCnst.START)
 
-                    .handlers(StateCnst.VALIDATE, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.VALIDATION_ERROR, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.VALIDATION_ERROR, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.DELETE, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.DELETE, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.START, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.START, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
 
-                    .handlers(StateCnst.END, StateMachine.execStart(val -> {
+                    .handlers(StateCnst.END, val -> {
                         return Promises.just(StateMachine.triggerNext(val));
-                    }))
+                    })
             );
         });
     }

@@ -12,11 +12,9 @@ import io.vertx.core.json.JsonObject;
 /**
  * Created by Jango on 9/11/2016.
  */
-public interface VertxUtils {
+public interface SenderUtils {
 
     <T> Promise<T> send(String address, Object message);
-
-    <T, R> void handleMessage(Message<T> message, VertxMessageHandler<T, R> handler);
 
     Promise<JsonObject> sendAndReceiveJsonObject(String address, Object jsonReq);
 

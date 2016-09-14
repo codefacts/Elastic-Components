@@ -20,13 +20,16 @@ public interface VertxUtilsExporter {
             moduleSystem.export(ReplyHandler.class, module -> module.export(Message::reply));
 
             moduleSystem.export(
-                VertxUtils.class,
+                SenderUtils.class,
                 module -> module.export(
-                    new VertxUtilsImpl(
-                        module.require(Vertx.class),
-                        module.require(FailureCodeHandler.class), module.require(ReplyHandler.class)
+                    new SenderUtilsImpl(
+                        module.require(Vertx.class)
                     )
                 ));
+
+            moduleSystem.export(HandlerUtils.class, module -> module.export(new HandlerUtilsImpl(module.require(FailureCodeHandler.class), module.require(ReplyHandler.class))));
+
+            moduleSystem.export(DbUtils.class, module -> module.export(new DbUtilsImpl()));
         };
     }
 

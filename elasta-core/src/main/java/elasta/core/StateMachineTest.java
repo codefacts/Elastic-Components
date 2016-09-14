@@ -22,22 +22,22 @@ public class StateMachineTest {
                 on("ok", "respond"),
                 on("err", "errState"),
                 on("fuck", "fuckState"))
-            .handlers("errState", StateMachine.exec(o -> {
+            .exec("errState", StateMachine.exec(o -> {
                 System.out.println("errState");
                 return Promises.just(StateMachine.exit("errState"));
             }, null))
-            .handlers("fuckState", StateMachine.exec(null, () -> {
+            .exec("fuckState", StateMachine.exec(null, () -> {
                 System.out.println("fuckState: end");
                 return Promises.empty();
             }))
-            .handlers("respond", StateMachine.exec(t -> {
+            .exec("respond", StateMachine.exec(t -> {
                 System.out.println("res");
                 return Promises.just(StateMachine.exit());
             }, () -> {
                 System.out.println("res:end");
                 return Promises.empty();
             }))
-            .handlers("start", StateMachine.exec(o -> {
+            .exec("start", StateMachine.exec(o -> {
                 System.out.println("ok gury");
                 return Promises.just(StateMachine.<String>trigger("fuck", "ok"));
             }, () -> {

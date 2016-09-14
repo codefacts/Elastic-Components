@@ -1,7 +1,7 @@
 package elasta.webutils;
 
 import elasta.module.ModuleSystem;
-import elasta.vertxutils.VertxUtils;
+import elasta.vertxutils.SenderUtils;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -31,7 +31,7 @@ public interface WebUtilsExporter {
             });
 
             moduleSystem.export(RequestHandlerFactory.class, RouteGenerator.HANDLER_FACTORY_MODULE_NAME, module -> {
-                module.export(RouteGenerator.defaultHandlerFactory(module.require(VertxUtils.class), module.require(WebUtils.class)));
+                module.export(RouteGenerator.defaultHandlerFactory(module.require(SenderUtils.class), module.require(WebUtils.class)));
             });
 
             moduleSystem.export(RouteGenerator.class,
@@ -89,7 +89,7 @@ public interface WebUtilsExporter {
                 module.export(
                     machine ->
                         message ->
-                            module.require(VertxUtils.class)
+                            module.require(SenderUtils.class)
                                 .handleMessage(message,
                                     (body, headers, address, replyAddress) ->
                                         module.require(StateMachineStarter.class)

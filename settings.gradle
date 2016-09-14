@@ -6,4 +6,5 @@ include 'web-utils'
 include 'vertx-utils'
 include 'elasta-module'
 include 'commons'
+include 'elasta-orm'
 
