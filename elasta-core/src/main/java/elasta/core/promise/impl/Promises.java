@@ -2,6 +2,7 @@ package elasta.core.promise.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.core.intfs.CallableUnchecked;
+import elasta.core.intfs.ConsumerUnchecked;
 import elasta.core.intfs.RunnableUnchecked;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.MapHandler;
@@ -49,6 +50,14 @@ final public class Promises {
             defer.reject(ex);
         }
         return defer.promise();
+    }
+
+    public static <T> Promise<T> callableP(final CallableUnchecked<Promise<T>> callableUnchecked) {
+        try {
+            return callableUnchecked.call();
+        } catch (Throwable throwable) {
+            return Promises.error(throwable);
+        }
     }
 
     public static <T> Promise<T> error(Throwable error) {
@@ -341,5 +350,20 @@ final public class Promises {
 
     public static <T> MapHandler<T, Void> toVoid() {
         return s -> (Void) s;
+    }
+
+    public static <T> Promise<T> withDefer(ConsumerUnchecked<Defer<T>> consumerUnchecked) {
+
+        Defer<T> defer = Promises.defer();
+
+        try {
+
+            consumerUnchecked.accept(defer);
+
+        } catch (Throwable throwable) {
+            return Promises.error(throwable);
+        }
+
+        return defer.promise();
     }
 }

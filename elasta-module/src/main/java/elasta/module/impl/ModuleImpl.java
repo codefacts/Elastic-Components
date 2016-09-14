@@ -28,6 +28,16 @@ public class ModuleImpl<T> implements Module<T> {
     }
 
     @Override
+    public <T1> T1 requireOrElse(Class<T1> t1Class, T1 defaultValue) {
+        return moduleSystem.requireOrElse(t1Class, defaultValue);
+    }
+
+    @Override
+    public <T1> T1 requireOrElse(Class<T1> t1Class, String moduleName, T1 defaultValue) {
+        return moduleSystem.requireOrElse(t1Class, moduleName, defaultValue);
+    }
+
+    @Override
     public void export(T newModule) {
         this.module = newModule;
     }

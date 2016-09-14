@@ -1,0 +1,23 @@
+group 'com.github.codefacts'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':elasta-core')
+    compile project(':elasta-module')
+
+    compile group: 'io.vertx', name: 'vertx-core', version: '3.3.2'
+    // https://mvnrepository.com/artifact/io.vertx/vertx-jdbc-client
+    compile group: 'io.vertx', name: 'vertx-jdbc-client', version: '3.3.2'
+
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}

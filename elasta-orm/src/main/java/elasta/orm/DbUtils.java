@@ -1,4 +1,4 @@
-package elasta.vertxutils;
+package elasta.orm;
 
 import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;

@@ -28,8 +28,6 @@ public interface VertxUtilsExporter {
                 ));
 
             moduleSystem.export(HandlerUtils.class, module -> module.export(new HandlerUtilsImpl(module.require(FailureCodeHandler.class), module.require(ReplyHandler.class))));
-
-            moduleSystem.export(DbUtils.class, module -> module.export(new DbUtilsImpl()));
         };
     }
 

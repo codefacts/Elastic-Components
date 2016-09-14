@@ -9,6 +9,10 @@ public interface Module<TT> {
 
     <T> T require(Class<T> tClass, String moduleName);
 
+    <T> T requireOrElse(Class<T> tClass, T defaultValue);
+
+    <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue);
+
     void export(TT newModule);
 
     ModuleSystem moduleSystem();
