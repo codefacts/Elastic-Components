@@ -3,7 +3,7 @@ package elasta.core.promise.impl;
 /**
  * Created by someone on 26/08/2015.
  */
-final public class SimpleCounter {
+final class SimpleCounter {
     public int counter = 0;
 
     public SimpleCounter() {

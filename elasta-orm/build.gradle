@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    compile project(':commons')
     compile project(':elasta-core')
     compile project(':elasta-module')
 

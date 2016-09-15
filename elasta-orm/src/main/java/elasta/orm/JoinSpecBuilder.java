@@ -1,14 +1,10 @@
 package elasta.orm;
 
-final public class JoinSpecBuilder {
-    private String column;
+public class JoinSpecBuilder {
     private String joinTable;
     private String joinColumn;
-
-    public JoinSpecBuilder setColumn(String column) {
-        this.column = column;
-        return this;
-    }
+    private JoinType joinType;
+    private String joinTableAlias;
 
     public JoinSpecBuilder setJoinTable(String joinTable) {
         this.joinTable = joinTable;
@@ -20,7 +16,17 @@ final public class JoinSpecBuilder {
         return this;
     }
 
-    public JoinSpec createJoinSepc() {
-        return new JoinSpec(column, joinTable, joinColumn);
+    public JoinSpecBuilder setJoinType(JoinType joinType) {
+        this.joinType = joinType;
+        return this;
+    }
+
+    public JoinSpecBuilder setJoinTableAlias(String joinTableAlias) {
+        this.joinTableAlias = joinTableAlias;
+        return this;
+    }
+
+    public JoinSpec createJoinSpec() {
+        return new JoinSpec(joinTable, joinColumn, joinType, joinTableAlias);
     }
 }

@@ -1,9 +1,13 @@
 package elasta.orm;
 
+import elasta.commons.Utils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static elasta.commons.Utils.not;
 
 /**
  * Created by Jango on 9/15/2016.
@@ -29,16 +33,35 @@ final public class TableJoinImpl implements TableJoin {
             stringBuilder.append("(");
         }
 
-        stringBuilder.append(root.getRoot() + " " + root.getAlias());
+        if (root.getRoot().equalsIgnoreCase(root.getAlias())) {
+
+            stringBuilder.append(root.getRoot());
+        } else {
+
+            stringBuilder.append(root.getRoot() + " " + root.getAlias());
+        }
 
         String prevAlias = root.getAlias();
         for (JoinTuple joinTuple : joinTuples) {
-            stringBuilder.append(" ").append(joinTuple.getJoinType()).append(" ")
-                .append(joinTuple.getJoinTable()).append(" ").append(joinTuple.getJoinTableAlias())
+
+            String joinTableAlias = joinTuple.getJoinTableAlias();
+            String joinTable = joinTuple.getJoinTable();
+
+            stringBuilder.append(" ").append(joinTuple.getJoinType()).append(" ");
+
+            if (joinTableAlias.equalsIgnoreCase(joinTable)) {
+
+                stringBuilder.append(joinTable);
+            } else {
+
+                stringBuilder.append(joinTable).append(" ").append(joinTableAlias);
+            }
+
+            stringBuilder
                 .append(" on ").append(prevAlias).append(".").append(joinTuple.getColumn())
-                .append(" = ").append(joinTuple.getJoinTableAlias()).append(".").append(joinTuple.getJoinColumn())
+                .append(" = ").append(joinTableAlias).append(".").append(joinTuple.getJoinColumn())
                 .append(")");
-            prevAlias = joinTuple.getJoinTableAlias();
+            prevAlias = joinTableAlias;
         }
 
         return stringBuilder;

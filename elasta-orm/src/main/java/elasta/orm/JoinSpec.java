@@ -4,14 +4,16 @@ package elasta.orm;
  * Created by Jango on 9/14/2016.
  */
 final public class JoinSpec {
-    private final String column;
     private final String joinTable;
     private final String joinColumn;
+    private final JoinType joinType;
+    private final String joinTableAlias;
 
-    public JoinSpec(String column, String joinTable, String joinColumn) {
-        this.column = column;
+    public JoinSpec(String joinTable, String joinColumn, JoinType joinType, String joinTableAlias) {
         this.joinTable = joinTable;
         this.joinColumn = joinColumn;
+        this.joinType = joinType;
+        this.joinTableAlias = joinTableAlias;
     }
 
     public String getJoinTable() {
@@ -20,5 +22,13 @@ final public class JoinSpec {
 
     public String getJoinColumn() {
         return joinColumn;
+    }
+
+    public JoinType getJoinType() {
+        return joinType;
+    }
+
+    public String getJoinTableAlias() {
+        return joinTableAlias;
     }
 }
