@@ -13,12 +13,12 @@ import java.util.Map;
 /**
  * Created by Jango on 9/15/2016.
  */
-public class SqlUtilsImpl implements SqlUtils {
+public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
     private static final String COMMA_SEP = ", ";
     private final Map<String, Map<String, JoinSpec>> tableMap;
     private final Map<String, TableSpec> tableSpecMap;
 
-    public SqlUtilsImpl(Map<String, Map<String, JoinSpec>> tableMap, Map<String, TableSpec> tableSpecMap) {
+    public SqlQueryGeneratorImpl(Map<String, Map<String, JoinSpec>> tableMap, Map<String, TableSpec> tableSpecMap) {
         this.tableMap = tableMap;
         this.tableSpecMap = tableSpecMap;
     }
@@ -110,5 +110,59 @@ public class SqlUtilsImpl implements SqlUtils {
                 }, (u, u2) -> u);
 
         return mtpl.t1.append(mtpl.t2).toString();
+    }
+
+    public static void main(String[] args) {
+
+        ImmutableList.Builder<TableSpec> builder = ImmutableList.builder();
+        builder.add(
+            new TableSpecBuilder()
+                .setTableName("users")
+                .setPrimaryKey("id")
+                .setColumnSpecs(ImmutableList.of(
+                    new ColumnSpecBuilder()
+                        .setColumnName("id")
+                        .setJavaType(JavaType.LONG)
+                        .createColumnSpec(),
+                    new ColumnSpecBuilder()
+                        .setColumnName("name")
+                        .setJavaType(JavaType.STRING)
+                        .createColumnSpec(),
+                    new ColumnSpecBuilder()
+                        .setColumnName("email")
+                        .setJavaType(JavaType.STRING)
+                        .createColumnSpec(),
+                    new ColumnSpecBuilder()
+                        .setColumnName("phone")
+                        .setJavaType(JavaType.STRING)
+                        .createColumnSpec()
+                ))
+                .createTableSpec()
+        )
+            .add(
+                new TableSpecBuilder()
+                    .setTableName("br")
+                    .setPrimaryKey("id")
+                    .setColumnSpecs(ImmutableList.of(
+                        new ColumnSpecBuilder()
+                            .setColumnName("id")
+                            .setJavaType(JavaType.LONG)
+                            .createColumnSpec(),
+                        new ColumnSpecBuilder()
+                            .setColumnName("name")
+                            .setJavaType(JavaType.STRING)
+                            .createColumnSpec(),
+                        new ColumnSpecBuilder()
+                            .setColumnName("email")
+                            .setJavaType(JavaType.STRING)
+                            .createColumnSpec(),
+                        new ColumnSpecBuilder()
+                            .setColumnName("phone")
+                            .setJavaType(JavaType.STRING)
+                            .createColumnSpec()
+                    ))
+                    .createTableSpec()
+            )
+        ;
     }
 }
