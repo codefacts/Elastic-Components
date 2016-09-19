@@ -149,15 +149,52 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
                             .setJavaType(JavaType.LONG)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
-                            .setColumnName("name")
+                            .setColumnName("house")
                             .setJavaType(JavaType.STRING)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
-                            .setColumnName("email")
+                            .setColumnName("ac")
+                            .setJavaType(JavaType.STRING)
+                            .createColumnSpec()
+                    ))
+                    .createTableSpec()
+            )
+            .add(
+                new TableSpecBuilder()
+                    .setTableName("region")
+                    .setColumnSpecs(ImmutableList.of(
+                        new ColumnSpecBuilder()
+                            .setColumnName("region_name")
+                            .setJavaType(JavaType.STRING)
+                            .createColumnSpec()
+                    ))
+                    .createTableSpec()
+            )
+            .add(
+                new TableSpecBuilder()
+                    .setTableName("area")
+                    .setColumnSpecs(ImmutableList.of(
+                        new ColumnSpecBuilder()
+                            .setColumnName("area_name")
                             .setJavaType(JavaType.STRING)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
-                            .setColumnName("phone")
+                            .setColumnName("region_name")
+                            .setJavaType(JavaType.STRING)
+                            .createColumnSpec()
+                    ))
+                    .createTableSpec()
+            )
+            .add(
+                new TableSpecBuilder()
+                    .setTableName("house")
+                    .setColumnSpecs(ImmutableList.of(
+                        new ColumnSpecBuilder()
+                            .setColumnName("house_name")
+                            .setJavaType(JavaType.STRING)
+                            .createColumnSpec(),
+                        new ColumnSpecBuilder()
+                            .setColumnName("area_name")
                             .setJavaType(JavaType.STRING)
                             .createColumnSpec()
                     ))
