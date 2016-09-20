@@ -4,6 +4,9 @@ package elasta.orm;
  * Created by Jango on 9/15/2016.
  */
 public enum JoinType {
+    JOIN("join"),
+    LEFT_JOIN("left_join"),
+    RIGHT_JOIN("right_join"),
     INNER_JOIN("inner join"),
     LEFT_INNER_JOIN("left inner join"),
     RIGHT_INNER_JOIN("right inner join"),
