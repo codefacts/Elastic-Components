@@ -1,9 +1,11 @@
 package elasta.orm;
 
+import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Jango on 9/14/2016.

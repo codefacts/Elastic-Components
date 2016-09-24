@@ -6,6 +6,7 @@ public class TableSpecBuilder {
     private String tableName;
     private String primaryKey;
     private List<ColumnSpec> columnSpecs;
+    private String tableAlias;
 
     public TableSpecBuilder setTableName(String tableName) {
         this.tableName = tableName;
@@ -23,6 +24,11 @@ public class TableSpecBuilder {
     }
 
     public TableSpec createTableSpec() {
-        return new TableSpec(tableName, primaryKey, columnSpecs);
+        return new TableSpec(tableName, tableAlias, primaryKey, columnSpecs);
+    }
+
+    public TableSpecBuilder setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
+        return this;
     }
 }

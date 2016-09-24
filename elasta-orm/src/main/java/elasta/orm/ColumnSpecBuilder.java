@@ -4,6 +4,7 @@ public class ColumnSpecBuilder {
     private String columnName;
     private JavaType javaType;
     private JoinSpec joinSpec;
+    private String name;
 
     public ColumnSpecBuilder setColumnName(String columnName) {
         this.columnName = columnName;
@@ -21,6 +22,11 @@ public class ColumnSpecBuilder {
     }
 
     public ColumnSpec createColumnSpec() {
-        return new ColumnSpec(columnName, javaType, joinSpec);
+        return new ColumnSpec(columnName, name, javaType, joinSpec);
+    }
+
+    public ColumnSpecBuilder setName(String name) {
+        this.name = name;
+        return this;
     }
 }
