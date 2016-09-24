@@ -55,8 +55,7 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
 
                 count += joinAllFieldsRecursive(tableSpecMap.get(ff.table).getColumnSpecs(), ff.alias, sqlBuilder);
 
-            } else if (ff.fields.get(0).equals("*")) {
-
+            } else if (ff.fields.get(0).equals("**")) {
                 List<ColumnSpec> columnSpecs = tableSpecMap.get(ff.table).getColumnSpecs();
 
                 for (ColumnSpec columnSpec : columnSpecs) {
@@ -66,7 +65,6 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
                         count++;
                     }
                 }
-
             }
         }
 
@@ -147,7 +145,7 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
 
     private TableAndPath joinTableName(String rootTable, String path) {
 
-        if (path == null || ROOT.equals(path) || rootTable.equalsIgnoreCase(path)) {
+        if (path == null || ROOT.equalsIgnoreCase(path) || rootTable.equalsIgnoreCase(path)) {
             return new TableAndPath(rootTable, ROOT, null);
         } else {
 
@@ -196,7 +194,21 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
 
             } else if (ff.fields.get(0).equals("*")) {
 
-                addAllFields(tableSpecMap.get(ff.table).getColumnSpecs(), ff.alias, sqlBuilder);
+                List<ColumnSpec> columnSpecs = tableSpecMap.get(ff.table).getColumnSpecs();
+                addFields(columnSpecs, ff.alias, sqlBuilder);
+
+            } else if (ff.fields.get(0).equals("**")) {
+
+                List<ColumnSpec> columnSpecs = tableSpecMap.get(ff.table).getColumnSpecs();
+                for (ColumnSpec columnSpec : columnSpecs) {
+                    sqlBuilder.append(ff.alias + "." + columnSpec.getColumnName() + COMMA);
+                    JoinSpec joinSpec = columnSpec.getJoinSpec();
+                    if (joinSpec != null) {
+
+                        List<ColumnSpec> colSpecsJonTable = tableSpecMap.get(joinSpec.getJoinTable()).getColumnSpecs();
+                        addFields(colSpecsJonTable, joinSpec.getJoinTableAlias(), sqlBuilder);
+                    }
+                }
 
             } else {
 
@@ -214,7 +226,8 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
         return sqlBuilder.toString();
     }
 
-    private void addAllFields(List<ColumnSpec> columnSpecs, String alias, StringBuilder sqlBuilder) {
+    private void addFields(List<ColumnSpec> columnSpecs, String alias, StringBuilder sqlBuilder) {
+
         for (ColumnSpec columnSpec : columnSpecs) {
             sqlBuilder.append(alias + "." + columnSpec.getColumnName() + COMMA);
         }
@@ -243,37 +256,32 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
         String users = null;
 
 
-        for (int i = 0; i < 1000; i++) {
-            long t1 = System.nanoTime();
-            generator.toSql("contact", ImmutableList.of(
-                new SqlFieldBuilder()
-                    .setPath("contact")
-                    .setFields(ImmutableList.of("id", "name", "email"))
-                    .createSqlField(),
-                new SqlFieldBuilder()
-                    .setPath("br_id.house_id.area_id")
-                    .setFields(
-                        ImmutableList.of(
-                            "area_name"
-                        )
+        users = generator.toSql("contact", ImmutableList.of(
+            new SqlFieldBuilder()
+                .setPath("contact")
+                .setFields(ImmutableList.of("id", "name", "email"))
+                .createSqlField(),
+            new SqlFieldBuilder()
+                .setPath("br_id.house_id.area_id")
+                .setFields(
+                    ImmutableList.of(
+                        "**"
                     )
-                    .createSqlField(),
-                new SqlFieldBuilder()
-                    .setPath("br_id")
-                    .setFields(ImmutableList.of("name", "house_name"))
-                    .createSqlField(),
-                new SqlFieldBuilder()
-                    .setPath("area_id")
-                    .setFields(ImmutableList.of("name", "regin_name"))
-                    .createSqlField(),
-                new SqlFieldBuilder()
-                    .setPath("supervisor_id")
-                    .setFields(ImmutableList.of("name"))
-                    .createSqlField()
-            ));
-            long t2 = System.nanoTime();
-            System.out.println("time: " + (t2 - t1));
-        }
+                )
+                .createSqlField(),
+            new SqlFieldBuilder()
+                .setPath("br_id")
+                .setFields(ImmutableList.of("name", "house_name"))
+                .createSqlField(),
+            new SqlFieldBuilder()
+                .setPath("area_id")
+                .setFields(ImmutableList.of("name", "regin_name"))
+                .createSqlField(),
+            new SqlFieldBuilder()
+                .setPath("supervisor_id")
+                .setFields(ImmutableList.of("name"))
+                .createSqlField()
+        ));
 
         System.out.println(users);
     }
