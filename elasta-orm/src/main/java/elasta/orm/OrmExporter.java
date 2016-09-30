@@ -21,7 +21,7 @@ public interface OrmExporter {
                     module.require(Vertx.class), module.require(JsonObject.class, DB_CONFIG))
                 ));
 
-            moduleSystem.exportPrototype(DB.class, module -> module.export(new DBImpl(module.require(JDBCClient.class))));
+            moduleSystem.exportPrototype(Db.class, module -> module.export(new DbImpl(module.require(JDBCClient.class))));
 
             moduleSystem.exportPrototype(TableJoinerFactory.class,
                 module -> module.export(TableJoinerImpl::new));
