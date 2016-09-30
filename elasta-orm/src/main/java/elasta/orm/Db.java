@@ -20,15 +20,11 @@ public interface Db {
 
     Promise<Long> count(String table);
 
-    <T> Promise<T> create(String table, JsonObject data);
+    <T> Promise<T> insertOrUpdate(String table, JsonObject data);
 
-    Promise<JsonObject> update(String table, JsonObject data);
+    <T> Promise<List<T>> insertOrUpdateAll(String table, List<JsonObject> jsonObjects);
 
     <T> Promise<T> delete(String table, T id);
-
-    <T> Promise<List<T>> createAll(String table, List<JsonObject> jsonObjects);
-
-    Promise<List<JsonObject>> updateAll(String table, List<JsonObject> jsonObjects);
 
     <T> Promise<List<T>> deleteAll(String table, List<T> ids);
 

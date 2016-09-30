@@ -84,12 +84,7 @@ final public class DbImpl implements Db {
     }
 
     @Override
-    public <T> Promise<T> create(String table, JsonObject data) {
-        return null;
-    }
-
-    @Override
-    public Promise<JsonObject> update(String table, JsonObject data) {
+    public <T> Promise<T> insertOrUpdate(String table, JsonObject data) {
         return null;
     }
 
@@ -99,12 +94,7 @@ final public class DbImpl implements Db {
     }
 
     @Override
-    public <T> Promise<List<T>> createAll(String table, List<JsonObject> jsonObjects) {
-        return null;
-    }
-
-    @Override
-    public Promise<List<JsonObject>> updateAll(String table, List<JsonObject> jsonObjects) {
+    public <T> Promise<List<T>> insertOrUpdateAll(String table, List<JsonObject> jsonObjects) {
         return null;
     }
 
