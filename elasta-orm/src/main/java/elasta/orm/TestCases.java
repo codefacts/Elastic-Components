@@ -138,6 +138,7 @@ public class TestCases {
             .add(
                 new TableSpecBuilder()
                     .setTableName("region")
+                    .setPrimaryKey("id")
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
@@ -153,6 +154,7 @@ public class TestCases {
             .add(
                 new TableSpecBuilder()
                     .setTableName("area")
+                    .setPrimaryKey("id")
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
@@ -179,6 +181,7 @@ public class TestCases {
             .add(
                 new TableSpecBuilder()
                     .setTableName("house")
+                    .setPrimaryKey("id")
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
@@ -208,6 +211,9 @@ public class TestCases {
                     .setPrimaryKey("id")
                     .setColumnSpecs(
                         ImmutableList.of(
+                            new ColumnSpecBuilder()
+                                .setColumnName("id")
+                                .createColumnSpec(),
                             new ColumnSpecBuilder()
                                 .setColumnName("name")
                                 .createColumnSpec(),

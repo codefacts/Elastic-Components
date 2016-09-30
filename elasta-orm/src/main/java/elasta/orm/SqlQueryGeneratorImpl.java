@@ -253,21 +253,14 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
 
         SqlQueryGeneratorImpl generator = new SqlQueryGeneratorImpl(specMap, SqlUtils.toColumnSpecMapByName(specMap), SqlUtils.toColumnSpecMapByColumnMap(specMap));
 
-        String users = null;
-
-
-        users = generator.toSql("contact", ImmutableList.of(
+        String users = generator.toSql("contact", ImmutableList.of(
             new SqlFieldBuilder()
                 .setPath("contact")
                 .setFields(ImmutableList.of("id", "name", "email"))
                 .createSqlField(),
             new SqlFieldBuilder()
                 .setPath("br_id.house_id.area_id")
-                .setFields(
-                    ImmutableList.of(
-                        "**"
-                    )
-                )
+                .setFields(ImmutableList.of("**"))
                 .createSqlField(),
             new SqlFieldBuilder()
                 .setPath("br_id")

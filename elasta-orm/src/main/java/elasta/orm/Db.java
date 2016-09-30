@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by Jango on 9/14/2016.
  */
-public interface DbUtils {
+public interface DB {
 
     <T> Promise<JsonObject> findOne(String table, T id);
 

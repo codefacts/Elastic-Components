@@ -16,11 +16,11 @@ import java.util.List;
 /**
  * Created by Jango on 9/14/2016.
  */
-final public class DbUtilsImpl implements DbUtils {
+final public class DBImpl implements DB {
     private final JDBCClient jdbcClient;
     private final String ID = "id";
 
-    public DbUtilsImpl(JDBCClient jdbcClient) {
+    public DBImpl(JDBCClient jdbcClient) {
         this.jdbcClient = jdbcClient;
     }
 
