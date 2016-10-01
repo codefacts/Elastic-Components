@@ -5,36 +5,38 @@ package elasta.orm;
  */
 public class RelationTable {
     private final String tableName;
-    private final String firstColumn;
-    private final String secondColumn;
-    private final JavaType firstColumnType;
-    private final JavaType secondColumnType;
+    private final String tableNameAlias;
+    private final String leftColumn;
+    private final String rightColumn;
+    private final JavaType leftColumnType;
+    private final JavaType rightColumnType;
 
-    public RelationTable(String tableName, String firstColumn, String secondColumn, JavaType firstColumnType, JavaType secondColumnType) {
+    public RelationTable(String tableName, String tableNameAlias, String leftColumn, String rightColumn, JavaType leftColumnType, JavaType rightColumnType) {
         this.tableName = tableName;
-        this.firstColumn = firstColumn;
-        this.secondColumn = secondColumn;
-        this.firstColumnType = firstColumnType;
-        this.secondColumnType = secondColumnType;
+        this.tableNameAlias = tableNameAlias;
+        this.leftColumn = leftColumn;
+        this.rightColumn = rightColumn;
+        this.leftColumnType = leftColumnType;
+        this.rightColumnType = rightColumnType;
     }
 
     public String getTableName() {
         return tableName;
     }
 
-    public String getFirstColumn() {
-        return firstColumn;
+    public String getLeftColumn() {
+        return leftColumn;
     }
 
-    public String getSecondColumn() {
-        return secondColumn;
+    public String getRightColumn() {
+        return rightColumn;
     }
 
-    public JavaType getFirstColumnType() {
-        return firstColumnType;
+    public JavaType getLeftColumnType() {
+        return leftColumnType;
     }
 
-    public JavaType getSecondColumnType() {
-        return secondColumnType;
+    public JavaType getRightColumnType() {
+        return rightColumnType;
     }
 }

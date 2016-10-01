@@ -4,17 +4,16 @@ import java.util.List;
 
 public class TableSpecBuilder {
     private String tableName;
-    private String primaryKey;
-    private List<ColumnSpec> columnSpecs;
     private String tableAlias;
+    private List<ColumnSpec> columnSpecs;
 
     public TableSpecBuilder setTableName(String tableName) {
         this.tableName = tableName;
         return this;
     }
 
-    public TableSpecBuilder setPrimaryKey(String primaryKey) {
-        this.primaryKey = primaryKey;
+    public TableSpecBuilder setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
         return this;
     }
 
@@ -24,11 +23,6 @@ public class TableSpecBuilder {
     }
 
     public TableSpec createTableSpec() {
-        return new TableSpec(tableName, tableAlias, primaryKey, columnSpecs);
-    }
-
-    public TableSpecBuilder setTableAlias(String tableAlias) {
-        this.tableAlias = tableAlias;
-        return this;
+        return new TableSpec(tableName, tableAlias, columnSpecs);
     }
 }

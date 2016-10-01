@@ -1,8 +1,6 @@
 package elasta.orm;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import elasta.commons.Utils;
 
 import java.util.List;
 import java.util.Map;
@@ -13,16 +11,13 @@ import static elasta.commons.Utils.not;
  * Created by Jango on 9/15/2016.
  */
 public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
-    private static final String DOT = ".";
     private static final String COMMA = ", ";
     private static final String ROOT = "root";
     private final Map<String, TableSpec> tableSpecMap;
-    private final Map<String, Map<String, ColumnSpec>> columnSpecMapByNameMap;
     private final Map<String, Map<String, ColumnSpec>> columnSpecMapByColumnMap;
 
-    public SqlQueryGeneratorImpl(Map<String, TableSpec> tableSpecMap, Map<String, Map<String, ColumnSpec>> columnSpecMapByNameMap, Map<String, Map<String, ColumnSpec>> columnSpecMapByColumnMap) {
+    public SqlQueryGeneratorImpl(Map<String, TableSpec> tableSpecMap, Map<String, Map<String, ColumnSpec>> columnSpecMapByColumnMap) {
         this.tableSpecMap = tableSpecMap;
-        this.columnSpecMapByNameMap = columnSpecMapByNameMap;
         this.columnSpecMapByColumnMap = columnSpecMapByColumnMap;
     }
 
@@ -122,21 +117,12 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
 
         fields.forEach(sqlField -> {
             TableAndPath tableAndPath = joinTableName(table, sqlField.getPath());
-            String tableName = tableAndPath.table;
-            Map<String, ColumnSpec> columnSpecMap = columnSpecMapByNameMap.get(tableName);
-
-            ImmutableList.Builder<String> lBuilder = ImmutableList.builder();
-            if (sqlField.getFields() != null) {
-                sqlField.getFields().forEach(name -> {
-                    ColumnSpec columnSpec = columnSpecMap.get(name);
-                    lBuilder.add(columnSpec == null ? name : columnSpec.getColumnName());
-                });
-            }
 
             listBuilder.add(new TblPathFields(
                 tableAndPath.table,
-                tableAndPath.alias, tableAndPath.path,
-                lBuilder.build()
+                tableAndPath.alias,
+                tableAndPath.path,
+                sqlField.getFields()
             ));
         });
 
@@ -154,11 +140,11 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
             ImmutableList.Builder<String> listBuilder = ImmutableList.builder();
             String joinTable = rootTable;
             String alias = ROOT;
-            Map<String, ColumnSpec> specMap = columnSpecMapByNameMap.get(joinTable);
+            Map<String, ColumnSpec> specMap = columnSpecMapByColumnMap.get(joinTable);
             for (int i = 0; i < joinFields.length; i++) {
-                String fieldName = joinFields[i];
+                String columnName = joinFields[i];
 
-                ColumnSpec columnSpec = specMap.get(fieldName);
+                ColumnSpec columnSpec = specMap.get(columnName);
 
                 JoinSpec joinSpec = columnSpec.getJoinSpec();
 
@@ -166,9 +152,9 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
 
                 alias = joinSpec.getJoinTableAlias();
 
-                listBuilder.add(columnSpec.getColumnName());
+                listBuilder.add(columnName);
 
-                specMap = columnSpecMapByNameMap.get(joinTable);
+                specMap = columnSpecMapByColumnMap.get(joinTable);
 
             }
 
@@ -251,7 +237,7 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
 
         Map<String, TableSpec> specMap = SqlUtils.toTableSpecByTableMap(list);
 
-        SqlQueryGeneratorImpl generator = new SqlQueryGeneratorImpl(specMap, SqlUtils.toColumnSpecMapByName(specMap), SqlUtils.toColumnSpecMapByColumnMap(specMap));
+        SqlQueryGeneratorImpl generator = new SqlQueryGeneratorImpl(specMap, SqlUtils.toColumnSpecMapByColumnMap(specMap));
 
         String users = generator.toSql("contact", ImmutableList.of(
             new SqlFieldBuilder()

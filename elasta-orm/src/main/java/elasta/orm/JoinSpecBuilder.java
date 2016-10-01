@@ -5,8 +5,6 @@ public class JoinSpecBuilder {
     private String joinColumn;
     private JoinType joinType;
     private String joinTableAlias;
-    private RelationType relationType;
-    private RelationTable relationTable;
 
     public JoinSpecBuilder setJoinTable(String joinTable) {
         this.joinTable = joinTable;
@@ -29,16 +27,6 @@ public class JoinSpecBuilder {
     }
 
     public JoinSpec createJoinSpec() {
-        return new JoinSpec(joinTable, joinColumn, joinType, joinTableAlias, relationType, relationTable);
-    }
-
-    public JoinSpecBuilder setRelationType(RelationType relationType) {
-        this.relationType = relationType;
-        return this;
-    }
-
-    public JoinSpecBuilder setRelationTable(RelationTable relationTable) {
-        this.relationTable = relationTable;
-        return this;
+        return new JoinSpec(joinTable, joinColumn, joinType, joinTableAlias);
     }
 }

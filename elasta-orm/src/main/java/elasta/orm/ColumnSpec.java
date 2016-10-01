@@ -5,27 +5,21 @@ package elasta.orm;
  */
 public class ColumnSpec {
     private final String columnName;
-    private final String name;
-    private final JavaType javaType;
+    private final JavaType columnType;
     private final JoinSpec joinSpec;
 
-    public ColumnSpec(String columnName, String name, JavaType javaType, JoinSpec joinSpec) {
+    public ColumnSpec(String columnName, JavaType columnType, JoinSpec joinSpec) {
         this.columnName = columnName;
-        this.name = name;
-        this.javaType = javaType;
+        this.columnType = columnType;
         this.joinSpec = joinSpec;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getColumnName() {
         return columnName;
     }
 
-    public JavaType getJavaType() {
-        return javaType;
+    public JavaType getColumnType() {
+        return columnType;
     }
 
     public JoinSpec getJoinSpec() {

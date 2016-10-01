@@ -8,16 +8,12 @@ final public class JoinSpec {
     private final String joinColumn;
     private final JoinType joinType;
     private final String joinTableAlias;
-    private final RelationType relationType;
-    private final RelationTable relationTable;
 
-    public JoinSpec(String joinTable, String joinColumn, JoinType joinType, String joinTableAlias, RelationType relationType, RelationTable relationTable) {
+    public JoinSpec(String joinTable, String joinColumn, JoinType joinType, String joinTableAlias) {
         this.joinTable = joinTable;
         this.joinColumn = joinColumn;
         this.joinType = joinType;
         this.joinTableAlias = joinTableAlias;
-        this.relationType = relationType;
-        this.relationTable = relationTable;
     }
 
     public String getJoinTable() {
@@ -34,13 +30,5 @@ final public class JoinSpec {
 
     public String getJoinTableAlias() {
         return joinTableAlias;
-    }
-
-    public RelationType getRelationType() {
-        return relationType;
-    }
-
-    public RelationTable getRelationTable() {
-        return relationTable;
     }
 }

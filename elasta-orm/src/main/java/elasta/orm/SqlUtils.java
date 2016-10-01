@@ -2,7 +2,6 @@ package elasta.orm;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.commons.Utils;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class SqlUtils {
             for (ColumnSpec columnSpec : columnSpecs) {
                 colBuilder.add(
                     new ColumnSpecBuilder()
-                        .setJavaType(columnSpec.getJavaType())
+                        .setColumnType(columnSpec.getColumnType())
                         .setColumnName(columnSpec.getColumnName())
                         .setJoinSpec(
                             columnSpec.getJoinSpec() == null ? null : new JoinSpecBuilder()
@@ -35,7 +34,6 @@ public class SqlUtils {
                                 .setJoinColumn(columnSpec.getJoinSpec().getJoinColumn() == null ? columnSpec.getColumnName() : columnSpec.getJoinSpec().getJoinColumn())
                                 .createJoinSpec()
                         )
-                        .setName(columnSpec.getName() == null ? columnSpec.getColumnName() : columnSpec.getName())
                         .createColumnSpec()
                 );
             }
@@ -44,7 +42,6 @@ public class SqlUtils {
                 new TableSpecBuilder()
                     .setTableName(tableSpec.getTableName())
                     .setTableAlias(tableAlias)
-                    .setPrimaryKey(tableSpec.getPrimaryKey())
                     .setColumnSpecs(colBuilder.build())
                     .createTableSpec()
             );
@@ -80,24 +77,6 @@ public class SqlUtils {
             builder.put(tableSpec.getTableName(), tableSpec);
         }
         return builder.build();
-    }
-
-    public static Map<String, Map<String, ColumnSpec>> toColumnSpecMapByName(Map<String, TableSpec> tableSpecMap) {
-
-        ImmutableMap.Builder<String, Map<String, ColumnSpec>> columnMapByNameMapBuilder = ImmutableMap.builder();
-
-        tableSpecMap.entrySet().forEach(entry -> {
-
-            ImmutableMap.Builder<String, ColumnSpec> mapBuilder = ImmutableMap.builder();
-
-            for (ColumnSpec columnSpec : entry.getValue().getColumnSpecs()) {
-                mapBuilder.put(columnSpec.getName(), columnSpec);
-            }
-
-            columnMapByNameMapBuilder.put(entry.getKey(), mapBuilder.build());
-        });
-
-        return columnMapByNameMapBuilder.build();
     }
 
     public static Map<String, Map<String, ColumnSpec>> toColumnSpecMapByColumnMap(Map<String, TableSpec> tableSpecMap) {

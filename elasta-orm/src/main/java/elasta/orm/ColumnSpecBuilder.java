@@ -2,17 +2,16 @@ package elasta.orm;
 
 public class ColumnSpecBuilder {
     private String columnName;
-    private JavaType javaType;
+    private JavaType columnType;
     private JoinSpec joinSpec;
-    private String name;
 
     public ColumnSpecBuilder setColumnName(String columnName) {
         this.columnName = columnName;
         return this;
     }
 
-    public ColumnSpecBuilder setJavaType(JavaType javaType) {
-        this.javaType = javaType;
+    public ColumnSpecBuilder setColumnType(JavaType columnType) {
+        this.columnType = columnType;
         return this;
     }
 
@@ -22,11 +21,6 @@ public class ColumnSpecBuilder {
     }
 
     public ColumnSpec createColumnSpec() {
-        return new ColumnSpec(columnName, name, javaType, joinSpec);
-    }
-
-    public ColumnSpecBuilder setName(String name) {
-        this.name = name;
-        return this;
+        return new ColumnSpec(columnName, columnType, joinSpec);
     }
 }

@@ -2,37 +2,43 @@ package elasta.orm;
 
 public class RelationTableBuilder {
     private String tableName;
-    private String firstColumn;
-    private String secondColumn;
-    private JavaType firstColumnType;
-    private JavaType secondColumnType;
+    private String tableNameAlias;
+    private String leftColumn;
+    private String rightColumn;
+    private JavaType leftColumnType;
+    private JavaType rightColumnType;
 
     public RelationTableBuilder setTableName(String tableName) {
         this.tableName = tableName;
         return this;
     }
 
-    public RelationTableBuilder setFirstColumn(String firstColumn) {
-        this.firstColumn = firstColumn;
+    public RelationTableBuilder setTableNameAlias(String tableNameAlias) {
+        this.tableNameAlias = tableNameAlias;
         return this;
     }
 
-    public RelationTableBuilder setSecondColumn(String secondColumn) {
-        this.secondColumn = secondColumn;
+    public RelationTableBuilder setLeftColumn(String leftColumn) {
+        this.leftColumn = leftColumn;
         return this;
     }
 
-    public RelationTableBuilder setFirstColumnType(JavaType firstColumnType) {
-        this.firstColumnType = firstColumnType;
+    public RelationTableBuilder setRightColumn(String rightColumn) {
+        this.rightColumn = rightColumn;
         return this;
     }
 
-    public RelationTableBuilder setSecondColumnType(JavaType secondColumnType) {
-        this.secondColumnType = secondColumnType;
+    public RelationTableBuilder setLeftColumnType(JavaType leftColumnType) {
+        this.leftColumnType = leftColumnType;
+        return this;
+    }
+
+    public RelationTableBuilder setRightColumnType(JavaType rightColumnType) {
+        this.rightColumnType = rightColumnType;
         return this;
     }
 
     public RelationTable createRelationTable() {
-        return new RelationTable(tableName, firstColumn, secondColumn, firstColumnType, secondColumnType);
+        return new RelationTable(tableName, tableNameAlias, leftColumn, rightColumn, leftColumnType, rightColumnType);
     }
 }

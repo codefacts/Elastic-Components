@@ -8,13 +8,11 @@ import java.util.List;
 public class TableSpec {
     private final String tableName;
     private final String tableAlias;
-    private final String primaryKey;
     private final List<ColumnSpec> columnSpecs;
 
-    public TableSpec(String tableName, String tableAlias, String primaryKey, List<ColumnSpec> columnSpecs) {
+    public TableSpec(String tableName, String tableAlias, List<ColumnSpec> columnSpecs) {
         this.tableName = tableName;
         this.tableAlias = tableAlias;
-        this.primaryKey = primaryKey;
         this.columnSpecs = columnSpecs;
     }
 
@@ -24,10 +22,6 @@ public class TableSpec {
 
     public String getTableAlias() {
         return tableAlias;
-    }
-
-    public String getPrimaryKey() {
-        return primaryKey;
     }
 
     public List<ColumnSpec> getColumnSpecs() {
