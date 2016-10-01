@@ -1,27 +1,24 @@
 package elasta.orm;
 
-import elasta.core.touple.immutable.Tpl2;
 import elasta.orm.exceptions.SqlParameterException;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jango on 9/15/2016.
  */
-public class SqlParameterUtilsImpl implements SqlParameterUtils {
+public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
     private final Map<String, String> functionMap;
     private final Map<String, SqlSymbolTranslator> symbolTranslatorMap;
     private static final String _AND_ = " and ";
     private static final String _OR_ = " or ";
     private static final String NOT_ = "not ";
 
-    public SqlParameterUtilsImpl(Map<String, String> functionMap, Map<String, SqlSymbolTranslator> symbolTranslatorMap) {
+    public SqlCriteriaUtilsImpl(Map<String, String> functionMap, Map<String, SqlSymbolTranslator> symbolTranslatorMap) {
         this.functionMap = functionMap;
         this.symbolTranslatorMap = symbolTranslatorMap;
     }
@@ -168,7 +165,7 @@ public class SqlParameterUtilsImpl implements SqlParameterUtils {
 
     private static void test6() {
 
-        String sql = new SqlParameterUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
             .toSql(
                 new JsonObject()
                     .put("k", "1")
@@ -222,7 +219,7 @@ public class SqlParameterUtilsImpl implements SqlParameterUtils {
 
     private static void test5() {
 
-        String sql = new SqlParameterUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
             .toSql(
                 new JsonObject()
                     .put("k", "1")
@@ -276,7 +273,7 @@ public class SqlParameterUtilsImpl implements SqlParameterUtils {
 
     private static void test4() {
 
-        String sql = new SqlParameterUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
             .toSql(
                 new JsonObject()
                     .put("k", "1")
@@ -317,7 +314,7 @@ public class SqlParameterUtilsImpl implements SqlParameterUtils {
 
     private static void test3() {
 
-        String sql = new SqlParameterUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
             .toSql(
                 new JsonObject()
                     .put("k", "1")
@@ -357,7 +354,7 @@ public class SqlParameterUtilsImpl implements SqlParameterUtils {
     }
 
     private static void test2() {
-        String sql = new SqlParameterUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
             .toSql(
                 new JsonObject()
                     .put("k", "1")
@@ -377,7 +374,7 @@ public class SqlParameterUtilsImpl implements SqlParameterUtils {
 
     private static void test1() {
 
-        String sql = new SqlParameterUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
             .toSql(
                 new JsonObject()
                     .put("k", "1")
