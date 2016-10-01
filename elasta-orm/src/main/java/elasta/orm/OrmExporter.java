@@ -23,11 +23,6 @@ public interface OrmExporter {
 
             moduleSystem.exportPrototype(Db.class, module -> module.export(new DbImpl(module.require(JDBCClient.class))));
 
-            moduleSystem.exportPrototype(TableJoinerFactory.class,
-                module -> module.export(TableJoinerImpl::new));
-
-            moduleSystem.exportPrototype(TableJoinFactory.class, module -> module.export(TableJoinImpl::new));
-
         };
     }
 }
