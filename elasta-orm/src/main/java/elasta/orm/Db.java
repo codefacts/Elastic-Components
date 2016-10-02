@@ -1,7 +1,7 @@
 package elasta.orm;
 
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.core.FieldInfo;
+import elasta.orm.json.core.FieldInfo;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
