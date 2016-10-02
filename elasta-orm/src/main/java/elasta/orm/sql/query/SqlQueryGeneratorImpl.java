@@ -1,6 +1,8 @@
 package elasta.orm.sql.query;
 
 import com.google.common.collect.ImmutableList;
+import elasta.orm.core.FieldInfo;
+import elasta.orm.core.FieldInfoBuilder;
 import elasta.orm.sql.SqlUtils;
 import elasta.orm.sql.TestCases;
 import elasta.orm.sql.core.ColumnSpec;
@@ -27,7 +29,7 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
     }
 
     @Override
-    public String toSql(String rootTable, List<SqlField> fields) {
+    public String toSql(String rootTable, List<FieldInfo> fields) {
         List<TblPathFields> fieldsList = translate(rootTable, fields);
         String select = sqlSelect(rootTable, fieldsList);
         String from = sqlJoin(rootTable, fieldsList);
@@ -117,7 +119,7 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
         return count;
     }
 
-    private List<TblPathFields> translate(String table, List<SqlField> fields) {
+    private List<TblPathFields> translate(String table, List<FieldInfo> fields) {
         ImmutableList.Builder<TblPathFields> listBuilder = ImmutableList.builder();
 
         fields.forEach(sqlField -> {
@@ -245,23 +247,23 @@ public class SqlQueryGeneratorImpl implements SqlQueryGenerator {
         SqlQueryGeneratorImpl generator = new SqlQueryGeneratorImpl(specMap, SqlUtils.toColumnSpecMapByColumnMap(specMap));
 
         String users = generator.toSql("contact", ImmutableList.of(
-            new SqlFieldBuilder()
+            new FieldInfoBuilder()
                 .setPath("contact")
                 .setFields(ImmutableList.of("id", "name", "email"))
                 .createSqlField(),
-            new SqlFieldBuilder()
+            new FieldInfoBuilder()
                 .setPath("br_id.house_id.area_id")
                 .setFields(ImmutableList.of("**"))
                 .createSqlField(),
-            new SqlFieldBuilder()
+            new FieldInfoBuilder()
                 .setPath("br_id")
                 .setFields(ImmutableList.of("name", "house_name"))
                 .createSqlField(),
-            new SqlFieldBuilder()
+            new FieldInfoBuilder()
                 .setPath("area_id")
                 .setFields(ImmutableList.of("name", "regin_name"))
                 .createSqlField(),
-            new SqlFieldBuilder()
+            new FieldInfoBuilder()
                 .setPath("supervisor_id")
                 .setFields(ImmutableList.of("name"))
                 .createSqlField()

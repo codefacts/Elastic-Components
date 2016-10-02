@@ -19,23 +19,18 @@ public class TestCases {
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
-                            .setColumnType(JavaType.LONG)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("user_id")
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("name")
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("email")
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("phone")
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec()
                     ))
                     .createTableSpec()
@@ -46,11 +41,9 @@ public class TestCases {
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
-                            .setColumnType(JavaType.LONG)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("user_id")
-                            .setColumnType(JavaType.STRING)
                             .setJoinSpec(
                                 new JoinSpecBuilder()
                                     .setJoinColumn("user_id")
@@ -61,7 +54,6 @@ public class TestCases {
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("house_id")
-                            .setColumnType(JavaType.STRING)
                             .setJoinSpec(
                                 new JoinSpecBuilder()
                                     .setJoinTable("house")
@@ -79,7 +71,6 @@ public class TestCases {
                                     .setJoinType(JoinType.INNER_JOIN)
                                     .createJoinSpec()
                             )
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec()
                     ))
                     .createTableSpec()
@@ -138,11 +129,9 @@ public class TestCases {
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
-                            .setColumnType(JavaType.LONG)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("region_name")
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec()
                     ))
                     .createTableSpec()
@@ -153,15 +142,12 @@ public class TestCases {
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
-                            .setColumnType(JavaType.LONG)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("area_name")
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("region_id")
-                            .setColumnType(JavaType.STRING)
                             .setJoinSpec(
                                 new JoinSpecBuilder()
                                     .setJoinTable("region")
@@ -179,15 +165,12 @@ public class TestCases {
                     .setColumnSpecs(ImmutableList.of(
                         new ColumnSpecBuilder()
                             .setColumnName("id")
-                            .setColumnType(JavaType.LONG)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("house_name")
-                            .setColumnType(JavaType.STRING)
                             .createColumnSpec(),
                         new ColumnSpecBuilder()
                             .setColumnName("area_id")
-                            .setColumnType(JavaType.STRING)
                             .setJoinSpec(
                                 new JoinSpecBuilder()
                                     .setJoinTable("area")

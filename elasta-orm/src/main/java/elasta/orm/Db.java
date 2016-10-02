@@ -1,6 +1,7 @@
 package elasta.orm;
 
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.core.FieldInfo;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -10,28 +11,28 @@ import java.util.List;
  */
 public interface Db {
 
-    <T> Promise<JsonObject> findOne(String table, T id);
+    <T> Promise<JsonObject> findOne(String model, T id);
 
-    <T> Promise<JsonObject> findOne(String table, T id, List<String> selectFields);
+    <T> Promise<JsonObject> findOne(String model, T id, List<FieldInfo> selectFields);
 
-    <T> Promise<List<JsonObject>> findAll(String table, List<T> ids);
+    <T> Promise<List<JsonObject>> findAll(String model, List<T> ids);
 
-    <T> Promise<List<JsonObject>> findAll(String table, List<T> ids, List<String> selectFields);
+    <T> Promise<List<JsonObject>> findAll(String model, List<T> ids, List<FieldInfo> selectFields);
 
-    Promise<Long> count(String table);
+    <T> Promise<T> insertOrUpdate(String model, JsonObject data);
 
-    <T> Promise<T> insertOrUpdate(String table, JsonObject data);
+    <T> Promise<List<T>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects);
 
-    <T> Promise<List<T>> insertOrUpdateAll(String table, List<JsonObject> jsonObjects);
+    <T> Promise<T> delete(String model, T id);
 
-    <T> Promise<T> delete(String table, T id);
+    <T> Promise<List<T>> deleteAll(String model, List<T> ids);
 
-    <T> Promise<List<T>> deleteAll(String table, List<T> ids);
+    Promise<Long> count(String model);
 
-    Promise<Long> count(String table, JsonObject criteria);
+    Promise<Long> count(String model, JsonObject criteria);
 
-    Promise<List<JsonObject>> findAll(String table, JsonObject criteria);
+    Promise<List<JsonObject>> findAll(String model, JsonObject criteria);
 
-    Promise<List<JsonObject>> findAll(String table, JsonObject criteria, List<String> selectFields);
+    Promise<List<JsonObject>> findAll(String model, JsonObject criteria, List<FieldInfo> selectFields);
 
 }

@@ -1,15 +1,15 @@
-package elasta.orm.sql.query;
+package elasta.orm.core;
 
 import java.util.List;
 
 /**
  * Created by Jango on 9/22/2016.
  */
-final public class SqlField {
+final public class FieldInfo {
     private final String path;
     private final List<String> fields;
 
-    public SqlField(String path, List<String> fields) {
+    public FieldInfo(String path, List<String> fields) {
         this.path = path;
         this.fields = fields;
     }

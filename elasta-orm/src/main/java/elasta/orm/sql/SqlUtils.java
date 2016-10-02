@@ -25,7 +25,6 @@ public class SqlUtils {
             for (ColumnSpec columnSpec : columnSpecs) {
                 colBuilder.add(
                     new ColumnSpecBuilder()
-                        .setColumnType(columnSpec.getColumnType())
                         .setColumnName(columnSpec.getColumnName())
                         .setJoinSpec(
                             columnSpec.getJoinSpec() == null ? null : new JoinSpecBuilder()
@@ -48,27 +47,6 @@ public class SqlUtils {
             );
         }
         return builder.build();
-    }
-
-    public static Map<String, Map<String, JoinSpec>> toJoinSpecsByTableNameMap(Map<String, TableSpec> tableSpecMap) {
-
-        ImmutableMap.Builder<String, Map<String, JoinSpec>> mapBuilder = ImmutableMap.builder();
-
-        tableSpecMap.entrySet().forEach(entry -> {
-
-            TableSpec tableSpec = entry.getValue();
-
-            ImmutableMap.Builder<String, JoinSpec> builder = ImmutableMap.builder();
-            tableSpec.getColumnSpecs().forEach(columnSpec -> {
-                if (columnSpec.getJoinSpec() != null) {
-                    builder.put(columnSpec.getColumnName(), columnSpec.getJoinSpec());
-                }
-            });
-
-            mapBuilder.put(entry.getKey(), builder.build());
-        });
-
-        return mapBuilder.build();
     }
 
     public static Map<String, TableSpec> toTableSpecByTableMap(List<TableSpec> tableSpecs) {
