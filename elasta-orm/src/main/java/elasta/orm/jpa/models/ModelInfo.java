@@ -1,4 +1,4 @@
-package elasta.orm.jpa;
+package elasta.orm.jpa.models;
 
 import java.util.Map;
 

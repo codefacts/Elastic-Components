@@ -1,4 +1,4 @@
-package elasta.orm.jpa;
+package elasta.orm.jpa.models;
 
 /**
  * Created by Jango on 10/6/2016.
