@@ -16,6 +16,8 @@ import java.util.List;
  */
 public interface Jpa {
 
+    <T> Class<T> getModelClass(String model);
+
     <T> Promise<JsonObject> find(Class<T> tClass, Object id);
 
     <T> Promise<List<JsonObject>> query(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked);

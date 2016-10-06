@@ -25,6 +25,8 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Type;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -41,11 +43,18 @@ public class JpaImpl implements Jpa {
     private final Vertx vertx;
     private final EntityManagerFactory emf;
     private final ObjectMapper mapper;
+    private final Map<String, Class> entityClassMap;
 
     public JpaImpl(Vertx vertx, EntityManagerFactory emf, ObjectMapper mapper) {
         this.vertx = vertx;
         this.emf = emf;
         this.mapper = mapper;
+        entityClassMap = ImmutableMap.copyOf(emf.getMetamodel().getEntities().stream().collect(Collectors.toMap(EntityType::getName, Type::getJavaType)));
+    }
+
+    @Override
+    public <T> Class<T> getModelClass(String model) {
+        return entityClassMap.get(model);
     }
 
     @Override

@@ -13,4 +13,12 @@ public class ModelInfo {
         this.name = name;
         this.propInfoMap = propInfoMap;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Map<String, PropInfo> getPropInfoMap() {
+        return propInfoMap;
+    }
 }

@@ -11,5 +11,4 @@ public interface ModelInfoProvider {
 
     String primaryKey(String model);
 
-
 }
