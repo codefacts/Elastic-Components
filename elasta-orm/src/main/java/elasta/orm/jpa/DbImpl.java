@@ -18,17 +18,17 @@ import java.util.stream.Collectors;
  */
 public class DbImpl implements Db {
     private final Jpa jpa;
-    private final ModelInfoProvider infoProvider;
+    private final ModelInfoProvider modelInfoProvider;
 
-    public DbImpl(Jpa jpa, ModelInfoProvider infoProvider) {
+    public DbImpl(Jpa jpa, ModelInfoProvider modelInfoProvider) {
         this.jpa = jpa;
-        this.infoProvider = infoProvider;
+        this.modelInfoProvider = modelInfoProvider;
     }
 
     @Override
     public <T> Promise<JsonObject> findOne(String model, T id) {
 
-        Class<Object> modelClass = infoProvider.get(model);
+        Class<Object> modelClass = modelInfoProvider.get(model);
         return jpa.find(modelClass, id);
     }
 
@@ -38,7 +38,7 @@ public class DbImpl implements Db {
         List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields);
 
         Promise<JsonArray> promise = jpa.querySingleArray(cb -> {
-            Class<T> modelClass = infoProvider.get(model);
+            Class<T> modelClass = modelInfoProvider.get(model);
 
             CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
@@ -46,7 +46,7 @@ public class DbImpl implements Db {
 
             query.multiselect(toSelections(fieldDetailsList, root));
 
-            query.where(cb.equal(root.get(infoProvider.primaryKey(model)), id));
+            query.where(cb.equal(root.get(modelInfoProvider.primaryKey(model)), id));
 
             return query;
         });
@@ -58,7 +58,7 @@ public class DbImpl implements Db {
     public <T> Promise<List<JsonObject>> findAll(String model, List<T> ids) {
 
         return jpa.query(cb -> {
-            Class<T> modelClass = infoProvider.get(model);
+            Class<T> modelClass = modelInfoProvider.get(model);
 
             CriteriaQuery<T> query = cb.createQuery(modelClass);
 
@@ -68,7 +68,7 @@ public class DbImpl implements Db {
 
             Predicate[] predicates = new Predicate[ids.size()];
 
-            String primaryKey = infoProvider.primaryKey(model);
+            String primaryKey = modelInfoProvider.primaryKey(model);
 
             for (int i = 0; i < predicates.length; i++) {
                 predicates[i] = cb.equal(root.get(primaryKey), ids.get(i));
@@ -87,7 +87,7 @@ public class DbImpl implements Db {
 
         return jpa.queryArray(cb -> {
 
-            Class<T> modelClass = infoProvider.get(model);
+            Class<T> modelClass = modelInfoProvider.get(model);
 
             CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
@@ -97,7 +97,7 @@ public class DbImpl implements Db {
 
             Predicate[] predicates = new Predicate[ids.size()];
 
-            String primaryKey = infoProvider.primaryKey(model);
+            String primaryKey = modelInfoProvider.primaryKey(model);
 
             for (int i = 0; i < predicates.length; i++) {
                 predicates[i] = cb.equal(root.get(primaryKey), ids.get(i));
@@ -116,6 +116,8 @@ public class DbImpl implements Db {
 
     @Override
     public <T> Promise<T> insertOrUpdate(String model, JsonObject data) {
+
+
 
         return null;
     }

@@ -5,7 +5,9 @@ package elasta.orm.jpa;
  */
 public interface ModelInfoProvider {
 
-    <T> Class<T> get(String model);
+    ModelInfo get(String model);
 
     String primaryKey(String model);
+
+
 }
