@@ -1,5 +1,8 @@
 package elasta.orm.jpa;
 
+import elasta.orm.jpa.models.ModelInfo;
+import elasta.orm.jpa.models.PropInfo;
+
 import java.util.Map;
 
 public class ModelInfoBuilder {
