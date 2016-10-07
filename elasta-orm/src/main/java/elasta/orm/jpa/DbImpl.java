@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.Db;
+import elasta.orm.jpa.models.ModelInfo;
+import elasta.orm.jpa.models.PropInfo;
 import elasta.orm.json.core.FieldInfo;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -12,6 +14,7 @@ import io.vertx.core.json.JsonObject;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Jango on 10/2/2016.
@@ -28,8 +31,8 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<JsonObject> findOne(String model, T id) {
 
-        Class<Object> modelClass = modelInfoProvider.get(model);
-        return jpa.find(modelClass, id);
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+        return jpa.find(jpa.getModelClass(model), id);
     }
 
     @Override
@@ -38,7 +41,7 @@ public class DbImpl implements Db {
         List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields);
 
         Promise<JsonArray> promise = jpa.querySingleArray(cb -> {
-            Class<T> modelClass = modelInfoProvider.get(model);
+            Class<T> modelClass = jpa.getModelClass(model);
 
             CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
@@ -58,7 +61,7 @@ public class DbImpl implements Db {
     public <T> Promise<List<JsonObject>> findAll(String model, List<T> ids) {
 
         return jpa.query(cb -> {
-            Class<T> modelClass = modelInfoProvider.get(model);
+            Class<T> modelClass = jpa.getModelClass(model);
 
             CriteriaQuery<T> query = cb.createQuery(modelClass);
 
@@ -87,7 +90,7 @@ public class DbImpl implements Db {
 
         return jpa.queryArray(cb -> {
 
-            Class<T> modelClass = modelInfoProvider.get(model);
+            Class<T> modelClass = jpa.getModelClass(model);
 
             CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
@@ -117,7 +120,16 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<T> insertOrUpdate(String model, JsonObject data) {
 
+        ModelInfo modelInfo = modelInfoProvider.get(model);
 
+        Map<String, PropInfo> propInfoMap = modelInfo.getPropInfoMap();
+
+        new IU(propInfoMap).updateInfos(model, data)
+            .then(updateInfoList -> {
+
+
+            })
+        ;
 
         return null;
     }

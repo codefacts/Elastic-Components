@@ -1,4 +1,4 @@
-package elasta.orm.jpa;
+package elasta.orm.jpa.models;
 
 public class JoinTableInfoBuilder {
     private String joinTable;

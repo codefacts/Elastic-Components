@@ -1,4 +1,4 @@
-package elasta.orm.jpa;
+package elasta.orm.jpa.models;
 
 import elasta.orm.json.core.RelationTable;
 import elasta.orm.json.core.RelationType;
