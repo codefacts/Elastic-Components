@@ -14,6 +14,15 @@ public class PropInfo {
         this.relationInfo = relationInfo;
     }
 
+    public boolean hasRelation() {
+
+        return relationInfo != null;
+    }
+
+    public boolean hasColumn() {
+        return column != null;
+    }
+
     public String getName() {
         return name;
     }

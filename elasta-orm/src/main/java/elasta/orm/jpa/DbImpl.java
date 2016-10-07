@@ -6,7 +6,6 @@ import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.Db;
 import elasta.orm.jpa.models.ModelInfo;
-import elasta.orm.jpa.models.PropInfo;
 import elasta.orm.json.core.FieldInfo;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -14,7 +13,6 @@ import io.vertx.core.json.JsonObject;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Jango on 10/2/2016.
@@ -120,11 +118,7 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<T> insertOrUpdate(String model, JsonObject data) {
 
-        ModelInfo modelInfo = modelInfoProvider.get(model);
-
-        Map<String, PropInfo> propInfoMap = modelInfo.getPropInfoMap();
-
-        new IU(propInfoMap).updateInfos(model, data)
+        new IU(modelInfoProvider, dbSql).updateInfos(model, data)
             .then(updateInfoList -> {
 
 
