@@ -19,10 +19,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.EntityType;
@@ -30,10 +27,7 @@ import javax.persistence.metamodel.Type;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -63,6 +57,51 @@ public class JpaImpl implements Jpa {
             T obj = entityManager.find(tClass, id);
             Map map = mapper.convertValue(obj, Map.class);
             return new JsonObject(map);
+        });
+    }
+
+    @Override
+    public Promise<List<JsonArray>> jpqlQueryArray(String jpql) {
+        return jpqlQueryArray(jpql, new JsonArray(ImmutableList.of()));
+    }
+
+    @Override
+    public Promise<List<JsonArray>> jpqlQueryArray(String jpql, JsonArray params) {
+        return exeQuery(entityManager -> {
+            TypedQuery<Object[]> query = entityManager.createQuery(jpql, Object[].class);
+            for (int i = 0; i < params.getList().size(); i++) {
+                query.setParameter(i, params.getValue(i));
+            }
+            return query.getResultList().stream()
+                .map(objects -> new JsonArray(Arrays.asList(objects)))
+                .collect(Collectors.toList());
+        });
+    }
+
+    @Override
+    public Promise<JsonArray> jpqlQuerySingleArray(String jpql) {
+        return jpqlQueryArray(jpql).map(jsonArrays -> jsonArrays.get(0));
+    }
+
+    @Override
+    public Promise<JsonArray> jpqlQuerySingleArray(String jpql, JsonArray params) {
+        return jpqlQueryArray(jpql, params).map(jsonArrays -> jsonArrays.get(0));
+    }
+
+    @Override
+    public <T> Promise<T> jpqlQueryScalar(String jpql, Class<T> tClass) {
+        return exeQuery(entityManager -> entityManager.createQuery(jpql, tClass).getSingleResult());
+    }
+
+    @Override
+    public <T> Promise<T> jpqlQueryScalar(String jpql, Class<T> tClass, JsonArray params) {
+        return exeQuery(entityManager -> {
+            TypedQuery<T> query = entityManager.createQuery(jpql, tClass);
+            List list = params.getList();
+            for (int i = 0, listSize = list.size(); i < listSize; i++) {
+                query.setParameter(i, list.get(i));
+            }
+            return query.getSingleResult();
         });
     }
 
