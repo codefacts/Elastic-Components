@@ -20,6 +20,26 @@ public interface Jpa {
 
     <T> Promise<JsonObject> find(Class<T> tClass, Object id);
 
+    <T> Promise<List<JsonObject>> jpqlQuery(String jpql);
+
+    <T> Promise<List<JsonObject>> jpqlQuery(String jpql, JsonArray params);
+
+    Promise<List<JsonArray>> jpqlQueryArray(String jpql);
+
+    Promise<List<JsonArray>> jpqlQueryArray(String jpql, JsonArray params);
+
+    <T> Promise<JsonObject> jpqlQuerySingle(String jpql);
+
+    <T> Promise<JsonObject> jpqlQuerySingle(String jpql, JsonArray params);
+
+    Promise<JsonArray> jpqlQuerySingleArray(String jpql);
+
+    Promise<JsonArray> jpqlQuerySingleArray(String jpql, JsonArray params);
+
+    <T> Promise<T> jpqlQueryScalar(String jpql);
+
+    <T> Promise<T> jpqlQueryScalar(String jpql, JsonArray params);
+
     <T> Promise<List<JsonObject>> query(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked);
 
     Promise<List<JsonArray>> queryArray(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<Object[]>> functionUnchecked);

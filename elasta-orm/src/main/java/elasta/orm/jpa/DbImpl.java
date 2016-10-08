@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
-import elasta.core.touple.immutable.Tpls;
 import elasta.orm.Db;
 import elasta.orm.jpa.models.ModelInfo;
 import elasta.orm.jpa.models.PropInfo;
@@ -14,13 +13,14 @@ import elasta.orm.json.core.FieldInfo;
 import elasta.orm.json.core.RelationTable;
 import elasta.orm.json.core.RelationType;
 import elasta.orm.json.sql.*;
+import elasta.orm.json.sql.criteria.SqlAndParams;
+import elasta.orm.json.sql.criteria.SqlCriteriaUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Jango on 10/2/2016.
@@ -30,12 +30,14 @@ public class DbImpl implements Db {
     private final DbSql dbSql;
     private final ModelInfoProvider modelInfoProvider;
     private final IU iu;
+    private final SqlCriteriaUtils criteriaUtils;
 
-    public DbImpl(Jpa jpa, DbSql dbSql, ModelInfoProvider modelInfoProvider, IU iu) {
+    public DbImpl(Jpa jpa, DbSql dbSql, ModelInfoProvider modelInfoProvider, IU iu, SqlCriteriaUtils criteriaUtils) {
         this.jpa = jpa;
         this.dbSql = dbSql;
         this.modelInfoProvider = modelInfoProvider;
         this.iu = iu;
+        this.criteriaUtils = criteriaUtils;
     }
 
     @Override
@@ -154,32 +156,57 @@ public class DbImpl implements Db {
 
     @Override
     public <T> Promise<T> delete(String model, T id) {
-        return null;
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+        return dbSql.update("delete from " + modelInfo.getTable() + " where " + modelInfo.getPrimaryKey() + " = ?", new JsonArray(ImmutableList.of(id))).map(aVoid -> id);
     }
 
     @Override
     public <T> Promise<List<T>> deleteAll(String model, List<T> ids) {
-        return null;
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+
+        return dbSql.update("delete from " + modelInfo.getTable() +
+            " where " + modelInfo.getPrimaryKey() + " in (" +
+            ids.stream().map(t -> "?").collect(Collectors.joining(", ")) +
+            ")", new JsonArray(ids)).map(aVoid -> ids);
     }
 
     @Override
     public Promise<Long> count(String model) {
-        return null;
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+        dbSql.queryScalar(
+            "select count(" +
+                modelInfo.getPrimaryKey() +
+                ") from " + modelInfo.getTable());
+        return jpa.queryScalar(cb -> {
+            CriteriaQuery<Long> query = cb.createQuery(Long.class);
+            Root<Object> root = query.from(jpa.getModelClass(model));
+            query.select(cb.countDistinct(root.get(modelInfo.getPrimaryKey())));
+            return query;
+        });
     }
 
     @Override
     public Promise<Long> count(String model, JsonObject criteria) {
-        return null;
+        SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+        return jpa.jpqlQueryScalar("select count( m." + modelInfo.getPrimaryKey() + ") from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
     }
 
     @Override
     public Promise<List<JsonObject>> findAll(String model, JsonObject criteria) {
-        return null;
+        SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
+        return jpa.jpqlQuery("select m from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
     }
 
     @Override
     public Promise<List<JsonObject>> findAll(String model, JsonObject criteria, List<FieldInfo> selectFields) {
-        return null;
+        String select = selectFields.stream().flatMap(fieldInfo -> fieldInfo.getFields().stream()
+            .map(field -> (fieldInfo.getPath() == null || fieldInfo.getPath().isEmpty() ? "m." : "m." + fieldInfo.getPath() + ".") + field)
+        ).collect(Collectors.joining(", "));
+
+        SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
+
+        return jpa.jpqlQuery("select " + select + " from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
     }
 
     private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, Pairs pairs) {

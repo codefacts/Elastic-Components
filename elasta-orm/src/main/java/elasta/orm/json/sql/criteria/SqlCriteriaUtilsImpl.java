@@ -1,5 +1,6 @@
 package elasta.orm.json.sql.criteria;
 
+import com.google.common.collect.ImmutableList;
 import elasta.orm.json.exceptions.SqlParameterException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -24,12 +25,14 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
     }
 
     @Override
-    public String toSql(JsonObject criteria) {
-
-        return toSql(criteria, new StringBuilder()).toString();
+    public SqlAndParams toWhereSql(String prefix, JsonObject criteria) {
+        StringBuilder stringBuilder = new StringBuilder();
+        ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
+        toSql(prefix, criteria, stringBuilder, paramsBuilder);
+        return new SqlAndParams(stringBuilder.toString(), new JsonArray(paramsBuilder.build()));
     }
 
-    private StringBuilder toSql(JsonObject criteria, StringBuilder stringBuilder) {
+    private StringBuilder toSql(String prefix, JsonObject criteria, StringBuilder stringBuilder, ImmutableList.Builder<Object> paramsBuilder) {
 
         if (criteria.isEmpty()) return stringBuilder;
 
@@ -43,11 +46,11 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
                 if (e.getValue() instanceof JsonArray) {
 
-                    handleOr(((JsonArray) e.getValue()).getList(), stringBuilder);
+                    handleOr(prefix, ((JsonArray) e.getValue()).getList(), stringBuilder, paramsBuilder);
 
                 } else if (e.getValue() instanceof List) {
 
-                    handleOr((List<JsonObject>) e.getValue(), stringBuilder);
+                    handleOr(prefix, (List<JsonObject>) e.getValue(), stringBuilder, paramsBuilder);
 
                 } else {
 
@@ -62,11 +65,11 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
                 if (e.getValue() instanceof JsonObject) {
 
-                    toSql((JsonObject) e.getValue(), stringBuilder);
+                    toSql(prefix, (JsonObject) e.getValue(), stringBuilder, paramsBuilder);
 
                 } else if (e.getValue() instanceof Map) {
 
-                    toSql(new JsonObject((Map<String, Object>) e.getValue()), stringBuilder);
+                    toSql(prefix, new JsonObject((Map<String, Object>) e.getValue()), stringBuilder, paramsBuilder);
 
                 } else {
 
@@ -75,17 +78,20 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
             } else if (e.getValue() instanceof Map) {
 
-                OperatorValuePair pair = toSqlStr(e.getKey(), (Map<String, Object>) e.getValue(), stringBuilder);
-                stringBuilder.append(" ").append(pair.getOp()).append(" ").append(pair.getValue());
+                OperatorValuePair pair = toSqlStr(prefix, e.getKey(), (Map<String, Object>) e.getValue(), stringBuilder);
+                stringBuilder.append(" ").append(pair.getOp()).append(" ").append("?");
+                paramsBuilder.add(pair.getValue());
 
             } else if (e.getValue() instanceof JsonObject) {
 
-                OperatorValuePair pair = toSqlStr(e.getKey(), ((JsonObject) e.getValue()).getMap(), stringBuilder);
-                stringBuilder.append(" ").append(pair.getOp()).append(" ").append(pair.getValue());
+                OperatorValuePair pair = toSqlStr(prefix, e.getKey(), ((JsonObject) e.getValue()).getMap(), stringBuilder);
+                stringBuilder.append(" ").append(pair.getOp()).append(" ").append("?");
+                paramsBuilder.add(pair.getValue());
 
             } else {
 
-                stringBuilder.append(e.getKey() + " = " + toSqlValue(e.getValue()));
+                stringBuilder.append(prefix + e.getKey() + " = ?");
+                paramsBuilder.add(e.getValue());
             }
 
             stringBuilder.append(_AND_);
@@ -99,7 +105,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
         return stringBuilder;
     }
 
-    private void handleOr(List<JsonObject> jsonObjects, StringBuilder stringBuilder) {
+    private void handleOr(String prefix, List<JsonObject> jsonObjects, StringBuilder stringBuilder, ImmutableList.Builder<Object> paramsBuilder) {
 
         if (jsonObjects.isEmpty()) {
             return;
@@ -107,7 +113,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
         jsonObjects.forEach(entries -> {
 
-            toSql(entries, stringBuilder);
+            toSql(prefix, entries, stringBuilder, paramsBuilder);
             stringBuilder.append(_OR_);
         });
 
@@ -116,7 +122,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
     }
 
-    private OperatorValuePair toSqlStr(String key, Map<String, Object> map, StringBuilder stringBuilder) {
+    private OperatorValuePair toSqlStr(String prefix, String key, Map<String, Object> map, StringBuilder stringBuilder) {
         return map.entrySet().stream().findAny().map(e -> {
 
             String $key = e.getKey();
@@ -129,20 +135,20 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
                     Map<String, Object> js = e.getValue() instanceof JsonObject ? ((JsonObject) e.getValue()).getMap() : (Map<String, Object>) e.getValue();
 
                     stringBuilder.append(function).append("(");
-                    OperatorValuePair valuePair = toSqlStr(key, js, stringBuilder);
+                    OperatorValuePair valuePair = toSqlStr(prefix, key, js, stringBuilder);
                     stringBuilder.append(")");
 
                     return valuePair;
 
                 } else {
 
-                    stringBuilder.append(function).append("(").append(key).append(")");
-                    return new OperatorValuePair("=", toSqlValue(e.getValue()));
+                    stringBuilder.append(function).append("(").append(prefix + key).append(")");
+                    return new OperatorValuePair("=", e.getValue());
                 }
 
             } else if (symbolTranslatorMap.containsKey($key)) {
 
-                SqlSymbolSpec symbolSpec = symbolTranslatorMap.get($key).translate(key, e.getValue());
+                SqlSymbolSpec symbolSpec = symbolTranslatorMap.get($key).translate(prefix + key, e.getValue());
 
                 stringBuilder.append(symbolSpec.getKey());
 
@@ -154,10 +160,6 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
         }).orElseThrow(() -> new SqlParameterException("Invalid value given key '" + key + "'"));
     }
 
-    private String toSqlValue(Object value) {
-        return (value.getClass() == String.class ? ("'" + value + "'") : value.toString());
-    }
-
     public static void main(String[] args) {
 
         test6();
@@ -166,7 +168,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
     private static void test6() {
 
         String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
-            .toSql(
+            .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
                     .put("k3", 3)
@@ -213,14 +215,14 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
                             )
                     )
                     .put("k10", 90009L)
-            );
+            ).getSql();
         System.out.println(sql);
     }
 
     private static void test5() {
 
         String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
-            .toSql(
+            .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
                     .put("k3", 3)
@@ -267,14 +269,14 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
                             )
                     )
                     .put("k10", 90009L)
-            );
+            ).getSql();
         System.out.println(sql);
     }
 
     private static void test4() {
 
         String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
-            .toSql(
+            .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
                     .put("k3", 3)
@@ -308,14 +310,14 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
                             )
                     )
                     .put("k10", 90009L)
-            );
+            ).getSql();
         System.out.println(sql);
     }
 
     private static void test3() {
 
         String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
-            .toSql(
+            .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
                     .put("k3", 3)
@@ -349,13 +351,13 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
                             )
                     )
                     .put("k10", 90009L)
-            );
+            ).getSql();
         System.out.println(sql);
     }
 
     private static void test2() {
         String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
-            .toSql(
+            .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
                     .put("k2", "2")
@@ -368,14 +370,14 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
                     .put("k5", true)
                     .put("k9", new Date().toInstant())
                     .put("k10", 90009L)
-            );
+            ).getSql();
         System.out.println(sql);
     }
 
     private static void test1() {
 
         String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
-            .toSql(
+            .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
                     .put("k2", "2")
@@ -384,7 +386,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
                     .put("k5", true)
                     .put("k9", new Date().toInstant())
                     .put("k10", 90009L)
-            );
+            ).getSql();
         System.out.println(sql);
     }
 }
