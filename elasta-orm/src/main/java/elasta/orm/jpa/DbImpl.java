@@ -2,11 +2,16 @@ package elasta.orm.jpa;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.Db;
 import elasta.orm.jpa.models.ModelInfo;
+import elasta.orm.jpa.models.PropInfo;
 import elasta.orm.json.core.FieldInfo;
+import elasta.orm.json.core.RelationTable;
+import elasta.orm.json.core.RelationType;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -20,10 +25,12 @@ import java.util.stream.Collectors;
 public class DbImpl implements Db {
     private final Jpa jpa;
     private final ModelInfoProvider modelInfoProvider;
+    private final IU iu;
 
-    public DbImpl(Jpa jpa, ModelInfoProvider modelInfoProvider) {
+    public DbImpl(Jpa jpa, ModelInfoProvider modelInfoProvider, IU iu) {
         this.jpa = jpa;
         this.modelInfoProvider = modelInfoProvider;
+        this.iu = iu;
     }
 
     @Override
@@ -118,14 +125,93 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<T> insertOrUpdate(String model, JsonObject data) {
 
-        new IU(modelInfoProvider, dbSql).updateInfos(model, data)
-            .then(updateInfoList -> {
-
-
+        iu.findExistingTableIds(model, data)
+            .then(pairs -> {
+                ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder = ImmutableList.builder();
+                insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, pairs, operationListBuilder);
             })
         ;
 
         return null;
+    }
+
+    private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, Pairs pairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
+        ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
+        for (Map.Entry<String, PropInfo> entry : modelInfo.getPropInfoMap().entrySet()) {
+            if (entry.getValue().hasRelation()) {
+
+                if (entry.getValue().getRelationInfo().getRelationType() == RelationType.ONE_TO_MANY) {
+
+                    mergeCollection(entry, modelInfo, data, pairs, operationListBuilder);
+
+                } else if (entry.getValue().getRelationInfo().getRelationType() == RelationType.MANY_TO_MANY) {
+
+                    mergeCollection(entry, modelInfo, data, pairs, operationListBuilder);
+
+                } else if (entry.getValue().hasRelationTable()) {
+
+                    JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
+
+                    operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, pairs));
+
+                    insertOrUpdateOperationRecursively(
+                        modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinModel()),
+                        jsonObject, pairs, operationListBuilder
+                    );
+
+                } else {
+
+                    insertOrUpdateOperationRecursively(
+                        modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinModel()),
+                        data.getJsonObject(entry.getValue().getName()), pairs, operationListBuilder
+                    );
+                }
+
+            } else {
+                mapBuilder.put(entry.getValue().getColumn(), data.getValue(entry.getValue().getName()));
+            }
+        }
+    }
+
+    private void mergeCollection(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, Pairs pairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
+        JsonArray jsonArray = data.getJsonArray(entry.getValue().getName());
+
+        for (int i = 0; i < jsonArray.size(); i++) {
+
+            JsonObject jsonObject = jsonArray.getJsonObject(i);
+
+            operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, pairs));
+
+            insertOrUpdateOperationRecursively(
+                modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinModel()),
+                jsonObject, pairs, operationListBuilder
+            );
+        }
+    }
+
+    private InsertOrUpdateOperation relation(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, JsonObject jsonObject, Pairs pairs) {
+
+        RelationTable relationTable = entry.getValue().getRelationInfo().getRelationTable();
+
+        Object modelId = data.getValue(modelInfo.getPrimaryKey());
+        Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
+
+        return new InsertOrUpdateOperation(
+            pairs.getRelationTableIdPairs().contains(
+                new RelationTableIdPair(
+                    relationTable.getTableName(),
+                    modelId,
+                    childModelId
+                )
+            ),
+            relationTable.getTableName(),
+            new JsonObject(
+                ImmutableMap.of(
+                    relationTable.getLeftColumn(), modelId,
+                    relationTable.getRightColumn(), childModelId
+                )
+            )
+        );
     }
 
     @Override
@@ -239,6 +325,18 @@ public class DbImpl implements Db {
         private FieldDetails(List<String> path, List<String> fields) {
             this.path = path;
             this.fields = fields;
+        }
+    }
+
+    private static class InsertOrUpdateOperation {
+        final boolean insert;
+        final String table;
+        final JsonObject data;
+
+        private InsertOrUpdateOperation(boolean insert, String table, JsonObject data) {
+            this.insert = insert;
+            this.table = table;
+            this.data = data;
         }
     }
 }

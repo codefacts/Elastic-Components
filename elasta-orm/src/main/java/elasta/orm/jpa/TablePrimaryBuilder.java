@@ -3,7 +3,6 @@ package elasta.orm.jpa;
 public class TablePrimaryBuilder {
     private String table;
     private String primaryKey;
-    private String primaryKeyValue;
 
     public TablePrimaryBuilder setTable(String table) {
         this.table = table;
@@ -15,12 +14,7 @@ public class TablePrimaryBuilder {
         return this;
     }
 
-    public TablePrimaryBuilder setPrimaryKeyValue(String primaryKeyValue) {
-        this.primaryKeyValue = primaryKeyValue;
-        return this;
-    }
-
     public TablePrimary createTablePrimary() {
-        return new TablePrimary(table, primaryKey, primaryKeyValue);
+        return new TablePrimary(table, primaryKey);
     }
 }

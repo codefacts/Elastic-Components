@@ -25,7 +25,7 @@ public class RelationInfo {
         return relationTable;
     }
 
-    public JoinTableInfo getJoinTableInfo() {
+    public JoinTableInfo getJoinModelInfo() {
         return joinTableInfo;
     }
 }

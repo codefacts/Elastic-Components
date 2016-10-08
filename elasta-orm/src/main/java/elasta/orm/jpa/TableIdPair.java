@@ -6,10 +6,12 @@ package elasta.orm.jpa;
 public class TableIdPair {
     private final String table;
     private final Object id;
+    private final RelationTableInfo relationTableInfo;
 
-    public TableIdPair(String table, Object id) {
+    public TableIdPair(String table, Object id, boolean relationTable, RelationTableInfo relationTableInfo) {
         this.table = table;
         this.id = id;
+        this.relationTableInfo = relationTableInfo;
     }
 
     public String getTable() {
@@ -18,6 +20,14 @@ public class TableIdPair {
 
     public Object getId() {
         return id;
+    }
+
+    public RelationTableInfo getRelationTableInfo() {
+        return relationTableInfo;
+    }
+
+    public boolean isRelationTable() {
+        return relationTableInfo != null;
     }
 
     @Override

@@ -34,4 +34,8 @@ public class PropInfo {
     public RelationInfo getRelationInfo() {
         return relationInfo;
     }
+
+    public boolean hasRelationTable() {
+        return relationInfo.getRelationTable() != null;
+    }
 }

@@ -4,19 +4,19 @@ package elasta.orm.jpa.models;
  * Created by Jango on 10/6/2016.
  */
 public class JoinTableInfo {
-    private final String joinTable;
-    private final String joinColumn;
+    private final String joinModel;
+    private final String joinField;
 
-    public JoinTableInfo(String joinTable, String joinColumn) {
-        this.joinTable = joinTable;
-        this.joinColumn = joinColumn;
+    public JoinTableInfo(String joinModel, String joinField) {
+        this.joinModel = joinModel;
+        this.joinField = joinField;
     }
 
-    public String getJoinTable() {
-        return joinTable;
+    public String getJoinModel() {
+        return joinModel;
     }
 
-    public String getJoinColumn() {
-        return joinColumn;
+    public String getJoinField() {
+        return joinField;
     }
 }
