@@ -195,11 +195,7 @@ public class DbImpl implements Db {
     @Override
     public Promise<List<JsonObject>> findAll(String model, JsonObject criteria) {
         SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
-        return jpa.jpqlQueryArray("select m from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams())
-            .map(jsonArrays -> {
-                return null;
-            })
-            ;
+        return jpa.jpqlQuery("select m from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
     }
 
     @Override
@@ -210,10 +206,7 @@ public class DbImpl implements Db {
 
         SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
 
-        return jpa.jpqlQueryArray("select " + select + " from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams())
-            .map(jsonArrays -> {
-                return null;
-            });
+        return jpa.jpqlQuery("select " + select + " from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
     }
 
     private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, Pairs pairs) {
