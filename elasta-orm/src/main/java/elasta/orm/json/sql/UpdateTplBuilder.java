@@ -8,6 +8,7 @@ public class UpdateTplBuilder {
     private JsonObject data;
     private String where;
     private JsonArray jsonArray;
+    private UpdateOperationType updateOperationType;
 
     public UpdateTplBuilder setTable(String table) {
         this.table = table;
@@ -30,6 +31,11 @@ public class UpdateTplBuilder {
     }
 
     public UpdateTpl createUpdateTpl() {
-        return new UpdateTpl(table, data, where, jsonArray);
+        return new UpdateTpl(updateOperationType, table, data, where, jsonArray);
+    }
+
+    public UpdateTplBuilder setUpdateOperationType(UpdateOperationType updateOperationType) {
+        this.updateOperationType = updateOperationType;
+        return this;
     }
 }

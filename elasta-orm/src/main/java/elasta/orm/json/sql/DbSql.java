@@ -43,5 +43,4 @@ public interface DbSql {
     Promise<Void> updateJo(String table, List<JsonObject> sqlList, List<String> where);
 
     Promise<Void> updateJo(List<UpdateTpl> sqlList);
-
 }

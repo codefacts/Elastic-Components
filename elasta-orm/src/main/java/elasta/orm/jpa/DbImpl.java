@@ -13,16 +13,14 @@ import elasta.orm.jpa.models.PropInfo;
 import elasta.orm.json.core.FieldInfo;
 import elasta.orm.json.core.RelationTable;
 import elasta.orm.json.core.RelationType;
-import elasta.orm.json.sql.DbSql;
-import elasta.orm.json.sql.InsertTpl;
-import elasta.orm.json.sql.UpdateTpl;
-import elasta.orm.json.sql.UpdateTplBuilder;
+import elasta.orm.json.sql.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Jango on 10/2/2016.
@@ -133,58 +131,190 @@ public class DbImpl implements Db {
     public Promise<JsonObject> insertOrUpdate(String model, JsonObject data) {
 
         return iu.findExistingTableIds(model, data)
-            .map(pairs -> {
-                ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder = ImmutableList.builder();
-                insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, pairs, operationListBuilder);
-                ImmutableList.Builder<InsertTpl> insertListBuilder = ImmutableList.builder();
-                ImmutableList.Builder<UpdateTpl> updateListBuilder = ImmutableList.builder();
-                operationListBuilder.build().forEach(operation -> {
-                    if (operation.isInsert()) {
-
-                        insertListBuilder.add(
-                            new InsertTpl(operation.getTable(), operation.data)
-                        );
-
-                    } else {
-
-                        if (operation.getRelationTableColumns() != null) {
-
-                            updateListBuilder.add(
-                                new UpdateTplBuilder()
-                                    .setTable(operation.table)
-                                    .setData(operation.data)
-                                    .setWhere(
-                                        operation.getTable() + "." + operation.getRelationTableColumns().getLeftColumn() + " = ?" +
-                                            operation.getTable() + "." + operation.getRelationTableColumns().getRightColumn() + " = ?"
-                                    )
-                                    .setJsonArray(new JsonArray(
-                                        ImmutableList.of(
-                                            operation.data.getValue(operation.getRelationTableColumns().getLeftColumn()),
-                                            operation.data.getValue(operation.getRelationTableColumns().getRightColumn())
-                                        )))
-                                    .createUpdateTpl()
-                            );
-                        } else {
-                            updateListBuilder.add(
-                                new UpdateTplBuilder()
-                                    .setTable(operation.table)
-                                    .setData(operation.data)
-                                    .setWhere(
-                                        operation.getTable() + "." + operation.getPrimaryKey() + " = ?"
-                                    )
-                                    .setJsonArray(new JsonArray(
-                                        ImmutableList.of(
-                                            operation.data.getValue(operation.getPrimaryKey())
-                                        )))
-                                    .createUpdateTpl()
-                            );
-                        }
-                    }
-                });
-                return Tpls.of(insertListBuilder.build(), updateListBuilder.build());
-            })
-            .mapP(tpl2 -> Promises.when(dbSql.insertJo(tpl2.t1), dbSql.updateJo(tpl2.t2)))
+            .map(pairs -> toUpdateList(model, data, pairs))
+            .mapP(dbSql::updateJo)
             .map(voidVoidMutableTpl2 -> data);
+    }
+
+    @Override
+    public Promise<List<JsonObject>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects) {
+
+        return Promises.when(jsonObjects.stream()
+            .map(
+                data -> iu.findExistingTableIds(model, data)
+                    .map(pairs -> toUpdateList(model, data, pairs))
+            ).collect(Collectors.toList()))
+            .mapP(lists -> dbSql.updateJo(
+                lists.stream()
+                    .flatMap(tpls -> tpls.stream())
+                    .collect(Collectors.toList())
+            ))
+            .map(aVoid -> jsonObjects);
+    }
+
+    @Override
+    public <T> Promise<T> delete(String model, T id) {
+        return null;
+    }
+
+    @Override
+    public <T> Promise<List<T>> deleteAll(String model, List<T> ids) {
+        return null;
+    }
+
+    @Override
+    public Promise<Long> count(String model) {
+        return null;
+    }
+
+    @Override
+    public Promise<Long> count(String model, JsonObject criteria) {
+        return null;
+    }
+
+    @Override
+    public Promise<List<JsonObject>> findAll(String model, JsonObject criteria) {
+        return null;
+    }
+
+    @Override
+    public Promise<List<JsonObject>> findAll(String model, JsonObject criteria, List<FieldInfo> selectFields) {
+        return null;
+    }
+
+    private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, Pairs pairs) {
+        ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder = ImmutableList.builder();
+        insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, pairs, operationListBuilder);
+        ImmutableList.Builder<UpdateTpl> updateListBuilder = ImmutableList.builder();
+        operationListBuilder.build().forEach(operation -> {
+            if (operation.isInsert()) {
+
+                updateListBuilder.add(
+                    new UpdateTplBuilder()
+                        .setUpdateOperationType(UpdateOperationType.INSERT)
+                        .setTable(operation.table)
+                        .setData(operation.data)
+                        .createUpdateTpl()
+                );
+
+            } else {
+
+                if (operation.getRelationTableColumns() != null) {
+
+                    updateListBuilder.add(
+                        new UpdateTplBuilder()
+                            .setUpdateOperationType(UpdateOperationType.UPDATE)
+                            .setTable(operation.table)
+                            .setData(operation.data)
+                            .setWhere(
+                                operation.getTable() + "." + operation.getRelationTableColumns().getLeftColumn() + " = ?" +
+                                    operation.getTable() + "." + operation.getRelationTableColumns().getRightColumn() + " = ?"
+                            )
+                            .setJsonArray(new JsonArray(
+                                ImmutableList.of(
+                                    operation.data.getValue(operation.getRelationTableColumns().getLeftColumn()),
+                                    operation.data.getValue(operation.getRelationTableColumns().getRightColumn())
+                                )))
+                            .createUpdateTpl()
+                    );
+                } else {
+                    updateListBuilder.add(
+                        new UpdateTplBuilder()
+                            .setUpdateOperationType(UpdateOperationType.UPDATE)
+                            .setTable(operation.table)
+                            .setData(operation.data)
+                            .setWhere(
+                                operation.getTable() + "." + operation.getPrimaryKey() + " = ?"
+                            )
+                            .setJsonArray(new JsonArray(
+                                ImmutableList.of(
+                                    operation.data.getValue(operation.getPrimaryKey())
+                                )))
+                            .createUpdateTpl()
+                    );
+                }
+            }
+        });
+        return updateListBuilder.build();
+    }
+
+    private MapHandler<JsonArray, JsonObject> toJsonObject(List<FieldDetails> fieldDetailsList) {
+        return ja -> convertToJa(ja, fieldDetailsList);
+    }
+
+    private JsonObject convertToJa(JsonArray jsonArray, List<FieldDetails> fieldDetailsList) {
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+
+        final PathMap pathMap = new PathMap(hashMap);
+
+        int idx = 0;
+        for (FieldDetails fieldDetails : fieldDetailsList) {
+
+            Map<String, Object> obj = pathMap.get(fieldDetails.path);
+
+            for (String field : fieldDetails.fields) {
+
+                obj.put(field, jsonArray.getValue(idx++));
+            }
+        }
+
+        return new JsonObject(hashMap);
+    }
+
+    private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields) {
+        ImmutableList.Builder<FieldDetails> fieldListBuilder = ImmutableList.builder();
+
+        selectFields.forEach(fieldInfo -> {
+            fieldListBuilder.add(new FieldDetails(toParts(fieldInfo.getPath()), fieldInfo.getFields()));
+        });
+
+        return fieldListBuilder.build();
+    }
+
+    private List<String> toParts(String path) {
+        if (Strings.isNullOrEmpty(path)) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(path.split("\\."));
+    }
+
+    private <T> List<Selection<?>> toSelections(List<FieldDetails> selectFields, Root<T> root) {
+        ImmutableList.Builder<Selection<?>> listBuilder = ImmutableList.builder();
+
+        selectFields.forEach(fieldInfo -> {
+            Path<T> path = toPath(fieldInfo.path, root);
+
+            fieldInfo.fields.forEach(field -> {
+                listBuilder.add(path.get(field));
+            });
+        });
+
+        return listBuilder.build();
+    }
+
+    private <T> Path<T> toPath(List<String> path, Root<T> root) {
+
+        if (path.isEmpty()) {
+            return root;
+        }
+
+        Path<T> pp = root;
+        for (String part : path) {
+            pp = pp.get(part);
+        }
+
+        return pp;
+    }
+
+    private static class FieldDetails {
+        final List<String> path;
+        final List<String> fields;
+
+        private FieldDetails(List<String> path, List<String> fields) {
+            this.path = path;
+            this.fields = fields;
+        }
     }
 
     private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, Pairs pairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
@@ -268,120 +398,6 @@ public class DbImpl implements Db {
                     )
                 )
             ).createInsertOrUpdateOperation();
-    }
-
-    @Override
-    public Promise<List<JsonObject>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects) {
-        return null;
-    }
-
-    @Override
-    public <T> Promise<T> delete(String model, T id) {
-        return null;
-    }
-
-    @Override
-    public <T> Promise<List<T>> deleteAll(String model, List<T> ids) {
-        return null;
-    }
-
-    @Override
-    public Promise<Long> count(String model) {
-        return null;
-    }
-
-    @Override
-    public Promise<Long> count(String model, JsonObject criteria) {
-        return null;
-    }
-
-    @Override
-    public Promise<List<JsonObject>> findAll(String model, JsonObject criteria) {
-        return null;
-    }
-
-    @Override
-    public Promise<List<JsonObject>> findAll(String model, JsonObject criteria, List<FieldInfo> selectFields) {
-        return null;
-    }
-
-    private MapHandler<JsonArray, JsonObject> toJsonObject(List<FieldDetails> fieldDetailsList) {
-        return ja -> convertToJa(ja, fieldDetailsList);
-    }
-
-    private JsonObject convertToJa(JsonArray jsonArray, List<FieldDetails> fieldDetailsList) {
-
-        HashMap<String, Object> hashMap = new HashMap<>();
-
-        final PathMap pathMap = new PathMap(hashMap);
-
-        int idx = 0;
-        for (FieldDetails fieldDetails : fieldDetailsList) {
-
-            Map<String, Object> obj = pathMap.get(fieldDetails.path);
-
-            for (String field : fieldDetails.fields) {
-
-                obj.put(field, jsonArray.getValue(idx++));
-            }
-        }
-
-        return new JsonObject(hashMap);
-    }
-
-    private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields) {
-        ImmutableList.Builder<FieldDetails> fieldListBuilder = ImmutableList.builder();
-
-        selectFields.forEach(fieldInfo -> {
-            fieldListBuilder.add(new FieldDetails(toParts(fieldInfo.getPath()), fieldInfo.getFields()));
-        });
-
-        return fieldListBuilder.build();
-    }
-
-    private List<String> toParts(String path) {
-        if (Strings.isNullOrEmpty(path)) {
-            return Collections.emptyList();
-        }
-        return Arrays.asList(path.split("\\."));
-    }
-
-    private <T> List<Selection<?>> toSelections(List<FieldDetails> selectFields, Root<T> root) {
-        ImmutableList.Builder<Selection<?>> listBuilder = ImmutableList.builder();
-
-        selectFields.forEach(fieldInfo -> {
-            Path<T> path = toPath(fieldInfo.path, root);
-
-            fieldInfo.fields.forEach(field -> {
-                listBuilder.add(path.get(field));
-            });
-        });
-
-        return listBuilder.build();
-    }
-
-    private <T> Path<T> toPath(List<String> path, Root<T> root) {
-
-        if (path.isEmpty()) {
-            return root;
-        }
-
-        Path<T> pp = root;
-        for (String part : path) {
-            pp = pp.get(part);
-        }
-
-        return pp;
-    }
-
-    private static class FieldDetails {
-        final List<String> path;
-        final List<String> fields;
-
-        private FieldDetails(List<String> path, List<String> fields) {
-            this.path = path;
-            this.fields = fields;
-        }
     }
 
     static class InsertOrUpdateOperation {
