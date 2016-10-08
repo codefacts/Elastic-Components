@@ -1,6 +1,5 @@
 package elasta.orm.jpa;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -22,11 +21,8 @@ import io.vertx.core.json.JsonObject;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Type;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,11 +35,11 @@ public class JpaImpl implements Jpa {
     private final ObjectMapper mapper;
     private final Map<String, Class> entityClassMap;
 
-    public JpaImpl(Vertx vertx, EntityManagerFactory emf, ObjectMapper mapper) {
+    public JpaImpl(Vertx vertx, EntityManagerFactory emf, ObjectMapper mapper, Map<String, Class> entityClassMap) {
         this.vertx = vertx;
         this.emf = emf;
         this.mapper = mapper;
-        entityClassMap = ImmutableMap.copyOf(emf.getMetamodel().getEntities().stream().collect(Collectors.toMap(EntityType::getName, Type::getJavaType)));
+        this.entityClassMap = entityClassMap;
     }
 
     @Override
