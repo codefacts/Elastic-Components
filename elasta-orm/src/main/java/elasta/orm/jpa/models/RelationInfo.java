@@ -9,12 +9,12 @@ import elasta.orm.json.core.RelationType;
 public class RelationInfo {
     private final RelationType relationType;
     private final RelationTable relationTable;
-    private final JoinTableInfo joinTableInfo;
+    private final ChildModelInfo childModelInfo;
 
-    public RelationInfo(RelationType relationType, RelationTable relationTable, JoinTableInfo joinTableInfo) {
+    public RelationInfo(RelationType relationType, RelationTable relationTable, ChildModelInfo childModelInfo) {
         this.relationType = relationType;
         this.relationTable = relationTable;
-        this.joinTableInfo = joinTableInfo;
+        this.childModelInfo = childModelInfo;
     }
 
     public RelationType getRelationType() {
@@ -25,7 +25,7 @@ public class RelationInfo {
         return relationTable;
     }
 
-    public JoinTableInfo getJoinModelInfo() {
-        return joinTableInfo;
+    public ChildModelInfo getJoinModelInfo() {
+        return childModelInfo;
     }
 }

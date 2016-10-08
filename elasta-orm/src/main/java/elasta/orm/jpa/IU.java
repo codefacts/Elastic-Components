@@ -116,7 +116,7 @@ public class IU {
                 if (entry.getValue().hasRelation()) {
                     RelationInfo relationInfo = entry.getValue().getRelationInfo();
 
-                    ModelInfo modelInfo = modelInfoProvider.get(relationInfo.getJoinModelInfo().getJoinModel());
+                    ModelInfo modelInfo = modelInfoProvider.get(relationInfo.getJoinModelInfo().getChildModel());
 
                     tablePrimaryKeySet.add(new TablePrimaryBuilder()
                         .setTable(modelInfo.getTable())

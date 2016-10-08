@@ -6,7 +6,7 @@ import elasta.orm.json.core.RelationType;
 public class RelationInfoBuilder {
     private RelationType relationType;
     private RelationTable relationTable;
-    private JoinTableInfo joinTableInfo;
+    private ChildModelInfo childModelInfo;
 
     public RelationInfoBuilder setRelationType(RelationType relationType) {
         this.relationType = relationType;
@@ -18,12 +18,12 @@ public class RelationInfoBuilder {
         return this;
     }
 
-    public RelationInfoBuilder setJoinTableInfo(JoinTableInfo joinTableInfo) {
-        this.joinTableInfo = joinTableInfo;
+    public RelationInfoBuilder setChildModelInfo(ChildModelInfo childModelInfo) {
+        this.childModelInfo = childModelInfo;
         return this;
     }
 
     public RelationInfo createRelationInfo() {
-        return new RelationInfo(relationType, relationTable, joinTableInfo);
+        return new RelationInfo(relationType, relationTable, childModelInfo);
     }
 }

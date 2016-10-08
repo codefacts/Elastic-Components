@@ -207,14 +207,14 @@ public class DbImpl implements Db {
                     operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, pairs));
 
                     insertOrUpdateOperationRecursively(
-                        modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinModel()),
+                        modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
                         jsonObject, pairs, operationListBuilder
                     );
 
                 } else {
 
                     insertOrUpdateOperationRecursively(
-                        modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinModel()),
+                        modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
                         data.getJsonObject(entry.getValue().getName()), pairs, operationListBuilder
                     );
                 }
@@ -235,7 +235,7 @@ public class DbImpl implements Db {
             operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, pairs));
 
             insertOrUpdateOperationRecursively(
-                modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinModel()),
+                modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
                 jsonObject, pairs, operationListBuilder
             );
         }
