@@ -189,13 +189,17 @@ public class DbImpl implements Db {
     public Promise<Long> count(String model, JsonObject criteria) {
         SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
         ModelInfo modelInfo = modelInfoProvider.get(model);
-        return jpa.jpqlQueryScalar("select count( m." + modelInfo.getPrimaryKey() + ") from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
+        return jpa.jpqlQueryScalar("select count( m." + modelInfo.getPrimaryKey() + ") from " + model + " m where " + sqlAndParams.getSql(), Long.class, sqlAndParams.getParams());
     }
 
     @Override
     public Promise<List<JsonObject>> findAll(String model, JsonObject criteria) {
         SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
-        return jpa.jpqlQuery("select m from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
+        return jpa.jpqlQueryArray("select m from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams())
+            .map(jsonArrays -> {
+                return null;
+            })
+            ;
     }
 
     @Override
@@ -206,7 +210,10 @@ public class DbImpl implements Db {
 
         SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
 
-        return jpa.jpqlQuery("select " + select + " from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
+        return jpa.jpqlQueryArray("select " + select + " from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams())
+            .map(jsonArrays -> {
+                return null;
+            });
     }
 
     private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, Pairs pairs) {

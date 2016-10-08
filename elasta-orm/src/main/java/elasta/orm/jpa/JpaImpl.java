@@ -61,6 +61,35 @@ public class JpaImpl implements Jpa {
     }
 
     @Override
+    public Promise<List<JsonObject>> jpqlQuery(String jpql) {
+        return jpqlQuery(jpql, new JsonArray(ImmutableList.of()));
+    }
+
+    @Override
+    public Promise<List<JsonObject>> jpqlQuery(String jpql, JsonArray params) {
+        return exeQuery(entityManager -> {
+            Query query = entityManager.createQuery(jpql);
+
+            for (int i = 0; i < params.size(); i++) {
+                query.setParameter(i, params.getValue(i));
+            }
+
+            List<Map<String, Object>> maps = mapper.convertValue(query.getResultList(), listOfMap());
+            return maps.stream().map(JsonObject::new).collect(Collectors.toList());
+        });
+    }
+
+    @Override
+    public Promise<JsonObject> jpqlQuerySingle(String jpql) {
+        return jpqlQuerySingle(jpql, new JsonArray(Collections.emptyList()));
+    }
+
+    @Override
+    public Promise<JsonObject> jpqlQuerySingle(String jpql, JsonArray params) {
+        return jpqlQuery(jpql, params).map(jsonObjects -> jsonObjects.get(0));
+    }
+
+    @Override
     public Promise<List<JsonArray>> jpqlQueryArray(String jpql) {
         return jpqlQueryArray(jpql, new JsonArray(ImmutableList.of()));
     }
@@ -72,9 +101,8 @@ public class JpaImpl implements Jpa {
             for (int i = 0; i < params.getList().size(); i++) {
                 query.setParameter(i, params.getValue(i));
             }
-            return query.getResultList().stream()
-                .map(objects -> new JsonArray(Arrays.asList(objects)))
-                .collect(Collectors.toList());
+            List<List<Object>> lists = mapper.convertValue(query.getResultList(), listOfList());
+            return lists.stream().map(objects -> new JsonArray(objects)).collect(Collectors.toList());
         });
     }
 

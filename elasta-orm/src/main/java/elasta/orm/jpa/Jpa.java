@@ -20,6 +20,14 @@ public interface Jpa {
 
     <T> Promise<JsonObject> find(Class<T> tClass, Object id);
 
+    Promise<List<JsonObject>> jpqlQuery(String jpql);
+
+    Promise<List<JsonObject>> jpqlQuery(String jpql, JsonArray params);
+
+    Promise<JsonObject> jpqlQuerySingle(String jpql);
+
+    Promise<JsonObject> jpqlQuerySingle(String jpql, JsonArray params);
+
     Promise<List<JsonArray>> jpqlQueryArray(String jpql);
 
     Promise<List<JsonArray>> jpqlQueryArray(String jpql, JsonArray params);
