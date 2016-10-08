@@ -19,9 +19,9 @@ public interface Db {
 
     <T> Promise<List<JsonObject>> findAll(String model, List<T> ids, List<FieldInfo> selectFields);
 
-    <T> Promise<T> insertOrUpdate(String model, JsonObject data);
+    Promise<JsonObject> insertOrUpdate(String model, JsonObject data);
 
-    <T> Promise<List<T>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects);
+    Promise<List<JsonObject>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects);
 
     <T> Promise<T> delete(String model, T id);
 

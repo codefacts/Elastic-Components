@@ -3,15 +3,20 @@ package elasta.orm.jpa;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
+import elasta.core.touple.immutable.Tpls;
 import elasta.orm.Db;
 import elasta.orm.jpa.models.ModelInfo;
 import elasta.orm.jpa.models.PropInfo;
 import elasta.orm.json.core.FieldInfo;
 import elasta.orm.json.core.RelationTable;
 import elasta.orm.json.core.RelationType;
-import io.vertx.core.json.Json;
+import elasta.orm.json.sql.DbSql;
+import elasta.orm.json.sql.InsertTpl;
+import elasta.orm.json.sql.UpdateTpl;
+import elasta.orm.json.sql.UpdateTplBuilder;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -24,11 +29,13 @@ import java.util.stream.Collectors;
  */
 public class DbImpl implements Db {
     private final Jpa jpa;
+    private final DbSql dbSql;
     private final ModelInfoProvider modelInfoProvider;
     private final IU iu;
 
-    public DbImpl(Jpa jpa, ModelInfoProvider modelInfoProvider, IU iu) {
+    public DbImpl(Jpa jpa, DbSql dbSql, ModelInfoProvider modelInfoProvider, IU iu) {
         this.jpa = jpa;
+        this.dbSql = dbSql;
         this.modelInfoProvider = modelInfoProvider;
         this.iu = iu;
     }
@@ -123,16 +130,61 @@ public class DbImpl implements Db {
     }
 
     @Override
-    public <T> Promise<T> insertOrUpdate(String model, JsonObject data) {
+    public Promise<JsonObject> insertOrUpdate(String model, JsonObject data) {
 
-        iu.findExistingTableIds(model, data)
-            .then(pairs -> {
+        return iu.findExistingTableIds(model, data)
+            .map(pairs -> {
                 ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder = ImmutableList.builder();
                 insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, pairs, operationListBuilder);
-            })
-        ;
+                ImmutableList.Builder<InsertTpl> insertListBuilder = ImmutableList.builder();
+                ImmutableList.Builder<UpdateTpl> updateListBuilder = ImmutableList.builder();
+                operationListBuilder.build().forEach(operation -> {
+                    if (operation.isInsert()) {
 
-        return null;
+                        insertListBuilder.add(
+                            new InsertTpl(operation.getTable(), operation.data)
+                        );
+
+                    } else {
+
+                        if (operation.getRelationTableColumns() != null) {
+
+                            updateListBuilder.add(
+                                new UpdateTplBuilder()
+                                    .setTable(operation.table)
+                                    .setData(operation.data)
+                                    .setWhere(
+                                        operation.getTable() + "." + operation.getRelationTableColumns().getLeftColumn() + " = ?" +
+                                            operation.getTable() + "." + operation.getRelationTableColumns().getRightColumn() + " = ?"
+                                    )
+                                    .setJsonArray(new JsonArray(
+                                        ImmutableList.of(
+                                            operation.data.getValue(operation.getRelationTableColumns().getLeftColumn()),
+                                            operation.data.getValue(operation.getRelationTableColumns().getRightColumn())
+                                        )))
+                                    .createUpdateTpl()
+                            );
+                        } else {
+                            updateListBuilder.add(
+                                new UpdateTplBuilder()
+                                    .setTable(operation.table)
+                                    .setData(operation.data)
+                                    .setWhere(
+                                        operation.getTable() + "." + operation.getPrimaryKey() + " = ?"
+                                    )
+                                    .setJsonArray(new JsonArray(
+                                        ImmutableList.of(
+                                            operation.data.getValue(operation.getPrimaryKey())
+                                        )))
+                                    .createUpdateTpl()
+                            );
+                        }
+                    }
+                });
+                return Tpls.of(insertListBuilder.build(), updateListBuilder.build());
+            })
+            .mapP(tpl2 -> Promises.when(dbSql.insertJo(tpl2.t1), dbSql.updateJo(tpl2.t2)))
+            .map(voidVoidMutableTpl2 -> data);
     }
 
     private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, Pairs pairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
@@ -196,26 +248,30 @@ public class DbImpl implements Db {
         Object modelId = data.getValue(modelInfo.getPrimaryKey());
         Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
 
-        return new InsertOrUpdateOperation(
-            pairs.getRelationTableIdPairs().contains(
-                new RelationTableIdPair(
-                    relationTable.getTableName(),
-                    modelId,
-                    childModelId
+        return new InsertOrUpdateOperationBuilder()
+            .setInsert(
+                pairs.getRelationTableIdPairs().contains(
+                    new RelationTableIdPair(
+                        relationTable.getTableName(),
+                        modelId,
+                        childModelId
+                    )
                 )
-            ),
-            relationTable.getTableName(),
-            new JsonObject(
-                ImmutableMap.of(
-                    relationTable.getLeftColumn(), modelId,
-                    relationTable.getRightColumn(), childModelId
+            ).setTable(relationTable.getTableName())
+            .setRelationTableColumns(
+                new RelationTableColumns(relationTable.getLeftColumn(), relationTable.getRightColumn())
+            ).setData(
+                new JsonObject(
+                    ImmutableMap.of(
+                        relationTable.getLeftColumn(), modelId,
+                        relationTable.getRightColumn(), childModelId
+                    )
                 )
-            )
-        );
+            ).createInsertOrUpdateOperation();
     }
 
     @Override
-    public <T> Promise<List<T>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects) {
+    public Promise<List<JsonObject>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects) {
         return null;
     }
 
@@ -328,15 +384,76 @@ public class DbImpl implements Db {
         }
     }
 
-    private static class InsertOrUpdateOperation {
+    static class InsertOrUpdateOperation {
         final boolean insert;
         final String table;
+        final String primaryKey;
+        final RelationTableColumns relationTableColumns;
         final JsonObject data;
 
-        private InsertOrUpdateOperation(boolean insert, String table, JsonObject data) {
+        public InsertOrUpdateOperation(boolean insert, String table, String primaryKey, RelationTableColumns relationTableColumns, JsonObject data) {
             this.insert = insert;
             this.table = table;
+            this.primaryKey = primaryKey;
+            this.relationTableColumns = relationTableColumns;
             this.data = data;
+        }
+
+        public boolean isInsert() {
+            return insert;
+        }
+
+        public String getTable() {
+            return table;
+        }
+
+        public String getPrimaryKey() {
+            return primaryKey;
+        }
+
+        public RelationTableColumns getRelationTableColumns() {
+            return relationTableColumns;
+        }
+
+        public JsonObject getData() {
+            return data;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            InsertOrUpdateOperation that = (InsertOrUpdateOperation) o;
+
+            if (insert != that.insert) return false;
+            if (table != null ? !table.equals(that.table) : that.table != null) return false;
+            if (primaryKey != null ? !primaryKey.equals(that.primaryKey) : that.primaryKey != null) return false;
+            if (relationTableColumns != null ? !relationTableColumns.equals(that.relationTableColumns) : that.relationTableColumns != null)
+                return false;
+            return data != null ? data.equals(that.data) : that.data == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (insert ? 1 : 0);
+            result = 31 * result + (table != null ? table.hashCode() : 0);
+            result = 31 * result + (primaryKey != null ? primaryKey.hashCode() : 0);
+            result = 31 * result + (relationTableColumns != null ? relationTableColumns.hashCode() : 0);
+            result = 31 * result + (data != null ? data.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "InsertOrUpdateOperation{" +
+                "insert=" + insert +
+                ", table='" + table + '\'' +
+                ", primaryKey='" + primaryKey + '\'' +
+                ", relationTableColumns=" + relationTableColumns +
+                ", data=" + data +
+                '}';
         }
     }
 }
