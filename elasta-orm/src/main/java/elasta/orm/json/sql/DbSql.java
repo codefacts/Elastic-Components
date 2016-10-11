@@ -16,10 +16,6 @@ public interface DbSql {
 
     Promise<ResultSet> query(String sql, JsonArray params);
 
-    Promise<ResultSet> querySingle(String sql);
-
-    Promise<ResultSet> querySingle(String sql, JsonArray params);
-
     <T> Promise<T> queryScalar(String sql);
 
     <T> Promise<T> queryScalar(String sql, JsonArray params);
@@ -36,7 +32,7 @@ public interface DbSql {
 
     Promise<Void> insertJo(String table, List<JsonObject> sqlList);
 
-    Promise<Void> updateJo(String table, JsonObject jsonObject, String where);
+    Promise<Void> updateJo(String table, JsonObject jsonObject, String where, JsonArray params);
 
     Promise<Void> updateJo(List<UpdateTpl> sqlList);
 }
