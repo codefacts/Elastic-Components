@@ -148,7 +148,6 @@ public class DbSqlImpl implements DbSql {
                 con -> {
                     try {
                         return function.apply(con)
-                            .errP(e -> Promises.exec(voidDefer -> con.rollback(StaticUtils.deferred(voidDefer))))
                             .cmp(signal -> con.close());
                     } catch (Exception e) {
                         con.close();
