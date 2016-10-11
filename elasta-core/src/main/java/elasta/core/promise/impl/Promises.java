@@ -60,6 +60,16 @@ final public class Promises {
         }
     }
 
+    public static <T> Promise<T> exec(ConsumerUnchecked<Defer<T>> consumerUnchecked) {
+        Defer<T> defer = Promises.defer();
+        try {
+            consumerUnchecked.accept(defer);
+        } catch (Throwable throwable) {
+            defer.reject(throwable);
+        }
+        return defer.promise();
+    }
+
     public static <T> Promise<T> error(Throwable error) {
         return new PromiseImpl<>(SignalImpl.error(error));
     }

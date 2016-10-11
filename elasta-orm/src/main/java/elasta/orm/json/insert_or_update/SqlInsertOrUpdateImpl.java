@@ -174,7 +174,7 @@ public class SqlInsertOrUpdateImpl implements SqlInsertOrUpdate {
         List<TableSpec> list = TestCases.createList();
         list = SqlUtils.makeDefaults(list);
         Map<String, TableSpec> stringTableSpecMap = SqlUtils.toTableSpecByTableMap(list);
-        SqlInsertOrUpdateImpl update = new SqlInsertOrUpdateImpl(stringTableSpecMap, null, new DbSqlImpl());
+        SqlInsertOrUpdateImpl update = new SqlInsertOrUpdateImpl(stringTableSpecMap, null, new DbSqlImpl(jdbcClient));
 
         update.insertOrUpdate(
             "contact", new JsonObject()

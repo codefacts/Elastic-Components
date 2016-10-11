@@ -36,11 +36,7 @@ public interface DbSql {
 
     Promise<Void> insertJo(String table, List<JsonObject> sqlList);
 
-    Promise<Void> insertJo(List<InsertTpl> sqlList);
-
     Promise<Void> updateJo(String table, JsonObject jsonObject, String where);
-
-    Promise<Void> updateJo(String table, List<JsonObject> sqlList, List<String> where);
 
     Promise<Void> updateJo(List<UpdateTpl> sqlList);
 }
