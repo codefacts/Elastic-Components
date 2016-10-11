@@ -1,7 +1,4 @@
-package elasta.orm.jpa;
-
-import elasta.orm.jpa.models.ModelInfo;
-import elasta.orm.jpa.models.PropInfo;
+package elasta.orm.jpa.models;
 
 import java.util.Map;
 
