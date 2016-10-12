@@ -67,7 +67,7 @@ public class ModuleSystemImpl implements ModuleSystem {
                 ModuleSpec spec = scriptMap.keySet().stream()
                     .filter(ms -> ms.moduleClass == moduleClass)
                     .findFirst()
-                    .get();
+                    .orElseThrow(() -> new ModuleSystemException("Module is not found for type: '" + moduleClass + "'"));
 
                 if (spec == null) {
                     return null;

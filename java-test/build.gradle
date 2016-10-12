@@ -15,6 +15,7 @@ dependencies {
     compile project(':elasta-core')
     compile project(':elasta-module')
     compile project(':vertx-utils')
+    compile project(':elasta-orm')
 
     compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '2.6.4'
 // https://mvnrepository.com/artifact/mysql/mysql-connector-java

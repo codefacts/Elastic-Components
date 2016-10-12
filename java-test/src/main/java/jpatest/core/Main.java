@@ -17,7 +17,7 @@ import java.util.function.Function;
  * Created by Jango on 10/2/2016.
  */
 public class Main {
-    private static final String PU = "jpatest";
+    public static final String PU = "jpatest";
 
     public static void main(String[] args) {
 
