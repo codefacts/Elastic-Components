@@ -7,4 +7,5 @@ include 'vertx-utils'
 include 'elasta-module'
 include 'commons'
 include 'elasta-orm'
+include 'java-test'
 
