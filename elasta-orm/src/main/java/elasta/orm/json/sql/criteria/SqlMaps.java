@@ -9,7 +9,7 @@ import static elasta.orm.json.sql.criteria.SqlCriteriaHelper.*;
 /**
  * Created by Jango on 9/16/2016.
  */
-public class SqlInfo {
+public class SqlMaps {
     private static final Map<String, SqlSymbolTranslator> SYMBOL_TRANSLATOR_MAP;
     private static final Map<String, String> FUNCTION_MAP;
 

@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Created by Jango on 10/9/2016.
  */
-public class ModelInfoMapUtils {
+public class ModelInfoMapHelper {
     public Map<String, ModelInfo> modelInfoByModelMap(EntityManagerFactory emf) {
         ImmutableMap.Builder<String, ModelInfo> modelInfoMapBuilder = ImmutableMap.builder();
         Set<EntityType<?>> entities = emf.getMetamodel().getEntities();

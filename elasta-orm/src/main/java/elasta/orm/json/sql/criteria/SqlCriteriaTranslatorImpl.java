@@ -12,14 +12,14 @@ import java.util.Map;
 /**
  * Created by Jango on 9/15/2016.
  */
-public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
+public class SqlCriteriaTranslatorImpl implements SqlCriteriaTranslator {
     private final Map<String, String> functionMap;
     private final Map<String, SqlSymbolTranslator> symbolTranslatorMap;
     private static final String _AND_ = " and ";
     private static final String _OR_ = " or ";
     private static final String NOT_ = "not ";
 
-    public SqlCriteriaUtilsImpl(Map<String, String> functionMap, Map<String, SqlSymbolTranslator> symbolTranslatorMap) {
+    public SqlCriteriaTranslatorImpl(Map<String, String> functionMap, Map<String, SqlSymbolTranslator> symbolTranslatorMap) {
         this.functionMap = functionMap;
         this.symbolTranslatorMap = symbolTranslatorMap;
     }
@@ -167,7 +167,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
     private static void test6() {
 
-        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaTranslatorImpl(SqlMaps.getFunctionMap(), SqlMaps.getSymbolTranslatorMap())
             .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
@@ -221,7 +221,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
     private static void test5() {
 
-        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaTranslatorImpl(SqlMaps.getFunctionMap(), SqlMaps.getSymbolTranslatorMap())
             .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
@@ -275,7 +275,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
     private static void test4() {
 
-        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaTranslatorImpl(SqlMaps.getFunctionMap(), SqlMaps.getSymbolTranslatorMap())
             .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
@@ -316,7 +316,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
     private static void test3() {
 
-        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaTranslatorImpl(SqlMaps.getFunctionMap(), SqlMaps.getSymbolTranslatorMap())
             .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
@@ -356,7 +356,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
     }
 
     private static void test2() {
-        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaTranslatorImpl(SqlMaps.getFunctionMap(), SqlMaps.getSymbolTranslatorMap())
             .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")
@@ -376,7 +376,7 @@ public class SqlCriteriaUtilsImpl implements SqlCriteriaUtils {
 
     private static void test1() {
 
-        String sql = new SqlCriteriaUtilsImpl(SqlInfo.getFunctionMap(), SqlInfo.getSymbolTranslatorMap())
+        String sql = new SqlCriteriaTranslatorImpl(SqlMaps.getFunctionMap(), SqlMaps.getSymbolTranslatorMap())
             .toWhereSql("",
                 new JsonObject()
                     .put("k", "1")

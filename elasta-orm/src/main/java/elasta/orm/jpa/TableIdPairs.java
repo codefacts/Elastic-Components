@@ -5,11 +5,11 @@ import java.util.Set;
 /**
  * Created by Jango on 10/8/2016.
  */
-public class Pairs {
+public class TableIdPairs {
     private final Set<TableIdPair> tableIdPairs;
     private final Set<RelationTableIdPair> relationTableIdPairs;
 
-    public Pairs(Set<TableIdPair> tableIdPairs, Set<RelationTableIdPair> relationTableIdPairs) {
+    public TableIdPairs(Set<TableIdPair> tableIdPairs, Set<RelationTableIdPair> relationTableIdPairs) {
         this.tableIdPairs = tableIdPairs;
         this.relationTableIdPairs = relationTableIdPairs;
     }
@@ -27,11 +27,11 @@ public class Pairs {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Pairs pairs = (Pairs) o;
+        TableIdPairs tableIdPairs = (TableIdPairs) o;
 
-        if (tableIdPairs != null ? !tableIdPairs.equals(pairs.tableIdPairs) : pairs.tableIdPairs != null)
+        if (this.tableIdPairs != null ? !this.tableIdPairs.equals(tableIdPairs.tableIdPairs) : tableIdPairs.tableIdPairs != null)
             return false;
-        return relationTableIdPairs != null ? relationTableIdPairs.equals(pairs.relationTableIdPairs) : pairs.relationTableIdPairs == null;
+        return relationTableIdPairs != null ? relationTableIdPairs.equals(tableIdPairs.relationTableIdPairs) : tableIdPairs.relationTableIdPairs == null;
 
     }
 

@@ -14,7 +14,7 @@ import elasta.orm.json.core.RelationTable;
 import elasta.orm.json.core.RelationType;
 import elasta.orm.json.sql.*;
 import elasta.orm.json.sql.criteria.SqlAndParams;
-import elasta.orm.json.sql.criteria.SqlCriteriaUtils;
+import elasta.orm.json.sql.criteria.SqlCriteriaTranslator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -29,14 +29,14 @@ public class DbImpl implements Db {
     private final Jpa jpa;
     private final DbSql dbSql;
     private final ModelInfoProvider modelInfoProvider;
-    private final IU iu;
-    private final SqlCriteriaUtils criteriaUtils;
+    private final FindExistingIds findExistingIdsImpl;
+    private final SqlCriteriaTranslator criteriaUtils;
 
-    public DbImpl(Jpa jpa, DbSql dbSql, ModelInfoProvider modelInfoProvider, IU iu, SqlCriteriaUtils criteriaUtils) {
+    public DbImpl(Jpa jpa, DbSql dbSql, ModelInfoProvider modelInfoProvider, FindExistingIds findExistingIdsImpl, SqlCriteriaTranslator criteriaUtils) {
         this.jpa = jpa;
         this.dbSql = dbSql;
         this.modelInfoProvider = modelInfoProvider;
-        this.iu = iu;
+        this.findExistingIdsImpl = findExistingIdsImpl;
         this.criteriaUtils = criteriaUtils;
     }
 
@@ -132,7 +132,7 @@ public class DbImpl implements Db {
     @Override
     public Promise<JsonObject> insertOrUpdate(String model, JsonObject data) {
 
-        return iu.findExistingTableIds(model, data)
+        return findExistingIdsImpl.findExistingTableIds(model, data)
             .map(pairs -> toUpdateList(model, data, pairs))
             .mapP(dbSql::updateJo)
             .map(voidVoidMutableTpl2 -> data);
@@ -143,7 +143,7 @@ public class DbImpl implements Db {
 
         return Promises.when(jsonObjects.stream()
             .map(
-                data -> iu.findExistingTableIds(model, data)
+                data -> findExistingIdsImpl.findExistingTableIds(model, data)
                     .map(pairs -> toUpdateList(model, data, pairs))
             ).collect(Collectors.toList()))
             .mapP(lists -> dbSql.updateJo(
@@ -209,9 +209,9 @@ public class DbImpl implements Db {
         return jpa.jpqlQuery("select " + select + " from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
     }
 
-    private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, Pairs pairs) {
+    private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, TableIdPairs tableIdPairs) {
         ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder = ImmutableList.builder();
-        insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, pairs, operationListBuilder);
+        insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, tableIdPairs, operationListBuilder);
         ImmutableList.Builder<UpdateTpl> updateListBuilder = ImmutableList.builder();
         operationListBuilder.build().forEach(operation -> {
             if (operation.isInsert()) {
@@ -344,35 +344,35 @@ public class DbImpl implements Db {
         }
     }
 
-    private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, Pairs pairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
+    private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, TableIdPairs tableIdPairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
         ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
         for (Map.Entry<String, PropInfo> entry : modelInfo.getPropInfoMap().entrySet()) {
             if (entry.getValue().hasRelation()) {
 
                 if (entry.getValue().getRelationInfo().getRelationType() == RelationType.ONE_TO_MANY) {
 
-                    mergeCollection(entry, modelInfo, data, pairs, operationListBuilder);
+                    mergeCollection(entry, modelInfo, data, tableIdPairs, operationListBuilder);
 
                 } else if (entry.getValue().getRelationInfo().getRelationType() == RelationType.MANY_TO_MANY) {
 
-                    mergeCollection(entry, modelInfo, data, pairs, operationListBuilder);
+                    mergeCollection(entry, modelInfo, data, tableIdPairs, operationListBuilder);
 
                 } else if (entry.getValue().hasRelationTable()) {
 
                     JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
 
-                    operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, pairs));
+                    operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, tableIdPairs));
 
                     insertOrUpdateOperationRecursively(
                         modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
-                        jsonObject, pairs, operationListBuilder
+                        jsonObject, tableIdPairs, operationListBuilder
                     );
 
                 } else {
 
                     insertOrUpdateOperationRecursively(
                         modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
-                        data.getJsonObject(entry.getValue().getName()), pairs, operationListBuilder
+                        data.getJsonObject(entry.getValue().getName()), tableIdPairs, operationListBuilder
                     );
                 }
 
@@ -382,23 +382,23 @@ public class DbImpl implements Db {
         }
     }
 
-    private void mergeCollection(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, Pairs pairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
+    private void mergeCollection(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, TableIdPairs tableIdPairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
         JsonArray jsonArray = data.getJsonArray(entry.getValue().getName());
 
         for (int i = 0; i < jsonArray.size(); i++) {
 
             JsonObject jsonObject = jsonArray.getJsonObject(i);
 
-            operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, pairs));
+            operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, tableIdPairs));
 
             insertOrUpdateOperationRecursively(
                 modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
-                jsonObject, pairs, operationListBuilder
+                jsonObject, tableIdPairs, operationListBuilder
             );
         }
     }
 
-    private InsertOrUpdateOperation relation(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, JsonObject jsonObject, Pairs pairs) {
+    private InsertOrUpdateOperation relation(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, JsonObject jsonObject, TableIdPairs tableIdPairs) {
 
         RelationTable relationTable = entry.getValue().getRelationInfo().getRelationTable();
 
@@ -407,7 +407,7 @@ public class DbImpl implements Db {
 
         return new InsertOrUpdateOperationBuilder()
             .setInsert(
-                pairs.getRelationTableIdPairs().contains(
+                tableIdPairs.getRelationTableIdPairs().contains(
                     new RelationTableIdPair(
                         relationTable.getTableName(),
                         modelId,
