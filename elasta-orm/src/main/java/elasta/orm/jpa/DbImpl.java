@@ -173,14 +173,11 @@ public class DbImpl implements Db {
     @Override
     public Promise<Long> count(String model) {
         ModelInfo modelInfo = modelInfoProvider.get(model);
-        dbSql.queryScalar(
-            "select count(" +
-                modelInfo.getPrimaryKey() +
-                ") from " + modelInfo.getTable());
+
         return jpa.queryScalar(cb -> {
             CriteriaQuery<Long> query = cb.createQuery(Long.class);
             Root<Object> root = query.from(jpa.getModelClass(model));
-            query.select(cb.countDistinct(root.get(modelInfo.getPrimaryKey())));
+            query.select(cb.count(root.get(modelInfo.getPrimaryKey())));
             return query;
         });
     }

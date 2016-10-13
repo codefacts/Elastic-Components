@@ -26,7 +26,7 @@ public class Test {
         "  \"driver_class\": \"com.mysql.jdbc.Driver\"\n" +
         "}");
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(Main.PU);
 
@@ -45,7 +45,11 @@ public class Test {
 
             Db db = moduleSystem.require(Db.class);
 
+            db.count("Br").then(aLong -> System.out.println("count: " + aLong));
+
             System.out.println("DB created.");
+
+            Thread.sleep(Long.MAX_VALUE);
 
         } finally {
 
