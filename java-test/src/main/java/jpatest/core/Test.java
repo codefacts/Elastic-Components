@@ -1,9 +1,12 @@
 package jpatest.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;
+import elasta.orm.json.core.FieldInfo;
+import elasta.orm.json.core.FieldInfoBuilder;
 import elasta.orm.json.insert_or_update.ObjectData;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -50,7 +53,16 @@ public class Test {
 //            db.findOne("Br", 1L).then(entries -> System.out.println(entries));
 //            db.findAll("Br", Arrays.asList(1L, 2L, 3L)).then(entries -> System.out.println(entries));
 
-//            db.findOne();
+            db.findOne("Br", 1L, ImmutableList.of(
+                new FieldInfoBuilder()
+                    .setFields(Arrays.asList("firstName", "lastName", "email", "phone", "dateOfBirth"))
+                    .setPath("")
+                    .createSqlField(),
+                new FieldInfoBuilder()
+                    .setFields(Arrays.asList("buyDate", "id", "price", "name"))
+                    .setPath("tablets")
+                    .createSqlField()
+            )).then(entries -> System.out.println(entries)).err(e -> e.printStackTrace());
 
             System.out.println("DB created.");
 

@@ -3,6 +3,7 @@ package elasta.orm.jpa;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
@@ -52,21 +53,35 @@ public class DbImpl implements Db {
 
         List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields);
 
-        Promise<JsonArray> promise = jpa.querySingleArray(cb -> {
+        return jpa.queryArray(cb -> {
             Class<T> modelClass = jpa.getModelClass(model);
 
             CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
             Root<T> root = query.from(modelClass);
+            for (int i = 0; i < fieldDetailsList.size(); i++) {
+                FieldDetails fieldDetails = fieldDetailsList.get(i);
+
+                Join<Object, Object> join = null;
+
+                if (Utils.not(fieldDetails.path.isEmpty())) {
+                    join = root.join(fieldDetails.path.get(0));
+                }
+
+                for (int i1 = 1; i1 < fieldDetails.path.size(); i1++) {
+                    String part = fieldDetails.path.get(i1);
+                    join = join.join(part);
+                }
+            }
 
             query.multiselect(toSelections(fieldDetailsList, root));
 
-            query.where(cb.equal(root.get(modelInfoProvider.primaryKey(model)), id));
+            query.where(cb.equal(root.get(
+                modelInfoProvider.primaryKey(model)
+            ), id));
 
             return query;
-        });
-
-        return promise.map(toJsonObject(fieldDetailsList));
+        }).map(toJsonObject(fieldDetailsList));
     }
 
     @Override
@@ -118,7 +133,7 @@ public class DbImpl implements Db {
         }).map(
             jsonArrayList -> jsonArrayList
                 .stream()
-                .map(ja -> convertToJa(ja, fieldDetailsList))
+                .map(ja -> new JsonObject())
                 .collect(Collectors.toList())
         );
     }
@@ -256,26 +271,26 @@ public class DbImpl implements Db {
         return updateListBuilder.build();
     }
 
-    private MapHandler<JsonArray, JsonObject> toJsonObject(List<FieldDetails> fieldDetailsList) {
-        return ja -> convertToJa(ja, fieldDetailsList);
+    private MapHandler<List<JsonArray>, JsonObject> toJsonObject(List<FieldDetails> fieldDetailsList) {
+        return arrays -> convertToJo(arrays, fieldDetailsList);
     }
 
-    private JsonObject convertToJa(JsonArray jsonArray, List<FieldDetails> fieldDetailsList) {
+    private JsonObject convertToJo(List<JsonArray> arrays, List<FieldDetails> fieldDetailsList) {
 
         HashMap<String, Object> hashMap = new HashMap<>();
 
-        final PathMap pathMap = new PathMap(hashMap);
-
-        int idx = 0;
-        for (FieldDetails fieldDetails : fieldDetailsList) {
-
-            Map<String, Object> obj = pathMap.get(fieldDetails.path);
-
-            for (String field : fieldDetails.fields) {
-
-                obj.put(field, jsonArray.getValue(idx++));
-            }
-        }
+//        final PathMap pathMap = new PathMap(hashMap);
+//
+//        int idx = 0;
+//        for (FieldDetails fieldDetails : fieldDetailsList) {
+//
+//            Map<String, Object> obj = pathMap.get(fieldDetails.path);
+//
+//            for (String field : fieldDetails.fields) {
+//
+//                obj.put(field, arrays.getValue(idx++));
+//            }
+//        }
 
         return new JsonObject(hashMap);
     }
@@ -303,9 +318,7 @@ public class DbImpl implements Db {
         selectFields.forEach(fieldInfo -> {
             Path<T> path = toPath(fieldInfo.path, root);
 
-            fieldInfo.fields.forEach(field -> {
-                listBuilder.add(path.get(field));
-            });
+            fieldInfo.fields.forEach(field -> listBuilder.add(path.get(field)));
         });
 
         return listBuilder.build();
