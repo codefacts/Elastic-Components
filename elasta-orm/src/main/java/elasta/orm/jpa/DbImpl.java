@@ -81,15 +81,9 @@ public class DbImpl implements Db {
 
             query.select(root);
 
-            Predicate[] predicates = new Predicate[ids.size()];
-
             String primaryKey = modelInfoProvider.primaryKey(model);
 
-            for (int i = 0; i < predicates.length; i++) {
-                predicates[i] = cb.equal(root.get(primaryKey), ids.get(i));
-            }
-
-            query.where(cb.equal(root.get(primaryKey), cb.or(predicates)));
+            query.where(root.get(primaryKey).in(ids));
 
             return query;
         });

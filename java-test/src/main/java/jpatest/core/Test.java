@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.PluralAttribute;
+import java.util.Arrays;
 
 /**
  * Created by Jango on 10/12/2016.
@@ -45,7 +46,11 @@ public class Test {
 
             Db db = moduleSystem.require(Db.class);
 
-            db.count("Br").then(aLong -> System.out.println("count: " + aLong));
+//            db.count("Br").then(aLong -> System.out.println("count: " + aLong));
+//            db.findOne("Br", 1L).then(entries -> System.out.println(entries));
+//            db.findAll("Br", Arrays.asList(1L, 2L, 3L)).then(entries -> System.out.println(entries));
+
+//            db.findOne();
 
             System.out.println("DB created.");
 
