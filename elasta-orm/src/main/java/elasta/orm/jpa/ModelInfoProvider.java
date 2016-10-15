@@ -13,6 +13,8 @@ public interface ModelInfoProvider {
 
     ModelInfo get(String model, List<String> path);
 
+    ModelInfo get(String model, List<String> path, int len);
+
     String primaryKey(String model);
 
     String primaryKey(String model, List<String> path);

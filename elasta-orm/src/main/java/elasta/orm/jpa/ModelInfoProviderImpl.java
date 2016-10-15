@@ -22,9 +22,16 @@ public class ModelInfoProviderImpl implements ModelInfoProvider {
 
     @Override
     public ModelInfo get(String model, List<String> path) {
+        return get(model, path, path.size());
+    }
+
+    @Override
+    public ModelInfo get(final String model, final List<String> path, final int len) {
         ModelInfo modelInfo = modelInfoByModelMap.get(model);
 
-        for (String field : path) {
+        for (int i = 0; i < len; i++) {
+            String field = path.get(i);
+
             modelInfo = modelInfoByModelMap.get(
                 modelInfo.getPropInfoMap().get(field).getRelationInfo().getJoinModelInfo().getChildModel()
             );

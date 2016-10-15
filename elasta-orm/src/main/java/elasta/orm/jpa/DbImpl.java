@@ -1,8 +1,7 @@
 package elasta.orm.jpa;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.*;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.MapHandler;
@@ -22,6 +21,8 @@ import io.vertx.core.json.JsonObject;
 import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static elasta.commons.Utils.or;
 
 /**
  * Created by Jango on 10/2/2016.
@@ -281,10 +282,100 @@ public class DbImpl implements Db {
 
     private JsonObject convertToJo(List<JsonArray> arrays, List<FieldDetails> fieldDetailsList, ModelInfo modelInfo) {
 
-        HashMap<String, Object> hashMap = new HashMap<>();
+        LinkedHashMultimap<String, IdAndJo> multimap = LinkedHashMultimap.create();
 
+        for (JsonArray array : arrays) {
+            Iterator<Object> iterator = array.iterator();
 
-        return new JsonObject(hashMap);
+            for (FieldDetails fieldDetails : fieldDetailsList) {
+
+                Map<String, Object> map = toMap(fieldDetails, iterator);
+
+                multimap.put(or(fieldDetails.pathStr, ""), new IdAndJo(map.get(modelInfo.getPrimaryKey()), map, fieldDetails.path));
+            }
+
+        }
+
+        return new JsonObject(
+            toMapRecursive(
+                multimap.get("").stream().findAny().orElseThrow(
+                    () -> new OrmException("No Object found for model: " + modelInfo.getName())
+                ).map,
+                multimap, modelInfo
+            )
+        );
+    }
+
+    private Map<String, Object> toMapRecursive(final Map<String, Object> rootMap, final LinkedHashMultimap<String, IdAndJo> multimap, final ModelInfo rootModelInfo) {
+
+        for (IdAndJo idAndJo : multimap.values()) {
+
+            List<String> path = idAndJo.path;
+
+            if (path.isEmpty()) {
+                continue;
+            }
+
+            ModelInfo modelInfo = rootModelInfo;
+            Map<String, Object> map = rootMap;
+            for (int i = 0, pathSize_1 = path.size() - 1; i < pathSize_1; i++) {
+                String prop = path.get(i);
+
+                PropInfo propInfo = modelInfo.getPropInfoMap().get(prop);
+
+                modelInfo = modelInfoProvider.get(
+                    propInfo.getRelationInfo().getJoinModelInfo().getChildModel()
+                );
+
+                if (propInfo.isSingular()) {
+
+                    if (Utils.not(map.containsKey(prop))) {
+                        map.put(prop, new LinkedHashMap<>());
+                    }
+
+                    map = (Map<String, Object>) map.get(prop);
+
+                } else {
+                    throw new OrmException("Model property '" + prop + "' is plural in path '" + idAndJo.path + "'");
+                }
+            }
+
+            final String lastProp = path.get(path.size() - 1);
+
+            if (modelInfo.getPropInfoMap().get(lastProp).isSingular()) {
+
+                if (Utils.not(map.containsKey(lastProp))) {
+
+                    map.put(lastProp, idAndJo.map);
+
+                } else {
+
+                    Map<String, Object> mm = (Map<String, Object>) map.get(lastProp);
+                    mm.putAll(idAndJo.map);
+                }
+
+            } else {
+
+                if (Utils.not(map.containsKey(lastProp))) {
+                    map.put(lastProp, new ArrayList<>());
+                }
+
+                List<Map<String, Object>> list = (List<Map<String, Object>>) map.get(lastProp);
+
+                list.add(idAndJo.map);
+            }
+        }
+        return rootMap;
+    }
+
+    private Map<String, Object> toMap(FieldDetails fieldDetails, Iterator<Object> iterator) {
+        Map<String, Object> map = new LinkedHashMap<>();
+
+        for (String field : fieldDetails.fields) {
+            map.put(field, iterator.next());
+        }
+
+        return map;
     }
 
     private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields, ModelInfo modelInfo) {
@@ -502,6 +593,42 @@ public class DbImpl implements Db {
                 ", primaryKey='" + primaryKey + '\'' +
                 ", relationTableColumns=" + relationTableColumns +
                 ", data=" + data +
+                '}';
+        }
+    }
+
+    private static class IdAndJo {
+        final Object id;
+        final Map<String, Object> map;
+        final List<String> path;
+
+        private IdAndJo(Object id, Map<String, Object> map, List<String> path) {
+            this.id = id;
+            this.map = map;
+            this.path = path;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            IdAndJo idAndJo = (IdAndJo) o;
+
+            return id != null ? id.equals(idAndJo.id) : idAndJo.id == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            return id != null ? id.hashCode() : 0;
+        }
+
+        @Override
+        public String toString() {
+            return "IdAndJo{" +
+                "id=" + id +
+                ", map=" + map +
                 '}';
         }
     }
