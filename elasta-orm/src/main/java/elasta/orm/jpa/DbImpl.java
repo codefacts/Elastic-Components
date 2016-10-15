@@ -51,7 +51,9 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<JsonObject> findOne(String model, T id, List<FieldInfo> selectFields) {
 
-        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields);
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+
+        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields, modelInfo);
 
         return jpa.queryArray(cb -> {
             Class<T> modelClass = jpa.getModelClass(model);
@@ -77,11 +79,11 @@ public class DbImpl implements Db {
             query.multiselect(toSelections(fieldDetailsList, root));
 
             query.where(cb.equal(root.get(
-                modelInfoProvider.primaryKey(model)
+                modelInfo.getPrimaryKey()
             ), id));
 
             return query;
-        }).map(toJsonObject(fieldDetailsList));
+        }).map(toJsonObject(fieldDetailsList, modelInfo));
     }
 
     @Override
@@ -107,7 +109,9 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<List<JsonObject>> findAll(String model, List<T> ids, List<FieldInfo> selectFields) {
 
-        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields);
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+
+        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields, modelInfo);
 
         return jpa.queryArray(cb -> {
 
@@ -121,7 +125,7 @@ public class DbImpl implements Db {
 
             Predicate[] predicates = new Predicate[ids.size()];
 
-            String primaryKey = modelInfoProvider.primaryKey(model);
+            String primaryKey = modelInfo.getPrimaryKey();
 
             for (int i = 0; i < predicates.length; i++) {
                 predicates[i] = cb.equal(root.get(primaryKey), ids.get(i));
@@ -271,36 +275,32 @@ public class DbImpl implements Db {
         return updateListBuilder.build();
     }
 
-    private MapHandler<List<JsonArray>, JsonObject> toJsonObject(List<FieldDetails> fieldDetailsList) {
-        return arrays -> convertToJo(arrays, fieldDetailsList);
+    private MapHandler<List<JsonArray>, JsonObject> toJsonObject(List<FieldDetails> fieldDetailsList, ModelInfo modelInfo) {
+        return arrays -> convertToJo(arrays, fieldDetailsList, modelInfo);
     }
 
-    private JsonObject convertToJo(List<JsonArray> arrays, List<FieldDetails> fieldDetailsList) {
+    private JsonObject convertToJo(List<JsonArray> arrays, List<FieldDetails> fieldDetailsList, ModelInfo modelInfo) {
 
         HashMap<String, Object> hashMap = new HashMap<>();
 
-//        final PathMap pathMap = new PathMap(hashMap);
-//
-//        int idx = 0;
-//        for (FieldDetails fieldDetails : fieldDetailsList) {
-//
-//            Map<String, Object> obj = pathMap.get(fieldDetails.path);
-//
-//            for (String field : fieldDetails.fields) {
-//
-//                obj.put(field, arrays.getValue(idx++));
-//            }
-//        }
 
         return new JsonObject(hashMap);
     }
 
-    private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields) {
+    private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields, ModelInfo modelInfo) {
         ImmutableList.Builder<FieldDetails> fieldListBuilder = ImmutableList.builder();
 
-        selectFields.forEach(fieldInfo -> {
-            fieldListBuilder.add(new FieldDetails(toParts(fieldInfo.getPath()), fieldInfo.getFields()));
-        });
+        selectFields.forEach(
+            fieldInfo -> {
+
+                List<String> fields = fieldInfo.getFields();
+                fields = fields.contains(modelInfo.getPrimaryKey()) ? fields
+                    : ImmutableList.<String>builder().add(modelInfo.getPrimaryKey()).addAll(fields).build();
+
+                fieldListBuilder.add(
+                    new FieldDetails(fieldInfo.getPath(), toParts(fieldInfo.getPath()), fields)
+                );
+            });
 
         return fieldListBuilder.build();
     }
@@ -339,10 +339,12 @@ public class DbImpl implements Db {
     }
 
     private static class FieldDetails {
+        final String pathStr;
         final List<String> path;
         final List<String> fields;
 
-        private FieldDetails(List<String> path, List<String> fields) {
+        private FieldDetails(String pathStr, List<String> path, List<String> fields) {
+            this.pathStr = pathStr;
             this.path = path;
             this.fields = fields;
         }
