@@ -124,15 +124,9 @@ public class DbImpl implements Db {
 
             query.multiselect(toSelections(fieldDetailsInfo.fieldDetailsList, root));
 
-            Predicate[] predicates = new Predicate[ids.size()];
-
-            String primaryKey = modelInfo.getPrimaryKey();
-
-            for (int i = 0; i < predicates.length; i++) {
-                predicates[i] = cb.equal(root.get(primaryKey), ids.get(i));
-            }
-
-            query.where(cb.equal(root.get(primaryKey), cb.or(predicates)));
+            query.where(
+                root.get(modelInfo.getPrimaryKey()).in(ids)
+            );
 
             return query;
         }).map(toJsonObjectList(fieldDetailsInfo, modelInfo));
@@ -273,7 +267,7 @@ public class DbImpl implements Db {
 
     private MapHandler<List<JsonArray>, JsonObject> toJsonObject(FieldDetailsInfo fieldDetailsInfo, ModelInfo modelInfo) {
         return arrays -> {
-            LinkedHashMultimap<String, IdAndJo> multimap = toMultimap(arrays, fieldDetailsInfo, modelInfo, arrays.stream().findAny().get().getValue(fieldDetailsInfo.rootIdIndex));
+            LinkedHashMultimap<String, IdAndJo> multimap = toMultimap(arrays, fieldDetailsInfo, modelInfo);
 
             return new JsonObject(
                 toMapRecursive(
@@ -291,7 +285,7 @@ public class DbImpl implements Db {
 
             ImmutableList.Builder<JsonObject> listBuilder = ImmutableList.builder();
 
-            LinkedHashMultimap<String, IdAndJo> multimap = toMultimap(jsonArrays, fieldDetailsList, modelInfo, jsonArrays.stream().findAny().get().getValue(fieldDetailsList.rootIdIndex));
+            LinkedHashMultimap<String, IdAndJo> multimap = toMultimap(jsonArrays, fieldDetailsList, modelInfo);
 
             Map<Object, Map<String, Object>> roots = multimap.values().stream().filter(idAndJo -> idAndJo.path.isEmpty())
                 .peek(idAndJo -> listBuilder.add(new JsonObject(idAndJo.map)))
@@ -305,18 +299,18 @@ public class DbImpl implements Db {
         };
     }
 
-    private LinkedHashMultimap<String, IdAndJo> toMultimap(List<JsonArray> arrays, FieldDetailsInfo fieldDetailsList, ModelInfo modelInfo, Object rootId) {
+    private LinkedHashMultimap<String, IdAndJo> toMultimap(List<JsonArray> arrays, FieldDetailsInfo detailsInfo, ModelInfo modelInfo) {
 
         LinkedHashMultimap<String, IdAndJo> multimap = LinkedHashMultimap.create();
 
         for (JsonArray array : arrays) {
             Iterator<Object> iterator = array.iterator();
 
-            for (FieldDetails fieldDetails : fieldDetailsList.fieldDetailsList) {
+            for (FieldDetails fieldDetails : detailsInfo.fieldDetailsList) {
 
                 Map<String, Object> map = toMap(fieldDetails, iterator);
 
-                multimap.put(or(fieldDetails.pathStr, ""), new IdAndJo(map.get(modelInfo.getPrimaryKey()), map, fieldDetails.path, rootId));
+                multimap.put(or(fieldDetails.pathStr, ""), new IdAndJo(map.get(modelInfo.getPrimaryKey()), map, fieldDetails.path, array.getValue(detailsInfo.rootIdIndex)));
             }
 
         }
