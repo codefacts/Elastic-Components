@@ -53,7 +53,7 @@ public class Test {
 //            db.findOne("Br", 1L).then(entries -> System.out.println(entries));
 //            db.findAll("Br", Arrays.asList(1L, 2L, 3L)).then(entries -> System.out.println(entries));
 
-            db.findAll("Br", Arrays.asList(1L, 2L), ImmutableList.of(
+            db.findAll("Br", Arrays.asList(16L, 66L, 116L), ImmutableList.of(
                 new FieldInfoBuilder()
                     .setFields(Arrays.asList("firstName", "lastName", "email", "phone", "dateOfBirth"))
                     .setPath("")
