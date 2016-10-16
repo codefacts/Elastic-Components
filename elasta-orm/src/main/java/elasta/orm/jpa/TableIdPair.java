@@ -39,8 +39,16 @@ public class TableIdPair {
         TableIdPair that = (TableIdPair) o;
 
         if (table != null ? !table.equals(that.table) : that.table != null) return false;
-        return id != null ? id.equals(that.id) : that.id == null;
+        return id != null ? idEqual(id, that.id) : that.id == null;
 
+    }
+
+    private boolean idEqual(Object id, Object thatId) {
+        if (id instanceof Number && thatId instanceof Number) {
+            return new Long(((Number) id).longValue()).equals(((Number) thatId).longValue());
+        } else {
+            return id.equals(thatId);
+        }
     }
 
     @Override

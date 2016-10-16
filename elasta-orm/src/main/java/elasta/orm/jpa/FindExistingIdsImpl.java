@@ -34,7 +34,12 @@ public class FindExistingIdsImpl implements FindExistingIds {
         String query = finder.queryString(model, data);
 
         return dbSql.query(query, new JsonArray(
-            finder.tablePrimaryKeySet.build().stream().flatMap(tablePrimary -> Stream.of(finder.tableIdSetBuilder.build().get(tablePrimary.getTable()))).collect(Collectors.toList())
+
+            finder.tablePrimaryKeySet.build()
+                .stream().flatMap(
+                tablePrimary -> finder.tableIdSetBuilder.build().get(tablePrimary.getTable()).stream())
+                .collect(Collectors.toList())
+
         )).map(resultSet -> {
             ImmutableSet.Builder<TableIdPair> tableIdPairBuilder = ImmutableSet.builder();
             ImmutableSet.Builder<RelationTableIdPair> relationTableIdPairBuilder = ImmutableSet.builder();

@@ -20,6 +20,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.PluralAttribute;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Created by Jango on 10/12/2016.
@@ -74,8 +75,10 @@ public class Test {
                             Br br = new Br();
 
                             br.setId(256L);
-                            br.setFirstName("8888");
-                            br.setLastName("Banu");
+//                            br.setDateOfBirth(new Date());
+                            br.setEmail("kaku@kaku.com");
+                            br.setFirstName("hala");
+                            br.setLastName("kk");
 
                             return br;
                         })

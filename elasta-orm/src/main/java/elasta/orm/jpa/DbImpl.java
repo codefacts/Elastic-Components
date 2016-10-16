@@ -138,7 +138,7 @@ public class DbImpl implements Db {
         return findExistingIdsImpl.findExistingTableIds(model, data)
             .map(pairs -> toUpdateList(model, data, pairs))
             .mapP(dbSql::updateJo)
-            .map(voidVoidMutableTpl2 -> data);
+            .map(tpl2 -> data);
     }
 
     @Override
@@ -210,7 +210,9 @@ public class DbImpl implements Db {
     }
 
     private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, TableIdPairs tableIdPairs) {
+
         ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder = ImmutableList.builder();
+
         insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, tableIdPairs, operationListBuilder);
 
         ImmutableList.Builder<UpdateTpl> relationsBuilder = ImmutableList.builder();
@@ -268,11 +270,11 @@ public class DbImpl implements Db {
                             .setTable(operation.table)
                             .setData(operation.data)
                             .setWhere(
-                                operation.getTable() + "." + operation.getPrimaryKey() + " = ?"
+                                operation.getTable() + "." + operation.getTablePrimaryKey() + " = ?"
                             )
                             .setJsonArray(new JsonArray(
                                 ImmutableList.of(
-                                    operation.data.getValue(operation.getPrimaryKey())
+                                    operation.data.getValue(operation.getTablePrimaryKey())
                                 )))
                             .createUpdateTpl()
                     );
@@ -552,7 +554,7 @@ public class DbImpl implements Db {
                     ))
                 )
                 .setTable(modelInfo.getTable())
-                .setPrimaryKey(modelInfo.getPrimaryKey())
+                .setPrimaryColumn(modelInfo.getPrimaryColumn())
                 .setData(new JsonObject(mapBuilder.build()))
                 .createInsertOrUpdateOperation()
         );
@@ -631,7 +633,7 @@ public class DbImpl implements Db {
             return table;
         }
 
-        public String getPrimaryKey() {
+        public String getTablePrimaryKey() {
             return primaryKey;
         }
 

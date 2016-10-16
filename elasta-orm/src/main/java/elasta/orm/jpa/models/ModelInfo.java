@@ -33,4 +33,8 @@ public class ModelInfo {
     public Map<String, PropInfo> getPropInfoMap() {
         return propInfoMap;
     }
+
+    public String getPrimaryColumn() {
+        return propInfoMap.get(primaryKey).getColumn();
+    }
 }
