@@ -212,23 +212,25 @@ public class DbImpl implements Db {
     private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, TableIdPairs tableIdPairs) {
         ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder = ImmutableList.builder();
         insertOrUpdateOperationRecursively(modelInfoProvider.get(model), data, tableIdPairs, operationListBuilder);
-        ImmutableList.Builder<UpdateTpl> updateListBuilder = ImmutableList.builder();
+
+        ImmutableList.Builder<UpdateTpl> relationsBuilder = ImmutableList.builder();
+        ImmutableList.Builder<UpdateTpl> tablesBuilder = ImmutableList.builder();
+
         operationListBuilder.build().forEach(operation -> {
-            if (operation.isInsert()) {
 
-                updateListBuilder.add(
-                    new UpdateTplBuilder()
-                        .setUpdateOperationType(UpdateOperationType.INSERT)
-                        .setTable(operation.table)
-                        .setData(operation.data)
-                        .createUpdateTpl()
-                );
+            if (operation.getRelationTableColumns() != null) {
 
-            } else {
+                if (operation.isInsert()) {
+                    relationsBuilder.add(
+                        new UpdateTplBuilder()
+                            .setUpdateOperationType(UpdateOperationType.INSERT)
+                            .setTable(operation.table)
+                            .setData(operation.data)
+                            .createUpdateTpl()
+                    );
+                } else {
 
-                if (operation.getRelationTableColumns() != null) {
-
-                    updateListBuilder.add(
+                    relationsBuilder.add(
                         new UpdateTplBuilder()
                             .setUpdateOperationType(UpdateOperationType.UPDATE)
                             .setTable(operation.table)
@@ -244,8 +246,23 @@ public class DbImpl implements Db {
                                 )))
                             .createUpdateTpl()
                     );
+                }
+
+            } else {
+
+                if (operation.isInsert()) {
+
+                    tablesBuilder.add(
+                        new UpdateTplBuilder()
+                            .setUpdateOperationType(UpdateOperationType.INSERT)
+                            .setTable(operation.table)
+                            .setData(operation.data)
+                            .createUpdateTpl()
+                    );
+
                 } else {
-                    updateListBuilder.add(
+
+                    tablesBuilder.add(
                         new UpdateTplBuilder()
                             .setUpdateOperationType(UpdateOperationType.UPDATE)
                             .setTable(operation.table)
@@ -262,7 +279,7 @@ public class DbImpl implements Db {
                 }
             }
         });
-        return updateListBuilder.build();
+        return tablesBuilder.addAll(relationsBuilder.build()).build();
     }
 
     private MapHandler<List<JsonArray>, JsonObject> toJsonObject(FieldDetailsInfo fieldDetailsInfo, ModelInfo modelInfo) {
