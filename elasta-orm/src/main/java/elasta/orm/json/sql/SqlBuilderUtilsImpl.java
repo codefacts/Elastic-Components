@@ -16,23 +16,23 @@ public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
 
         StringBuilder keysBuilder = new StringBuilder();
-        StringBuilder builder = new StringBuilder();
+        StringBuilder qBuilder = new StringBuilder();
 
         jsonObject.getMap().forEach((key, o) -> {
-            keysBuilder.append("`").append(key).append("`");
-            builder.append("?").append(COMMA);
+            keysBuilder.append("`").append(key).append("`").append(COMMA);
+            qBuilder.append("?").append(COMMA);
             paramsBuilder.add(o);
         });
 
         if (jsonObject.size() > 0) {
             keysBuilder.delete(keysBuilder.length() - COMMA.length(), keysBuilder.length());
-            builder.delete(builder.length() - COMMA.length(), builder.length());
+            qBuilder.delete(qBuilder.length() - COMMA.length(), qBuilder.length());
         }
 
         return new SqlAndParams(
             "INSERT INTO `" + table + "`(" +
                 keysBuilder.toString() +
-                ") VALUES (" + builder.toString() + ")",
+                ") VALUES (" + qBuilder.toString() + ")",
             new JsonArray(paramsBuilder.build())
         );
     }

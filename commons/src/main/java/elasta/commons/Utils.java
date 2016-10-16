@@ -1,5 +1,8 @@
 package elasta.commons;
 
+import java.util.Map;
+import java.util.concurrent.Callable;
+
 /**
  * Created by Jango on 9/15/2016.
  */
@@ -18,5 +21,13 @@ final public class Utils {
 
     private static boolean isEmptyNullSpace(String val) {
         return (val == null) || val.isEmpty() || val.trim().isEmpty();
+    }
+
+    public static <T> T call(Callable<T> callable) {
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

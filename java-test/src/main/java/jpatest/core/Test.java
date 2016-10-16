@@ -1,7 +1,9 @@
 package jpatest.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import elasta.commons.Utils;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;
@@ -30,7 +32,7 @@ public class Test {
         "  \"driver_class\": \"com.mysql.jdbc.Driver\"\n" +
         "}");
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, JsonProcessingException {
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(Main.PU);
 
@@ -53,16 +55,34 @@ public class Test {
 //            db.findOne("Br", 1L).then(entries -> System.out.println(entries));
 //            db.findAll("Br", Arrays.asList(1L, 2L, 3L)).then(entries -> System.out.println(entries));
 
-            db.findAll("Br", Arrays.asList(16L, 66L, 116L), ImmutableList.of(
-                new FieldInfoBuilder()
-                    .setFields(Arrays.asList("firstName", "lastName", "email", "phone", "dateOfBirth"))
-                    .setPath("")
-                    .createSqlField(),
-                new FieldInfoBuilder()
-                    .setFields(Arrays.asList("buyDate", "id", "price", "name"))
-                    .setPath("tablets")
-                    .createSqlField()
-            )).then(entries -> System.out.println(entries)).err(e -> e.printStackTrace());
+//            db.findAll("Br", Arrays.asList(16L, 66L, 116L), ImmutableList.of(
+//                new FieldInfoBuilder()
+//                    .setFields(Arrays.asList("firstName", "lastName", "email", "phone", "dateOfBirth"))
+//                    .setPath("")
+//                    .createSqlField(),
+//                new FieldInfoBuilder()
+//                    .setFields(Arrays.asList("buyDate", "id", "price", "name"))
+//                    .setPath("tablets")
+//                    .createSqlField()
+//            )).then(entries -> System.out.println(entries)).err(e -> e.printStackTrace());
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            db.insertOrUpdate("Br", new JsonObject(
+                    mapper.writeValueAsString(
+                        Utils.call(() -> {
+                            Br br = new Br();
+
+                            br.setId(284L);
+                            br.setFirstName("8888");
+                            br.setLastName("Banu");
+
+                            return br;
+                        })
+                    )
+                )
+                .put("sohan", "kala")
+            ).then(jsonObject -> System.out.println("result: " + jsonObject)).err(Throwable::printStackTrace);
 
             System.out.println("DB created.");
 

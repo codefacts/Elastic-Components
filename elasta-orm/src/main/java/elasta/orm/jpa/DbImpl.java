@@ -470,7 +470,8 @@ public class DbImpl implements Db {
         }
     }
 
-    private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, TableIdPairs tableIdPairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
+    private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, TableIdPairs tableIdPairs,
+                                                    ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
         ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
         for (Map.Entry<String, PropInfo> entry : modelInfo.getPropInfoMap().entrySet()) {
             if (entry.getValue().hasRelation()) {
@@ -487,6 +488,10 @@ public class DbImpl implements Db {
 
                     JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
 
+                    if (jsonObject == null) {
+                        continue;
+                    }
+
                     operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, tableIdPairs));
 
                     insertOrUpdateOperationRecursively(
@@ -496,20 +501,53 @@ public class DbImpl implements Db {
 
                 } else {
 
+                    JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
+
+                    if (jsonObject == null) {
+                        continue;
+                    }
+
                     insertOrUpdateOperationRecursively(
                         modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
-                        data.getJsonObject(entry.getValue().getName()), tableIdPairs, operationListBuilder
+                        jsonObject, tableIdPairs, operationListBuilder
                     );
                 }
 
             } else {
-                mapBuilder.put(entry.getValue().getColumn(), data.getValue(entry.getValue().getName()));
+
+                Object value = data.getValue(entry.getValue().getName());
+
+                if (value != null) {
+
+                    mapBuilder.put(entry.getValue().getColumn(), value);
+                }
             }
         }
+
+        operationListBuilder.add(
+            new InsertOrUpdateOperationBuilder()
+                .setInsert(
+                    Utils.not(tableIdPairs.getTableIdPairs().contains(
+                        new TableIdPairBuilder()
+                            .setId(data.getValue(modelInfo.getPrimaryKey()))
+                            .setTable(modelInfo.getTable())
+                            .createTableIdPair()
+                    ))
+                )
+                .setTable(modelInfo.getTable())
+                .setPrimaryKey(modelInfo.getPrimaryKey())
+                .setData(new JsonObject(mapBuilder.build()))
+                .createInsertOrUpdateOperation()
+        );
+
     }
 
     private void mergeCollection(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, TableIdPairs tableIdPairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
         JsonArray jsonArray = data.getJsonArray(entry.getValue().getName());
+
+        if (jsonArray == null) {
+            return;
+        }
 
         for (int i = 0; i < jsonArray.size(); i++) {
 

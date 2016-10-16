@@ -197,9 +197,11 @@ final public class Executors {
 
                 try {
 
-                    Promise<Void> promise = errorHandler.apply(error);
+                    PromiseImpl pp = new PromiseImpl<>();
 
-                    return (PromiseImpl) promise.map(aVoid -> signal.val());
+                    errorHandler.apply(error).cmp(signal1 -> pp.reject(signal.err()));
+
+                    return pp;
 
                 } catch (Throwable throwable) {
 
@@ -219,9 +221,17 @@ final public class Executors {
 
             try {
 
-                Promise<Void> promise = completeHandler.apply(signal);
+                PromiseImpl objectPromise = new PromiseImpl<>();
 
-                return (PromiseImpl) promise.map(aVoid -> signal.val());
+                completeHandler.apply(signal).cmp(ss -> {
+                    if (ss.isError()) {
+                        objectPromise.reject(ss.err());
+                    } else {
+                        objectPromise.resolve(signal.val());
+                    }
+                });
+
+                return objectPromise;
 
             } catch (Throwable throwable) {
 

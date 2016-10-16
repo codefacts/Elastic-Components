@@ -8,7 +8,7 @@ public class TableIdPair {
     private final Object id;
     private final RelationTableInfo relationTableInfo;
 
-    public TableIdPair(String table, Object id, boolean relationTable, RelationTableInfo relationTableInfo) {
+    public TableIdPair(String table, Object id, RelationTableInfo relationTableInfo) {
         this.table = table;
         this.id = id;
         this.relationTableInfo = relationTableInfo;
