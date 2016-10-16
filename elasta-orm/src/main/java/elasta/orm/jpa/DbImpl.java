@@ -22,6 +22,7 @@ import javax.persistence.criteria.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static elasta.commons.Utils.not;
 import static elasta.commons.Utils.or;
 
 /**
@@ -45,7 +46,6 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<JsonObject> findOne(String model, T id) {
 
-        ModelInfo modelInfo = modelInfoProvider.get(model);
         return jpa.find(jpa.getModelClass(model), id);
     }
 
@@ -54,7 +54,7 @@ public class DbImpl implements Db {
 
         ModelInfo modelInfo = modelInfoProvider.get(model);
 
-        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields, modelInfo);
+        FieldDetailsInfo fieldDetailsInfo = toFieldDetailsList(selectFields, modelInfo);
 
         return jpa.queryArray(cb -> {
             Class<T> modelClass = jpa.getModelClass(model);
@@ -62,8 +62,8 @@ public class DbImpl implements Db {
             CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
             Root<T> root = query.from(modelClass);
-            for (int i = 0; i < fieldDetailsList.size(); i++) {
-                FieldDetails fieldDetails = fieldDetailsList.get(i);
+            for (int i = 0; i < fieldDetailsInfo.fieldDetailsList.size(); i++) {
+                FieldDetails fieldDetails = fieldDetailsInfo.fieldDetailsList.get(i);
 
                 Join<Object, Object> join = null;
 
@@ -77,14 +77,14 @@ public class DbImpl implements Db {
                 }
             }
 
-            query.multiselect(toSelections(fieldDetailsList, root));
+            query.multiselect(toSelections(fieldDetailsInfo.fieldDetailsList, root));
 
             query.where(cb.equal(root.get(
                 modelInfo.getPrimaryKey()
             ), id));
 
             return query;
-        }).map(toJsonObject(fieldDetailsList, modelInfo));
+        }).map(toJsonObject(fieldDetailsInfo, modelInfo));
     }
 
     @Override
@@ -112,7 +112,7 @@ public class DbImpl implements Db {
 
         ModelInfo modelInfo = modelInfoProvider.get(model);
 
-        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields, modelInfo);
+        FieldDetailsInfo fieldDetailsInfo = toFieldDetailsList(selectFields, modelInfo);
 
         return jpa.queryArray(cb -> {
 
@@ -122,7 +122,7 @@ public class DbImpl implements Db {
 
             Root<T> root = query.from(modelClass);
 
-            query.multiselect(toSelections(fieldDetailsList, root));
+            query.multiselect(toSelections(fieldDetailsInfo.fieldDetailsList, root));
 
             Predicate[] predicates = new Predicate[ids.size()];
 
@@ -135,12 +135,7 @@ public class DbImpl implements Db {
             query.where(cb.equal(root.get(primaryKey), cb.or(predicates)));
 
             return query;
-        }).map(
-            jsonArrayList -> jsonArrayList
-                .stream()
-                .map(ja -> new JsonObject())
-                .collect(Collectors.toList())
-        );
+        }).map(toJsonObjectList(fieldDetailsInfo, modelInfo));
     }
 
     @Override
@@ -276,96 +271,122 @@ public class DbImpl implements Db {
         return updateListBuilder.build();
     }
 
-    private MapHandler<List<JsonArray>, JsonObject> toJsonObject(List<FieldDetails> fieldDetailsList, ModelInfo modelInfo) {
-        return arrays -> convertToJo(arrays, fieldDetailsList, modelInfo);
+    private MapHandler<List<JsonArray>, JsonObject> toJsonObject(FieldDetailsInfo fieldDetailsInfo, ModelInfo modelInfo) {
+        return arrays -> {
+            LinkedHashMultimap<String, IdAndJo> multimap = toMultimap(arrays, fieldDetailsInfo, modelInfo, arrays.stream().findAny().get().getValue(fieldDetailsInfo.rootIdIndex));
+
+            return new JsonObject(
+                toMapRecursive(
+                    multimap.get("").stream().findAny().orElseThrow(
+                        () -> new OrmException("No Object found for model: " + modelInfo.getName())
+                    ).map,
+                    multimap, modelInfo
+                )
+            );
+        };
     }
 
-    private JsonObject convertToJo(List<JsonArray> arrays, List<FieldDetails> fieldDetailsList, ModelInfo modelInfo) {
+    private MapHandler<List<JsonArray>, List<JsonObject>> toJsonObjectList(FieldDetailsInfo fieldDetailsList, ModelInfo modelInfo) {
+        return jsonArrays -> {
+
+            ImmutableList.Builder<JsonObject> listBuilder = ImmutableList.builder();
+
+            LinkedHashMultimap<String, IdAndJo> multimap = toMultimap(jsonArrays, fieldDetailsList, modelInfo, jsonArrays.stream().findAny().get().getValue(fieldDetailsList.rootIdIndex));
+
+            Map<Object, Map<String, Object>> roots = multimap.values().stream().filter(idAndJo -> idAndJo.path.isEmpty())
+                .peek(idAndJo -> listBuilder.add(new JsonObject(idAndJo.map)))
+                .collect(Collectors.toMap(idAndJo -> idAndJo.id, idAndJo -> idAndJo.map));
+
+            for (IdAndJo idAndJo : multimap.values()) {
+                if (idAndJo.path.isEmpty()) continue;
+                updateData(roots.get(idAndJo.rootId), idAndJo, multimap, modelInfo);
+            }
+            return listBuilder.build();
+        };
+    }
+
+    private LinkedHashMultimap<String, IdAndJo> toMultimap(List<JsonArray> arrays, FieldDetailsInfo fieldDetailsList, ModelInfo modelInfo, Object rootId) {
 
         LinkedHashMultimap<String, IdAndJo> multimap = LinkedHashMultimap.create();
 
         for (JsonArray array : arrays) {
             Iterator<Object> iterator = array.iterator();
 
-            for (FieldDetails fieldDetails : fieldDetailsList) {
+            for (FieldDetails fieldDetails : fieldDetailsList.fieldDetailsList) {
 
                 Map<String, Object> map = toMap(fieldDetails, iterator);
 
-                multimap.put(or(fieldDetails.pathStr, ""), new IdAndJo(map.get(modelInfo.getPrimaryKey()), map, fieldDetails.path));
+                multimap.put(or(fieldDetails.pathStr, ""), new IdAndJo(map.get(modelInfo.getPrimaryKey()), map, fieldDetails.path, rootId));
             }
 
         }
-
-        return new JsonObject(
-            toMapRecursive(
-                multimap.get("").stream().findAny().orElseThrow(
-                    () -> new OrmException("No Object found for model: " + modelInfo.getName())
-                ).map,
-                multimap, modelInfo
-            )
-        );
+        return multimap;
     }
 
     private Map<String, Object> toMapRecursive(final Map<String, Object> rootMap, final LinkedHashMultimap<String, IdAndJo> multimap, final ModelInfo rootModelInfo) {
 
         for (IdAndJo idAndJo : multimap.values()) {
 
-            List<String> path = idAndJo.path;
-
-            if (path.isEmpty()) {
+            if (idAndJo.path.isEmpty()) {
                 continue;
             }
 
-            ModelInfo modelInfo = rootModelInfo;
-            Map<String, Object> map = rootMap;
-            for (int i = 0, pathSize_1 = path.size() - 1; i < pathSize_1; i++) {
-                String prop = path.get(i);
+            updateData(rootMap, idAndJo, multimap, rootModelInfo);
+        }
+        return rootMap;
+    }
 
-                PropInfo propInfo = modelInfo.getPropInfoMap().get(prop);
+    private void updateData(Map<String, Object> rootMap, IdAndJo idAndJo, LinkedHashMultimap<String, IdAndJo> multimap, ModelInfo rootModelInfo) {
+        List<String> path = idAndJo.path;
 
-                modelInfo = modelInfoProvider.get(
-                    propInfo.getRelationInfo().getJoinModelInfo().getChildModel()
-                );
+        ModelInfo modelInfo = rootModelInfo;
+        Map<String, Object> map = rootMap;
+        for (int i = 0, pathSize_1 = path.size() - 1; i < pathSize_1; i++) {
+            String prop = path.get(i);
 
-                if (propInfo.isSingular()) {
+            PropInfo propInfo = modelInfo.getPropInfoMap().get(prop);
 
-                    if (Utils.not(map.containsKey(prop))) {
-                        map.put(prop, new LinkedHashMap<>());
-                    }
+            modelInfo = modelInfoProvider.get(
+                propInfo.getRelationInfo().getJoinModelInfo().getChildModel()
+            );
 
-                    map = (Map<String, Object>) map.get(prop);
+            if (propInfo.isSingular()) {
 
-                } else {
-                    throw new OrmException("Model property '" + prop + "' is plural in path '" + idAndJo.path + "'");
+                if (Utils.not(map.containsKey(prop))) {
+                    map.put(prop, new LinkedHashMap<>());
                 }
+
+                map = (Map<String, Object>) map.get(prop);
+
+            } else {
+                throw new OrmException("Model property '" + prop + "' is plural in path '" + idAndJo.path + "'");
             }
+        }
 
-            final String lastProp = path.get(path.size() - 1);
+        final String lastProp = path.get(path.size() - 1);
 
-            if (modelInfo.getPropInfoMap().get(lastProp).isSingular()) {
+        if (modelInfo.getPropInfoMap().get(lastProp).isSingular()) {
 
-                if (Utils.not(map.containsKey(lastProp))) {
+            if (Utils.not(map.containsKey(lastProp))) {
 
-                    map.put(lastProp, idAndJo.map);
-
-                } else {
-
-                    Map<String, Object> mm = (Map<String, Object>) map.get(lastProp);
-                    mm.putAll(idAndJo.map);
-                }
+                map.put(lastProp, idAndJo.map);
 
             } else {
 
-                if (Utils.not(map.containsKey(lastProp))) {
-                    map.put(lastProp, new ArrayList<>());
-                }
-
-                List<Map<String, Object>> list = (List<Map<String, Object>>) map.get(lastProp);
-
-                list.add(idAndJo.map);
+                Map<String, Object> mm = (Map<String, Object>) map.get(lastProp);
+                mm.putAll(idAndJo.map);
             }
+
+        } else {
+
+            if (Utils.not(map.containsKey(lastProp))) {
+                map.put(lastProp, new ArrayList<>());
+            }
+
+            List<Map<String, Object>> list = (List<Map<String, Object>>) map.get(lastProp);
+
+            list.add(idAndJo.map);
         }
-        return rootMap;
     }
 
     private Map<String, Object> toMap(FieldDetails fieldDetails, Iterator<Object> iterator) {
@@ -378,22 +399,36 @@ public class DbImpl implements Db {
         return map;
     }
 
-    private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields, ModelInfo modelInfo) {
+    private FieldDetailsInfo toFieldDetailsList(List<FieldInfo> selectFields, ModelInfo modelInfo) {
         ImmutableList.Builder<FieldDetails> fieldListBuilder = ImmutableList.builder();
 
-        selectFields.forEach(
-            fieldInfo -> {
+        int rootIdIndex = 0;
+        boolean present = selectFields.stream().filter(fieldInfo -> fieldInfo.getPath() == null || fieldInfo.getPath().isEmpty()).findAny().isPresent();
 
-                List<String> fields = fieldInfo.getFields();
-                fields = fields.contains(modelInfo.getPrimaryKey()) ? fields
-                    : ImmutableList.<String>builder().add(modelInfo.getPrimaryKey()).addAll(fields).build();
+        if (not(present)) {
+            fieldListBuilder.add(
+                new FieldDetails("", Collections.emptyList(), Collections.singletonList(modelInfo.getPrimaryKey()))
+            );
+        }
 
-                fieldListBuilder.add(
-                    new FieldDetails(fieldInfo.getPath(), toParts(fieldInfo.getPath()), fields)
-                );
-            });
+        int len = 0;
+        for (FieldInfo fieldInfo : selectFields) {
+            List<String> fields = fieldInfo.getFields();
+            fields = fields.contains(modelInfo.getPrimaryKey()) ? fields
+                : ImmutableList.<String>builder().add(modelInfo.getPrimaryKey()).addAll(fields).build();
 
-        return fieldListBuilder.build();
+            fieldListBuilder.add(
+                new FieldDetails(fieldInfo.getPath(), toParts(fieldInfo.getPath()), fields)
+            );
+
+            if (fieldInfo.getPath() == null || fieldInfo.getPath().isEmpty()) {
+                rootIdIndex = len + fields.indexOf(modelInfo.getPrimaryKey());
+            }
+
+            len += fields.size();
+        }
+
+        return new FieldDetailsInfo(rootIdIndex, fieldListBuilder.build());
     }
 
     private List<String> toParts(String path) {
@@ -601,11 +636,13 @@ public class DbImpl implements Db {
         final Object id;
         final Map<String, Object> map;
         final List<String> path;
+        final Object rootId;
 
-        private IdAndJo(Object id, Map<String, Object> map, List<String> path) {
+        private IdAndJo(Object id, Map<String, Object> map, List<String> path, Object rootId) {
             this.id = id;
             this.map = map;
             this.path = path;
+            this.rootId = rootId;
         }
 
         @Override
@@ -630,6 +667,16 @@ public class DbImpl implements Db {
                 "id=" + id +
                 ", map=" + map +
                 '}';
+        }
+    }
+
+    private static class FieldDetailsInfo {
+        final int rootIdIndex;
+        final List<FieldDetails> fieldDetailsList;
+
+        private FieldDetailsInfo(int rootIdIndex, List<FieldDetails> fieldDetailsList) {
+            this.rootIdIndex = rootIdIndex;
+            this.fieldDetailsList = fieldDetailsList;
         }
     }
 }
