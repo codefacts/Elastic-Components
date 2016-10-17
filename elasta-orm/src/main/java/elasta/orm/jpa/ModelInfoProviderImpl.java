@@ -2,6 +2,7 @@ package elasta.orm.jpa;
 
 import elasta.orm.jpa.models.ModelInfo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
