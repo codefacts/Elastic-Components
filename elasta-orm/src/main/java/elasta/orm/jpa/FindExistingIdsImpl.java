@@ -34,7 +34,12 @@ public class FindExistingIdsImpl implements FindExistingIds {
         String query = finder.queryString(model, data);
 
         return dbSql.query(query, new JsonArray(
-            finder.tablePrimaryKeySet.build().stream().flatMap(tablePrimary -> Stream.of(finder.tableIdSetBuilder.build().get(tablePrimary.getTable()))).collect(Collectors.toList())
+
+            finder.tablePrimaryKeySet.build()
+                .stream().flatMap(
+                tablePrimary -> finder.tableIdSetBuilder.build().get(tablePrimary.getTable()).stream())
+                .collect(Collectors.toList())
+
         )).map(resultSet -> {
             ImmutableSet.Builder<TableIdPair> tableIdPairBuilder = ImmutableSet.builder();
             ImmutableSet.Builder<RelationTableIdPair> relationTableIdPairBuilder = ImmutableSet.builder();
@@ -111,28 +116,30 @@ public class FindExistingIdsImpl implements FindExistingIds {
         }
 
         private void mergeRecursive(ModelInfo primaryModelInfo, JsonObject data,
-                                    ImmutableSet.Builder<TablePrimary> tablePrimaryKeySet, ImmutableSet.Builder<String> tables, ImmutableSetMultimap.Builder<String, Object> tableIdSetBuilder) {
+                                    ImmutableSet.Builder<TablePrimary> tablePrimaryKeySet,
+                                    ImmutableSet.Builder<String> tables, ImmutableSetMultimap.Builder<String, Object> tableIdSetBuilder) {
+
             for (Map.Entry<String, PropInfo> entry : primaryModelInfo.getPropInfoMap().entrySet()) {
                 if (entry.getValue().hasRelation()) {
                     RelationInfo relationInfo = entry.getValue().getRelationInfo();
 
                     ModelInfo modelInfo = modelInfoProvider.get(relationInfo.getJoinModelInfo().getChildModel());
 
-                    tablePrimaryKeySet.add(new TablePrimaryBuilder()
-                        .setTable(modelInfo.getTable())
-                        .setPrimaryKey(modelInfo.getPrimaryKey())
-                        .createTablePrimary());
-                    tables.add(modelInfo.getTable());
-
                     if (relationInfo.getRelationType() == RelationType.ONE_TO_MANY
                         || relationInfo.getRelationType() == RelationType.MANY_TO_MANY) {
+
+                        JsonArray jsonArray = data.getJsonArray(entry.getValue().getName());
+
+                        if (jsonArray == null) {
+                            continue;
+                        }
+
+                        List<JsonObject> joList = jsonArray.getList();
 
                         relationTablePrimaryKeySet.add(
                             new RelationTablePrimary(relationInfo.getRelationTable().getTableName(), relationInfo.getRelationTable().getLeftColumn(), relationInfo.getRelationTable().getRightColumn())
                         );
                         relationTables.add(relationInfo.getRelationTable().getTableName());
-
-                        List<JsonObject> joList = data.getJsonArray(entry.getValue().getName()).getList();
 
                         for (JsonObject jsonObject : joList) {
                             tableIdSetBuilder.put(modelInfo.getTable(), jsonObject.getValue(modelInfo.getPrimaryKey()));
@@ -149,6 +156,11 @@ public class FindExistingIdsImpl implements FindExistingIds {
                     } else {
 
                         JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
+
+                        if (jsonObject == null) {
+                            continue;
+                        }
+
                         tableIdSetBuilder.put(modelInfo.getTable(), jsonObject.getValue(modelInfo.getPrimaryKey()));
 
                         if (relationInfo.getRelationTable() != null) {
@@ -173,6 +185,12 @@ public class FindExistingIdsImpl implements FindExistingIds {
                         }
 
                     }
+
+                    tablePrimaryKeySet.add(new TablePrimaryBuilder()
+                        .setTable(modelInfo.getTable())
+                        .setPrimaryKey(modelInfo.getPrimaryKey())
+                        .createTablePrimary());
+                    tables.add(modelInfo.getTable());
                 }
             }
         }

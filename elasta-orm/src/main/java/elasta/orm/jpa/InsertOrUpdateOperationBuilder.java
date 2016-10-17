@@ -19,7 +19,7 @@ public class InsertOrUpdateOperationBuilder {
         return this;
     }
 
-    public InsertOrUpdateOperationBuilder setPrimaryKey(String primaryKey) {
+    public InsertOrUpdateOperationBuilder setPrimaryColumn(String primaryKey) {
         this.primaryKey = primaryKey;
         return this;
     }

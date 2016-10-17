@@ -3,7 +3,6 @@ package elasta.orm.jpa;
 public class TableIdPairBuilder {
     private String table;
     private Object id;
-    private boolean relationTable;
     private RelationTableInfo relationTableInfo;
 
     public TableIdPairBuilder setTable(String table) {
@@ -16,17 +15,12 @@ public class TableIdPairBuilder {
         return this;
     }
 
-    public TableIdPairBuilder setRelationTable(boolean relationTable) {
-        this.relationTable = relationTable;
-        return this;
-    }
-
     public TableIdPairBuilder setRelationTableInfo(RelationTableInfo relationTableInfo) {
         this.relationTableInfo = relationTableInfo;
         return this;
     }
 
     public TableIdPair createTableIdPair() {
-        return new TableIdPair(table, id, relationTable, relationTableInfo);
+        return new TableIdPair(table, id, relationTableInfo);
     }
 }

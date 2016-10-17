@@ -87,7 +87,7 @@ public class ModelInfoMapHelper {
                 new RelationInfoBuilder()
                     .setChildModelInfo(
                         new ChildModelInfoBuilder()
-                            .setChildModel(mapping.getReferenceClassName())
+                            .setChildModel(mapping.getReferenceClass().getSimpleName())
                             .setJoinField(mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getValue().getName())
                             .createJoinTableInfo()
                     )
@@ -106,7 +106,7 @@ public class ModelInfoMapHelper {
                 new RelationInfoBuilder()
                     .setChildModelInfo(
                         new ChildModelInfoBuilder()
-                            .setChildModel(mapping.getReferenceClassName())
+                            .setChildModel(mapping.getReferenceClass().getSimpleName())
                             .setJoinField(mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getValue().getName())
                             .createJoinTableInfo()
                     )
