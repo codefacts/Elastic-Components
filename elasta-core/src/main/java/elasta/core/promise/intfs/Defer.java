@@ -11,5 +11,7 @@ public interface Defer<T> {
 
     void resolve(T value);
 
+    void filter();
+
     Promise<T> promise();
 }

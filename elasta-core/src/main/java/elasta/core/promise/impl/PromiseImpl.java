@@ -143,14 +143,9 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
         return signal.err();
     }
 
-    public static <T> void reject(final PromiseImpl<T> prevPromise, final Throwable throwable) {
+    static <T> void signal(final PromiseImpl<T> promise, final SignalImpl<T> signal) {
 
-        execute(prevPromise.next, prevPromise.signal = SignalImpl.error(throwable));
-    }
-
-    public static <T> void resolve(final PromiseImpl<T> promise, final T value) {
-
-        execute(promise.next, promise.signal = SignalImpl.success(value));
+        execute(promise.next, promise.signal = signal);
     }
 
     private static <T> void execute(PromiseImpl promise, SignalImpl<T> signal) {
@@ -214,17 +209,22 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
 
     @Override
     public void reject(Throwable throwable) {
-        reject(this, throwable);
+        signal(this, SignalImpl.error(throwable));
     }
 
     @Override
     public void resolve() {
-        resolve(this, null);
+        signal(this, SignalImpl.success(null));
     }
 
     @Override
     public void resolve(T value) {
-        resolve(this, value);
+        signal(this, SignalImpl.success(value));
+    }
+
+    @Override
+    public void filter() {
+        signal(this, SignalImpl.filtered());
     }
 
     @Override

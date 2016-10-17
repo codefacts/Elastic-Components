@@ -132,9 +132,17 @@ final public class Executors {
             if (canExecuteThen(signal)) {
                 try {
 
-                    Promise promise = thenHandler.apply(signal.val());
+                    PromiseImpl<T> promise = new PromiseImpl<>();
 
-                    return (PromiseImpl) promise.map(o -> signal.val());
+                    thenHandler.apply(signal.val()).cmp(ss -> {
+                        if (ss.isError()) {
+                            promise.reject(ss.err());
+                        } else {
+                            PromiseImpl.signal(promise, signal);
+                        }
+                    });
+
+                    return promise;
 
                 } catch (Throwable throwable) {
 
@@ -151,11 +159,22 @@ final public class Executors {
 
                 try {
 
-                    Promise testPromise = filterPHandler.test(signal.val());
+                    PromiseImpl<T> promise = new PromiseImpl<>();
 
-                    return
-                        (PromiseImpl<SignalImpl<T>>) testPromise
-                            .map(testSuccess -> ((Boolean) testSuccess) ? signal.val() : SignalImpl.filtered());
+                    filterPHandler.test(signal.val()).cmp(ss -> {
+                        if (ss.isError()) {
+                            promise.reject(ss.err());
+                        } else {
+
+                            if (ss.val()) {
+                                PromiseImpl.signal(promise, signal);
+                            } else {
+                                promise.filter();
+                            }
+                        }
+                    });
+
+                    return promise;
 
                 } catch (Throwable throwable) {
 
@@ -174,9 +193,8 @@ final public class Executors {
             if (canExecuteMap(signal)) {
 
                 try {
-                    Promise<R> promise = mapHandler.apply(signal.val());
 
-                    return (PromiseImpl<SignalImpl<R>>) promise;
+                    return (PromiseImpl<R>) mapHandler.apply(signal.val());
 
                 } catch (Throwable throwable) {
 
@@ -197,9 +215,19 @@ final public class Executors {
 
                 try {
 
-                    Promise<Void> promise = errorHandler.apply(error);
+                    PromiseImpl<T> tPromise = new PromiseImpl<>();
 
-                    return (PromiseImpl) promise.map(aVoid -> signal.val());
+                    errorHandler.apply(error).cmp(ss -> {
+
+                        if (ss.isError()) {
+
+                            error.addSuppressed(ss.err());
+                        }
+
+                        PromiseImpl.signal(tPromise, signal);
+                    });
+
+                    return tPromise;
 
                 } catch (Throwable throwable) {
 
@@ -213,15 +241,23 @@ final public class Executors {
         };
     }
 
-    public static final <T, R> DeferredExecutor<T, R> deferredCompleteExecutor(CompletePHandler<T> completeHandler) {
+    public static final <T> DeferredExecutor<T, T> deferredCompleteExecutor(CompletePHandler<T> completeHandler) {
 
         return signal -> {
 
             try {
 
-                Promise<Void> promise = completeHandler.apply(signal);
+                PromiseImpl<T> promise = new PromiseImpl<>();
 
-                return (PromiseImpl) promise.map(aVoid -> signal.val());
+                completeHandler.apply(signal).cmp(ss -> {
+                    if (ss.isError()) {
+                        promise.reject(ss.err());
+                    } else {
+                        PromiseImpl.signal(promise, signal);
+                    }
+                });
+
+                return promise;
 
             } catch (Throwable throwable) {
 

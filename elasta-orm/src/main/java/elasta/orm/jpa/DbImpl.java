@@ -1,9 +1,7 @@
 package elasta.orm.jpa;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import elasta.commons.Utils;
+import com.google.common.collect.*;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
@@ -51,7 +49,7 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<JsonObject> findOne(String model, T id, List<FieldInfo> selectFields) {
 
-        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields);
+        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields, model);
 
         return jpa.queryArray(cb -> {
             Class<T> modelClass = jpa.getModelClass(model);
@@ -59,20 +57,6 @@ public class DbImpl implements Db {
             CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
 
             Root<T> root = query.from(modelClass);
-            for (int i = 0; i < fieldDetailsList.size(); i++) {
-                FieldDetails fieldDetails = fieldDetailsList.get(i);
-
-                Join<Object, Object> join = null;
-
-                if (Utils.not(fieldDetails.path.isEmpty())) {
-                    join = root.join(fieldDetails.path.get(0));
-                }
-
-                for (int i1 = 1; i1 < fieldDetails.path.size(); i1++) {
-                    String part = fieldDetails.path.get(i1);
-                    join = join.join(part);
-                }
-            }
 
             query.multiselect(toSelections(fieldDetailsList, root));
 
@@ -107,7 +91,7 @@ public class DbImpl implements Db {
     @Override
     public <T> Promise<List<JsonObject>> findAll(String model, List<T> ids, List<FieldInfo> selectFields) {
 
-        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields);
+        List<FieldDetails> fieldDetailsList = toFieldDetailsList(selectFields, model);
 
         return jpa.queryArray(cb -> {
 
@@ -277,29 +261,38 @@ public class DbImpl implements Db {
 
     private JsonObject convertToJo(List<JsonArray> arrays, List<FieldDetails> fieldDetailsList) {
 
-        HashMap<String, Object> hashMap = new HashMap<>();
+        Multimap<Integer, Map<String, Object>> multimap = LinkedListMultimap.create();
 
-//        final PathMap pathMap = new PathMap(hashMap);
-//
-//        int idx = 0;
-//        for (FieldDetails fieldDetails : fieldDetailsList) {
-//
-//            Map<String, Object> obj = pathMap.get(fieldDetails.path);
-//
-//            for (String field : fieldDetails.fields) {
-//
-//                obj.put(field, arrays.getValue(idx++));
-//            }
-//        }
+        arrays.forEach(array -> {
+            Iterator<Object> iterator = array.iterator();
 
-        return new JsonObject(hashMap);
+            for (int i = 0, fieldDetailsListSize = fieldDetailsList.size(); i < fieldDetailsListSize; i++) {
+                FieldDetails fieldDetails = fieldDetailsList.get(i);
+
+                multimap.put(i, convertToJo2(fieldDetails.fields, iterator));
+            }
+        });
+
+        return new JsonObject();
     }
 
-    private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields) {
+    private Map<String, Object> convertToJo2(List<String> fields, Iterator<Object> iterator) {
+
+        ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
+
+        fields.forEach(field -> mapBuilder.put(field, iterator.next()));
+
+        return mapBuilder.build();
+    }
+
+    private List<FieldDetails> toFieldDetailsList(List<FieldInfo> selectFields, String model) {
         ImmutableList.Builder<FieldDetails> fieldListBuilder = ImmutableList.builder();
 
         selectFields.forEach(fieldInfo -> {
-            fieldListBuilder.add(new FieldDetails(toParts(fieldInfo.getPath()), fieldInfo.getFields()));
+
+            List<String> parts = toParts(fieldInfo.getPath());
+
+            fieldListBuilder.add(new FieldDetails(fieldInfo.getPath(), parts, fieldInfo.getFields()));
         });
 
         return fieldListBuilder.build();
@@ -316,33 +309,39 @@ public class DbImpl implements Db {
         ImmutableList.Builder<Selection<?>> listBuilder = ImmutableList.builder();
 
         selectFields.forEach(fieldInfo -> {
-            Path<T> path = toPath(fieldInfo.path, root);
 
-            fieldInfo.fields.forEach(field -> listBuilder.add(path.get(field)));
+            if (fieldInfo.path.isEmpty()) {
+
+                fieldInfo.fields.forEach(field -> listBuilder.add(root.get(field)));
+
+            } else {
+
+                Join<Object, Object> join = toJoin(fieldInfo.path, root);
+
+                fieldInfo.fields.forEach(field -> listBuilder.add(join.get(field)));
+            }
         });
 
         return listBuilder.build();
     }
 
-    private <T> Path<T> toPath(List<String> path, Root<T> root) {
+    private <T> Join<Object, Object> toJoin(List<String> path, Root<T> root) {
 
-        if (path.isEmpty()) {
-            return root;
+        Join<Object, Object> join = root.join(path.get(0));
+        for (int i = 1; i < path.size(); i++) {
+            join = join.join(path.get(i));
         }
 
-        Path<T> pp = root;
-        for (String part : path) {
-            pp = pp.get(part);
-        }
-
-        return pp;
+        return join;
     }
 
     private static class FieldDetails {
+        final String pathStr;
         final List<String> path;
         final List<String> fields;
 
-        private FieldDetails(List<String> path, List<String> fields) {
+        private FieldDetails(String pathStr, List<String> path, List<String> fields) {
+            this.pathStr = pathStr;
             this.path = path;
             this.fields = fields;
         }
@@ -503,4 +502,5 @@ public class DbImpl implements Db {
                 '}';
         }
     }
+
 }

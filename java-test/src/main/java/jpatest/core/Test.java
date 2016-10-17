@@ -18,6 +18,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.PluralAttribute;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Jango on 10/12/2016.
@@ -65,6 +66,9 @@ public class Test {
             )).then(entries -> System.out.println(entries)).err(e -> e.printStackTrace());
 
             System.out.println("DB created.");
+
+            List<Object[]> resultList = em.createQuery("select br.id, br.firstName, br.lastName, t.price, t.buyDate from Br br join br.tablets t where br.id = 1", Object[].class).getResultList();
+            System.out.println(resultList);
 
             Thread.sleep(Long.MAX_VALUE);
 
