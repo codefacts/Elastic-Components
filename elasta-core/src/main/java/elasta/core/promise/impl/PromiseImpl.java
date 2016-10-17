@@ -164,16 +164,11 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
 
             } else {
 
-                PromiseImpl<SignalImpl> signalPromise = (PromiseImpl<SignalImpl>) promise.executor.execute(signal);
-
                 final PromiseImpl prms = promise;
 
-                signalPromise.cmp(retSignal -> {
+                PromiseImpl pp = (PromiseImpl) promise.executor.execute(signal);
 
-                    prms.signal = (SignalImpl) retSignal;
-
-                    execute(prms.next, prms.signal);
-                });
+                pp.cmp(ss -> signal(prms, (SignalImpl<T>) ss));
 
                 break;
             }
