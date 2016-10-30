@@ -180,6 +180,35 @@ public class Test {
                                         return house;
                                     }));
 
+                                    br.setCommands(
+                                        ImmutableList.of(
+                                            Utils.call(() -> {
+                                                Command command = new Command();
+
+                                                command.setId(568L);
+                                                command.setName("comd@568");
+
+                                                return command;
+                                            }),
+                                            Utils.call(() -> {
+                                                Command command = new Command();
+
+                                                command.setId(569L);
+                                                command.setName("comd@569");
+
+                                                return command;
+                                            }),
+                                            Utils.call(() -> {
+                                                Command command = new Command();
+
+                                                command.setId(570L);
+                                                command.setName("comd@570");
+
+                                                return command;
+                                            })
+                                        )
+                                    );
+
                                     return br;
                                 })
                             )

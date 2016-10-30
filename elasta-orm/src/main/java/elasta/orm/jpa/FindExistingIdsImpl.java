@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.jpa.models.ChildModelInfo;
 import elasta.orm.jpa.models.ModelInfo;
 import elasta.orm.jpa.models.PropInfo;
 import elasta.orm.jpa.models.RelationInfo;
@@ -162,10 +163,11 @@ public class FindExistingIdsImpl implements FindExistingIds {
                 if (entry.getValue().hasRelation()) {
                     RelationInfo relationInfo = entry.getValue().getRelationInfo();
 
-                    ModelInfo modelInfo = modelInfoProvider.get(relationInfo.getJoinModelInfo().getChildModel());
+                    ChildModelInfo joinModelInfo = relationInfo.getJoinModelInfo();
 
-                    if (relationInfo.getRelationType() == RelationType.ONE_TO_MANY
-                        || relationInfo.getRelationType() == RelationType.MANY_TO_MANY) {
+                    ModelInfo childModelInfo = modelInfoProvider.get(joinModelInfo.getChildModel());
+
+                    if (relationInfo.getRelationType() == RelationType.ONE_TO_MANY || relationInfo.getRelationType() == RelationType.MANY_TO_MANY) {
 
                         JsonArray jsonArray = data.getJsonArray(entry.getValue().getName());
 
@@ -173,28 +175,41 @@ public class FindExistingIdsImpl implements FindExistingIds {
                             continue;
                         }
 
-                        relationTablePrimaryKeySet.add(
-                            new RelationTablePrimary(
-                                relationInfo.getRelationTable().getTableName(),
-                                relationInfo.getRelationTable().getLeftColumn(), relationInfo.getRelationTable().getRightColumn()
-                            )
-                        );
-                        relationTablesBuilder.add(relationInfo.getRelationTable().getTableName());
+                        if (relationInfo.getRelationTable() != null) {
 
-                        for (int i = 0, jsonArraySize = jsonArray.size(); i < jsonArraySize; i++) {
-                            JsonObject jsonObject = jsonArray.getJsonObject(i);
-
-                            tableIdSetBuilder.put(modelInfo.getTable(), jsonObject.getValue(modelInfo.getPrimaryKey()));
-
-                            relationTableIdSetBuilder.put(relationInfo.getRelationTable().getTableName(),
-                                new RelationColumnValuePairs(
-                                    data.getValue(primaryModelInfo.getPrimaryKey()),
-                                    jsonObject.getValue(relationInfo.getJoinModelInfo().getJoinField())
+                            relationTablePrimaryKeySet.add(
+                                new RelationTablePrimary(
+                                    relationInfo.getRelationTable().getTableName(),
+                                    relationInfo.getRelationTable().getLeftColumn(), relationInfo.getRelationTable().getRightColumn()
                                 )
                             );
+                            relationTablesBuilder.add(relationInfo.getRelationTable().getTableName());
 
-                            mergeRecursive(modelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);
+                            for (int i = 0, jsonArraySize = jsonArray.size(); i < jsonArraySize; i++) {
+                                JsonObject jsonObject = jsonArray.getJsonObject(i);
+
+                                tableIdSetBuilder.put(childModelInfo.getTable(), jsonObject.getValue(childModelInfo.getPrimaryKey()));
+
+                                relationTableIdSetBuilder.put(relationInfo.getRelationTable().getTableName(),
+                                    new RelationColumnValuePairs(
+                                        data.getValue(primaryModelInfo.getPrimaryKey()),
+                                        jsonObject.getValue(joinModelInfo.getJoinField())
+                                    )
+                                );
+
+                                mergeRecursive(childModelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);
+                            }
+                        } else {
+
+                            for (int i = 0, jsonArraySize = jsonArray.size(); i < jsonArraySize; i++) {
+                                JsonObject jsonObject = jsonArray.getJsonObject(i);
+                                
+                                tableIdSetBuilder.put(childModelInfo.getTable(), jsonObject.getValue(childModelInfo.getPrimaryKey()));
+
+                                mergeRecursive(childModelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);
+                            }
                         }
+
                     } else {
 
                         JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
@@ -203,36 +218,40 @@ public class FindExistingIdsImpl implements FindExistingIds {
                             continue;
                         }
 
-                        tableIdSetBuilder.put(modelInfo.getTable(), jsonObject.getValue(modelInfo.getPrimaryKey()));
+                        tableIdSetBuilder.put(childModelInfo.getTable(), jsonObject.getValue(childModelInfo.getPrimaryKey()));
 
                         if (relationInfo.getRelationTable() != null) {
 
                             relationTablePrimaryKeySet.add(
-                                new RelationTablePrimary(relationInfo.getRelationTable().getTableName(), relationInfo.getRelationTable().getLeftColumn(), relationInfo.getRelationTable().getRightColumn())
+                                new RelationTablePrimary(
+                                    relationInfo.getRelationTable().getTableName(),
+                                    relationInfo.getRelationTable().getLeftColumn(),
+                                    relationInfo.getRelationTable().getRightColumn()
+                                )
                             );
                             relationTablesBuilder.add(relationInfo.getRelationTable().getTableName());
 
                             relationTableIdSetBuilder.put(relationInfo.getRelationTable().getTableName(),
                                 new RelationColumnValuePairs(
                                     data.getValue(primaryModelInfo.getPrimaryKey()),
-                                    jsonObject.getValue(relationInfo.getJoinModelInfo().getJoinField())
+                                    jsonObject.getValue(joinModelInfo.getJoinField())
                                 )
                             );
 
-                            mergeRecursive(modelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);
+                            mergeRecursive(childModelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);
 
                         } else {
 
-                            mergeRecursive(modelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);
+                            mergeRecursive(childModelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);
                         }
 
                     }
 
                     tablePrimaryKeySet.add(new TablePrimaryBuilder()
-                        .setTable(modelInfo.getTable())
-                        .setPrimaryKey(modelInfo.getPrimaryKey())
+                        .setTable(childModelInfo.getTable())
+                        .setPrimaryKey(childModelInfo.getPrimaryKey())
                         .createTablePrimary());
-                    tables.add(modelInfo.getTable());
+                    tables.add(childModelInfo.getTable());
                 }
             }
         }

@@ -9,6 +9,7 @@ import elasta.core.promise.intfs.Promise;
 import elasta.orm.Db;
 import elasta.orm.jpa.models.ModelInfo;
 import elasta.orm.jpa.models.PropInfo;
+import elasta.orm.jpa.models.RelationInfo;
 import elasta.orm.json.core.FieldInfo;
 import elasta.orm.json.core.RelationTable;
 import elasta.orm.json.core.RelationType;
@@ -475,30 +476,31 @@ public class DbImpl implements Db {
         }
     }
 
-    private void insertOrUpdateOperationRecursively(ModelInfo modelInfo, JsonObject data, TableIdPairs tableIdPairs,
+    private void insertOrUpdateOperationRecursively(ModelInfo rootModelInfo, JsonObject rootObject, TableIdPairs tableIdPairs,
                                                     ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
+
         ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
-        for (Map.Entry<String, PropInfo> entry : modelInfo.getPropInfoMap().entrySet()) {
+        for (Map.Entry<String, PropInfo> entry : rootModelInfo.getPropInfoMap().entrySet()) {
             if (entry.getValue().hasRelation()) {
 
                 if (entry.getValue().getRelationInfo().getRelationType() == RelationType.ONE_TO_MANY) {
 
-                    mergeCollection(entry, modelInfo, data, tableIdPairs, operationListBuilder);
+                    mergeCollection(entry, rootModelInfo, rootObject, tableIdPairs, operationListBuilder);
 
                 } else if (entry.getValue().getRelationInfo().getRelationType() == RelationType.MANY_TO_MANY) {
 
-                    mergeCollection(entry, modelInfo, data, tableIdPairs, operationListBuilder);
+                    mergeCollection(entry, rootModelInfo, rootObject, tableIdPairs, operationListBuilder);
 
                 } else if (entry.getValue().hasRelationTable()) {
 
-                    JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
+                    JsonObject jsonObject = rootObject.getJsonObject(entry.getValue().getName());
 
                     if (jsonObject == null) {
                         continue;
                     }
 
                     RelationTable relationTable = entry.getValue().getRelationInfo().getRelationTable();
-                    Object modelId = data.getValue(modelInfo.getPrimaryKey());
+                    Object modelId = rootObject.getValue(rootModelInfo.getPrimaryKey());
                     Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
 
                     boolean isInsert = Utils.not(
@@ -522,7 +524,7 @@ public class DbImpl implements Db {
 
                 } else {
 
-                    JsonObject jsonObject = data.getJsonObject(entry.getValue().getName());
+                    JsonObject jsonObject = rootObject.getJsonObject(entry.getValue().getName());
 
                     if (jsonObject == null) {
                         continue;
@@ -538,7 +540,7 @@ public class DbImpl implements Db {
 
             } else {
 
-                Object value = data.getValue(entry.getValue().getName());
+                Object value = rootObject.getValue(entry.getValue().getName());
 
                 if (value != null) {
 
@@ -552,21 +554,21 @@ public class DbImpl implements Db {
                 .setInsert(
                     Utils.not(tableIdPairs.getTableIdPairs().contains(
                         new TableIdPairBuilder()
-                            .setId(data.getValue(modelInfo.getPrimaryKey()))
-                            .setTable(modelInfo.getTable())
+                            .setId(rootObject.getValue(rootModelInfo.getPrimaryKey()))
+                            .setTable(rootModelInfo.getTable())
                             .createTableIdPair()
                     ))
                 )
-                .setTable(modelInfo.getTable())
-                .setPrimaryColumn(modelInfo.getPrimaryColumn())
+                .setTable(rootModelInfo.getTable())
+                .setPrimaryColumn(rootModelInfo.getPrimaryColumn())
                 .setData(new JsonObject(mapBuilder.build()))
                 .createInsertOrUpdateOperation()
         );
 
     }
 
-    private void mergeCollection(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, TableIdPairs tableIdPairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
-        JsonArray jsonArray = data.getJsonArray(entry.getValue().getName());
+    private void mergeCollection(Map.Entry<String, PropInfo> entry, final ModelInfo rootModelInfo, JsonObject rootObject, TableIdPairs tableIdPairs, ImmutableList.Builder<InsertOrUpdateOperation> operationListBuilder) {
+        JsonArray jsonArray = rootObject.getJsonArray(entry.getValue().getName());
 
         if (jsonArray == null) {
             return;
@@ -576,26 +578,44 @@ public class DbImpl implements Db {
 
             JsonObject jsonObject = jsonArray.getJsonObject(i);
 
-            RelationTable relationTable = entry.getValue().getRelationInfo().getRelationTable();
-            Object modelId = data.getValue(modelInfo.getPrimaryKey());
-            Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
+            RelationInfo relationInfo = entry.getValue().getRelationInfo();
+            RelationTable relationTable = relationInfo.getRelationTable();
 
-            boolean isInsert = Utils.not(
-                tableIdPairs.getRelationTableIdPairs().contains(
-                    new RelationTableIdPair(
-                        relationTable.getTableName(),
-                        modelId,
-                        childModelId
+            ModelInfo childModelInfo = modelInfoProvider.get(relationInfo.getJoinModelInfo().getChildModel());
+
+            String joinField = relationInfo.getJoinModelInfo().getJoinField();
+
+            if (relationTable != null) {
+
+                Object modelId = rootObject.getValue(rootModelInfo.getPrimaryKey());
+                Object childModelId = jsonObject.getValue(joinField);
+
+                boolean isInsert = Utils.not(
+                    tableIdPairs.getRelationTableIdPairs().contains(
+                        new RelationTableIdPair(
+                            relationTable.getTableName(),
+                            modelId,
+                            childModelId
+                        )
                     )
-                )
-            );
+                );
 
-            if (isInsert) {
-                operationListBuilder.add(relation(isInsert, relationTable, modelId, childModelId));
+                if (isInsert) {
+                    operationListBuilder.add(relation(isInsert, relationTable, modelId, childModelId));
+                }
+
+            } else {
+
+                if (Utils.not(jsonObject.containsKey(joinField))) {
+
+                    jsonObject.put(joinField, new JsonObject().put(
+                        rootModelInfo.getPrimaryKey(), rootObject.getValue(rootModelInfo.getPrimaryKey())
+                    ));
+                }
             }
 
             insertOrUpdateOperationRecursively(
-                modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
+                childModelInfo,
                 jsonObject, tableIdPairs, operationListBuilder
             );
         }

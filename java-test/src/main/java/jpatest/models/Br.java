@@ -42,6 +42,14 @@ public class Br extends Employee {
         this.tablets = tablets;
     }
 
+    public List<Command> getCommands() {
+        return commands;
+    }
+
+    public void setCommands(List<Command> commands) {
+        this.commands = commands;
+    }
+
     @Override
     public String toString() {
         return "Br{" +
