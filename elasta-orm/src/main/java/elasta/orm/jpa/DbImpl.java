@@ -2,7 +2,6 @@ package elasta.orm.jpa;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
-import com.google.common.collect.*;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.MapHandler;
@@ -229,24 +228,6 @@ public class DbImpl implements Db {
                             .setUpdateOperationType(UpdateOperationType.INSERT)
                             .setTable(operation.table)
                             .setData(operation.data)
-                            .createUpdateTpl()
-                    );
-                } else {
-
-                    relationsBuilder.add(
-                        new UpdateTplBuilder()
-                            .setUpdateOperationType(UpdateOperationType.UPDATE)
-                            .setTable(operation.table)
-                            .setData(operation.data)
-                            .setWhere(
-                                operation.getTable() + "." + operation.getRelationTableColumns().getLeftColumn() + " = ? and " +
-                                    operation.getTable() + "." + operation.getRelationTableColumns().getRightColumn() + " = ?"
-                            )
-                            .setJsonArray(new JsonArray(
-                                ImmutableList.of(
-                                    operation.data.getValue(operation.getRelationTableColumns().getLeftColumn()),
-                                    operation.data.getValue(operation.getRelationTableColumns().getRightColumn())
-                                )))
                             .createUpdateTpl()
                     );
                 }
@@ -516,7 +497,23 @@ public class DbImpl implements Db {
                         continue;
                     }
 
-                    operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, tableIdPairs));
+                    RelationTable relationTable = entry.getValue().getRelationInfo().getRelationTable();
+                    Object modelId = data.getValue(modelInfo.getPrimaryKey());
+                    Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
+
+                    boolean isInsert = Utils.not(
+                        tableIdPairs.getRelationTableIdPairs().contains(
+                            new RelationTableIdPair(
+                                relationTable.getTableName(),
+                                modelId,
+                                childModelId
+                            )
+                        )
+                    );
+
+                    if (isInsert) {
+                        operationListBuilder.add(relation(isInsert, relationTable, modelId, childModelId));
+                    }
 
                     insertOrUpdateOperationRecursively(
                         modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
@@ -579,7 +576,23 @@ public class DbImpl implements Db {
 
             JsonObject jsonObject = jsonArray.getJsonObject(i);
 
-            operationListBuilder.add(relation(entry, modelInfo, data, jsonObject, tableIdPairs));
+            RelationTable relationTable = entry.getValue().getRelationInfo().getRelationTable();
+            Object modelId = data.getValue(modelInfo.getPrimaryKey());
+            Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
+
+            boolean isInsert = Utils.not(
+                tableIdPairs.getRelationTableIdPairs().contains(
+                    new RelationTableIdPair(
+                        relationTable.getTableName(),
+                        modelId,
+                        childModelId
+                    )
+                )
+            );
+
+            if (isInsert) {
+                operationListBuilder.add(relation(isInsert, relationTable, modelId, childModelId));
+            }
 
             insertOrUpdateOperationRecursively(
                 modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
@@ -588,23 +601,10 @@ public class DbImpl implements Db {
         }
     }
 
-    private InsertOrUpdateOperation relation(Map.Entry<String, PropInfo> entry, ModelInfo modelInfo, JsonObject data, JsonObject jsonObject, TableIdPairs tableIdPairs) {
-
-        RelationTable relationTable = entry.getValue().getRelationInfo().getRelationTable();
-
-        Object modelId = data.getValue(modelInfo.getPrimaryKey());
-        Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
+    private InsertOrUpdateOperation relation(boolean isInsert, RelationTable relationTable, Object modelId, Object childModelId) {
 
         return new InsertOrUpdateOperationBuilder()
-            .setInsert(Utils.not(
-                tableIdPairs.getRelationTableIdPairs().contains(
-                    new RelationTableIdPair(
-                        relationTable.getTableName(),
-                        modelId,
-                        childModelId
-                    )
-                )
-            )).setTable(relationTable.getTableName())
+            .setInsert(isInsert).setTable(relationTable.getTableName())
             .setRelationTableColumns(
                 new RelationTableColumns(relationTable.getLeftColumn(), relationTable.getRightColumn())
             ).setData(

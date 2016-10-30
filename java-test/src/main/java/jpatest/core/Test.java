@@ -100,7 +100,7 @@ public class Test {
                                                 Tablet tablet = new Tablet();
 
                                                 tablet.setId(897L);
-                                                tablet.setName("T@897");
+                                                tablet.setName("T#897");
 
                                                 return tablet;
                                             }),
@@ -108,7 +108,23 @@ public class Test {
                                                 Tablet tablet = new Tablet();
 
                                                 tablet.setId(898L);
-                                                tablet.setName("T@898");
+                                                tablet.setName("T#898");
+
+                                                return tablet;
+                                            }),
+                                            Utils.call(() -> {
+                                                Tablet tablet = new Tablet();
+
+                                                tablet.setId(899L);
+                                                tablet.setName("T@896");
+
+                                                return tablet;
+                                            }),
+                                            Utils.call(() -> {
+                                                Tablet tablet = new Tablet();
+
+                                                tablet.setId(900L);
+                                                tablet.setName("T@896");
 
                                                 return tablet;
                                             })
