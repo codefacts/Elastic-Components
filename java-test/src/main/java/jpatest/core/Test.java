@@ -5,15 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
 import elasta.composer.transformation.impl.json.object.RemoveNullsTransformation;
+import elasta.composer.util.Util;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
-import jpatest.models.Ac;
-import jpatest.models.Br;
-import jpatest.models.Supervisor;
+import jpatest.models.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -81,10 +80,10 @@ public class Test {
                                 Utils.call(() -> {
                                     Br br = new Br();
 
-                                    br.setId(850L);
+                                    br.setId(851L);
                                     br.setDateOfBirth(new Date());
                                     br.setEmail("sona@kaku.com");
-                                    br.setFirstName("hala");
+                                    br.setFirstName("br@851");
                                     br.setLastName("kk");
 
 //                                    br.setTablets(
@@ -97,9 +96,9 @@ public class Test {
                                         Utils.call(() -> {
                                             Supervisor supervisor = new Supervisor();
 
-                                            supervisor.setId(890L);
+                                            supervisor.setId(895L);
                                             supervisor.setEmail("spp@dk.com");
-                                            supervisor.setFirstName("moni");
+                                            supervisor.setFirstName("sup895");
                                             supervisor.setLastName("akter");
                                             supervisor.setDateOfBirth(new Date());
                                             supervisor.setJoinDate(new Date());
@@ -109,11 +108,28 @@ public class Test {
                                                 Utils.call(() -> {
                                                     Ac ac = new Ac();
 
-                                                    ac.setId(783L);
+                                                    ac.setId(775L);
                                                     ac.setDateOfBirth(new Date());
-                                                    ac.setFirstName("komol");
+                                                    ac.setFirstName("ac@775");
                                                     ac.setLastName("banu");
                                                     ac.setEmail("ac@dd.com");
+
+                                                    ac.setArea(Utils.call(() -> {
+                                                        Area area = new Area();
+
+                                                        area.setId(91L);
+                                                        area.setName("Area@91");
+                                                        area.setRegion(Utils.call(() -> {
+                                                            Region region = new Region();
+
+                                                            region.setId(89L);
+                                                            region.setName("Region@89");
+
+                                                            return region;
+                                                        }));
+
+                                                        return area;
+                                                    }));
 
                                                     return ac;
                                                 })
@@ -122,6 +138,23 @@ public class Test {
                                             return supervisor;
                                         })
                                     );
+
+                                    br.setHouse(Utils.call(() -> {
+                                        House house = new House();
+
+                                        house.setId(566L);
+                                        house.setName("house@566");
+
+                                        house.setArea(Utils.call(() -> {
+                                            Area area = new Area();
+
+                                            area.setId(91L);
+
+                                            return area;
+                                        }));
+
+                                        return house;
+                                    }));
 
                                     return br;
                                 })
