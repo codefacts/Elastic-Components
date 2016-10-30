@@ -5,8 +5,8 @@ import elasta.composer.validator.ValidationPipeline;
 import elasta.composer.validator.ValidationResult;
 import elasta.composer.validator.composer.JsonObjectValidatorComposer;
 import elasta.core.promise.impl.Promises;
-import elasta.core.statemachine.StateMachine;
-import elasta.core.statemachine.StateMachineBuilder;
+import elasta.core.flow.Flow;
+import elasta.core.flow.FlowBuilder;
 import elasta.module.ModuleSystem;
 import elasta.webutils.CrudBuilder;
 import elasta.webutils.EventAddresses;
@@ -36,19 +36,19 @@ public class AppImpl {
 
         crudBuilder.addRoutesAndHandlers(router, "/api", "users", machineMapUsers(moduleSystem));
 
-        crudBuilder.addRoutesAndHandlers(router, "/api", "books");
-
-        crudBuilder.addRoutesAndHandlers(router, "/api", "taxes");
-
-        crudBuilder.addRoutesAndHandlers(router, "/api", "tokens");
+//        crudBuilder.addRoutesAndHandlers(router, "/api", "books");
+//
+//        crudBuilder.addRoutesAndHandlers(router, "/api", "taxes");
+//
+//        crudBuilder.addRoutesAndHandlers(router, "/api", "tokens");
 
         moduleSystem.require(Vertx.class).createHttpServer().requestHandler(router::accept).listen(6500);
 
         System.out.println("started");
     }
 
-    private static Map<String, StateMachine> machineMapUsers(ModuleSystem moduleSystem) {
-        StateMachineBuilder machineBuilder = moduleSystem.require(StateMachineBuilder.class, EventAddresses.CREATE);
+    private static Map<String, Flow> machineMapUsers(ModuleSystem moduleSystem) {
+        FlowBuilder machineBuilder = moduleSystem.require(FlowBuilder.class, EventAddresses.CREATE);
 
         JsonObjectValidatorComposer composer = new JsonObjectValidatorComposer(new ArrayList<>(), moduleSystem.require(MessageBundle.class));
 
@@ -64,14 +64,14 @@ public class AppImpl {
             List<ValidationResult> validationResults = validationPipeline.validate(val.getJsonObject(ReqCnst.BODY));
 
             if (validationResults == null) {
-                return Promises.just(StateMachine.triggerNext(val));
+                return Promises.just(Flow.triggerNext(val));
             } else {
-                return Promises.just(StateMachine.trigger(EventCnst.VALIDATION_FAIL, validationResults));
+                return Promises.just(Flow.trigger(EventCnst.VALIDATION_FAIL, validationResults));
             }
         });
 
         machineBuilder.handlers(StateCnst.CREATE, val -> {
-            
+            return null;
         });
 
         return null;

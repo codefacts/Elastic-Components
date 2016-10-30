@@ -1,6 +1,6 @@
 package elasta.webutils;
 
-import elasta.core.statemachine.StateMachine;
+import elasta.core.flow.Flow;
 import io.vertx.ext.web.Router;
 
 import java.util.Map;
@@ -10,5 +10,5 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface CrudBuilder {
-    void addRoutesAndHandlers(Router router, String prefixUri, String resourceName, Map<String, StateMachine> machineMap);
+    void addRoutesAndHandlers(Router router, String prefixUri, String resourceName, Map<String, Flow> machineMap);
 }

@@ -1,41 +1,41 @@
 package elasta.webutils;
 
-import elasta.core.statemachine.StateMachine;
+import elasta.core.flow.Flow;
 
 public class CrudStateMachinesBuilder {
-    private StateMachine find;
-    private StateMachine findAll;
-    private StateMachine create;
-    private StateMachine updateAllProperties;
-    private StateMachine updateSomeProperties;
-    private StateMachine delete;
+    private Flow find;
+    private Flow findAll;
+    private Flow create;
+    private Flow updateAllProperties;
+    private Flow updateSomeProperties;
+    private Flow delete;
 
-    public CrudStateMachinesBuilder setFind(StateMachine find) {
+    public CrudStateMachinesBuilder setFind(Flow find) {
         this.find = find;
         return this;
     }
 
-    public CrudStateMachinesBuilder setFindAll(StateMachine findAll) {
+    public CrudStateMachinesBuilder setFindAll(Flow findAll) {
         this.findAll = findAll;
         return this;
     }
 
-    public CrudStateMachinesBuilder setCreate(StateMachine create) {
+    public CrudStateMachinesBuilder setCreate(Flow create) {
         this.create = create;
         return this;
     }
 
-    public CrudStateMachinesBuilder setUpdateAllProperties(StateMachine updateAllProperties) {
+    public CrudStateMachinesBuilder setUpdateAllProperties(Flow updateAllProperties) {
         this.updateAllProperties = updateAllProperties;
         return this;
     }
 
-    public CrudStateMachinesBuilder setUpdateSomeProperties(StateMachine updateSomeProperties) {
+    public CrudStateMachinesBuilder setUpdateSomeProperties(Flow updateSomeProperties) {
         this.updateSomeProperties = updateSomeProperties;
         return this;
     }
 
-    public CrudStateMachinesBuilder setDelete(StateMachine delete) {
+    public CrudStateMachinesBuilder setDelete(Flow delete) {
         this.delete = delete;
         return this;
     }

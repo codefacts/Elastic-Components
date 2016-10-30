@@ -1,9 +1,9 @@
 package elasta.core;
 
 import elasta.core.promise.impl.Promises;
-import elasta.core.statemachine.StateMachine;
+import elasta.core.flow.Flow;
 
-import static elasta.core.statemachine.StateEntry.on;
+import static elasta.core.flow.FlowEntry.on;
 
 /**
  * Created by Jango on 9/10/2016.
@@ -17,29 +17,29 @@ public class StateMachineTest {
 
     private static void test1() {
 
-        StateMachine.builder()
+        Flow.builder()
             .when("start",
                 on("ok", "respond"),
                 on("err", "errState"),
                 on("fuck", "fuckState"))
-            .exec("errState", StateMachine.exec(o -> {
+            .exec("errState", Flow.exec(o -> {
                 System.out.println("errState");
-                return Promises.just(StateMachine.exit("errState"));
+                return Promises.just(Flow.exit("errState"));
             }, null))
-            .exec("fuckState", StateMachine.exec(null, () -> {
+            .exec("fuckState", Flow.exec(null, () -> {
                 System.out.println("fuckState: end");
                 return Promises.empty();
             }))
-            .exec("respond", StateMachine.exec(t -> {
+            .exec("respond", Flow.exec(t -> {
                 System.out.println("res");
-                return Promises.just(StateMachine.exit());
+                return Promises.just(Flow.exit());
             }, () -> {
                 System.out.println("res:end");
                 return Promises.empty();
             }))
-            .exec("start", StateMachine.exec(o -> {
+            .exec("start", Flow.exec(o -> {
                 System.out.println("ok gury");
-                return Promises.just(StateMachine.<String>trigger("fuck", "ok"));
+                return Promises.just(Flow.<String>trigger("fuck", "ok"));
             }, () -> {
                 System.out.println("start: end");
                 return Promises.empty();

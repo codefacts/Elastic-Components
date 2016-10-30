@@ -2,7 +2,7 @@ package elasta.webutils;
 
 import com.google.common.collect.ImmutableList;
 import elasta.commons.ReflectionUtils;
-import elasta.core.statemachine.StateMachine;
+import elasta.core.flow.Flow;
 import elasta.module.ModuleSystem;
 import io.vertx.core.eventbus.EventBus;
 
@@ -25,7 +25,7 @@ public class EventHandlerGenerator {
         this.eventHandlerBuilder = eventHandlerBuilder;
     }
 
-    public List<EventSpec> makeHandlers(String resourceName, Map<String, StateMachine> machineMap) {
+    public List<EventSpec> makeHandlers(String resourceName, Map<String, Flow> machineMap) {
         ImmutableList.Builder<EventSpec> builder = ImmutableList.builder();
 
         ReflectionUtils.staticFinalValues(EventAddresses.class).forEach(

@@ -1,7 +1,7 @@
 package elasta.webutils;
 
 import elasta.core.promise.intfs.Promise;
-import elasta.core.statemachine.StateMachine;
+import elasta.core.flow.Flow;
 import io.vertx.core.MultiMap;
 import io.vertx.core.json.JsonObject;
 
@@ -10,5 +10,5 @@ import io.vertx.core.json.JsonObject;
  */
 @FunctionalInterface
 public interface StateMachineStarter<R> {
-    Promise<R> startMachine(StateMachine machine, JsonObject body, MultiMap headers, String address, String replyAddress);
+    Promise<R> startMachine(Flow machine, JsonObject body, MultiMap headers, String address, String replyAddress);
 }

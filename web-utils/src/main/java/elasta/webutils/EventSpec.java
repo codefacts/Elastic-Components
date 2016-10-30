@@ -1,7 +1,5 @@
 package elasta.webutils;
 
-import elasta.core.statemachine.StateMachine;
-
 /**
  * Created by Jango on 9/12/2016.
  */
