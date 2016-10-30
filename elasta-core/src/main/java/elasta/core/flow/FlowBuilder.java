@@ -90,7 +90,7 @@ public class FlowBuilder {
 
         eventToStateMapByState.forEach((state, eventToStateMap) -> mapBuilder.put(state, ImmutableMap.copyOf(eventToStateMap)));
 
-        return null;
+        return mapBuilder.build();
     }
 
     private Map<String, Set<String>> immutableCopyOf(Map<String, Set<String>> eventsByStateMap) {
