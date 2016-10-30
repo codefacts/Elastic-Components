@@ -2,7 +2,6 @@ package elasta.core.flow;
 
 import elasta.core.intfs.FunctionUnchecked;
 import elasta.core.promise.impl.Promises;
-import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.Promise;
 
 import java.util.Map;
@@ -13,31 +12,24 @@ import java.util.concurrent.Callable;
  * Created by Khan on 5/7/2016.
  */
 public class Flow {
-    private static final FlowTrigger STATE_TRIGGER = FlowTrigger.create(null, null);
+    private static final FlowTrigger DEFAULT_STATE_TRIGGER = FlowTrigger.create(null, null);
     private static final String NEXT = "next";
     private final String initialState;
-    private final Map<String, Set<String>> stateEvents;
-    private final Map<String, Map<String, String>> eventStateMapByState;
+    private final Map<String, Set<String>> eventsByStateMap;
+    private final Map<String, Map<String, String>> eventToStateMapByPrevState;
     private final Map<String, FlowCallbacks> stateCallbacksMap;
 
-    public Flow(String initialState, Map<String, Set<String>> stateEvents,
-                Map<String, Map<String, String>> eventStateMapByState,
+    public Flow(String initialState, Map<String, Set<String>> eventsByStateMap,
+                Map<String, Map<String, String>> eventToStateMapByState,
                 Map<String, FlowCallbacks> stateCallbacksMap) {
         this.initialState = initialState;
-        this.stateEvents = stateEvents;
-        this.eventStateMapByState = eventStateMapByState;
+        this.eventsByStateMap = eventsByStateMap;
+        this.eventToStateMapByPrevState = eventToStateMapByState;
         this.stateCallbacksMap = stateCallbacksMap;
     }
 
     public <T, R> Promise<R> start(T message) {
-        try {
-            final FlowCallbacks<T, Object> flowCallbacks = stateCallbacksMap.get(initialState);
-            return execute(flowCallbacks, message)
-                .mapP(trigger -> executeNext(trigger, initialState))
-                .map(stateTrigger -> (R) stateTrigger.message);
-        } catch (Throwable ex) {
-            return Promises.error(ex);
-        }
+        return start(initialState, message);
     }
 
     public <T, R> Promise<R> start(String state, T message) {
@@ -51,44 +43,32 @@ public class Flow {
         }
     }
 
-    private <R> Promise<FlowTrigger<R>> executeNext(FlowTrigger<Object> trigger, String prevState) {
+    private <R> Promise<FlowTrigger<R>> executeNext(FlowTrigger trigger, String state) {
 
-        final Set<String> events = stateEvents.get(prevState);
+        final Set<String> events = eventsByStateMap.get(state);
 
-        if (events == null || events.size() == 0) {
+        if (events.size() == 0) {
 
             if (trigger == null) {
                 return Promises.just(Flow.this.defaultStateTrigger());
             }
 
-            return Promises.just((FlowTrigger<R>) trigger);
+            return Promises.just(trigger);
         }
 
         if (trigger == null || trigger.event == null) {
-            return Promises.error(new FlowException("Invalid trigger '" + trigger + "' from state '" + prevState + "'."));
+            return Promises.error(new FlowException("Invalid trigger '" + trigger + "' from state '" + state + "'."));
         }
 
         if (!events.contains(trigger.event)) {
-            return Promises.error(new FlowException("Invalid event '" + trigger.event + "' on trigger from state '" + prevState + "'."));
+            return Promises.error(new FlowException("Invalid event '" + trigger.event + "' on trigger from state '" + state + "'."));
         }
 
-        final Map<String, String> esMap = eventStateMapByState.get(prevState);
-
-        if (esMap == null) {
-            return Promises.error(new FlowException("No \"event to state\" mapping found for state '" + prevState + "'."));
-        }
+        final Map<String, String> esMap = eventToStateMapByPrevState.get(state);
 
         final String nextState = esMap.get(trigger.event);
 
-        if (nextState == null) {
-            return Promises.error(new FlowException("No state is found for event '" + trigger.event + "' for state '" + prevState + "'."));
-        }
-
         final FlowCallbacks<Object, Object> nextFlowCallbacks = stateCallbacksMap.get(nextState);
-
-        if (nextFlowCallbacks == null) {
-            return Promises.error(new FlowException("Callbacks is missing for state '" + nextState + "'"));
-        }
 
         return Flow.this.execute(nextFlowCallbacks, trigger.message)
             .mapP(sTrigger -> executeNext(sTrigger, nextState));
@@ -96,38 +76,20 @@ public class Flow {
 
     private <T, R> Promise<FlowTrigger<R>> execute(FlowCallbacks<T, R> flowCallbacks, T message) {
         try {
-            final Defer<FlowTrigger<R>> defer = Promises.defer();
-            flowCallbacks.onEnter.apply(message)
-                .cmp(
-                    promise -> {
-                        if (promise.isError()) {
-                            defer.reject(promise.err());
-                            return;
-                        }
-                        final Promise<Void> voidPromise = flowCallbacks.onExit.call();
-                        if (voidPromise == null) {
-                            defer.resolve(promise.val());
-                        } else {
-                            voidPromise
-                                .cmp(p -> {
-                                    if (p.isSuccess()) {
-                                        defer.resolve(promise.val());
-                                    } else {
-                                        defer.reject(p.err());
-                                    }
-                                });
-                        }
-                    })
-                .err(defer::reject)
-            ;
-            return defer.promise();
-        } catch (Throwable e) {
-            return Promises.error(e);
+            return flowCallbacks.onEnter.apply(message)
+                .cmpP(signal -> {
+
+                    Promise<Void> voidPromise = flowCallbacks.onExit.call();
+                    return voidPromise == null ? Promises.empty() : voidPromise;
+                });
+
+        } catch (Throwable throwable) {
+            return Promises.error(throwable);
         }
     }
 
     private <RR> FlowTrigger<RR> defaultStateTrigger() {
-        return STATE_TRIGGER;
+        return DEFAULT_STATE_TRIGGER;
     }
 
     public static FlowBuilder builder() {
