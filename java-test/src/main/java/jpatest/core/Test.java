@@ -88,22 +88,7 @@ public class Test {
 
                                     br.setTablets(
                                         ImmutableList.of(
-                                            Utils.call(() -> {
-                                                Tablet tablet = new Tablet();
 
-                                                tablet.setId(896L);
-                                                tablet.setName("T@896");
-
-                                                return tablet;
-                                            }),
-                                            Utils.call(() -> {
-                                                Tablet tablet = new Tablet();
-
-                                                tablet.setId(897L);
-                                                tablet.setName("T#897");
-
-                                                return tablet;
-                                            }),
                                             Utils.call(() -> {
                                                 Tablet tablet = new Tablet();
 
@@ -115,7 +100,7 @@ public class Test {
                                             Utils.call(() -> {
                                                 Tablet tablet = new Tablet();
 
-                                                tablet.setId(899L);
+                                                tablet.setId(599L);
                                                 tablet.setName("T@896");
 
                                                 return tablet;
