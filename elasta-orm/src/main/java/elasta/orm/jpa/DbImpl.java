@@ -308,7 +308,10 @@ public class DbImpl implements Db {
             } else {
 
 
-                RelationTableIdPair relationTableIdPair = new RelationTableIdPair(op.table, op.getRelationTableColumns().getLeftColumn(), op.getRelationTableColumns().getRightColumn());
+                RelationTableIdPair relationTableIdPair = new RelationTableIdPair(op.table,
+                    op.data.getValue(op.getRelationTableColumns().getLeftColumn()),
+                    op.data.getValue(op.getRelationTableColumns().getRightColumn())
+                );
 
                 if (Utils.not(relationTableIdPairMap.containsKey(relationTableIdPair))) {
 
@@ -318,16 +321,16 @@ public class DbImpl implements Db {
 
                     InsertOrUpdateOperation operation = relationTableIdPairMap.get(relationTableIdPair);
 
+                    HashMap<String, Object> map = new HashMap<>(operation.data.getMap());
+                    map.putAll(op.data.getMap());
+
                     operation = new InsertOrUpdateOperationBuilder()
                         .setInsert(operation.insert)
                         .setTable(operation.table)
                         .setPrimaryColumn(operation.primaryKey)
                         .setRelationTableColumns(operation.relationTableColumns)
                         .setData(
-                            new JsonObject(ImmutableMap.<String, Object>builder()
-                                .putAll(operation.getData().getMap())
-                                .putAll(op.getData().getMap())
-                                .build())
+                            new JsonObject(map)
                         )
                         .createInsertOrUpdateOperation();
 
