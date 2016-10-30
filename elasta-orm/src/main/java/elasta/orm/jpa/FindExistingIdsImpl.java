@@ -106,7 +106,7 @@ public class FindExistingIdsImpl implements FindExistingIds {
                     " in (" +
                     multimap.get(tablePrimary.getTable()).stream().map(o -> "?").collect(Collectors.joining(COMMA)) +
                     ")"
-            ).collect(Collectors.joining(COMMA));
+            ).collect(Collectors.joining(_OR_));
 
             String relationWhere = relationTablePrimaryKeySet.build().stream().map(
                 tablePrimary -> "(" + tablePrimary.getRelationTable() + "." + tablePrimary.getLeftColumn() + " = ? and " + tablePrimary.getRelationTable() + "." + tablePrimary.getRightColumn() + " = ?" + ")"

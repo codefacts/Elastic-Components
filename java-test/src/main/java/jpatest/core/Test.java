@@ -4,22 +4,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
+import elasta.composer.transformation.impl.json.object.RemoveNullsTransformation;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;
-import elasta.orm.json.core.FieldInfo;
-import elasta.orm.json.core.FieldInfoBuilder;
-import elasta.orm.json.insert_or_update.ObjectData;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
+import jpatest.models.Ac;
 import jpatest.models.Br;
+import jpatest.models.Supervisor;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.metamodel.PluralAttribute;
-import java.util.Arrays;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -67,24 +68,66 @@ public class Test {
 //                    .createSqlField()
 //            )).then(entries -> System.out.println(entries)).err(e -> e.printStackTrace());
 
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
             ObjectMapper mapper = new ObjectMapper();
+            mapper.setDateFormat(dateFormat);
 
-            db.insertOrUpdate("Br", new JsonObject(
-                    mapper.writeValueAsString(
-                        Utils.call(() -> {
-                            Br br = new Br();
+            db.insertOrUpdate("Br",
+                new RemoveNullsTransformation(null, null)
+                    .transform(
+                        new JsonObject(
+                            mapper.writeValueAsString(
+                                Utils.call(() -> {
+                                    Br br = new Br();
 
-                            br.setId(256L);
-//                            br.setDateOfBirth(new Date());
-                            br.setEmail("kaku@kaku.com");
-                            br.setFirstName("hala");
-                            br.setLastName("kk");
+                                    br.setId(850L);
+                                    br.setDateOfBirth(new Date());
+                                    br.setEmail("sona@kaku.com");
+                                    br.setFirstName("hala");
+                                    br.setLastName("kk");
 
-                            return br;
-                        })
+//                                    br.setTablets(
+//                                        ImmutableList.of(
+//
+//                                        )
+//                                    );
+
+                                    br.setSupervisor(
+                                        Utils.call(() -> {
+                                            Supervisor supervisor = new Supervisor();
+
+                                            supervisor.setId(890L);
+                                            supervisor.setEmail("spp@dk.com");
+                                            supervisor.setFirstName("moni");
+                                            supervisor.setLastName("akter");
+                                            supervisor.setDateOfBirth(new Date());
+                                            supervisor.setJoinDate(new Date());
+                                            supervisor.setSalary(8935349.8948);
+
+                                            supervisor.setAc(
+                                                Utils.call(() -> {
+                                                    Ac ac = new Ac();
+
+                                                    ac.setId(783L);
+                                                    ac.setDateOfBirth(new Date());
+                                                    ac.setFirstName("komol");
+                                                    ac.setLastName("banu");
+                                                    ac.setEmail("ac@dd.com");
+
+                                                    return ac;
+                                                })
+                                            );
+
+                                            return supervisor;
+                                        })
+                                    );
+
+                                    return br;
+                                })
+                            )
+                        ).put("sohan", "kala")
                     )
-                )
-                .put("sohan", "kala")
             ).then(jsonObject -> System.out.println("result: " + jsonObject)).err(Throwable::printStackTrace);
 
             System.out.println("DB created.");

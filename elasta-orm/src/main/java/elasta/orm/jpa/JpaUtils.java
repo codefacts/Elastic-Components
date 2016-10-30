@@ -7,7 +7,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Type;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -23,6 +22,6 @@ public class JpaUtils {
     }
 
     public static Map<String, ModelInfo> modelInfoByModelMap(EntityManagerFactory emf) {
-        return new ModelInfoMapHelper().modelInfoByModelMap(emf);
+        return new ModelInfoMapHelper(emf).modelInfoByModelMap(emf);
     }
 }

@@ -531,6 +531,8 @@ public class DbImpl implements Db {
                         continue;
                     }
 
+                    mapBuilder.put(entry.getValue().getColumn(), jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField()));
+
                     insertOrUpdateOperationRecursively(
                         modelInfoProvider.get(entry.getValue().getRelationInfo().getJoinModelInfo().getChildModel()),
                         jsonObject, tableIdPairs, operationListBuilder

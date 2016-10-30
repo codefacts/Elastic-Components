@@ -22,6 +22,13 @@ import java.util.Set;
  * Created by Jango on 10/9/2016.
  */
 public class ModelInfoMapHelper {
+
+    private final EntityManagerFactory emf;
+
+    public ModelInfoMapHelper(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
+
     public Map<String, ModelInfo> modelInfoByModelMap(EntityManagerFactory emf) {
         ImmutableMap.Builder<String, ModelInfo> modelInfoMapBuilder = ImmutableMap.builder();
         Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
@@ -72,7 +79,7 @@ public class ModelInfoMapHelper {
     }
 
     private PropInfo assProp(SingularAttributeImpl sngAttr) {
-        if (sngAttr.getMapping() instanceof OneToOneMapping) {
+        if (sngAttr.getPersistentAttributeType() == Attribute.PersistentAttributeType.ONE_TO_ONE) {
             return oneToOne(sngAttr, (OneToOneMapping) sngAttr.getMapping());
         } else {
             return manyToOne(sngAttr, (ManyToOneMapping) sngAttr.getMapping());
@@ -80,6 +87,19 @@ public class ModelInfoMapHelper {
     }
 
     private PropInfo manyToOne(SingularAttributeImpl sngAttr, ManyToOneMapping mapping) {
+
+        String joinColumn = mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getValue().getName();
+
+        Set<Attribute> attributes = emf.getMetamodel().entity(mapping.getReferenceClass()).getSingularAttributes();
+
+        String joinField = attributes.stream().filter(attribute -> {
+
+            DatabaseField field = ((SingularAttributeImpl) attribute).getMapping().getField();
+
+            return field != null && field.getName().equalsIgnoreCase(joinColumn);
+
+        }).findAny().get().getName();
+
         return new PropInfoBuilder()
             .setName(sngAttr.getName())
             .setColumn(mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getKey().getName())
@@ -88,7 +108,8 @@ public class ModelInfoMapHelper {
                     .setChildModelInfo(
                         new ChildModelInfoBuilder()
                             .setChildModel(mapping.getReferenceClass().getSimpleName())
-                            .setJoinField(mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getValue().getName())
+                            .setJoinField(joinField)
+                            .setJoinColumn(joinColumn)
                             .createJoinTableInfo()
                     )
                     .setRelationTable(null)
@@ -99,6 +120,13 @@ public class ModelInfoMapHelper {
     }
 
     private PropInfo oneToOne(SingularAttributeImpl sngAttr, OneToOneMapping mapping) {
+
+        String joinColumn = mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getValue().getName();
+
+        Set<Attribute> attributes = emf.getMetamodel().entity(mapping.getReferenceClass()).getSingularAttributes();
+
+        String joinField = attributes.stream().filter(attribute -> ((SingularAttributeImpl) attribute).getMapping().getField().getName().equalsIgnoreCase(joinColumn)).findAny().get().getName();
+
         return new PropInfoBuilder()
             .setName(sngAttr.getName())
             .setColumn(mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getKey().getName())
@@ -107,7 +135,8 @@ public class ModelInfoMapHelper {
                     .setChildModelInfo(
                         new ChildModelInfoBuilder()
                             .setChildModel(mapping.getReferenceClass().getSimpleName())
-                            .setJoinField(mapping.getSourceToTargetKeyFields().entrySet().stream().findAny().get().getValue().getName())
+                            .setJoinColumn(joinColumn)
+                            .setJoinField(joinField)
                             .createJoinTableInfo()
                     )
                     .setRelationTable(null)
@@ -130,6 +159,9 @@ public class ModelInfoMapHelper {
 
     private PropInfo oneToMany(ListAttributeImpl sngAttr, OneToManyMapping mapping) {
 
+        String joinField = mapping.getMappedBy();
+        String joinColumn = joinField == null ? null : mapping.getSourceKeysToTargetForeignKeys().values().iterator().next().getName();
+
         return new PropInfoBuilder()
             .setName(sngAttr.getName())
             .setColumn(sngAttr.getMapping().getField() == null ? null : sngAttr.getMapping().getField().getName())
@@ -138,7 +170,8 @@ public class ModelInfoMapHelper {
                     .setChildModelInfo(
                         new ChildModelInfoBuilder()
                             .setChildModel(mapping.getReferenceClass().getSimpleName())
-                            .setJoinField(mapping.getMappedBy())
+                            .setJoinField(joinField)
+                            .setJoinColumn(joinColumn)
                             .createJoinTableInfo()
                     )
                     .setRelationTable(null)
@@ -163,7 +196,6 @@ public class ModelInfoMapHelper {
                     .setChildModelInfo(
                         new ChildModelInfoBuilder()
                             .setChildModel(mapping.getReferenceClass().getSimpleName())
-                            .setJoinField(mapping.getMappedBy())
                             .createJoinTableInfo()
                     )
                     .setRelationTable(

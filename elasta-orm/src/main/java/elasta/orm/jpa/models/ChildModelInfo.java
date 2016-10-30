@@ -6,10 +6,12 @@ package elasta.orm.jpa.models;
 public class ChildModelInfo {
     private final String childModel;
     private final String joinField;
+    private final String joinColumn;
 
-    public ChildModelInfo(String childModel, String joinField) {
+    public ChildModelInfo(String childModel, String joinField, String joinColumn) {
         this.childModel = childModel;
         this.joinField = joinField;
+        this.joinColumn = joinColumn;
     }
 
     public String getChildModel() {
@@ -18,5 +20,9 @@ public class ChildModelInfo {
 
     public String getJoinField() {
         return joinField;
+    }
+
+    public String getJoinColumn() {
+        return joinColumn;
     }
 }
