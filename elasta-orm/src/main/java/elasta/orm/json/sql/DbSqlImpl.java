@@ -128,9 +128,7 @@ public class DbSqlImpl implements DbSql {
                         sqlAndParams = sqlBuilderUtils.deleteSql(updateTpl.getTable(), updateTpl.getWhere(), updateTpl.getJsonArray());
                     }
 
-                    return Promises.exec(objectDefer -> {
-                        con.updateWithParams(sqlAndParams.getSql(), sqlAndParams.getParams(), StaticUtils.deferred(objectDefer));
-                    });
+                    return Promises.exec(objectDefer -> con.updateWithParams(sqlAndParams.getSql(), sqlAndParams.getParams(), StaticUtils.deferred(objectDefer)));
                 }).collect(Collectors.toList())
 
         ).map(objects -> (Void) null));

@@ -9,6 +9,10 @@ public class RelationTableIdPair {
     private final Object rightColumnValue;
 
     public RelationTableIdPair(String relationTable, Object leftColumnValue, Object rightColumnValue) {
+
+        leftColumnValue = leftColumnValue instanceof Number ? ((Number) leftColumnValue).longValue() : leftColumnValue;
+        rightColumnValue = rightColumnValue instanceof Number ? ((Number) rightColumnValue).longValue() : rightColumnValue;
+
         this.relationTable = relationTable;
         this.leftColumnValue = leftColumnValue;
         this.rightColumnValue = rightColumnValue;
@@ -28,7 +32,7 @@ public class RelationTableIdPair {
 
     @Override
     public boolean equals(Object o) {
-        
+
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

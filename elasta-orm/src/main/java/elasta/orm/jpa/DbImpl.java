@@ -239,7 +239,7 @@ public class DbImpl implements Db {
                             .setTable(operation.table)
                             .setData(operation.data)
                             .setWhere(
-                                operation.getTable() + "." + operation.getRelationTableColumns().getLeftColumn() + " = ?" +
+                                operation.getTable() + "." + operation.getRelationTableColumns().getLeftColumn() + " = ? and " +
                                     operation.getTable() + "." + operation.getRelationTableColumns().getRightColumn() + " = ?"
                             )
                             .setJsonArray(new JsonArray(
@@ -596,7 +596,7 @@ public class DbImpl implements Db {
         Object childModelId = jsonObject.getValue(entry.getValue().getRelationInfo().getJoinModelInfo().getJoinField());
 
         return new InsertOrUpdateOperationBuilder()
-            .setInsert(
+            .setInsert(Utils.not(
                 tableIdPairs.getRelationTableIdPairs().contains(
                     new RelationTableIdPair(
                         relationTable.getTableName(),
@@ -604,7 +604,7 @@ public class DbImpl implements Db {
                         childModelId
                     )
                 )
-            ).setTable(relationTable.getTableName())
+            )).setTable(relationTable.getTableName())
             .setRelationTableColumns(
                 new RelationTableColumns(relationTable.getLeftColumn(), relationTable.getRightColumn())
             ).setData(
