@@ -80,7 +80,7 @@ public class Test {
                                 Utils.call(() -> {
                                     Br br = new Br();
 
-                                    br.setId(851L);
+                                    br.setId(98723L);
                                     br.setDateOfBirth(new Date());
                                     br.setEmail("sona@kaku.com");
                                     br.setFirstName("br@851");
@@ -194,7 +194,7 @@ public class Test {
                                                 Command command = new Command();
 
                                                 command.setId(569L);
-                                                command.setName("comd@569");
+                                                command.setName("comd$569");
 
                                                 return command;
                                             }),
@@ -202,7 +202,15 @@ public class Test {
                                                 Command command = new Command();
 
                                                 command.setId(570L);
-                                                command.setName("comd@570");
+                                                command.setName("comd+570");
+
+                                                return command;
+                                            }),
+                                            Utils.call(() -> {
+                                                Command command = new Command();
+
+                                                command.setId(520L);
+                                                command.setName("comd+520");
 
                                                 return command;
                                             })

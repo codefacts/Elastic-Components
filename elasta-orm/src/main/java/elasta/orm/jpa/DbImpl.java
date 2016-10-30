@@ -219,7 +219,11 @@ public class DbImpl implements Db {
         ImmutableList.Builder<UpdateTpl> relationsBuilder = ImmutableList.builder();
         ImmutableList.Builder<UpdateTpl> tablesBuilder = ImmutableList.builder();
 
-        operationListBuilder.build().forEach(operation -> {
+        ImmutableList<InsertOrUpdateOperation> operations = operationListBuilder.build();
+
+        operations = mergeDuplicates(operations);
+
+        operations.forEach(operation -> {
 
             if (operation.getRelationTableColumns() != null) {
 
@@ -265,6 +269,78 @@ public class DbImpl implements Db {
             }
         });
         return tablesBuilder.addAll(relationsBuilder.build()).build();
+    }
+
+    private ImmutableList<InsertOrUpdateOperation> mergeDuplicates(ImmutableList<InsertOrUpdateOperation> operations) {
+
+        Map<TableIdPair, InsertOrUpdateOperation> tableIdPairMap = new LinkedHashMap<>();
+        Map<RelationTableIdPair, InsertOrUpdateOperation> relationTableIdPairMap = new LinkedHashMap<>();
+
+        operations.forEach(op -> {
+            if (op.getTablePrimaryKey() != null) {
+
+                final TableIdPair tableIdPair = new TableIdPair(op.getTable(), op.getData().getValue(op.getTablePrimaryKey()));
+
+                if (Utils.not(tableIdPairMap.containsKey(tableIdPair))) {
+
+                    tableIdPairMap.put(tableIdPair, op);
+
+                } else {
+
+                    InsertOrUpdateOperation operation = tableIdPairMap.get(tableIdPair);
+
+                    HashMap<String, Object> map = new HashMap<>(operation.data.getMap());
+                    map.putAll(op.data.getMap());
+
+                    operation = new InsertOrUpdateOperationBuilder()
+                        .setInsert(operation.insert)
+                        .setTable(operation.table)
+                        .setPrimaryColumn(operation.primaryKey)
+                        .setRelationTableColumns(operation.relationTableColumns)
+                        .setData(
+                            new JsonObject(map)
+                        )
+                        .createInsertOrUpdateOperation();
+
+                    tableIdPairMap.put(tableIdPair, operation);
+                }
+
+            } else {
+
+
+                RelationTableIdPair relationTableIdPair = new RelationTableIdPair(op.table, op.getRelationTableColumns().getLeftColumn(), op.getRelationTableColumns().getRightColumn());
+
+                if (Utils.not(relationTableIdPairMap.containsKey(relationTableIdPair))) {
+
+                    relationTableIdPairMap.put(relationTableIdPair, op);
+
+                } else {
+
+                    InsertOrUpdateOperation operation = relationTableIdPairMap.get(relationTableIdPair);
+
+                    operation = new InsertOrUpdateOperationBuilder()
+                        .setInsert(operation.insert)
+                        .setTable(operation.table)
+                        .setPrimaryColumn(operation.primaryKey)
+                        .setRelationTableColumns(operation.relationTableColumns)
+                        .setData(
+                            new JsonObject(ImmutableMap.<String, Object>builder()
+                                .putAll(operation.getData().getMap())
+                                .putAll(op.getData().getMap())
+                                .build())
+                        )
+                        .createInsertOrUpdateOperation();
+
+                    relationTableIdPairMap.put(relationTableIdPair, operation);
+                }
+
+            }
+        });
+
+        return ImmutableList.<InsertOrUpdateOperation>builder()
+            .addAll(tableIdPairMap.values())
+            .addAll(relationTableIdPairMap.values())
+            .build();
     }
 
     private MapHandler<List<JsonArray>, JsonObject> toJsonObject(FieldDetailsInfo fieldDetailsInfo, ModelInfo modelInfo) {
@@ -682,9 +758,7 @@ public class DbImpl implements Db {
             if (insert != that.insert) return false;
             if (table != null ? !table.equals(that.table) : that.table != null) return false;
             if (primaryKey != null ? !primaryKey.equals(that.primaryKey) : that.primaryKey != null) return false;
-            if (relationTableColumns != null ? !relationTableColumns.equals(that.relationTableColumns) : that.relationTableColumns != null)
-                return false;
-            return data != null ? data.equals(that.data) : that.data == null;
+            return relationTableColumns != null ? relationTableColumns.equals(that.relationTableColumns) : that.relationTableColumns == null;
 
         }
 
@@ -694,7 +768,6 @@ public class DbImpl implements Db {
             result = 31 * result + (table != null ? table.hashCode() : 0);
             result = 31 * result + (primaryKey != null ? primaryKey.hashCode() : 0);
             result = 31 * result + (relationTableColumns != null ? relationTableColumns.hashCode() : 0);
-            result = 31 * result + (data != null ? data.hashCode() : 0);
             return result;
         }
 
