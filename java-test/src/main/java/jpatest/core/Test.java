@@ -86,11 +86,34 @@ public class Test {
                                     br.setFirstName("br@851");
                                     br.setLastName("kk");
 
-//                                    br.setTablets(
-//                                        ImmutableList.of(
-//
-//                                        )
-//                                    );
+                                    br.setTablets(
+                                        ImmutableList.of(
+                                            Utils.call(() -> {
+                                                Tablet tablet = new Tablet();
+
+                                                tablet.setId(896L);
+                                                tablet.setName("T@896");
+
+                                                return tablet;
+                                            }),
+                                            Utils.call(() -> {
+                                                Tablet tablet = new Tablet();
+
+                                                tablet.setId(897L);
+                                                tablet.setName("T@897");
+
+                                                return tablet;
+                                            }),
+                                            Utils.call(() -> {
+                                                Tablet tablet = new Tablet();
+
+                                                tablet.setId(898L);
+                                                tablet.setName("T@898");
+
+                                                return tablet;
+                                            })
+                                        )
+                                    );
 
                                     br.setSupervisor(
                                         Utils.call(() -> {
@@ -161,7 +184,8 @@ public class Test {
                             )
                         ).put("sohan", "kala")
                     )
-            ).then(jsonObject -> System.out.println("result: " + jsonObject)).err(Throwable::printStackTrace);
+            ).then(jsonObject -> System.out.println("result: " + jsonObject))
+                .err((throwable) -> throwable.printStackTrace());
 
             System.out.println("DB created.");
 

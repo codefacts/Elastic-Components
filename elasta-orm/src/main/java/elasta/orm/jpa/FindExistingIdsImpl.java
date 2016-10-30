@@ -1,5 +1,6 @@
 package elasta.orm.jpa;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import elasta.core.promise.intfs.Promise;
@@ -33,36 +34,44 @@ public class FindExistingIdsImpl implements FindExistingIds {
         Fineder finder = new Fineder();
         String query = finder.queryString(model, data);
 
-        return dbSql.query(query, new JsonArray(
+        ImmutableSetMultimap<String, Object> multimap1 = finder.tableIdSetBuilder.build();
 
-            finder.tablePrimaryKeySet.build()
-                .stream().flatMap(
-                tablePrimary -> finder.tableIdSetBuilder.build().get(tablePrimary.getTable()).stream())
-                .collect(Collectors.toList())
+        List<Object> list1 = finder.tablePrimaryKeySet.build()
+            .stream().flatMap(
+                tablePrimary -> multimap1.get(tablePrimary.getTable()).stream())
+            .collect(Collectors.toList());
 
-        )).map(resultSet -> {
-            ImmutableSet.Builder<TableIdPair> tableIdPairBuilder = ImmutableSet.builder();
-            ImmutableSet.Builder<RelationTableIdPair> relationTableIdPairBuilder = ImmutableSet.builder();
-            for (JsonArray jsonArray : resultSet.getResults()) {
-                Iterator arrayIterator = jsonArray.getList().iterator();
+        ImmutableSetMultimap<String, RelationColumnValuePairs> multimap2 = finder.relationTableIdSetBuilder.build();
 
-                for (String table : finder.tables.build()) {
-                    if (arrayIterator.hasNext()) {
-                        Object id = arrayIterator.next();
-                        if (id != null) {
-                            tableIdPairBuilder.add(new TableIdPairBuilder().setTable(table).setId(id).createTableIdPair());
+        List<Object> list2 = finder.relationTablePrimaryKeySet.build().stream()
+            .flatMap(relationTablePrimary -> multimap2.get(relationTablePrimary.getRelationTable())
+                .stream().flatMap(relationColumnValuePairs -> Stream.of(relationColumnValuePairs.getLeftColumnValue(), relationColumnValuePairs.getRightColumnValue())))
+            .collect(Collectors.toList());
+
+        return dbSql.query(query, new JsonArray(ImmutableList.builder().addAll(list1).addAll(list2).build()))
+            .map(resultSet -> {
+                ImmutableSet.Builder<TableIdPair> tableIdPairBuilder = ImmutableSet.builder();
+                ImmutableSet.Builder<RelationTableIdPair> relationTableIdPairBuilder = ImmutableSet.builder();
+                for (JsonArray jsonArray : resultSet.getResults()) {
+                    Iterator arrayIterator = jsonArray.getList().iterator();
+
+                    for (String table : finder.tables.build()) {
+                        if (arrayIterator.hasNext()) {
+                            Object id = arrayIterator.next();
+                            if (id != null) {
+                                tableIdPairBuilder.add(new TableIdPairBuilder().setTable(table).setId(id).createTableIdPair());
+                            }
                         }
                     }
-                }
 
-                for (String relationTable : finder.relationTables.build()) {
-                    relationTableIdPairBuilder.add(
-                        new RelationTableIdPair(relationTable, arrayIterator.next(), arrayIterator.next())
-                    );
+                    for (String relationTable : finder.relationTables.build()) {
+                        relationTableIdPairBuilder.add(
+                            new RelationTableIdPair(relationTable, arrayIterator.next(), arrayIterator.next())
+                        );
+                    }
                 }
-            }
-            return new TableIdPairs(tableIdPairBuilder.build(), relationTableIdPairBuilder.build());
-        });
+                return new TableIdPairs(tableIdPairBuilder.build(), relationTableIdPairBuilder.build());
+            });
     }
 
     private class Fineder {
@@ -108,11 +117,22 @@ public class FindExistingIdsImpl implements FindExistingIds {
                     ")"
             ).collect(Collectors.joining(_OR_));
 
-            String relationWhere = relationTablePrimaryKeySet.build().stream().map(
-                tablePrimary -> "(" + tablePrimary.getRelationTable() + "." + tablePrimary.getLeftColumn() + " = ? and " + tablePrimary.getRelationTable() + "." + tablePrimary.getRightColumn() + " = ?" + ")"
+            ImmutableSetMultimap<String, RelationColumnValuePairs> cvpMultimap = relationTableIdSetBuilder.build();
+
+            String relationWhere = relationTablePrimaryKeySet.build().stream().flatMap(
+                relationTablePrimary -> {
+
+                    return cvpMultimap.get(relationTablePrimary.getRelationTable()).stream().map(rr -> {
+
+                        return "(" + relationTablePrimary.getRelationTable() + "." + relationTablePrimary.getLeftColumn() +
+                            " = ? and " + relationTablePrimary.getRelationTable() + "." + relationTablePrimary.getRightColumn() + " = ?" + ")";
+                    });
+                }
             ).collect(Collectors.joining(_OR_));
 
-            return select + " " + relationSelect + " " + from + " " + relationFrom + " " + where + " " + relationWhere;
+            return select + " " + (relationSelect.isEmpty() ? "" : ", " + relationSelect) + " " +
+                from + (relationFrom.isEmpty() ? "" : ", " + relationFrom) + " " +
+                where + (relationWhere.isEmpty() ? "" : " or " + relationWhere);
         }
 
         private void mergeRecursive(ModelInfo primaryModelInfo, JsonObject data,
@@ -134,14 +154,17 @@ public class FindExistingIdsImpl implements FindExistingIds {
                             continue;
                         }
 
-                        List<JsonObject> joList = jsonArray.getList();
-
                         relationTablePrimaryKeySet.add(
-                            new RelationTablePrimary(relationInfo.getRelationTable().getTableName(), relationInfo.getRelationTable().getLeftColumn(), relationInfo.getRelationTable().getRightColumn())
+                            new RelationTablePrimary(
+                                relationInfo.getRelationTable().getTableName(),
+                                relationInfo.getRelationTable().getLeftColumn(), relationInfo.getRelationTable().getRightColumn()
+                            )
                         );
                         relationTables.add(relationInfo.getRelationTable().getTableName());
 
-                        for (JsonObject jsonObject : joList) {
+                        for (int i = 0, jsonArraySize = jsonArray.size(); i < jsonArraySize; i++) {
+                            JsonObject jsonObject = jsonArray.getJsonObject(i);
+
                             tableIdSetBuilder.put(modelInfo.getTable(), jsonObject.getValue(modelInfo.getPrimaryKey()));
 
                             relationTableIdSetBuilder.put(relationInfo.getRelationTable().getTableName(),

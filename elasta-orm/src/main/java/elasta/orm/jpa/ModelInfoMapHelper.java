@@ -188,6 +188,20 @@ public class ModelInfoMapHelper {
 
         DatabaseField targetRelationColumn = mechanism.getTargetRelationKeyFields().get(0);
 
+        DatabaseField targetField = mechanism.getTargetKeyFields().get(0);
+
+        Set<SingularAttributeImpl> attributes = emf.getMetamodel().entity(mapping.getReferenceClass()).getSingularAttributes();
+
+        String joinField = attributes.stream().filter(singularAttribute -> {
+
+            DatabaseField field = singularAttribute.getMapping().getField();
+
+            boolean x = field != null && field.getName().equalsIgnoreCase(targetField.getName());
+
+            return x;
+
+        }).findAny().get().getName();
+
         return new PropInfoBuilder()
             .setName(sngAttr.getName())
             .setColumn(sngAttr.getMapping().getField() == null ? null : sngAttr.getMapping().getField().getName())
@@ -196,6 +210,7 @@ public class ModelInfoMapHelper {
                     .setChildModelInfo(
                         new ChildModelInfoBuilder()
                             .setChildModel(mapping.getReferenceClass().getSimpleName())
+                            .setJoinField(joinField)
                             .createJoinTableInfo()
                     )
                     .setRelationTable(
