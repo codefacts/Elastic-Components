@@ -3,7 +3,7 @@ package elasta.core;
 import elasta.core.promise.impl.Promises;
 import elasta.core.flow.Flow;
 
-import static elasta.core.flow.FlowEntry.on;
+import static elasta.core.flow.EventToStateMapping.on;
 
 /**
  * Created by Jango on 9/10/2016.

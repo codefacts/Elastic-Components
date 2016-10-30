@@ -8,7 +8,7 @@ import elasta.webutils.EventAddresses;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import static elasta.core.flow.FlowEntry.on;
+import static elasta.core.flow.EventToStateMapping.on;
 import static elasta.core.flow.Flow.next;
 
 /**

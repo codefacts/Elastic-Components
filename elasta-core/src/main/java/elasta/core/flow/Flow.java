@@ -96,12 +96,12 @@ public class Flow {
         return FlowBuilder.create();
     }
 
-    public static FlowEntry on(String event, String state) {
-        return FlowEntry.on(event, state);
+    public static EventToStateMapping on(String event, String state) {
+        return EventToStateMapping.on(event, state);
     }
 
-    public static FlowEntry next(String state) {
-        return FlowEntry.on(NEXT, state);
+    public static EventToStateMapping next(String state) {
+        return EventToStateMapping.on(NEXT, state);
     }
 
     public static <T, R> FlowCallbacks<T, R> exec(

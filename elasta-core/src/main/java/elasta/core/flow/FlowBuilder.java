@@ -26,7 +26,7 @@ public class FlowBuilder {
         return this;
     }
 
-    public FlowBuilder when(String state, FlowEntry... stateEntries) {
+    public FlowBuilder when(String state, EventToStateMapping... stateEntries) {
 
         Objects.requireNonNull(state, "State is null.");
 
