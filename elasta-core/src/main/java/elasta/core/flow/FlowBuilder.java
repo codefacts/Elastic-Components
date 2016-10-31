@@ -3,6 +3,7 @@ package elasta.core.flow;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 
 import java.util.*;
@@ -14,6 +15,9 @@ public class FlowBuilder {
     private final Map<String, Map<String, String>> eventToStateMapByState = new HashMap<>();
     private final Map<String, FlowCallbacks> stateCallbacksMap = new HashMap<>();
 
+    private Map<String, Set<Class<? extends Throwable>>> errorsByStateMap = new HashMap<>();
+    private Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState = new HashMap<>();
+
     private FlowBuilder() {
     }
 
@@ -21,7 +25,7 @@ public class FlowBuilder {
         return new FlowBuilder();
     }
 
-    public FlowBuilder startPoint(String initialState) {
+    public FlowBuilder initialState(String initialState) {
         this.initialState = initialState;
         return this;
     }
@@ -61,6 +65,41 @@ public class FlowBuilder {
         return this;
     }
 
+    public FlowBuilder whenError(String state, ErrorToStateMapping... errorToStateMappings) {
+
+        Objects.requireNonNull(state, "State is null.");
+
+        Set<Class<? extends Throwable>> throwables = errorsByStateMap.get(state);
+        if (throwables == null) {
+            throwables = new HashSet<>();
+            errorsByStateMap.put(state, throwables);
+        }
+
+        final Set<Class<? extends Throwable>> throwableSet = throwables;
+
+        Map<Class<? extends Throwable>, String> errorToStateMap = errorToStateMapByState.get(state);
+
+        if (errorToStateMap == null) {
+            errorToStateMap = new HashMap<>();
+            errorToStateMapByState.put(state, errorToStateMap);
+        }
+
+        final Map<Class<? extends Throwable>, String> stateMap = errorToStateMap;
+
+        Arrays.asList(errorToStateMappings).forEach(entry -> {
+
+            Objects.requireNonNull(entry, "EventToStateMapping is null.");
+            Objects.requireNonNull(entry.getErrorClass(), "Event is null.");
+            Objects.requireNonNull(entry.getNextState(), "State is null for event '" + entry.getNextState() + "'.");
+
+            throwableSet.add(entry.getErrorClass());
+
+            stateMap.put(entry.getErrorClass(), entry.getNextState());
+        });
+
+        return this;
+    }
+
     public Flow build() {
 
         if (stateCallbacksMap.size() < eventsByStateMap.size()) {
@@ -77,7 +116,12 @@ public class FlowBuilder {
 
         eventsByStateMap.forEach(this::ensureStateMappingRecursive);
 
-        return new Flow(initialState, immutableCopyOf(eventsByStateMap), immutableCopyOf2(eventToStateMapByState), immutableCopyOf3(stateCallbacksMap));
+        return new Flow(
+            initialState,
+            immutableCopyOf(eventsByStateMap),
+            immutableCopyOf2(eventToStateMapByState),
+            errorsByStateMap, errorToStateMapByState,
+            immutableCopyOf3(stateCallbacksMap));
     }
 
     private Map<String, FlowCallbacks> immutableCopyOf3(Map<String, FlowCallbacks> stateCallbacksMap) {
@@ -137,9 +181,42 @@ public class FlowBuilder {
     }
 
     public static void main(String[] args) {
-        Flow.builder()
-            .when("", Flow.on("", ""))
-            .exec("", Flow.exec().onEnter(null).onExit(null).build())
+        Flow flow = Flow.builder()
+            .initialState("start")
+            .when("start",
+                Flow.next("process"),
+                Flow.on("err", "errState"))
+            .whenError("start", Flow.onErr(NullPointerException.class, "errState"))
+            .when("errState", Flow.next("end"))
+            .when("process", Flow.next("end"))
+            .when("end", Flow.end())
+            .exec("start", Flow.onEnter(o -> {
+                System.out.println("onStart: " + o);
+                return Promises.just(Flow.trigger("err", new NullPointerException("ok")));
+            }))
+            .exec("errState", Flow.exec(
+                o -> {
+                    return Promises.just(Flow.triggerNext(o));
+                },
+                () -> {
+                    System.out.println("onExist errorState: ");
+                    return null;
+                }))
+            .exec("process", Flow.onEnter(o -> {
+                System.out.println("onEnter process: " + o);
+                return Promises.just(Flow.triggerNext(o));
+            }))
+            .exec("end", Flow.exec(o -> {
+
+                System.out.println("onEnter: end -> " + o);
+                return Promises.just(Flow.triggerValue(o));
+            }, () -> {
+
+                System.out.println("onExit: end -> ");
+                return null;
+            }))
             .build();
+
+        flow.start("go").then(System.out::println).err(Throwable::printStackTrace);
     }
 }

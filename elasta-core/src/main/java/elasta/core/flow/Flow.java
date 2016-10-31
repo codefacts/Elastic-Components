@@ -16,15 +16,24 @@ public class Flow {
     private static final String NEXT = "next";
     private final String initialState;
     private final Map<String, Set<String>> eventsByStateMap;
-    private final Map<String, Map<String, String>> eventToStateMapByPrevState;
+    private final Map<String, Map<String, String>> eventToStateMapByState;
+
+    private final Map<String, Set<Class<? extends Throwable>>> errorsByStateMap;
+    private final Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState;
+
     private final Map<String, FlowCallbacks> stateCallbacksMap;
 
     public Flow(String initialState, Map<String, Set<String>> eventsByStateMap,
                 Map<String, Map<String, String>> eventToStateMapByState,
+                Map<String, Set<Class<? extends Throwable>>> errorsByStateMap,
+                Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState,
                 Map<String, FlowCallbacks> stateCallbacksMap) {
+
         this.initialState = initialState;
         this.eventsByStateMap = eventsByStateMap;
-        this.eventToStateMapByPrevState = eventToStateMapByState;
+        this.eventToStateMapByState = eventToStateMapByState;
+        this.errorsByStateMap = errorsByStateMap;
+        this.errorToStateMapByState = errorToStateMapByState;
         this.stateCallbacksMap = stateCallbacksMap;
     }
 
@@ -64,7 +73,7 @@ public class Flow {
             return Promises.error(new FlowException("Invalid event '" + trigger.event + "' on trigger from state '" + state + "'."));
         }
 
-        final Map<String, String> esMap = eventToStateMapByPrevState.get(state);
+        final Map<String, String> esMap = eventToStateMapByState.get(state);
 
         final String nextState = esMap.get(trigger.event);
 
@@ -126,15 +135,27 @@ public class Flow {
         return FlowTrigger.create(null, null);
     }
 
-    public static <T, R> FlowCallbacks execStart(FunctionUnchecked<T, Promise<FlowTrigger<R>>> startHandler) {
+    public static <T, R> FlowCallbacks onEnter(FunctionUnchecked<T, Promise<FlowTrigger<R>>> startHandler) {
         return exec(startHandler, null);
     }
 
-    public static FlowCallbacks execEnd(Callable<Promise<Void>> endHandler) {
+    public static FlowCallbacks onExit(Callable<Promise<Void>> endHandler) {
         return exec(null, endHandler);
     }
 
     public static <T> FlowTrigger<T> triggerNext(T val) {
         return trigger(NEXT, val);
+    }
+
+    public static EventToStateMapping[] end() {
+        return new EventToStateMapping[]{};
+    }
+
+    public static <T> FlowTrigger<T> triggerValue(T value) {
+        return trigger(null, value);
+    }
+
+    public static ErrorToStateMapping onErr(Class<NullPointerException> exceptionClass, String nextState) {
+        return new ErrorToStateMapping(exceptionClass, nextState);
     }
 }

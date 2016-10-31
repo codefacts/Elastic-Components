@@ -25,7 +25,7 @@ public class RegisterStateMachines {
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.CREATE, next(StateCnst.END))
 
-                    .startPoint(StateCnst.START)
+                    .initialState(StateCnst.START)
 
                     .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(Flow.triggerNext(val));
@@ -56,7 +56,7 @@ public class RegisterStateMachines {
                     .when(StateCnst.START, Flow.next(StateCnst.FIND_ALL))
                     .when(StateCnst.FIND_ALL, Flow.next(StateCnst.END))
 
-                    .startPoint(StateCnst.START)
+                    .initialState(StateCnst.START)
 
                     .handlers(StateCnst.FIND_ALL, val -> {
                         return Promises.just(Flow.triggerNext(
@@ -80,7 +80,7 @@ public class RegisterStateMachines {
                     .when(StateCnst.START, Flow.next(StateCnst.FIND))
                     .when(StateCnst.FIND, Flow.next(StateCnst.END))
 
-                    .startPoint(StateCnst.START)
+                    .initialState(StateCnst.START)
 
                     .handlers(StateCnst.FIND, val -> {
                         return Promises.just(Flow.triggerNext(
@@ -106,7 +106,7 @@ public class RegisterStateMachines {
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.UPDATE_ALL_PROPERTIES, next(StateCnst.END))
 
-                    .startPoint(StateCnst.START)
+                    .initialState(StateCnst.START)
 
                     .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(Flow.triggerNext(val));
@@ -139,7 +139,7 @@ public class RegisterStateMachines {
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.UPDATE_SOME_PROPERTIES, next(StateCnst.END))
 
-                    .startPoint(StateCnst.START)
+                    .initialState(StateCnst.START)
 
                     .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(Flow.triggerNext(val));
@@ -172,7 +172,7 @@ public class RegisterStateMachines {
                     .when(StateCnst.VALIDATION_ERROR, next(StateCnst.END))
                     .when(StateCnst.DELETE, next(StateCnst.END))
 
-                    .startPoint(StateCnst.START)
+                    .initialState(StateCnst.START)
 
                     .handlers(StateCnst.VALIDATE, val -> {
                         return Promises.just(Flow.triggerNext(val));
