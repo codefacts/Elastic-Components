@@ -120,11 +120,28 @@ public class FlowBuilder {
             initialState,
             immutableCopyOf(eventsByStateMap),
             immutableCopyOf2(eventToStateMapByState),
-            errorsByStateMap, errorToStateMapByState,
-            immutableCopyOf3(stateCallbacksMap));
+            immutableCopyOf3(errorsByStateMap),
+            immutableCopyOf4(errorToStateMapByState),
+            immutableCopyOf5(stateCallbacksMap));
     }
 
-    private Map<String, FlowCallbacks> immutableCopyOf3(Map<String, FlowCallbacks> stateCallbacksMap) {
+    private Map<String, Set<Class<? extends Throwable>>> immutableCopyOf3(Map<String, Set<Class<? extends Throwable>>> errorsByStateMap) {
+        ImmutableMap.Builder<String, Set<Class<? extends Throwable>>> mapBuilder = ImmutableMap.builder();
+
+        errorsByStateMap.forEach((state, classes) -> mapBuilder.put(state, ImmutableSet.copyOf(classes)));
+
+        return mapBuilder.build();
+    }
+
+    private Map<String, Map<Class<? extends Throwable>, String>> immutableCopyOf4(Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState) {
+        ImmutableMap.Builder<String, Map<Class<? extends Throwable>, String>> mapBuilder = ImmutableMap.builder();
+
+        errorToStateMapByState.forEach((state, classStringMap) -> mapBuilder.put(state, ImmutableMap.copyOf(classStringMap)));
+
+        return mapBuilder.build();
+    }
+
+    private Map<String, FlowCallbacks> immutableCopyOf5(Map<String, FlowCallbacks> stateCallbacksMap) {
         return ImmutableMap.copyOf(stateCallbacksMap);
     }
 
