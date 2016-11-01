@@ -114,7 +114,7 @@ public class FlowBuilder {
             throw new FlowException("Callbacks is not defined for initial state ['" + initialState + "'].");
         }
 
-        eventsByStateMap.forEach(this::ensureStateMappingRecursive);
+        errorsByStateMap.forEach((state, classes) -> ensureStateAndErrorMappingRecursive(state, classes, eventsByStateMap.get(state)));
 
         return new Flow(
             initialState,
@@ -123,6 +123,36 @@ public class FlowBuilder {
             immutableCopyOf3(errorsByStateMap),
             immutableCopyOf4(errorToStateMapByState),
             immutableCopyOf5(stateCallbacksMap));
+    }
+
+    private void ensureStateAndErrorMappingRecursive(String state, Set<Class<? extends Throwable>> classes, Set<String> events) {
+
+
+        if (!stateCallbacksMap.containsKey(state)) {
+            throw new FlowException("Callbacks is missing for state '" + state + "'.");
+        }
+
+        if (events == null) {
+            throw new FlowException("Events is null for state '" + state + "'.");
+        }
+
+        Map<String, String> eventToStateMap = eventToStateMapByState.get(state);
+        Map<Class<? extends Throwable>, String> errorToStateMap = errorToStateMapByState.get(state);
+
+        ImmutableSet.Builder<String> nextStatesBuilder = ImmutableSet.builder();
+
+        events.forEach(event -> nextStatesBuilder.add(
+            eventToStateMap.get(event)
+        ));
+
+        if (classes != null) {
+
+            classes.forEach(errClass -> nextStatesBuilder.add(
+                errorToStateMap.get(errClass)
+            ));
+        }
+
+        nextStatesBuilder.build().forEach(nextState -> ensureStateAndErrorMappingRecursive(nextState, errorsByStateMap.get(nextState), eventsByStateMap.get(nextState)));
     }
 
     private Map<String, Set<Class<? extends Throwable>>> immutableCopyOf3(Map<String, Set<Class<? extends Throwable>>> errorsByStateMap) {
@@ -160,27 +190,6 @@ public class FlowBuilder {
         eventsByStateMap.forEach((state, events) -> mapBuilder.put(state, ImmutableSet.copyOf(events)));
 
         return mapBuilder.build();
-    }
-
-    private void ensureStateMappingRecursive(String state, Set<String> events) {
-
-        if (!stateCallbacksMap.containsKey(state)) {
-            throw new FlowException("Callbacks is missing for state '" + state + "'.");
-        }
-
-        if (events == null) {
-            throw new FlowException("Set of events is null for state '" + state + "'.");
-        }
-
-        Map<String, String> eventToStateMap = eventToStateMapByState.get(state);
-
-        events.forEach(event -> {
-
-            String nextState = eventToStateMap.get(event);
-
-            ensureStateMappingRecursive(nextState, eventsByStateMap.get(nextState));
-
-        });
     }
 
     public FlowBuilder exec(String state, FlowCallbacks flowCallbacks) {
