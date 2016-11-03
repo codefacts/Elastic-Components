@@ -18,22 +18,15 @@ public class Flow {
     private final Map<String, Set<String>> eventsByStateMap;
     private final Map<String, Map<String, String>> eventToStateMapByState;
 
-    private final Map<String, Set<Class<? extends Throwable>>> errorsByStateMap;
-    private final Map<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> errorToStateMapByState;
-
     private final Map<String, FlowCallbacks> stateCallbacksMap;
 
     public Flow(String initialState, Map<String, Set<String>> eventsByStateMap,
                 Map<String, Map<String, String>> eventToStateMapByState,
-                Map<String, Set<Class<? extends Throwable>>> errorsByStateMap,
-                Map<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> errorToStateMapByState,
                 Map<String, FlowCallbacks> stateCallbacksMap) {
 
         this.initialState = initialState;
         this.eventsByStateMap = eventsByStateMap;
         this.eventToStateMapByState = eventToStateMapByState;
-        this.errorsByStateMap = errorsByStateMap;
-        this.errorToStateMapByState = errorToStateMapByState;
         this.stateCallbacksMap = stateCallbacksMap;
     }
 
@@ -47,46 +40,18 @@ public class Flow {
 
     private <R, T> Promise<R> execState(String state, T message) {
 
-        return Promises.<R>exec(defer -> {
+        final FlowCallbacks<T, Object> flowCallbacks = stateCallbacksMap.get(state);
 
-            final FlowCallbacks<T, Object> flowCallbacks = stateCallbacksMap.get(state);
+        return this.execute(flowCallbacks, message).mapP(trigger -> {
 
-            this.execute(flowCallbacks, message).cmp(signal -> {
+            final NextStateAndMessage nextStateAndMessage = nextStateAndMessage(trigger, state);
 
-                final NextStateAndMessage nextStateAndMessage = signal.isError() ? nextStateAndMessage(signal.err(), state) : nextStateAndMessage(signal.val(), state);
-
-                if (nextStateAndMessage == null) {
-                    defer.reject(signal.err());
-                } else if (nextStateAndMessage.nextState == null) {
-                    defer.resolve((R) nextStateAndMessage.message);
-                } else {
-
-                    execState(nextStateAndMessage.nextState, nextStateAndMessage.message);
-                }
-            });
-        });
-    }
-
-    private <R> NextStateAndMessage<R> nextStateAndMessage(Throwable err, String state) throws Throwable {
-
-        Set<Class<? extends Throwable>> errClasses = errorsByStateMap.get(state);
-
-        ErrorHandlerAndStatePair pair = null;
-        for (Class<? extends Throwable> errClass : errClasses) {
-
-            if (errClass.isInstance(err)) {
-                pair = errorToStateMapByState.get(state).get(errClass);
+            if (nextStateAndMessage.nextState == null) {
+                return Promises.just((R) nextStateAndMessage.message);
             }
-        }
 
-        if (pair != null) {
-
-            Object result = pair.getErrorHandler().apply(err);
-
-            return new NextStateAndMessage<>(pair.getNextState(), (R) result);
-        }
-
-        return null;
+            return execState(nextStateAndMessage.nextState, nextStateAndMessage.message);
+        });
     }
 
     private <P> NextStateAndMessage<P> nextStateAndMessage(FlowTrigger<P> trigger, String state) {
