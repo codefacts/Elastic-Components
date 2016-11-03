@@ -13,5 +13,7 @@ public interface Defer<T> {
 
     void filter();
 
+    void signal(Signal<T> signal);
+
     Promise<T> promise();
 }

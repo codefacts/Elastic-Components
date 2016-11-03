@@ -93,6 +93,22 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
+    public Promise<T> errd(DoOnErrorHandler<T> doOnErrorHandler) {
+
+        PromiseImpl<T> promise = createPromise(Executors.errorExecutor(doOnErrorHandler));
+
+        return executeOrSchedule(promise);
+    }
+
+    @Override
+    public Promise<T> errdP(DoOnErrorPHandler<T> doOnErrorHandler) {
+
+        PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(doOnErrorHandler));
+
+        return executeOrSchedule(promise);
+    }
+
+    @Override
     public Promise<T> cmp(CompleteHandler<T> completeHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.completeExecutor(completeHandler));
@@ -220,6 +236,11 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     @Override
     public void filter() {
         signal(this, SignalImpl.filtered());
+    }
+
+    @Override
+    public void signal(Signal<T> signal) {
+        signal(this, (SignalImpl<T>) signal);
     }
 
     @Override

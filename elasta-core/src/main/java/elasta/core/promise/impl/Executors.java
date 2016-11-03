@@ -108,6 +108,29 @@ final public class Executors {
         };
     }
 
+    public static final <T> InstantExecutor<T, T> errorExecutor(DoOnErrorHandler<T> errorHandler) {
+        return signal -> {
+
+            if (canExecuteError(signal)) {
+
+                final Throwable error = signal.err();
+
+                try {
+
+                    return SignalImpl.success(errorHandler.apply(error));
+
+                } catch (Throwable throwable) {
+
+                    error.addSuppressed(throwable);
+
+                    return signal;
+                }
+            }
+
+            return signal;
+        };
+    }
+
     private static boolean canExecuteError(SignalImpl signal) {
         return signal.type == Signal.Type.ERROR;
     }
@@ -225,6 +248,43 @@ final public class Executors {
                         }
 
                         PromiseImpl.signal(tPromise, signal);
+                    });
+
+                    return tPromise;
+
+                } catch (Throwable throwable) {
+
+                    error.addSuppressed(throwable);
+
+                    return new PromiseImpl(signal);
+                }
+            }
+
+            return new PromiseImpl(signal);
+        };
+    }
+
+    public static final <T> DeferredExecutor<T, T> deferredErrorExecutor(DoOnErrorPHandler<T> errorHandler) {
+        return signal -> {
+
+            if (canExecuteError(signal)) {
+
+                final Throwable error = signal.err();
+
+                try {
+
+                    PromiseImpl<T> tPromise = new PromiseImpl<>();
+
+                    errorHandler.apply(error).cmp(ss -> {
+
+                        if (ss.isError()) {
+
+                            error.addSuppressed(ss.err());
+                            PromiseImpl.signal(tPromise, signal);
+                            return;
+                        }
+
+                        PromiseImpl.signal(tPromise, (SignalImpl<T>) ss);
                     });
 
                     return tPromise;
