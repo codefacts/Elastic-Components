@@ -16,7 +16,7 @@ public class FlowBuilder {
     private final Map<String, FlowCallbacks> stateCallbacksMap = new HashMap<>();
 
     private Map<String, Set<Class<? extends Throwable>>> errorsByStateMap = new HashMap<>();
-    private Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState = new HashMap<>();
+    private Map<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> errorToStateMapByState = new HashMap<>();
 
     private FlowBuilder() {
     }
@@ -77,14 +77,14 @@ public class FlowBuilder {
 
         final Set<Class<? extends Throwable>> throwableSet = throwables;
 
-        Map<Class<? extends Throwable>, String> errorToStateMap = errorToStateMapByState.get(state);
+        Map<Class<? extends Throwable>, ErrorHandlerAndStatePair> errorToStateMap = errorToStateMapByState.get(state);
 
         if (errorToStateMap == null) {
             errorToStateMap = new HashMap<>();
             errorToStateMapByState.put(state, errorToStateMap);
         }
 
-        final Map<Class<? extends Throwable>, String> stateMap = errorToStateMap;
+        final Map<Class<? extends Throwable>, ErrorHandlerAndStatePair> stateMap = errorToStateMap;
 
         Arrays.asList(errorToStateMappings).forEach(entry -> {
 
@@ -94,7 +94,7 @@ public class FlowBuilder {
 
             throwableSet.add(entry.getErrorClass());
 
-            stateMap.put(entry.getErrorClass(), entry.getNextState());
+            stateMap.put(entry.getErrorClass(), new ErrorHandlerAndStatePair(entry.getErrorHandler(), entry.getNextState()));
         });
 
         return this;
@@ -137,7 +137,7 @@ public class FlowBuilder {
         }
 
         Map<String, String> eventToStateMap = eventToStateMapByState.get(state);
-        Map<Class<? extends Throwable>, String> errorToStateMap = errorToStateMapByState.get(state);
+        Map<Class<? extends Throwable>, ErrorHandlerAndStatePair> errorToStateMap = errorToStateMapByState.get(state);
 
         ImmutableSet.Builder<String> nextStatesBuilder = ImmutableSet.builder();
 
@@ -148,7 +148,7 @@ public class FlowBuilder {
         if (classes != null) {
 
             classes.forEach(errClass -> nextStatesBuilder.add(
-                errorToStateMap.get(errClass)
+                errorToStateMap.get(errClass).getNextState()
             ));
         }
 
@@ -163,8 +163,8 @@ public class FlowBuilder {
         return mapBuilder.build();
     }
 
-    private Map<String, Map<Class<? extends Throwable>, String>> immutableCopyOf4(Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState) {
-        ImmutableMap.Builder<String, Map<Class<? extends Throwable>, String>> mapBuilder = ImmutableMap.builder();
+    private Map<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> immutableCopyOf4(Map<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> errorToStateMapByState) {
+        ImmutableMap.Builder<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> mapBuilder = ImmutableMap.builder();
 
         errorToStateMapByState.forEach((state, classStringMap) -> mapBuilder.put(state, ImmutableMap.copyOf(classStringMap)));
 
@@ -212,7 +212,7 @@ public class FlowBuilder {
             .when("start",
                 Flow.next("process"),
                 Flow.on("err", "errState"))
-            .whenError("start", Flow.onErr(NullPointerException.class, "errState"))
+            .whenError("start", Flow.onErr(NullPointerException.class, "errState", Throwable::toString))
             .when("errState", Flow.next("end"))
             .when("process", Flow.next("end"))
             .when("end", Flow.end())

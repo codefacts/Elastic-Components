@@ -15,6 +15,6 @@ public class ErrorToStateMappingBuilder {
     }
 
     public ErrorToStateMapping createErrorToStateMapping() {
-        return new ErrorToStateMapping(errorClass, nextState);
+        return new ErrorToStateMapping(errorClass, nextState, errorHandler);
     }
 }

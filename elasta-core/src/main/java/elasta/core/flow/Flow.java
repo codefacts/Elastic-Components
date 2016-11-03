@@ -19,14 +19,14 @@ public class Flow {
     private final Map<String, Map<String, String>> eventToStateMapByState;
 
     private final Map<String, Set<Class<? extends Throwable>>> errorsByStateMap;
-    private final Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState;
+    private final Map<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> errorToStateMapByState;
 
     private final Map<String, FlowCallbacks> stateCallbacksMap;
 
     public Flow(String initialState, Map<String, Set<String>> eventsByStateMap,
                 Map<String, Map<String, String>> eventToStateMapByState,
                 Map<String, Set<Class<? extends Throwable>>> errorsByStateMap,
-                Map<String, Map<Class<? extends Throwable>, String>> errorToStateMapByState,
+                Map<String, Map<Class<? extends Throwable>, ErrorHandlerAndStatePair>> errorToStateMapByState,
                 Map<String, FlowCallbacks> stateCallbacksMap) {
 
         this.initialState = initialState;
@@ -42,45 +42,75 @@ public class Flow {
     }
 
     public <T, R> Promise<R> start(String state, T message) {
-        try {
-            final FlowCallbacks<T, Object> flowCallbacks = stateCallbacksMap.get(state);
-            return execute(flowCallbacks, message)
-                .mapP(trigger -> executeNext(trigger, state))
-                .map(stateTrigger -> (R) stateTrigger.message);
-        } catch (Throwable ex) {
-            return Promises.error(ex);
-        }
+        return execState(state, message);
     }
 
-    private <R> Promise<FlowTrigger<R>> executeNext(FlowTrigger trigger, String state) {
+    private <R, T> Promise<R> execState(String state, T message) {
+
+        return Promises.<R>exec(defer -> {
+
+            final FlowCallbacks<T, Object> flowCallbacks = stateCallbacksMap.get(state);
+
+            this.execute(flowCallbacks, message).cmp(signal -> {
+
+                final NextStateAndMessage nextStateAndMessage = signal.isError() ? nextStateAndMessage(signal.err(), state) : nextStateAndMessage(signal.val(), state);
+
+                if (nextStateAndMessage == null) {
+                    defer.reject(signal.err());
+                } else if (nextStateAndMessage.nextState == null) {
+                    defer.resolve((R) nextStateAndMessage.message);
+                } else {
+
+                    execState(nextStateAndMessage.nextState, nextStateAndMessage.message);
+                }
+            });
+        });
+    }
+
+    private <R> NextStateAndMessage<R> nextStateAndMessage(Throwable err, String state) throws Throwable {
+
+        Set<Class<? extends Throwable>> errClasses = errorsByStateMap.get(state);
+
+        ErrorHandlerAndStatePair pair = null;
+        for (Class<? extends Throwable> errClass : errClasses) {
+
+            if (errClass.isInstance(err)) {
+                pair = errorToStateMapByState.get(state).get(errClass);
+            }
+        }
+
+        if (pair != null) {
+
+            Object result = pair.getErrorHandler().apply(err);
+
+            return new NextStateAndMessage<>(pair.getNextState(), (R) result);
+        }
+
+        return null;
+    }
+
+    private <P> NextStateAndMessage<P> nextStateAndMessage(FlowTrigger<P> trigger, String state) {
 
         final Set<String> events = eventsByStateMap.get(state);
 
         if (events.size() == 0) {
 
             if (trigger == null) {
-                return Promises.just(Flow.this.defaultStateTrigger());
+                return new NextStateAndMessage<>(null, null);
             }
 
-            return Promises.just(trigger);
+            return new NextStateAndMessage<>(null, trigger.message);
         }
 
         if (trigger == null || trigger.event == null) {
-            return Promises.error(new FlowException("Invalid trigger '" + trigger + "' from state '" + state + "'."));
+            throw new FlowException("Invalid trigger '" + trigger + "' from state '" + state + "'.");
         }
 
         if (!events.contains(trigger.event)) {
-            return Promises.error(new FlowException("Invalid event '" + trigger.event + "' on trigger from state '" + state + "'."));
+            throw new FlowException("Invalid event '" + trigger.event + "' on trigger from state '" + state + "'.");
         }
 
-        final Map<String, String> esMap = eventToStateMapByState.get(state);
-
-        final String nextState = esMap.get(trigger.event);
-
-        final FlowCallbacks<Object, Object> nextFlowCallbacks = stateCallbacksMap.get(nextState);
-
-        return Flow.this.execute(nextFlowCallbacks, trigger.message)
-            .mapP(sTrigger -> executeNext(sTrigger, nextState));
+        return new NextStateAndMessage<>(eventToStateMapByState.get(state).get(trigger.event), trigger.message);
     }
 
     private <T, R> Promise<FlowTrigger<R>> execute(FlowCallbacks<T, R> flowCallbacks, T message) {
@@ -155,7 +185,17 @@ public class Flow {
         return trigger(null, value);
     }
 
-    public static ErrorToStateMapping onErr(Class<NullPointerException> exceptionClass, String nextState) {
-        return new ErrorToStateMapping(exceptionClass, nextState);
+    public static <R> ErrorToStateMapping onErr(Class<NullPointerException> exceptionClass, String nextState, FunctionUnchecked<? extends Throwable, R> errorHandler) {
+        return new ErrorToStateMapping(exceptionClass, nextState, errorHandler);
+    }
+
+    private static class NextStateAndMessage<T> {
+        private final String nextState;
+        private final T message;
+
+        public NextStateAndMessage(String nextState, T message) {
+            this.nextState = nextState;
+            this.message = message;
+        }
     }
 }

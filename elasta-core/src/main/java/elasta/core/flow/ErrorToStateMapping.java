@@ -1,15 +1,19 @@
 package elasta.core.flow;
 
+import elasta.core.intfs.FunctionUnchecked;
+
 /**
  * Created by Jango on 10/31/2016.
  */
-public class ErrorToStateMapping {
+public class ErrorToStateMapping<R> {
     private final Class<? extends Throwable> errorClass;
     private final String nextState;
+    private final FunctionUnchecked<? extends Throwable, R> errorHandler;
 
-    public ErrorToStateMapping(Class<? extends Throwable> errorClass, String nextState) {
+    public ErrorToStateMapping(Class<? extends Throwable> errorClass, String nextState, FunctionUnchecked<? extends Throwable, R> errorHandler) {
         this.errorClass = errorClass;
         this.nextState = nextState;
+        this.errorHandler = errorHandler;
     }
 
     public Class<? extends Throwable> getErrorClass() {
@@ -18,6 +22,10 @@ public class ErrorToStateMapping {
 
     public String getNextState() {
         return nextState;
+    }
+
+    public FunctionUnchecked<? extends Throwable, R> getErrorHandler() {
+        return errorHandler;
     }
 
     @Override
