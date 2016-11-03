@@ -150,10 +150,6 @@ public class Flow {
         return trigger(null, value);
     }
 
-    public static <R> ErrorToStateMapping onErr(Class<NullPointerException> exceptionClass, String nextState, FunctionUnchecked<? extends Throwable, R> errorHandler) {
-        return new ErrorToStateMapping(exceptionClass, nextState, errorHandler);
-    }
-
     private static class NextStateAndMessage<T> {
         private final String nextState;
         private final T message;

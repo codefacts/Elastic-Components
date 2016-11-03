@@ -8,7 +8,7 @@ import static elasta.core.flow.EventToStateMapping.on;
 /**
  * Created by Jango on 9/10/2016.
  */
-public class StateMachineTest {
+public class FlowTest {
     public static void main(String[] args) {
 
         test1();
