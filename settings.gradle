@@ -8,4 +8,5 @@ include 'elasta-module'
 include 'commons'
 include 'elasta-orm'
 include 'java-test'
+include 'simple-eventbus'
 
