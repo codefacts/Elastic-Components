@@ -1,7 +1,5 @@
-package elasta.core;
+package elasta.core.utils;
 
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**

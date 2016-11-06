@@ -1,4 +1,4 @@
-package elasta.core;
+package elasta.core.utils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
