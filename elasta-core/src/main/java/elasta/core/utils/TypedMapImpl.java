@@ -308,6 +308,12 @@ public class TypedMapImpl implements TypedMap {
         return this;
     }
 
+    @Override
+    public <T> TypedMap putAll(Map<String, ?> map) {
+        map.forEach(this::put);
+        return this;
+    }
+
     /**
      * Put a null value into the JSON object with the specified key.
      *

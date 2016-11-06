@@ -29,8 +29,8 @@ public class PathTemplateImpl implements PathTemplate {
         String[] tmpltParts = template.split(quote);
         String[] pathParts = path.split(quote, tmpltParts.length);
 
-        System.out.println(tmpltParts.length + " " + Arrays.toString(tmpltParts));
-        System.out.println(pathParts.length + " " + Arrays.toString(pathParts));
+//        System.out.println(tmpltParts.length + " " + Arrays.toString(tmpltParts));
+//        System.out.println(pathParts.length + " " + Arrays.toString(pathParts));
 
         ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
 

@@ -1,5 +1,6 @@
 package elasta.core.utils;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -39,6 +40,8 @@ public interface TypedMap {
     public Set<String> fieldNames();
 
     public <T> TypedMap put(String key, T value);
+
+    public <T> TypedMap putAll(Map<String, ?> map);
 
     public TypedMap putNull(String key);
 

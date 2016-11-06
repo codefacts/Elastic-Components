@@ -19,7 +19,7 @@ import java.util.Objects;
  */
 final public class Promises {
 
-    public static Promise<Void> empty() {
+    public static <R> Promise<R> empty() {
         return just(null);
     }
 
