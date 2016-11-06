@@ -1,34 +1,56 @@
 package elasta.core.eventbus.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import elasta.core.eventbus.Handler;
-import elasta.core.eventbus.SimpleEventbus;
+import elasta.core.eventbus.SimpleEventBus;
+import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
+import elasta.core.touple.MutableTpl1;
 import elasta.core.utils.PathTemplate;
 import elasta.core.utils.PathTemplateImpl;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Jango on 11/5/2016.
  */
-public class SimpleEventbusImpl implements SimpleEventbus {
+public class SimpleEventBusImpl implements SimpleEventBus {
     private final char PATH_SEPERATOR = '.';
-    private Map<String, List<EventMatchInfo>> handlersMap = new HashMap<>();
-    private List<EventHandlerInfo> handlerInfos = new ArrayList<>();
+    private Map<String, List<EventMatchInfo>> handlersMap = new ConcurrentHashMap<>();
+    private List<EventHandlerInfo> handlerInfos = new CopyOnWriteArrayList<>();
 
     @Override
-    public <T, R> SimpleEventbus addListener(String eventPattern, Handler<T, R> handler) {
+    public <T, R> SimpleEventBus addListener(String eventPattern, Handler<T, R> handler) {
         handlerInfos.add(new EventHandlerInfo(eventPattern, handler));
+
+        handlersMap.keySet().forEach(evet -> {
+            PathTemplate.MatchAndParams matchAndParams = new PathTemplateImpl(eventPattern).matchAndParams(evet, PATH_SEPERATOR);
+            if (matchAndParams.isMatch()) {
+
+                handlersMap.put(evet,
+                    ImmutableList.<EventMatchInfo>builder()
+                        .add(new EventMatchInfo(handler, matchAndParams.getParams()))
+                        .addAll(handlersMap.get(evet)).build()
+                );
+            }
+        });
+
         return this;
     }
 
     @Override
-    public <T, R> Promise<R> fire(String event, T t) {
+    public <R> Promise<R> fire(String event, Object t) {
+        return fire(event, t, ImmutableMap.of());
+    }
 
+    @Override
+    public <R> Promise<R> fire(String event, Object t, Map<String, ?> extra) {
         List<EventMatchInfo> handlers = handlersMap.get(event);
 
-        if (handlers == null || handlers.isEmpty()) {
+        if (handlers == null) {
 
             handlers = findHandlers(event);
 
@@ -36,7 +58,7 @@ public class SimpleEventbusImpl implements SimpleEventbus {
 
         }
 
-        return executeHandlers(handlers, event, t);
+        return executeHandlers(handlers, event, t, extra);
     }
 
     private List<EventMatchInfo> findHandlers(String event) {
@@ -61,92 +83,29 @@ public class SimpleEventbusImpl implements SimpleEventbus {
         return new PathTemplateImpl(eventPattern).matchAndParams(event, PATH_SEPERATOR);
     }
 
-//    private MatchAndParams _doMatchStuff(String eventPattern, String event) {
-//        Pattern pattern = Pattern.compile("\\{[^\\{]*?\\}");
-//
-//        Matcher matcher = pattern.matcher(eventPattern);
-//
-//        ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
-//
-//        int e1;
-//        String key1;
-//
-//        if (!matcher.find()) {
-//            return new MatchAndParams(eventPattern.equals(event), ImmutableMap.of());
-//        }
-//
-//        e1 = matcher.end();
-//        key1 = matcher.group();
-//        key1 = key1.substring(1, key1.length() - 1);
-//
-//        int start = matcher.start();
-//
-//        if (!event.startsWith(eventPattern.substring(0, start))) {
-//
-//            return new MatchAndParams(false, ImmutableMap.of());
-//        }
-//
-//        event = event.substring(start);
-//
-//        for (; matcher.find(); ) {
-//
-//            int s2 = matcher.start(), e2 = matcher.end();
-//            String key2 = matcher.group();
-//
-//            String part = eventPattern.substring(e1, s2);
-//            int indexOf = event.indexOf(part);
-//            if (indexOf < 0) {
-//                return new MatchAndParams(false, ImmutableMap.of());
-//            }
-//
-//            if (!key1.isEmpty()) {
-//
-//                String key1Val = event.substring(0, indexOf);
-//                mapBuilder.put(key1, key1Val);
-//            }
-//
-//            e1 = e2;
-//            key1 = key2.substring(1, key2.length() - 1);
-//
-//            event = event.substring(indexOf + part.length());
-//        }
-//
-//        String sub = eventPattern.substring(e1);
-//        if (sub.isEmpty()) {
-//            if (!key1.isEmpty()) {
-//                mapBuilder.put(key1, event);
-//            }
-//            return new MatchAndParams(true, mapBuilder.build());
-//        }
-//
-//        int indexOf = event.indexOf(sub);
-//        if (indexOf < 0) {
-//            return new MatchAndParams(false, ImmutableMap.of());
-//        }
-//
-//        if (!key1.isEmpty()) {
-//
-//            String key1Val = event.substring(0, indexOf);
-//            mapBuilder.put(key1, key1Val);
-//        }
-//
-//        return new MatchAndParams(true, mapBuilder.build());
-//    }
+    private <T, R> Promise<R> executeHandlers(List<EventMatchInfo> handlers, String event, T t, Map<String, ?> extra) {
 
-    private boolean charEquals(String eventPattern, int start, int end, String event, int s2) {
-
-        for (int i = start; i < end; i++) {
-            if (!(eventPattern.charAt(i) == event.charAt(s2++))) {
-                return false;
-            }
+        if (handlers.isEmpty()) {
+            return Promises.just((R) t);
         }
 
-        return true;
-    }
+        Iterator<EventMatchInfo> iterator = handlers.iterator();
+        EventMatchInfo info = iterator.next();
 
-    private <T, R> Promise<R> executeHandlers(List<EventMatchInfo> handlers, String event, T t) {
+        Map<String, ?> map = new HashMap<>(info.params);
+        map.putAll((Map) extra);
 
-        return null;
+        MutableTpl1<ContextImpl> tpl1 = new MutableTpl1<>();
+        tpl1.t1 = new ContextImpl(event, map, val -> {
+            if (!iterator.hasNext()) {
+                return Promises.just(val);
+            }
+            EventMatchInfo matchInfo = iterator.next();
+            tpl1.t1.params().putAll(matchInfo.params);
+            return matchInfo.handler.handle(val, tpl1.t1);
+        });
+
+        return info.handler.handle(t, tpl1.t1);
     }
 
     private class EventHandlerInfo {
@@ -161,7 +120,7 @@ public class SimpleEventbusImpl implements SimpleEventbus {
 
     public static void main(String[] args) {
 
-        System.out.println(new SimpleEventbusImpl().match("ss.{11}.{22}.{33}.*", "ss.{i}.{j}.{k}.sohan.kona.jama"));
+//        System.out.println(new SimpleEventBusImpl().match("ss.{11}.{22}.{33}.*", "ss.{i}.{j}.{k}.sohan.kona.jama"));
 //        System.out.println("kk".substring("kk".indexOf("kk") + "kk".length()));
 //
 //     System.out.println("{so}".substring(1, "{}".length() - 1));
@@ -169,18 +128,34 @@ public class SimpleEventbusImpl implements SimpleEventbus {
 //        Matcher jj = Pattern.compile("jj").matcher("kk.jj.mm.nn");
 //        jj.find();
 //        System.out.println("kk.jj.mm.nn".substring(jj.start()));
-    }
 
-    private class MTpl {
-        final int start;
-        final int end;
-        final String key;
+        SimpleEventBusImpl eventbus = new SimpleEventBusImpl();
+        SimpleEventBus listener = eventbus.<String, Object>addListener("book.create", (o, context) -> {
+            System.out.println("ok: " + o + " " + context);
+            return context.next(o);
+        });
 
-        private MTpl(int start, int end, String key) {
-            this.start = start;
-            this.end = end;
-            this.key = key;
-        }
+        eventbus.addListener("book.{op}", (o, context) -> {
+            context.params().put("ha", 444);
+            System.out.println("ok2: " + o + " " + context);
+            return context.next(o);
+        });
+
+        eventbus.addListener("*", (o, context) -> {
+            context.params().put("tu", 555);
+            System.out.println("ok3: " + o + " " + context);
+            return context.next(o);
+        });
+
+        eventbus.addListener("{entity}.{op}", (o, context) -> {
+            context.params().put("ll", 8655);
+            System.out.println("ok4: " + o + " " + context);
+            return context.next(o);
+        });
+
+        eventbus.fire("book.create", "go it", Collections.singletonMap("me", "sohan"));
+        eventbus.fire("book.create", "go it");
+        eventbus.fire("book.create", "go it");
     }
 
     private static class EventMatchInfo {
@@ -192,4 +167,5 @@ public class SimpleEventbusImpl implements SimpleEventbus {
             this.params = params;
         }
     }
+
 }

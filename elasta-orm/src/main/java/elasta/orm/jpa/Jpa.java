@@ -1,11 +1,9 @@
 package elasta.orm.jpa;
 
-import elasta.core.intfs.ConsumerUnchecked;
-import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.intfs.Fun1Unckd;
 import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -40,17 +38,17 @@ public interface Jpa {
 
     <T> Promise<T> jpqlQueryScalar(String jpql, Class<T> tClass, JsonArray params);
 
-    <T> Promise<List<JsonObject>> query(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked);
+    <T> Promise<List<JsonObject>> query(Fun1Unckd<CriteriaBuilder, CriteriaQuery<T>> fun1Unckd);
 
-    Promise<List<JsonArray>> queryArray(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<Object[]>> functionUnchecked);
+    Promise<List<JsonArray>> queryArray(Fun1Unckd<CriteriaBuilder, CriteriaQuery<Object[]>> fun1Unckd);
 
-    <T> Promise<JsonObject> querySingle(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked);
+    <T> Promise<JsonObject> querySingle(Fun1Unckd<CriteriaBuilder, CriteriaQuery<T>> fun1Unckd);
 
-    Promise<JsonArray> querySingleArray(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<Object[]>> functionUnchecked);
+    Promise<JsonArray> querySingleArray(Fun1Unckd<CriteriaBuilder, CriteriaQuery<Object[]>> fun1Unckd);
 
-    <T> Promise<T> queryScalar(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked);
+    <T> Promise<T> queryScalar(Fun1Unckd<CriteriaBuilder, CriteriaQuery<T>> fun1Unckd);
 
-    Promise<Void> update(FunctionUnchecked<CriteriaBuilder, CriteriaQuery> functionUnchecked);
+    Promise<Void> update(Fun1Unckd<CriteriaBuilder, CriteriaQuery> fun1Unckd);
 
-    Promise<Void> update(List<FunctionUnchecked<CriteriaBuilder, CriteriaQuery>> functionUncheckedList);
+    Promise<Void> update(List<Fun1Unckd<CriteriaBuilder, CriteriaQuery>> fun1UnckdList);
 }

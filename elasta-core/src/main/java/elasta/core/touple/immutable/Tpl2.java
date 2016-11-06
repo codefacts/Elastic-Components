@@ -1,7 +1,7 @@
 package elasta.core.touple.immutable;
 
-import elasta.core.intfs.BiConsumerUnchecked;
-import elasta.core.intfs.BiFunctionUnchecked;
+import elasta.core.intfs.Consumer2Unckd;
+import elasta.core.intfs.Fun2Unckd;
 
 /**
  * Created by someone on 08/11/2015.
@@ -47,7 +47,7 @@ final public class Tpl2<T1, T2> {
         return t2;
     }
 
-    public <R> R apply(final BiFunctionUnchecked<T1, T2, R> functionUnchecked) {
+    public <R> R apply(final Fun2Unckd<T1, T2, R> functionUnchecked) {
         try {
             return functionUnchecked.apply(t1, t2);
         } catch (Throwable e) {
@@ -59,7 +59,7 @@ final public class Tpl2<T1, T2> {
         }
     }
 
-    public void accept(final BiConsumerUnchecked<T1, T2> consumerUnchecked) {
+    public void accept(final Consumer2Unckd<T1, T2> consumerUnchecked) {
         try {
             consumerUnchecked.accept(t1, t2);
         } catch (Throwable e) {

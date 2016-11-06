@@ -4,15 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.core.intfs.ConsumerUnchecked;
-import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.intfs.Consumer1Unckd;
+import elasta.core.intfs.Fun1Unckd;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.immutable.Tpl2;
 import elasta.core.touple.immutable.Tpls;
 import elasta.vertxutils.StaticUtils;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -131,10 +130,10 @@ public class JpaImpl implements Jpa {
     }
 
     @Override
-    public <T> Promise<List<JsonObject>> query(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked) {
+    public <T> Promise<List<JsonObject>> query(Fun1Unckd<CriteriaBuilder, CriteriaQuery<T>> fun1Unckd) {
         return exeQuery(entityManager -> {
 
-            List<T> list = entityManager.createQuery(functionUnchecked.apply(entityManager.getCriteriaBuilder())).getResultList();
+            List<T> list = entityManager.createQuery(fun1Unckd.apply(entityManager.getCriteriaBuilder())).getResultList();
 
             List<Map<String, Object>> maps = mapper.convertValue(list, listOfMap());
 
@@ -143,9 +142,9 @@ public class JpaImpl implements Jpa {
     }
 
     @Override
-    public Promise<List<JsonArray>> queryArray(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<Object[]>> functionUnchecked) {
+    public Promise<List<JsonArray>> queryArray(Fun1Unckd<CriteriaBuilder, CriteriaQuery<Object[]>> fun1Unckd) {
         return exeQuery(em -> {
-            CriteriaQuery<Object[]> criteriaQuery = functionUnchecked.apply(em.getCriteriaBuilder());
+            CriteriaQuery<Object[]> criteriaQuery = fun1Unckd.apply(em.getCriteriaBuilder());
 
             List<Object[]> list = em.createQuery(criteriaQuery).getResultList();
 
@@ -156,9 +155,9 @@ public class JpaImpl implements Jpa {
     }
 
     @Override
-    public <T> Promise<JsonObject> querySingle(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked) {
+    public <T> Promise<JsonObject> querySingle(Fun1Unckd<CriteriaBuilder, CriteriaQuery<T>> fun1Unckd) {
         return exeQuery(entityManager -> {
-            CriteriaQuery<T> query = functionUnchecked.apply(entityManager.getCriteriaBuilder());
+            CriteriaQuery<T> query = fun1Unckd.apply(entityManager.getCriteriaBuilder());
             T result = entityManager.createQuery(query).getSingleResult();
             Map map = mapper.convertValue(result, Map.class);
             return new JsonObject(map);
@@ -166,9 +165,9 @@ public class JpaImpl implements Jpa {
     }
 
     @Override
-    public Promise<JsonArray> querySingleArray(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<Object[]>> functionUnchecked) {
+    public Promise<JsonArray> querySingleArray(Fun1Unckd<CriteriaBuilder, CriteriaQuery<Object[]>> fun1Unckd) {
         return exeQuery(entityManager -> {
-            CriteriaQuery<Object[]> query = functionUnchecked.apply(entityManager.getCriteriaBuilder());
+            CriteriaQuery<Object[]> query = fun1Unckd.apply(entityManager.getCriteriaBuilder());
             Object[] result = entityManager.createQuery(query).getSingleResult();
             List list = mapper.convertValue(result, List.class);
             return new JsonArray(list);
@@ -176,29 +175,29 @@ public class JpaImpl implements Jpa {
     }
 
     @Override
-    public <T> Promise<T> queryScalar(FunctionUnchecked<CriteriaBuilder, CriteriaQuery<T>> functionUnchecked) {
+    public <T> Promise<T> queryScalar(Fun1Unckd<CriteriaBuilder, CriteriaQuery<T>> fun1Unckd) {
         return exeQuery(entityManager -> {
 
-            CriteriaQuery<T> query = functionUnchecked.apply(entityManager.getCriteriaBuilder());
+            CriteriaQuery<T> query = fun1Unckd.apply(entityManager.getCriteriaBuilder());
 
             return entityManager.createQuery(query).getSingleResult();
         });
     }
 
     @Override
-    public Promise<Void> update(FunctionUnchecked<CriteriaBuilder, CriteriaQuery> functionUnchecked) {
+    public Promise<Void> update(Fun1Unckd<CriteriaBuilder, CriteriaQuery> fun1Unckd) {
         return exeUpdate(entityManager -> {
-            CriteriaQuery query = functionUnchecked.apply(entityManager.getCriteriaBuilder());
+            CriteriaQuery query = fun1Unckd.apply(entityManager.getCriteriaBuilder());
             entityManager.createQuery(query).executeUpdate();
         });
     }
 
     @Override
-    public Promise<Void> update(List<FunctionUnchecked<CriteriaBuilder, CriteriaQuery>> functionUncheckedList) {
+    public Promise<Void> update(List<Fun1Unckd<CriteriaBuilder, CriteriaQuery>> fun1UnckdList) {
         return exeUpdate(entityManager -> {
 
-            for (FunctionUnchecked<CriteriaBuilder, CriteriaQuery> functionUnchecked : functionUncheckedList) {
-                CriteriaQuery query = functionUnchecked.apply(entityManager.getCriteriaBuilder());
+            for (Fun1Unckd<CriteriaBuilder, CriteriaQuery> fun1Unckd : fun1UnckdList) {
+                CriteriaQuery query = fun1Unckd.apply(entityManager.getCriteriaBuilder());
 
                 entityManager.createQuery(query).executeUpdate();
             }
@@ -206,20 +205,20 @@ public class JpaImpl implements Jpa {
         });
     }
 
-    private <T> Promise<T> exeQuery(FunctionUnchecked<EntityManager, T> functionUnchecked) {
+    private <T> Promise<T> exeQuery(Fun1Unckd<EntityManager, T> fun1Unckd) {
         Defer<T> defer = Promises.defer();
 
-        vertx.executeBlocking(queryHandler(functionUnchecked), StaticUtils.deferred(defer));
+        vertx.executeBlocking(queryHandler(fun1Unckd), StaticUtils.deferred(defer));
         return defer.promise();
     }
 
-    private Promise<Void> exeUpdate(ConsumerUnchecked<EntityManager> consumerUnchecked) {
+    private Promise<Void> exeUpdate(Consumer1Unckd<EntityManager> consumer1Unckd) {
         Defer<Void> defer = Promises.defer();
-        vertx.executeBlocking(updateHandler(consumerUnchecked), StaticUtils.deferred(defer));
+        vertx.executeBlocking(updateHandler(consumer1Unckd), StaticUtils.deferred(defer));
         return defer.promise();
     }
 
-    private <T> Handler<Future<T>> queryHandler(FunctionUnchecked<EntityManager, T> functionUnchecked) {
+    private <T> Handler<Future<T>> queryHandler(Fun1Unckd<EntityManager, T> fun1Unckd) {
         return future -> {
 
             EntityManager em = null;
@@ -228,7 +227,7 @@ public class JpaImpl implements Jpa {
 
                 em = emf.createEntityManager();
 
-                T result = functionUnchecked.apply(em);
+                T result = fun1Unckd.apply(em);
 
                 future.complete(result);
 
@@ -246,7 +245,7 @@ public class JpaImpl implements Jpa {
         };
     }
 
-    private <T> Handler<Future<T>> updateHandler(ConsumerUnchecked<EntityManager> consumerUnchecked) {
+    private <T> Handler<Future<T>> updateHandler(Consumer1Unckd<EntityManager> consumer1Unckd) {
         return future -> {
 
             EntityManager em = null;
@@ -255,7 +254,7 @@ public class JpaImpl implements Jpa {
 
                 em = emf.createEntityManager();
 
-                transaction(em, consumerUnchecked, future);
+                transaction(em, consumer1Unckd, future);
 
             } catch (Throwable e) {
 
@@ -271,14 +270,14 @@ public class JpaImpl implements Jpa {
         };
     }
 
-    private void transaction(EntityManager em, ConsumerUnchecked<EntityManager> consumerUnchecked, Future future) throws Throwable {
+    private void transaction(EntityManager em, Consumer1Unckd<EntityManager> consumer1Unckd, Future future) throws Throwable {
 
         EntityTransaction tx = em.getTransaction();
 
         try {
             tx.begin();
 
-            consumerUnchecked.accept(em);
+            consumer1Unckd.accept(em);
 
             tx.commit();
 

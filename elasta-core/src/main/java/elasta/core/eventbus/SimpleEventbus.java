@@ -2,12 +2,16 @@ package elasta.core.eventbus;
 
 import elasta.core.promise.intfs.Promise;
 
+import java.util.Map;
+
 /**
  * Created by Jango on 11/5/2016.
  */
-public interface SimpleEventbus {
-    
-    <T, R> SimpleEventbus addListener(String event, Handler<T, R> handler);
+public interface SimpleEventBus {
 
-    <T, R> Promise<R> fire(String event, T t);
+    <T, R> SimpleEventBus addListener(String event, Handler<T, R> handler);
+
+    <R> Promise<R> fire(String event, Object t);
+
+    <R> Promise<R> fire(String event, Object t, Map<String, ?> extra);
 }

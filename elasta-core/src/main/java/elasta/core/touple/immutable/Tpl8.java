@@ -1,7 +1,7 @@
 package elasta.core.touple.immutable;
 
-import elasta.core.intfs.OctaConsumerUnchecked;
-import elasta.core.intfs.OctaFunctionUnchecked;
+import elasta.core.intfs.Consumer8Unckd;
+import elasta.core.intfs.Fun8Unckd;
 
 /**
  * Created by someone on 08/11/2015.
@@ -48,7 +48,7 @@ final public class Tpl8<T1, T2, T3, T4, T5, T6, T7, T8> {
         return t8;
     }
 
-    public <R> R apply(final OctaFunctionUnchecked<T1, T2, T3, T4, T5, T6, T7, T8, R> functionUnchecked) {
+    public <R> R apply(final Fun8Unckd<T1, T2, T3, T4, T5, T6, T7, T8, R> functionUnchecked) {
         try {
             return functionUnchecked.apply(t1, t2, t3, t4, t5, t6, t7, t8);
         } catch (Throwable e) {
@@ -60,7 +60,7 @@ final public class Tpl8<T1, T2, T3, T4, T5, T6, T7, T8> {
         }
     }
 
-    public void accept(final OctaConsumerUnchecked<T1, T2, T3, T4, T5, T6, T7, T8> consumerUnchecked) {
+    public void accept(final Consumer8Unckd<T1, T2, T3, T4, T5, T6, T7, T8> consumerUnchecked) {
         try {
             consumerUnchecked.accept(t1, t2, t3, t4, t5, t6, t7, t8);
         } catch (Throwable e) {

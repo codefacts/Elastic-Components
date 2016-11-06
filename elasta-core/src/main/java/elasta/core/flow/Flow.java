@@ -1,6 +1,6 @@
 package elasta.core.flow;
 
-import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.intfs.Fun1Unckd;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 
@@ -109,7 +109,7 @@ public class Flow {
     }
 
     public static <T, R> FlowCallbacks<T, R> exec(
-        FunctionUnchecked<T, Promise<FlowTrigger<R>>> onEnter,
+        Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter,
         Callable<Promise<Void>> onExit) {
         return new FlowCallbacks<>(onEnter, onExit);
     }
@@ -130,7 +130,7 @@ public class Flow {
         return FlowTrigger.create(null, null);
     }
 
-    public static <T, R> FlowCallbacks onEnter(FunctionUnchecked<T, Promise<FlowTrigger<R>>> startHandler) {
+    public static <T, R> FlowCallbacks onEnter(Fun1Unckd<T, Promise<FlowTrigger<R>>> startHandler) {
         return exec(startHandler, null);
     }
 

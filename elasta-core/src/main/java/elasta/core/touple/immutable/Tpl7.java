@@ -1,7 +1,7 @@
 package elasta.core.touple.immutable;
 
-import elasta.core.intfs.SevenConsumerUnchecked;
-import elasta.core.intfs.SevenFunctionUnchecked;
+import elasta.core.intfs.Consumer7Unckd;
+import elasta.core.intfs.Fun7Unckd;
 
 /**
  * Created by someone on 08/11/2015.
@@ -57,7 +57,7 @@ final public class Tpl7<T1, T2, T3, T4, T5, T6, T7> {
         return t7;
     }
 
-    public <R> R apply(final SevenFunctionUnchecked<T1, T2, T3, T4, T5, T6, T7, R> functionUnchecked) {
+    public <R> R apply(final Fun7Unckd<T1, T2, T3, T4, T5, T6, T7, R> functionUnchecked) {
         try {
             return functionUnchecked.apply(t1, t2, t3, t4, t5, t6, t7);
         } catch (Throwable e) {
@@ -69,7 +69,7 @@ final public class Tpl7<T1, T2, T3, T4, T5, T6, T7> {
         }
     }
 
-    public void accept(final SevenConsumerUnchecked<T1, T2, T3, T4, T5, T6, T7> consumerUnchecked) {
+    public void accept(final Consumer7Unckd<T1, T2, T3, T4, T5, T6, T7> consumerUnchecked) {
         try {
             consumerUnchecked.accept(t1, t2, t3, t4, t5, t6, t7);
         } catch (Throwable e) {

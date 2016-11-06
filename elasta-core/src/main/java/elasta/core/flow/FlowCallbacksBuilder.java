@@ -1,18 +1,18 @@
 package elasta.core.flow;
 
-import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.intfs.Fun1Unckd;
 import elasta.core.promise.intfs.Promise;
 
 import java.util.concurrent.Callable;
 
 public class FlowCallbacksBuilder<T, R> {
-    private FunctionUnchecked<T, Promise<FlowTrigger<R>>> onEnter;
+    private Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter;
     private Callable<Promise<Void>> onExit;
 
     public FlowCallbacksBuilder() {
     }
 
-    public FlowCallbacksBuilder<T, R> onEnter(FunctionUnchecked<T, Promise<FlowTrigger<R>>> onEnter) {
+    public FlowCallbacksBuilder<T, R> onEnter(Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter) {
         this.onEnter = onEnter;
         return this;
     }

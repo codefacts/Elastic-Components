@@ -1,9 +1,9 @@
 package elasta.core.promise.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.core.intfs.CallableUnchecked;
-import elasta.core.intfs.ConsumerUnchecked;
-import elasta.core.intfs.RunnableUnchecked;
+import elasta.core.intfs.CallableUnckd;
+import elasta.core.intfs.Consumer1Unckd;
+import elasta.core.intfs.RunnableUnckd;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
@@ -28,11 +28,11 @@ final public class Promises {
         return promise;
     }
 
-    public static Promise<Void> runnable(final RunnableUnchecked runnableUnchecked) {
-        Objects.requireNonNull(runnableUnchecked, "Argument to Promises.runnable can't be null.");
+    public static Promise<Void> runnable(final RunnableUnckd runnableUnckd) {
+        Objects.requireNonNull(runnableUnckd, "Argument to Promises.runnable can't be null.");
         Defer<Void> defer = defer();
         try {
-            runnableUnchecked.run();
+            runnableUnckd.run();
             defer.resolve();
         } catch (Throwable ex) {
             defer.reject(ex);
@@ -40,11 +40,11 @@ final public class Promises {
         return defer.promise();
     }
 
-    public static <T> Promise<T> callable(final CallableUnchecked<T> callableUnchecked) {
-        Objects.requireNonNull(callableUnchecked, "Argument to Promises.callable can't be null.");
+    public static <T> Promise<T> callable(final CallableUnckd<T> callableUnckd) {
+        Objects.requireNonNull(callableUnckd, "Argument to Promises.callable can't be null.");
         Defer<T> defer = defer();
         try {
-            T retVal = callableUnchecked.call();
+            T retVal = callableUnckd.call();
             defer.resolve(retVal);
         } catch (Throwable ex) {
             defer.reject(ex);
@@ -52,18 +52,18 @@ final public class Promises {
         return defer.promise();
     }
 
-    public static <T> Promise<T> callableP(final CallableUnchecked<Promise<T>> callableUnchecked) {
+    public static <T> Promise<T> callableP(final CallableUnckd<Promise<T>> callableUnckd) {
         try {
-            return callableUnchecked.call();
+            return callableUnckd.call();
         } catch (Throwable throwable) {
             return Promises.error(throwable);
         }
     }
 
-    public static <T> Promise<T> exec(ConsumerUnchecked<Defer<T>> consumerUnchecked) {
+    public static <T> Promise<T> exec(Consumer1Unckd<Defer<T>> consumer1Unckd) {
         Defer<T> defer = Promises.defer();
         try {
-            consumerUnchecked.accept(defer);
+            consumer1Unckd.accept(defer);
         } catch (Throwable throwable) {
             defer.reject(throwable);
         }
@@ -362,13 +362,13 @@ final public class Promises {
         return s -> (Void) s;
     }
 
-    public static <T> Promise<T> withDefer(ConsumerUnchecked<Defer<T>> consumerUnchecked) {
+    public static <T> Promise<T> withDefer(Consumer1Unckd<Defer<T>> consumer1Unckd) {
 
         Defer<T> defer = Promises.defer();
 
         try {
 
-            consumerUnchecked.accept(defer);
+            consumer1Unckd.accept(defer);
 
         } catch (Throwable throwable) {
             return Promises.error(throwable);

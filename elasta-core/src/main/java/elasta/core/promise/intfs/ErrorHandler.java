@@ -1,9 +1,9 @@
 package elasta.core.promise.intfs;
 
-import elasta.core.intfs.ConsumerUnchecked;
+import elasta.core.intfs.Consumer1Unckd;
 
 /**
  * Created by someone on 16/10/2015.
  */
-public interface ErrorHandler extends ConsumerUnchecked<Throwable>, Invokable {
+public interface ErrorHandler extends Consumer1Unckd<Throwable>, Invokable {
 }

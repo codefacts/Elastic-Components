@@ -1,7 +1,7 @@
 package elasta.composer.util;
 
-import elasta.core.intfs.CallableUnchecked;
-import elasta.core.intfs.RunnableUnchecked;
+import elasta.core.intfs.CallableUnckd;
+import elasta.core.intfs.RunnableUnckd;
 import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -18,9 +18,9 @@ final public class ExceptionUtil {
     public static final Logger LOGGER = LoggerFactory.getLogger(ExceptionUtil.class);
     private static final String DEV_MODE = "dev-mode";
 
-    public static void toRuntime(final RunnableUnchecked runnableUnchecked) {
+    public static void toRuntime(final RunnableUnckd runnableUnckd) {
         try {
-            runnableUnchecked.run();
+            runnableUnckd.run();
         } catch (final Throwable e) {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
@@ -29,7 +29,7 @@ final public class ExceptionUtil {
         }
     }
 
-    public static <T> T toRuntimeCall(final CallableUnchecked<T> runnable) {
+    public static <T> T toRuntimeCall(final CallableUnckd<T> runnable) {
         try {
             return runnable.call();
         } catch (final Throwable e) {
@@ -40,15 +40,15 @@ final public class ExceptionUtil {
         }
     }
 
-    public static void sallowRun(final RunnableUnchecked runnableUnchecked) {
+    public static void sallowRun(final RunnableUnckd runnableUnckd) {
         try {
-            runnableUnchecked.run();
+            runnableUnckd.run();
         } catch (final Throwable e) {
             logSallowEx(e);
         }
     }
 
-    public static <T> T sallowCall(final CallableUnchecked<T> runnable) {
+    public static <T> T sallowCall(final CallableUnckd<T> runnable) {
         try {
             return runnable.call();
         } catch (final Throwable e) {

@@ -1,10 +1,10 @@
 package elasta.core.promise.intfs;
 
-import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.intfs.Fun1Unckd;
 
 /**
  * Created by Jango on 11/3/2016.
  */
 @FunctionalInterface
-public interface DoOnErrorPHandler<T> extends FunctionUnchecked<Throwable, Promise<T>> {
+public interface DoOnErrorPHandler<T> extends Fun1Unckd<Throwable, Promise<T>> {
 }

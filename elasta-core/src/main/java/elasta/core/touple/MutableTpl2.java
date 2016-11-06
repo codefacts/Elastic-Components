@@ -1,7 +1,7 @@
 package elasta.core.touple;
 
-import elasta.core.intfs.BiConsumerUnchecked;
-import elasta.core.intfs.BiFunctionUnchecked;
+import elasta.core.intfs.Consumer2Unckd;
+import elasta.core.intfs.Fun2Unckd;
 import elasta.core.touple.immutable.Tpl2;
 import elasta.core.touple.immutable.Tpls;
 
@@ -56,7 +56,7 @@ final public class MutableTpl2<T1, T2> {
         return Tpls.of(t1, t2);
     }
 
-    public <R> R apply(final BiFunctionUnchecked<T1, T2, R> functionUnchecked) {
+    public <R> R apply(final Fun2Unckd<T1, T2, R> functionUnchecked) {
         try {
             return functionUnchecked.apply(t1, t2);
         } catch (Throwable e) {
@@ -68,7 +68,7 @@ final public class MutableTpl2<T1, T2> {
         }
     }
 
-    public void accept(final BiConsumerUnchecked<T1, T2> consumerUnchecked) {
+    public void accept(final Consumer2Unckd<T1, T2> consumerUnchecked) {
         try {
             consumerUnchecked.accept(t1, t2);
         } catch (Throwable e) {

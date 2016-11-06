@@ -1,7 +1,7 @@
 package elasta.core.touple;
 
-import elasta.core.intfs.PetaConsumerUnchecked;
-import elasta.core.intfs.PetaFunctionUnchecked;
+import elasta.core.intfs.Consumer5Unckd;
+import elasta.core.intfs.Fun5Unckd;
 import elasta.core.touple.immutable.Tpl5;
 import elasta.core.touple.immutable.Tpls;
 
@@ -62,7 +62,7 @@ final public class MutableTpl5<T1, T2, T3, T4, T5> {
         return Tpls.of(t1, t2, t3, t4, t5);
     }
 
-    public <R> R apply(final PetaFunctionUnchecked<T1, T2, T3, T4, T5, R> functionUnchecked) {
+    public <R> R apply(final Fun5Unckd<T1, T2, T3, T4, T5, R> functionUnchecked) {
         try {
             return functionUnchecked.apply(t1, t2, t3, t4, t5);
         } catch (Throwable e) {
@@ -74,7 +74,7 @@ final public class MutableTpl5<T1, T2, T3, T4, T5> {
         }
     }
 
-    public void accept(final PetaConsumerUnchecked<T1, T2, T3, T4, T5> consumerUnchecked) {
+    public void accept(final Consumer5Unckd<T1, T2, T3, T4, T5> consumerUnchecked) {
         try {
             consumerUnchecked.accept(t1, t2, t3, t4, t5);
         } catch (Throwable e) {

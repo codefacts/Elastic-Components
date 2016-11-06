@@ -1,7 +1,7 @@
 package elasta.core.touple.immutable;
 
-import elasta.core.intfs.QuadConsumerUnchecked;
-import elasta.core.intfs.QuadFunctionUnchecked;
+import elasta.core.intfs.Consumer4Unckd;
+import elasta.core.intfs.Fun4Unckd;
 
 /**
  * Created by someone on 08/11/2015.
@@ -51,7 +51,7 @@ final public class Tpl4<T1, T2, T3, T4> {
         return t4;
     }
 
-    public <R> R apply(final QuadFunctionUnchecked<T1, T2, T3, T4, R> functionUnchecked) {
+    public <R> R apply(final Fun4Unckd<T1, T2, T3, T4, R> functionUnchecked) {
         try {
             return functionUnchecked.apply(t1, t2, t3, t4);
         } catch (Throwable e) {
@@ -63,7 +63,7 @@ final public class Tpl4<T1, T2, T3, T4> {
         }
     }
 
-    public void accept(final QuadConsumerUnchecked<T1, T2, T3, T4> consumerUnchecked) {
+    public void accept(final Consumer4Unckd<T1, T2, T3, T4> consumerUnchecked) {
         try {
             consumerUnchecked.accept(t1, t2, t3, t4);
         } catch (Throwable e) {

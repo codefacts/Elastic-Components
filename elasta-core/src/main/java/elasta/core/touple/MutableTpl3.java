@@ -1,7 +1,7 @@
 package elasta.core.touple;
 
-import elasta.core.intfs.TriConsumerUnchecked;
-import elasta.core.intfs.TriFunctionUnchecked;
+import elasta.core.intfs.Consumer3Unckd;
+import elasta.core.intfs.Fun3Unckd;
 import elasta.core.touple.immutable.Tpl3;
 import elasta.core.touple.immutable.Tpls;
 
@@ -58,7 +58,7 @@ final public class MutableTpl3<T1, T2, T3> {
         return Tpls.of(t1, t2, t3);
     }
 
-    public <R> R apply(final TriFunctionUnchecked<T1, T2, T3, R> functionUnchecked) {
+    public <R> R apply(final Fun3Unckd<T1, T2, T3, R> functionUnchecked) {
         try {
             return functionUnchecked.apply(t1, t2, t3);
         } catch (Throwable e) {
@@ -70,7 +70,7 @@ final public class MutableTpl3<T1, T2, T3> {
         }
     }
 
-    public void accept(final TriConsumerUnchecked<T1, T2, T3> consumerUnchecked) {
+    public void accept(final Consumer3Unckd<T1, T2, T3> consumerUnchecked) {
         try {
             consumerUnchecked.accept(t1, t2, t3);
         } catch (Throwable e) {

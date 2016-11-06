@@ -2,7 +2,7 @@ package elasta.core.flow;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import elasta.core.intfs.FunctionUnchecked;
+import elasta.core.intfs.Fun1Unckd;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 
@@ -131,11 +131,11 @@ public class FlowBuilder {
         return this;
     }
 
-    public <T, R> FlowBuilder handlers(String state, FunctionUnchecked<T, Promise<FlowTrigger<R>>> onEnter) {
+    public <T, R> FlowBuilder handlers(String state, Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter) {
         return handlers(state, onEnter, null);
     }
 
-    public <T, R> FlowBuilder handlers(String state, FunctionUnchecked<T, Promise<FlowTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
+    public <T, R> FlowBuilder handlers(String state, Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
         this.stateCallbacksMap.put(state, Flow.exec(onEnter, onExit));
         return this;
     }
