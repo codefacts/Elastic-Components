@@ -7,6 +7,8 @@ public interface Defer<T> {
 
     void reject(Throwable throwable);
 
+    <P> void reject(Throwable throwable, P lastValue);
+
     void resolve();
 
     void resolve(T value);

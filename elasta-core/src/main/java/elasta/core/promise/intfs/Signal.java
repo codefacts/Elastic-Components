@@ -17,6 +17,8 @@ public interface Signal<T> {
 
     Throwable err();
 
+    <P> P lastValue();
+
     enum Type {
         SUCCESS, ERROR, FILTERED
     }

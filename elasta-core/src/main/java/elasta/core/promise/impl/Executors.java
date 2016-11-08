@@ -108,7 +108,7 @@ final public class Executors {
         };
     }
 
-    public static final <T> InstantExecutor<T, T> errorExecutor(DoOnErrorHandler<T> errorHandler) {
+    public static final <T> InstantExecutor<T, T> errorExecutor(Error2Handler errorHandler) {
         return signal -> {
 
             if (canExecuteError(signal)) {
@@ -117,7 +117,30 @@ final public class Executors {
 
                 try {
 
-                    return SignalImpl.success(errorHandler.apply(error));
+                    errorHandler.accept(error, signal.lastValue());
+
+                } catch (Throwable throwable) {
+
+                    error.addSuppressed(throwable);
+
+                    return signal;
+                }
+            }
+
+            return signal;
+        };
+    }
+
+    public static final <P, T> InstantExecutor<T, T> errorExecutor(DoOnErrorHandler<P, T> errorHandler) {
+        return signal -> {
+
+            if (canExecuteError(signal)) {
+
+                final Throwable error = signal.err();
+
+                try {
+
+                    return SignalImpl.success(errorHandler.apply(error, signal.lastValue()));
 
                 } catch (Throwable throwable) {
 
@@ -264,7 +287,7 @@ final public class Executors {
         };
     }
 
-    public static final <T> DeferredExecutor<T, T> deferredErrorExecutor(DoOnErrorPHandler<T> errorHandler) {
+    public static final <T> DeferredExecutor<T, T> deferredErrorExecutor(Error2PHandler errorHandler) {
         return signal -> {
 
             if (canExecuteError(signal)) {
@@ -275,7 +298,42 @@ final public class Executors {
 
                     PromiseImpl<T> tPromise = new PromiseImpl<>();
 
-                    errorHandler.apply(error).cmp(ss -> {
+                    errorHandler.apply(error, signal.lastValue()).cmp(ss -> {
+
+                        if (ss.isError()) {
+
+                            error.addSuppressed(ss.err());
+                        }
+
+                        PromiseImpl.signal(tPromise, signal);
+                    });
+
+                    return tPromise;
+
+                } catch (Throwable throwable) {
+
+                    error.addSuppressed(throwable);
+
+                    return new PromiseImpl(signal);
+                }
+            }
+
+            return new PromiseImpl(signal);
+        };
+    }
+
+    public static final <P, T> DeferredExecutor<T, T> deferredErrorExecutor(DoOnErrorPHandler<P, T> errorHandler) {
+        return signal -> {
+
+            if (canExecuteError(signal)) {
+
+                final Throwable error = signal.err();
+
+                try {
+
+                    PromiseImpl<T> tPromise = new PromiseImpl<>();
+
+                    errorHandler.apply(error, signal.lastValue()).cmp(ss -> {
 
                         if (ss.isError()) {
 

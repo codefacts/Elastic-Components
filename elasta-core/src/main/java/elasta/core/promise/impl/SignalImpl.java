@@ -9,7 +9,7 @@ final public class SignalImpl<T> implements Signal<T> {
     final Object value;
     final Type type;
 
-    SignalImpl(T value, Type type) {
+    private SignalImpl(T value, Type type) {
         this.value = value;
         this.type = type;
     }
@@ -30,7 +30,12 @@ final public class SignalImpl<T> implements Signal<T> {
     }
 
     public Throwable err() {
-        return (type == Type.ERROR) ? (Throwable) value : null;
+        return (type == Type.ERROR) ? ((ErrorAndLastValue) value).err() : null;
+    }
+
+    @Override
+    public <P> P lastValue() {
+        return (type == Type.ERROR) ? ((ErrorAndLastValue) value).lastVal() : null;
     }
 
     public T val() {
@@ -47,7 +52,11 @@ final public class SignalImpl<T> implements Signal<T> {
     }
 
     public static <TT> SignalImpl<TT> error(Throwable throwable) {
-        return new SignalImpl(throwable, Type.ERROR);
+        return new SignalImpl(new ErrorAndLastValue(throwable, null), Type.ERROR);
+    }
+
+    public static <TT> SignalImpl<TT> error(Throwable throwable, Object lastValue) {
+        return new SignalImpl(new ErrorAndLastValue(throwable, lastValue), Type.ERROR);
     }
 
     public static <TT> SignalImpl<TT> filtered() {
@@ -57,5 +66,26 @@ final public class SignalImpl<T> implements Signal<T> {
     @Override
     public String toString() {
         return "Signal: type=" + type + " value=" + value;
+    }
+
+    /**
+     * Created by Jango on 11/9/2016.
+     */
+    public static class ErrorAndLastValue {
+        private final Throwable error;
+        private final Object lastValue;
+
+        public ErrorAndLastValue(Throwable error, Object lastValue) {
+            this.error = error;
+            this.lastValue = lastValue;
+        }
+
+        public Throwable err() {
+            return error;
+        }
+
+        public <T> T lastVal() {
+            return (T) lastValue;
+        }
     }
 }

@@ -1,4 +1,4 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.app;
 
 /**
  * Created by Jango on 11/7/2016.

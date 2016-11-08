@@ -1,5 +1,6 @@
 package elasta.webutils.app.impl;
 
+import elasta.webutils.app.ContentTypes;
 import elasta.webutils.app.ResponseGenerator;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;

@@ -85,6 +85,14 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
+    public Promise<T> err2(Error2Handler errorHandler) {
+
+        PromiseImpl<T> promise = createPromise(Executors.errorExecutor(errorHandler));
+
+        return executeOrSchedule(promise);
+    }
+
+    @Override
     public Promise<T> errP(ErrorPHandler errorPHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(errorPHandler));
@@ -93,7 +101,15 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
-    public Promise<T> errd(DoOnErrorHandler<T> doOnErrorHandler) {
+    public Promise<T> err2P(Error2PHandler errorHandler) {
+
+        PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(errorHandler));
+
+        return executeOrSchedule(promise);
+    }
+
+    @Override
+    public <P> Promise<T> errd(DoOnErrorHandler<P, T> doOnErrorHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.errorExecutor(doOnErrorHandler));
 
@@ -101,7 +117,7 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
-    public Promise<T> errdP(DoOnErrorPHandler<T> doOnErrorHandler) {
+    public <P> Promise<T> errdP(DoOnErrorPHandler<P, T> doOnErrorHandler) {
 
         PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(doOnErrorHandler));
 
@@ -221,6 +237,11 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     @Override
     public void reject(Throwable throwable) {
         signal(this, SignalImpl.error(throwable));
+    }
+
+    @Override
+    public <P> void reject(Throwable throwable, P lastValue) {
+        signal(this, SignalImpl.error(throwable, lastValue));
     }
 
     @Override
