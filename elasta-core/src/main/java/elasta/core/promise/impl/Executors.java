@@ -17,7 +17,7 @@ final public class Executors {
                     thenHandler.accept(signal.val());
 
                 } catch (Throwable throwable) {
-                    return SignalImpl.error(throwable);
+                    return SignalImpl.error(throwable, signal.val());
                 }
             }
             return signal;
@@ -48,7 +48,7 @@ final public class Executors {
 
                 } catch (Throwable throwable) {
 
-                    return SignalImpl.error(throwable);
+                    return SignalImpl.error(throwable, signal.val());
                 }
 
             } else {
@@ -74,7 +74,7 @@ final public class Executors {
 
                 } catch (Throwable throwable) {
 
-                    return SignalImpl.error(throwable);
+                    return SignalImpl.error(throwable, signal.val());
                 }
             }
             return (SignalImpl<R>) signal;
@@ -166,7 +166,7 @@ final public class Executors {
 
             } catch (Throwable throwable) {
 
-                return SignalImpl.error(throwable);
+                return SignalImpl.error(throwable, signal.val());
             }
             return signal;
         };
@@ -182,7 +182,7 @@ final public class Executors {
 
                     thenHandler.apply(signal.val()).cmp(ss -> {
                         if (ss.isError()) {
-                            promise.reject(ss.err());
+                            promise.signal((Signal<T>) ss);
                         } else {
                             PromiseImpl.signal(promise, signal);
                         }
@@ -192,7 +192,7 @@ final public class Executors {
 
                 } catch (Throwable throwable) {
 
-                    return new PromiseImpl(SignalImpl.error(throwable));
+                    return new PromiseImpl(SignalImpl.error(throwable, signal.val()));
                 }
             }
             return new PromiseImpl(signal);
@@ -209,7 +209,7 @@ final public class Executors {
 
                     filterPHandler.test(signal.val()).cmp(ss -> {
                         if (ss.isError()) {
-                            promise.reject(ss.err());
+                            promise.signal((Signal<T>) ss);
                         } else {
 
                             if (ss.val()) {
@@ -224,7 +224,7 @@ final public class Executors {
 
                 } catch (Throwable throwable) {
 
-                    return new PromiseImpl<>(SignalImpl.error(throwable));
+                    return new PromiseImpl<>(SignalImpl.error(throwable, signal.val()));
                 }
 
             } else {
@@ -244,7 +244,7 @@ final public class Executors {
 
                 } catch (Throwable throwable) {
 
-                    return new PromiseImpl<>(SignalImpl.error(throwable));
+                    return new PromiseImpl<>(SignalImpl.error(throwable, signal.val()));
                 }
             }
 
@@ -369,7 +369,7 @@ final public class Executors {
 
                 completeHandler.apply(signal).cmp(ss -> {
                     if (ss.isError()) {
-                        promise.reject(ss.err());
+                        promise.signal((Signal<T>) ss);
                     } else {
                         PromiseImpl.signal(promise, signal);
                     }
@@ -379,7 +379,7 @@ final public class Executors {
 
             } catch (Throwable throwable) {
 
-                return new PromiseImpl<>(SignalImpl.error(throwable));
+                return new PromiseImpl<>(SignalImpl.error(throwable, signal.val()));
             }
         };
     }
