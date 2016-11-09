@@ -84,10 +84,15 @@ final public class Promises {
         }
         Defer<List<T>> defer = defer();
         final SimpleCounter counter = new SimpleCounter(0);
-        MutableTpl2<Boolean, Throwable> pStatus = MutableTpls.of(true, null);
+        MutableTpl3<Boolean, Throwable, Object> pStatus = MutableTpls.of(true, null, null);
         promises.forEach(pm -> pm.cmp(pms -> {
             pStatus.t1 &= pms.isSuccess();
-            pStatus.t2 = pStatus.t2 == null ? pms.err() : pStatus.t2;
+
+            if (pStatus.t2 == null) {
+                pStatus.t2 = pms.err();
+                pStatus.t3 = pms.lastValue();
+            }
+
             counter.counter++;
             if (counter.counter == promises.size()) {
                 if (pStatus.t1) {
@@ -95,7 +100,7 @@ final public class Promises {
                     promises.forEach(promise -> builder.add(promise.val()));
                     defer.resolve(builder.build());
                 } else {
-                    defer.reject(pStatus.t2);
+                    defer.reject(pStatus.t2, pStatus.t3);
                 }
             }
         }));
@@ -137,7 +142,7 @@ final public class Promises {
                         defer.resolve(mutableTpl2);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -151,7 +156,7 @@ final public class Promises {
                         defer.resolve(mutableTpl2);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -174,7 +179,7 @@ final public class Promises {
                         defer.resolve(mutableTpl3);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -188,7 +193,7 @@ final public class Promises {
                         defer.resolve(mutableTpl3);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -202,7 +207,7 @@ final public class Promises {
                         defer.resolve(mutableTpl3);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -227,7 +232,7 @@ final public class Promises {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -241,7 +246,7 @@ final public class Promises {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -255,7 +260,7 @@ final public class Promises {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -269,7 +274,7 @@ final public class Promises {
                         defer.resolve(mutableTpl4);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -294,7 +299,7 @@ final public class Promises {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -308,7 +313,7 @@ final public class Promises {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -322,7 +327,7 @@ final public class Promises {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -336,7 +341,7 @@ final public class Promises {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -350,7 +355,7 @@ final public class Promises {
                         defer.resolve(mutableTpl5);
                     }
                 } else {
-                    defer.reject(t.err());
+                    defer.reject(t.err(), t.lastValue());
                 }
             }
         });
@@ -360,20 +365,5 @@ final public class Promises {
 
     public static <T> MapHandler<T, Void> toVoid() {
         return s -> (Void) s;
-    }
-
-    public static <T> Promise<T> withDefer(Consumer1Unckd<Defer<T>> consumer1Unckd) {
-
-        Defer<T> defer = Promises.defer();
-
-        try {
-
-            consumer1Unckd.accept(defer);
-
-        } catch (Throwable throwable) {
-            return Promises.error(throwable);
-        }
-
-        return defer.promise();
     }
 }
