@@ -44,7 +44,7 @@ public class App {
 
         registerEventHandlers(moduleSystem.require(SimpleEventBus.class));
 
-        vertx.createHttpServer().requestHandler(router::accept).listen(85);
+
         System.out.println("Server Started.");
     }
 

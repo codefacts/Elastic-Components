@@ -9,11 +9,11 @@ import java.util.concurrent.Callable;
 /**
  * Created by Khan on 5/7/2016.
  */
-public class FlowCallbacks<T, R> {
-    final Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter;
+public class StateTransitionHandlers<T, R> {
+    final Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter;
     final Callable<Promise<Void>> onExit;
 
-    protected FlowCallbacks(Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
+    public StateTransitionHandlers(Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
         this.onEnter = onEnter == null ? defE() : onEnter;
         this.onExit = onExit == null ? defX() : onExit;
     }
@@ -22,7 +22,15 @@ public class FlowCallbacks<T, R> {
         return () -> null;
     }
 
-    private static <T, R> Fun1Unckd<T, Promise<FlowTrigger<R>>> defE() {
+    private static <T, R> Fun1Unckd<T, Promise<StateTrigger<R>>> defE() {
         return t -> Promises.just(null);
+    }
+
+    public Fun1Unckd<T, Promise<StateTrigger<R>>> getOnEnter() {
+        return onEnter;
+    }
+
+    public Callable<Promise<Void>> getOnExit() {
+        return onExit;
     }
 }
