@@ -6,11 +6,11 @@ import elasta.core.promise.intfs.Promise;
 /**
  * Created by Jango on 11/5/2016.
  */
-public interface Context<T, R> {
+public interface Context {
 
     String event();
 
     TypedMap params();
 
-    Promise<R> next(T t);
+    <R> Promise<R> next(Object t);
 }

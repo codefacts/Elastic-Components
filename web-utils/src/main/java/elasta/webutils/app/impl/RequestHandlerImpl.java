@@ -1,10 +1,7 @@
 package elasta.webutils.app.impl;
 
 import elasta.core.eventbus.SimpleEventBus;
-import elasta.webutils.app.RequestConverter;
-import elasta.webutils.app.RequestHandler;
-import elasta.webutils.app.ResponseGenerator;
-import elasta.webutils.app.UriToEventTranslator;
+import elasta.webutils.app.*;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -14,11 +11,16 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class RequestHandlerImpl implements RequestHandler {
     private final RequestConverter<JsonObject> converter;
-    private final UriToEventTranslator uriToEventTranslator;
-    private final ResponseGenerator responseGenerator;
+    private final UriToEventTranslator<JsonObject> uriToEventTranslator;
+    private final ResponseGenerator<JsonObject> responseGenerator;
     private final SimpleEventBus eventBus;
 
-    public RequestHandlerImpl(RequestConverter converter, UriToEventTranslator uriToEventTranslator, ResponseGenerator responseGenerator, SimpleEventBus eventBus) {
+    public RequestHandlerImpl(
+        RequestConverter converter,
+        UriToEventTranslator uriToEventTranslator,
+        ResponseGenerator responseGenerator,
+        SimpleEventBus eventBus) {
+
         this.converter = converter;
         this.uriToEventTranslator = uriToEventTranslator;
         this.responseGenerator = responseGenerator;
@@ -34,7 +36,15 @@ public class RequestHandlerImpl implements RequestHandler {
 
             JsonObject val = converter.apply(context);
 
-            String eventAddress = uriToEventTranslator.apply(request.uri(), request.method());
+            String eventAddress = uriToEventTranslator.apply(
+                new RequestInfoBuilder<JsonObject>()
+                    .setHeaders(request.headers())
+                    .setUri(request.uri())
+                    .setAbsoluteUri(request.absoluteURI())
+                    .setHttpMethod(request.method())
+                    .setValue(val)
+                    .createRequestInfo()
+            );
 
             eventBus.<JsonObject>fire(eventAddress, val)
                 .then(jsonObject -> responseGenerator.reply(jsonObject, context))

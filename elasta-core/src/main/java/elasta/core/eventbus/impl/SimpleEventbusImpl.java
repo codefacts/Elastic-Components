@@ -2,8 +2,8 @@ package elasta.core.eventbus.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.core.eventbus.Handler;
-import elasta.core.eventbus.SimpleEventBus;
+import elasta.core.eventbus.*;
+import elasta.core.eventbus.EventListener;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.MutableTpl1;
@@ -23,8 +23,67 @@ public class SimpleEventBusImpl implements SimpleEventBus {
     private List<EventHandlerInfo> handlerInfos = new CopyOnWriteArrayList<>();
 
     @Override
-    public <T, R> SimpleEventBus addListener(String eventPattern, Handler<T, R> handler) {
-        handlerInfos.add(new EventHandlerInfo(eventPattern, handler));
+    public <T, R> SimpleEventBus addInterceptor(String event, Intercepetor<T, R> intercepetor) {
+        this.<T, R>addListener(event, (o, context) -> context.next(
+            intercepetor.handle(o, context.event(), context.params())
+        ));
+        return this;
+    }
+
+    @Override
+    public <T, R> SimpleEventBus addInterceptorP(String event, IntercepetorP<T, R> handlerP) {
+        this.<T, R>addListener(event, (o, context) -> handlerP.handle(o, context.event(), context.params())
+            .mapP(context::<R>next));
+        return this;
+    }
+
+    @Override
+    public <T> SimpleEventBus addFilter(String event, Filter<T> filter) {
+
+        this.<T, Object>addListener(event, (o, context) -> {
+            boolean isNext = filter.handle(o, context.event(), context.params());
+            if (isNext) {
+                return context.next(o);
+            } else {
+                return Promises.just(o);
+            }
+        });
+
+        return this;
+    }
+
+    @Override
+    public <T> SimpleEventBus addFilterP(String event, FilterP<T> filterP) {
+        this.<T, Object>addListener(event, (value, context) -> filterP.handle(value, context.event(), context.params())
+            .mapP(isNext -> {
+
+                if (isNext != null && isNext) {
+                    return context.next(value);
+                }
+
+                return Promises.<Object>just(value);
+            }));
+        return this;
+    }
+
+    @Override
+    public <T> SimpleEventBus addHandler(String event, EventHandler<T> handler) {
+        this.<T, Object>addListener(event, (o, context) -> {
+            handler.handle(o, context.event(), context.params());
+            return context.next(o);
+        });
+        return this;
+    }
+
+    @Override
+    public <T> SimpleEventBus addHandlerP(String event, EventHandlerP<T> handlerP) {
+        this.<T, Object>addListener(event, (o, context) -> handlerP.handle(o, context.event(), context.params()).mapP(aVoid -> context.next(o)));
+        return this;
+    }
+
+    @Override
+    public <T, R> SimpleEventBus addListener(String eventPattern, EventListener<T, R> eventListener) {
+        handlerInfos.add(new EventHandlerInfo(eventPattern, eventListener));
 
         handlersMap.keySet().forEach(evet -> {
             PathTemplate.MatchAndParams matchAndParams = new PathTemplateImpl(eventPattern).matchAndParams(evet, PATH_SEPERATOR);
@@ -32,7 +91,7 @@ public class SimpleEventBusImpl implements SimpleEventBus {
 
                 handlersMap.put(evet,
                     ImmutableList.<EventMatchInfo>builder()
-                        .add(new EventMatchInfo(handler, matchAndParams.getParams()))
+                        .add(new EventMatchInfo(eventListener, matchAndParams.getParams()))
                         .addAll(handlersMap.get(evet)).build()
                 );
             }
@@ -70,7 +129,7 @@ public class SimpleEventBusImpl implements SimpleEventBus {
             PathTemplate.MatchAndParams match = match(eventHandlerInfo.eventPattern, event);
 
             if (match.isMatch()) {
-                listBuilder.add(new EventMatchInfo(eventHandlerInfo.handler, match.getParams()));
+                listBuilder.add(new EventMatchInfo(eventHandlerInfo.eventListener, match.getParams()));
             }
 
         });
@@ -102,19 +161,19 @@ public class SimpleEventBusImpl implements SimpleEventBus {
             }
             EventMatchInfo matchInfo = iterator.next();
             tpl1.t1.params().putAll(matchInfo.params);
-            return matchInfo.handler.handle(val, tpl1.t1);
+            return matchInfo.eventListener.handle(val, tpl1.t1);
         });
 
-        return info.handler.handle(t, tpl1.t1);
+        return info.eventListener.handle(t, tpl1.t1);
     }
 
     private class EventHandlerInfo {
         final String eventPattern;
-        final Handler handler;
+        final EventListener eventListener;
 
-        private EventHandlerInfo(String eventPattern, Handler handler) {
+        private EventHandlerInfo(String eventPattern, EventListener eventListener) {
             this.eventPattern = eventPattern;
-            this.handler = handler;
+            this.eventListener = eventListener;
         }
     }
 
@@ -159,11 +218,11 @@ public class SimpleEventBusImpl implements SimpleEventBus {
     }
 
     private static class EventMatchInfo {
-        final Handler handler;
+        final EventListener eventListener;
         final Map<String, String> params;
 
-        private EventMatchInfo(Handler handler, Map<String, String> params) {
-            this.handler = handler;
+        private EventMatchInfo(EventListener eventListener, Map<String, String> params) {
+            this.eventListener = eventListener;
             this.params = params;
         }
     }

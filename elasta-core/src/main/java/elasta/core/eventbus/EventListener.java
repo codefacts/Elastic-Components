@@ -7,6 +7,6 @@ import java.util.Map;
 /**
  * Created by Jango on 11/5/2016.
  */
-public interface Handler<T, R> {
-    Promise<R> handle(T t, Context<Object, R> context);
+public interface EventListener<T, R> {
+    Promise<R> handle(T t, Context context);
 }
