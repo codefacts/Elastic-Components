@@ -3,12 +3,9 @@ package elasta.core.flow.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import elasta.core.flow.*;
-import elasta.core.intfs.Fun1Unckd;
 import elasta.core.promise.impl.Promises;
-import elasta.core.promise.intfs.Promise;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Created by Jango on 11/13/2016.
@@ -152,7 +149,7 @@ public class FlowBuilderImpl implements FlowBuilder {
                 Flow.on("err", "errState"))
             .when("errState", Flow.next("end"))
             .when("process", Flow.next("end"))
-            .when("end", Flow.end())
+            .when("end", Flow.finish())
             .exec("start", Flow.onEnterP(o -> {
                 System.out.println("onStart: " + o);
                 return Promises.just(Flow.trigger("err", new NullPointerException("ok")));

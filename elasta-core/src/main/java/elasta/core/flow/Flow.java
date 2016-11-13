@@ -31,7 +31,7 @@ public interface Flow {
         return EventAndState.on(NEXT, state);
     }
 
-    public static EventAndState[] end() {
+    public static EventAndState[] finish() {
         return new EventAndState[]{};
     }
 
