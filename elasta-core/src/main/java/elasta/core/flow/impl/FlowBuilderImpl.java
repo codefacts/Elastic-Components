@@ -71,11 +71,11 @@ public class FlowBuilderImpl implements FlowBuilder {
         return this;
     }
 
-    public <T, R> FlowBuilder handlers(String state, Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter) {
+    public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter) {
         return handlers(state, onEnter, null);
     }
 
-    public <T, R> FlowBuilder handlers(String state, Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
+    public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter, ExitEventHandler onExit) {
         this.stateCallbacksMap.put(state, Flow.execP(onEnter, onExit));
         return this;
     }

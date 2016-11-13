@@ -10,27 +10,27 @@ import java.util.concurrent.Callable;
  * Created by Khan on 5/7/2016.
  */
 public class StateTransitionHandlers<T, R> {
-    final Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter;
-    final Callable<Promise<Void>> onExit;
+    final EnterEventHandler<T, R> onEnter;
+    final ExitEventHandler onExit;
 
-    public StateTransitionHandlers(Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
+    public StateTransitionHandlers(EnterEventHandler<T, R> onEnter, ExitEventHandler onExit) {
         this.onEnter = onEnter == null ? defE() : onEnter;
         this.onExit = onExit == null ? defX() : onExit;
     }
 
-    private Callable<Promise<Void>> defX() {
+    private ExitEventHandler defX() {
         return () -> null;
     }
 
-    private static <T, R> Fun1Unckd<T, Promise<StateTrigger<R>>> defE() {
+    private static <T, R> EnterEventHandler<T, R> defE() {
         return t -> Promises.just(null);
     }
 
-    public Fun1Unckd<T, Promise<StateTrigger<R>>> getOnEnter() {
+    public EnterEventHandler<T, R> getOnEnter() {
         return onEnter;
     }
 
-    public Callable<Promise<Void>> getOnExit() {
+    public ExitEventHandler getOnExit() {
         return onExit;
     }
 }

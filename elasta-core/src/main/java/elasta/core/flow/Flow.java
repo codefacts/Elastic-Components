@@ -68,8 +68,8 @@ public interface Flow {
     }
 
     public static <T, R> StateTransitionHandlers<T, R> execP(
-        Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter,
-        Callable<Promise<Void>> onExit) {
+        EnterEventHandler<T, R> onEnter,
+        ExitEventHandler onExit) {
         return new StateTransitionHandlers<>(onEnter, onExit);
     }
 
@@ -79,7 +79,7 @@ public interface Flow {
         ), null);
     }
 
-    public static <T, R> StateTransitionHandlers onEnterP(Fun1Unckd<T, Promise<StateTrigger<R>>> startHandler) {
+    public static <T, R> StateTransitionHandlers onEnterP(EnterEventHandler<T, R> startHandler) {
         return execP(startHandler, null);
     }
 
@@ -87,7 +87,7 @@ public interface Flow {
         return execP(null, () -> Promises.runnable(endHandler));
     }
 
-    public static StateTransitionHandlers onExitP(Callable<Promise<Void>> endHandler) {
+    public static StateTransitionHandlers onExitP(ExitEventHandler endHandler) {
         return execP(null, endHandler);
     }
 }

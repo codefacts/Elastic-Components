@@ -1,5 +1,7 @@
 package elasta.core.flow.impl;
 
+import elasta.core.flow.EnterEventHandler;
+import elasta.core.flow.ExitEventHandler;
 import elasta.core.flow.StateTransitionHandlers;
 import elasta.core.flow.StateTrigger;
 import elasta.core.intfs.Fun1Unckd;
@@ -8,18 +10,18 @@ import elasta.core.promise.intfs.Promise;
 import java.util.concurrent.Callable;
 
 public class FlowCallbacksBuilder<T, R> {
-    private Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter;
-    private Callable<Promise<Void>> onExit;
+    private EnterEventHandler<T, R> onEnter;
+    private ExitEventHandler onExit;
 
     public FlowCallbacksBuilder() {
     }
 
-    public FlowCallbacksBuilder<T, R> onEnter(Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter) {
+    public FlowCallbacksBuilder<T, R> onEnter(EnterEventHandler<T, R> onEnter) {
         this.onEnter = onEnter;
         return this;
     }
 
-    public FlowCallbacksBuilder<T, R> onExit(Callable<Promise<Void>> onExit) {
+    public FlowCallbacksBuilder<T, R> onExit(ExitEventHandler onExit) {
         this.onExit = onExit;
         return this;
     }

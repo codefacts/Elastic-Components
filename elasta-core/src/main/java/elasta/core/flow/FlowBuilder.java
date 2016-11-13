@@ -14,9 +14,9 @@ public interface FlowBuilder {
 
     public FlowBuilder exec(String state, StateTransitionHandlers stateTransitionHandlers);
 
-    public <T, R> FlowBuilder handlers(String state, Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter);
+    public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter);
 
-    public <T, R> FlowBuilder handlers(String state, Fun1Unckd<T, Promise<StateTrigger<R>>> onEnter, Callable<Promise<Void>> onExit);
+    public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter, ExitEventHandler onExit);
 
     public Flow build();
 

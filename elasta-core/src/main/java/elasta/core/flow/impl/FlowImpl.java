@@ -81,10 +81,10 @@ public class FlowImpl implements Flow {
 
     private <T, R> Promise<StateTrigger<R>> execute(StateTransitionHandlers<T, R> stateTransitionHandlers, T message) {
         try {
-            return stateTransitionHandlers.getOnEnter().apply(message)
+            return stateTransitionHandlers.getOnEnter().handle(message)
                 .cmpP(signal -> {
 
-                    Promise<Void> voidPromise = stateTransitionHandlers.getOnExit().call();
+                    Promise<Void> voidPromise = stateTransitionHandlers.getOnExit().handle();
                     return voidPromise == null ? Promises.empty() : voidPromise;
                 });
 
