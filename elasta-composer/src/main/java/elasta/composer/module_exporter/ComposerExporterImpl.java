@@ -33,7 +33,9 @@ public class ComposerExporterImpl implements ComposerExporter {
                     .when(States.TRANSFORMATION, next(States.ACTION))
                     .when(States.ACTION, next(States.RESULT_PREPERATION))
                     .when(States.RESULT_PREPERATION, next(States.END))
-                    .when(States.END, Flow.finish())
+                    .when(States.END, Flow.end())
+                    .initialState(States.START)
+
                     .build()
             );
         });

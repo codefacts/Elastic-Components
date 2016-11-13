@@ -1,10 +1,6 @@
 package elasta.core.flow;
 
 import elasta.core.flow.impl.FlowBuilderImpl;
-import elasta.core.intfs.Fun1Unckd;
-import elasta.core.promise.intfs.Promise;
-
-import java.util.concurrent.Callable;
 
 public interface FlowBuilder {
 
@@ -17,6 +13,10 @@ public interface FlowBuilder {
     public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter);
 
     public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter, ExitEventHandler onExit);
+
+    public <T, R> FlowBuilder handlersP(String state, EnterEventHandlerP<T, R> onEnter);
+
+    public <T, R> FlowBuilder handlersP(String state, EnterEventHandlerP<T, R> onEnter, ExitEventHandlerP onExit);
 
     public Flow build();
 

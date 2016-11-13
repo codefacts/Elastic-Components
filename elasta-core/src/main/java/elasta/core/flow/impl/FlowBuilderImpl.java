@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import elasta.core.flow.*;
 import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Promise;
 
 import java.util.*;
 
@@ -68,11 +69,27 @@ public class FlowBuilderImpl implements FlowBuilder {
         return this;
     }
 
+    @Override
     public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter) {
-        return handlers(state, onEnter, null);
+        this.<T, R>handlersP(state, o -> Promises.just(
+            onEnter.handle(o)
+        ));
+        return this;
     }
 
+    @Override
     public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter, ExitEventHandler onExit) {
+        this.<T, R>handlersP(state, o -> Promises.just(
+            onEnter.handle(o)
+        ), () -> Promises.runnable(onExit::handle));
+        return this;
+    }
+
+    public <T, R> FlowBuilder handlersP(String state, EnterEventHandlerP<T, R> onEnter) {
+        return handlersP(state, onEnter, null);
+    }
+
+    public <T, R> FlowBuilder handlersP(String state, EnterEventHandlerP<T, R> onEnter, ExitEventHandlerP onExit) {
         this.stateCallbacksMap.put(state, Flow.execP(onEnter, onExit));
         return this;
     }
@@ -149,7 +166,7 @@ public class FlowBuilderImpl implements FlowBuilder {
                 Flow.on("err", "errState"))
             .when("errState", Flow.next("end"))
             .when("process", Flow.next("end"))
-            .when("end", Flow.finish())
+            .when("end", Flow.end())
             .exec("start", Flow.onEnterP(o -> {
                 System.out.println("onStart: " + o);
                 return Promises.just(Flow.trigger("err", new NullPointerException("ok")));

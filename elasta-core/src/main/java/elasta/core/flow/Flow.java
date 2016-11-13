@@ -6,8 +6,6 @@ import elasta.core.intfs.RunnableUnckd;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 
-import java.util.concurrent.Callable;
-
 /**
  * Created by Khan on 5/7/2016.
  */
@@ -31,7 +29,7 @@ public interface Flow {
         return EventAndState.on(NEXT, state);
     }
 
-    public static EventAndState[] finish() {
+    public static EventAndState[] end() {
         return new EventAndState[]{};
     }
 
@@ -68,8 +66,8 @@ public interface Flow {
     }
 
     public static <T, R> StateTransitionHandlers<T, R> execP(
-        EnterEventHandler<T, R> onEnter,
-        ExitEventHandler onExit) {
+        EnterEventHandlerP<T, R> onEnter,
+        ExitEventHandlerP onExit) {
         return new StateTransitionHandlers<>(onEnter, onExit);
     }
 
@@ -79,7 +77,7 @@ public interface Flow {
         ), null);
     }
 
-    public static <T, R> StateTransitionHandlers onEnterP(EnterEventHandler<T, R> startHandler) {
+    public static <T, R> StateTransitionHandlers onEnterP(EnterEventHandlerP<T, R> startHandler) {
         return execP(startHandler, null);
     }
 
@@ -87,7 +85,7 @@ public interface Flow {
         return execP(null, () -> Promises.runnable(endHandler));
     }
 
-    public static StateTransitionHandlers onExitP(ExitEventHandler endHandler) {
+    public static StateTransitionHandlers onExitP(ExitEventHandlerP endHandler) {
         return execP(null, endHandler);
     }
 }
