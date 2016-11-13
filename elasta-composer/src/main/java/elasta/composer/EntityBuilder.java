@@ -26,7 +26,7 @@ public class EntityBuilder {
         return this;
     }
 
-    public Entity createEntity() {
-        return new Entity(name, displayName, pluralName, eventPath);
+    public Resource createEntity() {
+        return new Resource(name, displayName, pluralName, eventPath);
     }
 }

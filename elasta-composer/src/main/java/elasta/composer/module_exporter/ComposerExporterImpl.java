@@ -3,7 +3,7 @@ package elasta.composer.module_exporter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.Cnsts;
-import elasta.composer.Entity;
+import elasta.composer.Resource;
 import elasta.composer.EntityBuilder;
 import elasta.composer.EventToFlowDispatcher;
 import elasta.composer.transformation.JsonTransformationPipeline;
@@ -119,7 +119,7 @@ public class ComposerExporterImpl implements ComposerExporter {
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.ACTION, module -> module.export(
             jsonObject -> {
-                Entity entity = (Entity) module.require(Map.class, Configs.ENTITY_BY_EVENT_PATH_MAP)
+                Resource resource = (Resource) module.require(Map.class, Configs.RESOURCE_BY_EVENT_PATH_MAP)
                     .get(
                         jsonObject.getString(EventToFlowDispatcher.ENTITY)
                     );
@@ -130,7 +130,7 @@ public class ComposerExporterImpl implements ComposerExporter {
 
                 JsonObject dbRequest = event.startsWith(DbEvents.DB_CREATE) || event.startsWith(DbEvents.DB_UPDATE) ? new JsonObject(
                     ImmutableMap.of(
-                        DbReqParams.ENTITY, entity.getName(),
+                        DbReqParams.ENTITY, resource.getName(),
                         DbReqParams.DATA, jsonObject
                     )
                 ) : jsonObject;
@@ -147,7 +147,7 @@ public class ComposerExporterImpl implements ComposerExporter {
             jsonObject -> Promises.just(Flow.triggerNext(jsonObject))
         ));
 
-        moduleSystem.export(Map.class, Configs.ENTITY_BY_EVENT_PATH_MAP, module -> module.export(ImmutableMap.of(
+        moduleSystem.export(Map.class, Configs.RESOURCE_BY_EVENT_PATH_MAP, module -> module.export(ImmutableMap.of(
             "students", new EntityBuilder()
                 .setName("student")
                 .setDisplayName("Student")
