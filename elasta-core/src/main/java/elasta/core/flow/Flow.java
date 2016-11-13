@@ -1,6 +1,7 @@
 package elasta.core.flow;
 
 import elasta.core.intfs.Fun1Unckd;
+import elasta.core.intfs.RunnableUnckd;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 
@@ -108,46 +109,64 @@ public class Flow {
         return EventToStateMapping.on(NEXT, state);
     }
 
-    public static <T, R> FlowCallbacks<T, R> exec(
-        Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter,
-        Callable<Promise<Void>> onExit) {
-        return new FlowCallbacks<>(onEnter, onExit);
-    }
-
-    public static <T, R> FlowCallbacksBuilder<T, R> exec() {
-        return FlowCallbacksBuilder.<T, R>create();
+    public static EventToStateMapping[] end() {
+        return new EventToStateMapping[]{};
     }
 
     public static <T> FlowTrigger<T> trigger(String event, T message) {
         return FlowTrigger.create(event, message);
     }
 
-    public static <T> FlowTrigger<T> exit(T message) {
+    public static <T> FlowTrigger<T> triggerExit(T message) {
         return FlowTrigger.create(null, message);
     }
 
-    public static <T> FlowTrigger<T> exit() {
+    public static <T> FlowTrigger<T> triggerExit() {
         return FlowTrigger.create(null, null);
     }
 
-    public static <T, R> FlowCallbacks onEnter(Fun1Unckd<T, Promise<FlowTrigger<R>>> startHandler) {
-        return exec(startHandler, null);
-    }
-
-    public static FlowCallbacks onExit(Callable<Promise<Void>> endHandler) {
-        return exec(null, endHandler);
+    public static <T> FlowTrigger<T> triggerValue(T value) {
+        return trigger(null, value);
     }
 
     public static <T> FlowTrigger<T> triggerNext(T val) {
         return trigger(NEXT, val);
     }
 
-    public static EventToStateMapping[] end() {
-        return new EventToStateMapping[]{};
+    public static <T, R> FlowCallbacksBuilder<T, R> execP() {
+        return FlowCallbacksBuilder.<T, R>create();
     }
 
-    public static <T> FlowTrigger<T> triggerValue(T value) {
-        return trigger(null, value);
+    public static <T, R> FlowCallbacks<T, R> exec(
+        Fun1Unckd<T, FlowTrigger<R>> onEnter,
+        RunnableUnckd onExit) {
+        return new FlowCallbacks<>(t -> Promises.just(
+            onEnter.apply(t)
+        ), () -> Promises.runnable(onExit));
+    }
+
+    public static <T, R> FlowCallbacks<T, R> execP(
+        Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter,
+        Callable<Promise<Void>> onExit) {
+        return new FlowCallbacks<>(onEnter, onExit);
+    }
+
+    public static <T, R> FlowCallbacks onEnter(Fun1Unckd<T, FlowTrigger<R>> startHandler) {
+        return Flow.<T, R>execP(o -> Promises.just(
+            startHandler.apply(o)
+        ), null);
+    }
+
+    public static <T, R> FlowCallbacks onEnterP(Fun1Unckd<T, Promise<FlowTrigger<R>>> startHandler) {
+        return execP(startHandler, null);
+    }
+
+    public static FlowCallbacks onExit(RunnableUnckd endHandler) {
+        return execP(null, () -> Promises.runnable(endHandler));
+    }
+
+    public static FlowCallbacks onExitP(Callable<Promise<Void>> endHandler) {
+        return execP(null, endHandler);
     }
 
     private static class NextStateAndMessage<T> {

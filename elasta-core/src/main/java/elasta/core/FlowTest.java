@@ -22,22 +22,22 @@ public class FlowTest {
                 on("ok", "respond"),
                 on("err", "errState"),
                 on("fuck", "fuckState"))
-            .exec("errState", Flow.exec(o -> {
+            .exec("errState", Flow.execP(o -> {
                 System.out.println("errState");
-                return Promises.just(Flow.exit("errState"));
+                return Promises.just(Flow.triggerExit("errState"));
             }, null))
-            .exec("fuckState", Flow.exec(null, () -> {
+            .exec("fuckState", Flow.execP(null, () -> {
                 System.out.println("fuckState: end");
                 return Promises.empty();
             }))
-            .exec("respond", Flow.exec(t -> {
+            .exec("respond", Flow.execP(t -> {
                 System.out.println("res");
-                return Promises.just(Flow.exit());
+                return Promises.just(Flow.triggerExit());
             }, () -> {
                 System.out.println("res:end");
                 return Promises.empty();
             }))
-            .exec("start", Flow.exec(o -> {
+            .exec("start", Flow.execP(o -> {
                 System.out.println("ok gury");
                 return Promises.just(Flow.<String>trigger("fuck", "ok"));
             }, () -> {

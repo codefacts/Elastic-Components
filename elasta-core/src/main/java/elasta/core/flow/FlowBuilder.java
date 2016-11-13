@@ -136,7 +136,7 @@ public class FlowBuilder {
     }
 
     public <T, R> FlowBuilder handlers(String state, Fun1Unckd<T, Promise<FlowTrigger<R>>> onEnter, Callable<Promise<Void>> onExit) {
-        this.stateCallbacksMap.put(state, Flow.exec(onEnter, onExit));
+        this.stateCallbacksMap.put(state, Flow.execP(onEnter, onExit));
         return this;
     }
 
@@ -149,11 +149,11 @@ public class FlowBuilder {
             .when("errState", Flow.next("end"))
             .when("process", Flow.next("end"))
             .when("end", Flow.end())
-            .exec("start", Flow.onEnter(o -> {
+            .exec("start", Flow.onEnterP(o -> {
                 System.out.println("onStart: " + o);
                 return Promises.just(Flow.trigger("err", new NullPointerException("ok")));
             }))
-            .exec("errState", Flow.exec(
+            .exec("errState", Flow.execP(
                 o -> {
                     return Promises.just(Flow.triggerNext(o));
                 },
@@ -161,11 +161,11 @@ public class FlowBuilder {
                     System.out.println("onExist errorState: ");
                     return null;
                 }))
-            .exec("process", Flow.onEnter(o -> {
+            .exec("process", Flow.onEnterP(o -> {
                 System.out.println("onEnter process: " + o);
                 return Promises.just(Flow.triggerNext(o));
             }))
-            .exec("end", Flow.exec(o -> {
+            .exec("end", Flow.execP(o -> {
 
                 System.out.println("onEnter: end -> " + o);
                 return Promises.just(Flow.triggerValue(o));

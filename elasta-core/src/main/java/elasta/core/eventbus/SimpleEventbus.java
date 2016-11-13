@@ -9,7 +9,19 @@ import java.util.Map;
  */
 public interface SimpleEventBus {
 
-    <T, R> SimpleEventBus addListener(String event, Handler<T, R> handler);
+    <T, R> SimpleEventBus addInterceptor(String event, Intercepetor<T, R> intercepetor);
+
+    <T, R> SimpleEventBus addInterceptorP(String event, IntercepetorP<T, R> handlerP);
+
+    <T> SimpleEventBus addFilter(String event, Filter<T> handlerP);
+
+    <T> SimpleEventBus addFilterP(String event, FilterP<T> handlerP);
+
+    <T> SimpleEventBus addHandler(String event, EventHandler<T> handlerP);
+
+    <T> SimpleEventBus addHandlerP(String event, EventHandlerP<T> handlerP);
+
+    <T, R> SimpleEventBus addListener(String event, EventListener<T, R> eventListener);
 
     <R> Promise<R> fire(String event, Object t);
 
