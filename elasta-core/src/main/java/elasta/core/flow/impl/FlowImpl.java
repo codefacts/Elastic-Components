@@ -106,4 +106,24 @@ public class FlowImpl implements Flow {
             this.message = message;
         }
     }
+
+    public static StateTrigger getDefaultStateTrigger() {
+        return DEFAULT_STATE_TRIGGER;
+    }
+
+    public String getInitialState() {
+        return initialState;
+    }
+
+    public Map<String, Set<String>> getEventsByStateMap() {
+        return eventsByStateMap;
+    }
+
+    public Map<String, Map<String, String>> getEventToStateMapByState() {
+        return eventToStateMapByState;
+    }
+
+    public Map<String, StateTransitionHandlers> getStateCallbacksMap() {
+        return stateCallbacksMap;
+    }
 }

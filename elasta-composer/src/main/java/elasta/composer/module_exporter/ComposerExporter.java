@@ -6,7 +6,7 @@ import elasta.module.ModuleSystem;
  * Created by Jango on 11/13/2016.
  */
 public interface ComposerExporter {
-    void export(ModuleSystem moduleSystem);
+    void exportTo(ModuleSystem moduleSystem);
 
     static ComposerExporter get() {
         return new ComposerExporterImpl();

@@ -17,6 +17,10 @@ public interface Flow {
 
     public <T, R> Promise<R> start(String state, T message);
 
+    public static FlowBuilder builder(Flow flow) {
+        return FlowBuilder.create(flow);
+    }
+
     public static FlowBuilder builder() {
         return FlowBuilder.create();
     }

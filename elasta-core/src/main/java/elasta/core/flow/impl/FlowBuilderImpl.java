@@ -13,11 +13,22 @@ import java.util.*;
  */
 public class FlowBuilderImpl implements FlowBuilder {
     private String initialState;
-    private final Map<String, Set<String>> eventsByStateMap = new HashMap<>();
-    private final Map<String, Map<String, String>> eventToStateMapByState = new HashMap<>();
-    private final Map<String, StateTransitionHandlers> stateCallbacksMap = new HashMap<>();
+    private final Map<String, Set<String>> eventsByStateMap;
+    private final Map<String, Map<String, String>> eventToStateMapByState;
+    private final Map<String, StateTransitionHandlers> stateCallbacksMap;
 
     public FlowBuilderImpl() {
+        eventsByStateMap = new HashMap<>();
+        eventToStateMapByState = new HashMap<>();
+        stateCallbacksMap = new HashMap<>();
+    }
+
+    public FlowBuilderImpl(Flow flow) {
+        FlowImpl flowImpl = (FlowImpl) flow;
+        initialState = flowImpl.getInitialState();
+        eventsByStateMap = new HashMap<>(flowImpl.getEventsByStateMap());
+        eventToStateMapByState = new HashMap<>(flowImpl.getEventToStateMapByState());
+        stateCallbacksMap = new HashMap<>(flowImpl.getStateCallbacksMap());
     }
 
     public static FlowBuilder create() {
@@ -60,6 +71,69 @@ public class FlowBuilderImpl implements FlowBuilder {
 
             stateMap.put(entry.getEvent(), entry.getState());
         });
+
+        return this;
+    }
+
+    @Override
+    public FlowBuilder replace(String prevState, String newState) {
+        Set<String> events = eventsByStateMap.get(prevState);
+
+        if (events != null) {
+
+            eventsByStateMap.remove(prevState);
+            eventsByStateMap.put(newState, events);
+        }
+
+        Map<String, String> eventToStateMap = eventToStateMapByState.get(prevState);
+
+        if (eventToStateMap != null) {
+
+            eventToStateMapByState.remove(prevState);
+            eventToStateMapByState.put(newState, eventToStateMap);
+        }
+
+        StateTransitionHandlers handlers = stateCallbacksMap.get(prevState);
+
+        if (handlers != null) {
+
+            stateCallbacksMap.remove(prevState);
+            stateCallbacksMap.put(newState, handlers);
+        }
+
+        if (initialState.equals(prevState)) {
+            initialState = newState;
+        }
+
+        return this;
+    }
+
+    @Override
+    public FlowBuilder remove(String state) {
+        Set<String> events = eventsByStateMap.get(state);
+
+        if (events != null) {
+
+            eventsByStateMap.remove(state);
+        }
+
+        Map<String, String> eventToStateMap = eventToStateMapByState.get(state);
+
+        if (eventToStateMap != null) {
+
+            eventToStateMapByState.remove(state);
+        }
+
+        StateTransitionHandlers handlers = stateCallbacksMap.get(state);
+
+        if (handlers != null) {
+
+            stateCallbacksMap.remove(state);
+        }
+
+        if (initialState.equals(state)) {
+            initialState = null;
+        }
 
         return this;
     }

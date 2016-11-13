@@ -360,6 +360,11 @@ public class TypedMapImpl implements TypedMap {
     }
 
     @Override
+    public Map<String, Object> getMap() {
+        return map;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

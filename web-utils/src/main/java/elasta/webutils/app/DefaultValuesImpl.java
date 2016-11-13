@@ -13,9 +13,9 @@ public class DefaultValuesImpl implements DefaultValues {
     public Map<HttpMethod, String> httpMethodToActionMap() {
 
         return ImmutableMap.of(
-            HttpMethod.GET, "get",
+            HttpMethod.GET, "find",
             HttpMethod.POST, "create",
-            HttpMethod.PUT, "save",
+            HttpMethod.PUT, "update",
             HttpMethod.DELETE, "delete"
         );
     }

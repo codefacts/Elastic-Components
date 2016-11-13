@@ -52,4 +52,6 @@ public interface TypedMap {
     public TypedMap clear();
 
     public boolean isEmpty();
+
+    Map<String, Object> getMap();
 }

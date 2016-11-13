@@ -1,5 +1,6 @@
 package elasta.composer.transformation;
 
+import elasta.composer.transformation.impl.json.object.JoJoTransform;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 /**
  * Created by shahadat on 3/1/16.
  */
-public class JsonTransformationPipeline implements Transform<JsonObject, JsonObject> {
+public class JsonTransformationPipeline implements JoJoTransform {
     private final List<Transform<JsonObject, JsonObject>> transformList;
 
     public JsonTransformationPipeline(List<Transform<JsonObject, JsonObject>> transformList) {

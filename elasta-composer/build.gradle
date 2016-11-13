@@ -15,6 +15,7 @@ dependencies {
     compile project(':vertx-utils')
     compile project(':web-utils')
     compile project(':elasta-module')
+    compile project(':elasta-orm')
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

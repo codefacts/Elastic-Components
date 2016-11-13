@@ -8,6 +8,10 @@ public interface FlowBuilder {
 
     public FlowBuilder when(String state, EventAndState... stateEntries);
 
+    FlowBuilder replace(String prevState, String newState);
+
+    FlowBuilder remove(String state);
+
     public FlowBuilder exec(String state, StateTransitionHandlers stateTransitionHandlers);
 
     public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter);
@@ -22,5 +26,9 @@ public interface FlowBuilder {
 
     public static FlowBuilder create() {
         return new FlowBuilderImpl();
+    }
+
+    static FlowBuilder create(Flow flow) {
+        return new FlowBuilderImpl(flow);
     }
 }

@@ -6,14 +6,13 @@ import elasta.webutils.app.*;
 import elasta.webutils.app.impl.RequestConverterImpl;
 import elasta.webutils.app.impl.RequestHandlerImpl;
 import elasta.webutils.app.impl.ResponseGeneratorImpl;
-import elasta.webutils.app.impl.UriToEventTranslatorImpl;
 
 /**
  * Created by Jango on 11/9/2016.
  */
-public class ModuleExporterImpl implements ModuleExporterWebUtils {
+public class WebUtilsExporterImpl implements WebUtilsExporter {
     @Override
-    public void exportModule(ModuleSystem moduleSystem) {
+    public void exportTo(ModuleSystem moduleSystem) {
 
         moduleSystem.export(RequestHandler.class, module -> module.export(new RequestHandlerImpl(
 
