@@ -9,9 +9,9 @@ import java.util.Map;
  */
 public interface SimpleEventBus {
 
-    <T, R> SimpleEventBus addInterceptor(String event, Intercepetor<T, R> intercepetor);
+    <T, R> SimpleEventBus addProcessor(String event, Processor<T, R> processor);
 
-    <T, R> SimpleEventBus addInterceptorP(String event, IntercepetorP<T, R> handlerP);
+    <T, R> SimpleEventBus addProcessorP(String event, ProcessorP<T, R> processorP);
 
     <T> SimpleEventBus addFilter(String event, Filter<T> handlerP);
 

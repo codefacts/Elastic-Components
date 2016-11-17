@@ -26,7 +26,7 @@ public interface OrmExporter {
     String FUNCTION_MAP = "functionMap";
     String SYMBOL_TRANSLATOR_MAP = "symbolTranslatorMap";
 
-    void export(ModuleSystem moduleSystem);
+    void exportTo(ModuleSystem moduleSystem);
 
     static OrmExporter get() {
         return OrmExporter::exportModule;

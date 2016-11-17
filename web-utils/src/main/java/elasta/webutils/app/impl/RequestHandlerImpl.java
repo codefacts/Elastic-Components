@@ -2,6 +2,7 @@ package elasta.webutils.app.impl;
 
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.webutils.app.*;
+import elasta.webutils.app.exceptions.WebException;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -32,19 +33,9 @@ public class RequestHandlerImpl implements RequestHandler {
 
         try {
 
-            HttpServerRequest request = context.request();
-
             JsonObject val = converter.apply(context);
 
-            String eventAddress = uriToEventTranslator.apply(
-                new RequestInfoBuilder<JsonObject>()
-                    .setHeaders(request.headers())
-                    .setUri(request.uri())
-                    .setAbsoluteUri(request.absoluteURI())
-                    .setHttpMethod(request.method())
-                    .setValue(val)
-                    .createRequestInfo()
-            );
+            String eventAddress = uriToEventTranslator.apply(context, val);
 
             eventBus.<JsonObject>fire(eventAddress, val)
                 .then(jsonObject -> responseGenerator.reply(jsonObject, context))

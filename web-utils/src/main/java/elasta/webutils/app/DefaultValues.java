@@ -10,5 +10,7 @@ import java.util.Map;
  */
 public interface DefaultValues {
 
+    String apiPrefix();
+
     Map<HttpMethod, String> httpMethodToActionMap();
 }

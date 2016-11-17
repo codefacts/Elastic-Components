@@ -23,16 +23,16 @@ public class SimpleEventBusImpl implements SimpleEventBus {
     private List<EventHandlerInfo> handlerInfos = new CopyOnWriteArrayList<>();
 
     @Override
-    public <T, R> SimpleEventBus addInterceptor(String event, Intercepetor<T, R> intercepetor) {
+    public <T, R> SimpleEventBus addProcessor(String event, Processor<T, R> processor) {
         this.<T, R>addListener(event, (o, context) -> context.next(
-            intercepetor.handle(o, context.event(), context.params())
+            processor.handle(o, context.event(), context.params())
         ));
         return this;
     }
 
     @Override
-    public <T, R> SimpleEventBus addInterceptorP(String event, IntercepetorP<T, R> handlerP) {
-        this.<T, R>addListener(event, (o, context) -> handlerP.handle(o, context.event(), context.params())
+    public <T, R> SimpleEventBus addProcessorP(String event, ProcessorP<T, R> processorP) {
+        this.<T, R>addListener(event, (o, context) -> processorP.handle(o, context.event(), context.params())
             .mapP(context::<R>next));
         return this;
     }

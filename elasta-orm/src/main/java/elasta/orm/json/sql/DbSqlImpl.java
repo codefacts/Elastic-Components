@@ -52,20 +52,21 @@ public class DbSqlImpl implements DbSql {
     @Override
     public Promise<Void> update(String sql) {
         return withConn(con -> Promises.exec(
-            defer -> con.update(sql, StaticUtils.deferred(defer))));
+            defer -> con.update(sql, StaticUtils.deferred(defer))).map(o -> null)
+        );
     }
 
     @Override
     public Promise<Void> update(String sql, JsonArray params) {
         return withConn(con -> Promises.exec(
-            defer -> con.updateWithParams(sql, params, StaticUtils.deferred(defer))));
+            defer -> con.updateWithParams(sql, params, StaticUtils.deferred(defer))).map(o -> null)
+        );
     }
 
     @Override
     public Promise<Void> update(List<String> sqlList) {
-        return execAndCommit(con -> Promises.exec(objectDefer -> {
-            con.batch(sqlList, StaticUtils.deferred(objectDefer));
-        }));
+        return execAndCommit(con -> Promises.exec(
+            objectDefer -> con.batch(sqlList, StaticUtils.deferred(objectDefer))));
     }
 
     @Override

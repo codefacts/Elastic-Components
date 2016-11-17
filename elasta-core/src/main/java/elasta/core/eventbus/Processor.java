@@ -8,6 +8,6 @@ import java.util.Map;
 /**
  * Created by Jango on 11/13/2016.
  */
-public interface Intercepetor<T, R> {
+public interface Processor<T, R> {
     R handle(T t, String event, TypedMap params);
 }

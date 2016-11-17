@@ -12,7 +12,7 @@ import io.vertx.core.json.JsonObject;
 public interface DbEventHandlers {
     static void registerHandlers(SimpleEventBus eventBus, Db db) {
 
-        eventBus.<JsonObject, JsonObject>addInterceptorP(DbEvents.DB_CREATE,
+        eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_CREATE,
             (jsonObject, event, params) ->
                 db.insertOrUpdate(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
@@ -20,7 +20,7 @@ public interface DbEventHandlers {
                 )
         );
 
-        eventBus.<JsonObject, JsonObject>addInterceptorP(DbEvents.DB_UPDATE,
+        eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_UPDATE,
             (jsonObject, event, params) ->
                 db.insertOrUpdate(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
@@ -28,7 +28,7 @@ public interface DbEventHandlers {
                 )
         );
 
-        eventBus.<JsonObject, JsonObject>addInterceptorP(DbEvents.DB_DELETE,
+        eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_DELETE,
             (jsonObject, event, params) ->
                 db.delete(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
@@ -36,7 +36,7 @@ public interface DbEventHandlers {
                     .map(id -> jsonObject)
         );
 
-        eventBus.<JsonObject, JsonObject>addInterceptorP(DbEvents.DB_FIND,
+        eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_FIND,
             (jsonObject, event, params) ->
                 db.findOne(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
@@ -45,7 +45,7 @@ public interface DbEventHandlers {
                         .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList())
         );
 
-        eventBus.<JsonObject, JsonObject>addInterceptorP(DbEvents.DB_FIND_BY_PARAMS,
+        eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_FIND_BY_PARAMS,
             (jsonObject, event, params) ->
                 db.findOne(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
@@ -54,7 +54,7 @@ public interface DbEventHandlers {
                         .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList())
         );
 
-        eventBus.<JsonObject, JsonObject>addInterceptorP(DbEvents.DB_FIND_ALL,
+        eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_FIND_ALL,
             (jsonObject, event, params) ->
                 db.findAll(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject

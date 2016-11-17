@@ -16,9 +16,9 @@ dependencies {
     compile project(':elasta-module')
     compile project(':vertx-utils')
 
-    compile group: 'io.vertx', name: 'vertx-core', version: '3.3.2'
+    compile group: 'io.vertx', name: 'vertx-core', version: '3.3.3'
     // https://mvnrepository.com/artifact/io.vertx/vertx-jdbc-client
-    compile group: 'io.vertx', name: 'vertx-jdbc-client', version: '3.3.2'
+    compile group: 'io.vertx', name: 'vertx-jdbc-client', version: '3.3.3'
 
     // https://mvnrepository.com/artifact/org.eclipse.persistence/org.eclipse.persistence.jpa
     compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '2.6.4'

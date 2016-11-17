@@ -6,6 +6,8 @@ import elasta.webutils.app.*;
 import elasta.webutils.app.impl.RequestConverterImpl;
 import elasta.webutils.app.impl.RequestHandlerImpl;
 import elasta.webutils.app.impl.ResponseGeneratorImpl;
+import elasta.webutils.app.impl.UriToEventTranslatorImpl;
+import io.vertx.core.json.JsonObject;
 
 /**
  * Created by Jango on 11/9/2016.
@@ -27,5 +29,7 @@ public class WebUtilsExporterImpl implements WebUtilsExporter {
         moduleSystem.export(ResponseGenerator.class, module -> module.export(new ResponseGeneratorImpl()));
 
         moduleSystem.export(DefaultValues.class, module -> module.export(new DefaultValuesImpl()));
+
+        moduleSystem.export(UriToEventTranslator.class, module -> module.export(new UriToEventTranslatorImpl()));
     }
 }

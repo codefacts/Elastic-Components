@@ -2,9 +2,9 @@ package elasta.composer.module_exporter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.composer.Cnsts;
+import elasta.commons.Utils;
 import elasta.composer.Resource;
-import elasta.composer.EntityBuilder;
+import elasta.composer.ResourceBuilder;
 import elasta.composer.EventToFlowDispatcher;
 import elasta.composer.transformation.JsonTransformationPipeline;
 import elasta.composer.transformation.impl.json.object.JoJoTransform;
@@ -14,8 +14,6 @@ import elasta.core.eventbus.SimpleEventBus;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
 import elasta.module.ModuleSystem;
-import elasta.webutils.app.DefaultValues;
-import elasta.webutils.app.UriToEventTranslator;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
@@ -31,11 +29,6 @@ public class ComposerExporterImpl implements ComposerExporter {
 
     @Override
     public void exportTo(ModuleSystem moduleSystem) {
-
-        moduleSystem.export(UriToEventTranslator.class, module -> module.export(
-            (UriToEventTranslator<JsonObject>) requestInfo -> (Cnsts.API + "." + requestInfo.getUri().substring(1).replace('/', '.') + "." + module.require(DefaultValues.class)
-                .httpMethodToActionMap().get(requestInfo.getHttpMethod())).toLowerCase()
-        ));
 
         moduleSystem.export(EventToFlowDispatcher.class, module -> module.export(
             (jsonObject, event, params) -> {
@@ -81,6 +74,7 @@ public class ComposerExporterImpl implements ComposerExporter {
                 .handlersP(States.ACTION, module.require(JsonEnterHanler.class, FLowEnterHandlers.ACTION))
                 .handlersP(States.RESULT_PREPERATION, module.require(JsonEnterHanler.class, FLowEnterHandlers.RESULT_PREPERATION))
                 .handlersP(States.END, module.require(JsonEnterHanler.class, FLowEnterHandlers.END))
+
                 .build()
         ));
 
@@ -97,7 +91,12 @@ public class ComposerExporterImpl implements ComposerExporter {
                 new RemoveNullsTransformation()
             ))));
 
-        moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.CONVERTION, module -> module.export(jsonObject -> Promises.just(Flow.triggerNext(jsonObject))));
+        moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.CONVERTION, module -> module.export(jsonObject -> {
+            if (jsonObject.containsKey("id")) {
+                jsonObject.put("id", Long.parseLong(jsonObject.getString("id")));
+            }
+            return Promises.just(Flow.triggerNext(jsonObject));
+        }));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.CONVERTION_ERROR_TO_VALIDATION_ERROR_TRANSLATION, module -> module.export(
             jsonObject -> Promises.just(
@@ -130,12 +129,25 @@ public class ComposerExporterImpl implements ComposerExporter {
 
                 JsonObject dbRequest = event.startsWith(DbEvents.DB_CREATE) || event.startsWith(DbEvents.DB_UPDATE) ? new JsonObject(
                     ImmutableMap.of(
-                        DbReqParams.ENTITY, resource.getName(),
+                        DbReqParams.ENTITY, resource.getEntity(),
                         DbReqParams.DATA, jsonObject
                     )
-                ) : jsonObject;
+                ) : new JsonObject(
+                    ImmutableMap.<String, Object>builder()
+                        .putAll(Utils.call(() -> {
+                            jsonObject.remove(DbReqParams.ENTITY);
+                            return jsonObject;
+                        }))
+                        .put(DbReqParams.ENTITY, resource.getEntity())
+                        .build()
+                );
 
-                return module.require(SimpleEventBus.class).<JsonObject>fire(event, dbRequest).map(o -> Flow.triggerNext(jsonObject));
+                return module.require(SimpleEventBus.class).<JsonObject>fire(event, dbRequest).map(entries -> {
+                    if (action.startsWith("find")) {
+                        return Flow.triggerNext(entries);
+                    }
+                    return Flow.triggerNext(jsonObject);
+                });
             }
         ));
 
@@ -148,14 +160,15 @@ public class ComposerExporterImpl implements ComposerExporter {
         ));
 
         moduleSystem.export(Map.class, Configs.RESOURCE_BY_EVENT_PATH_MAP, module -> module.export(ImmutableMap.of(
-            "students", new EntityBuilder()
-                .setName("student")
-                .setDisplayName("Student")
-                .createEntity(),
-            "books", new EntityBuilder()
-                .setName("book")
-                .setDisplayName("Book")
-                .createEntity()
+            "tablet", new ResourceBuilder()
+                .setName("tablet")
+                .setDisplayName("Tablet")
+                .setEntity("Tablet")
+                .build(),
+            "br", new ResourceBuilder()
+                .setName("br")
+                .setDisplayName("Business Representative")
+                .build()
         )));
     }
 }

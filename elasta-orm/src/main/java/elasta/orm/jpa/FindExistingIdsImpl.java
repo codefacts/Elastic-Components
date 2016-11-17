@@ -86,7 +86,14 @@ public class FindExistingIdsImpl implements FindExistingIds {
                 .setPrimaryKey(modelInfo.getPrimaryKey())
                 .createTablePrimary());
             tablesBuilder.add(modelInfo.getTable());
-            tableIdSetBuilder.put(modelInfo.getTable(), data.getValue(modelInfo.getPrimaryKey()));
+
+            Object idValue = data.getValue(modelInfo.getPrimaryKey());
+
+            if (idValue == null) {
+                throw new OrmException("Entity Object does not contains primary key value. Primary key '" + modelInfo.getPrimaryKey() + "' = " + idValue);
+            }
+
+            tableIdSetBuilder.put(modelInfo.getTable(), idValue);
 
             mergeRecursive(modelInfo, data, tablePrimaryKeySet, tablesBuilder, tableIdSetBuilder);
 
@@ -203,7 +210,7 @@ public class FindExistingIdsImpl implements FindExistingIds {
 
                             for (int i = 0, jsonArraySize = jsonArray.size(); i < jsonArraySize; i++) {
                                 JsonObject jsonObject = jsonArray.getJsonObject(i);
-                                
+
                                 tableIdSetBuilder.put(childModelInfo.getTable(), jsonObject.getValue(childModelInfo.getPrimaryKey()));
 
                                 mergeRecursive(childModelInfo, jsonObject, tablePrimaryKeySet, tables, tableIdSetBuilder);

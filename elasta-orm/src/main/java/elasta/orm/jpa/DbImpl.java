@@ -36,12 +36,12 @@ public class DbImpl implements Db {
     private final FindExistingIds findExistingIdsImpl;
     private final SqlCriteriaTranslator criteriaUtils;
 
-    public DbImpl(Jpa jpa, DbSql dbSql, ModelInfoProvider modelInfoProvider, FindExistingIds findExistingIdsImpl, SqlCriteriaTranslator criteriaUtils) {
+    public DbImpl(Jpa jpa, DbSql dbSql, ModelInfoProvider modelInfoProvider, FindExistingIds findExistingIdsImpl, SqlCriteriaTranslator sqlCriteriaTranslator) {
         this.jpa = jpa;
         this.dbSql = dbSql;
         this.modelInfoProvider = modelInfoProvider;
         this.findExistingIdsImpl = findExistingIdsImpl;
-        this.criteriaUtils = criteriaUtils;
+        this.criteriaUtils = sqlCriteriaTranslator;
     }
 
     @Override
@@ -52,6 +52,10 @@ public class DbImpl implements Db {
 
     @Override
     public <T> Promise<JsonObject> findOne(String model, T id, List<FieldInfo> selectFields) {
+
+        if (selectFields == null || selectFields.size() == 0) {
+            return findOne(model, id);
+        }
 
         ModelInfo modelInfo = modelInfoProvider.get(model);
 
@@ -110,6 +114,10 @@ public class DbImpl implements Db {
 
     @Override
     public <T> Promise<List<JsonObject>> findAll(String model, List<T> ids, List<FieldInfo> selectFields) {
+
+        if (selectFields == null || selectFields.size() == 0) {
+            return findAll(model, ids);
+        }
 
         ModelInfo modelInfo = modelInfoProvider.get(model);
 

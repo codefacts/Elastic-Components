@@ -1,72 +1,80 @@
 package elasta.composer;
 
-import elasta.composer.moc.MocDb;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import elasta.composer.module_exporter.ComposerExporter;
 import elasta.composer.module_exporter.DbEventHandlers;
-import elasta.composer.module_exporter.Flows;
-import elasta.composer.module_exporter.States;
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.core.eventbus.impl.SimpleEventBusImpl;
-import elasta.core.flow.Flow;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
-import elasta.orm.jpa.DbImpl;
+import elasta.orm.OrmExporter;
+import elasta.webutils.app.PerRequestToEventResolver;
 import elasta.webutils.app.RequestHandler;
 import elasta.webutils.app.module.exporter.WebUtilsExporter;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import jpatest.core.Main;
+import jpatest.core.Test;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 /**
  * Created by Jango on 11/9/2016.
  */
 public class App {
+    public static final String API_PREFIX = "/api/*";
 
     public static void main(String[] args) {
 
         final ModuleSystem moduleSystem = ModuleSystem.create();
 
         WebUtilsExporter.get().exportTo(moduleSystem);
-
         ComposerExporter.get().exportTo(moduleSystem);
-
+        OrmExporter.get().exportTo(moduleSystem);
         moduleSystem.export(SimpleEventBus.class, module -> module.export(new SimpleEventBusImpl()));
-
-        moduleSystem.export(Db.class, module -> module.export(new MocDb()));
-
+        moduleSystem.export(EntityManagerFactory.class, module -> module.export(Persistence.createEntityManagerFactory(Main.PU)));
+        moduleSystem.export(Vertx.class, module -> module.export(Vertx.vertx()));
+        moduleSystem.export(ObjectMapper.class, module -> module.export(new ObjectMapper()));
+        moduleSystem.export(JsonObject.class, "db-config", module -> module.export(Test.DB_CONFIG));
+        //---------------
         DbEventHandlers.registerHandlers(moduleSystem.require(SimpleEventBus.class), moduleSystem.require(Db.class));
 
         moduleSystem.require(SimpleEventBus.class)
-            .addInterceptorP(Cnsts.API + ".{" + EventToFlowDispatcher.ENTITY + "}.{" + EventToFlowDispatcher.ACTION + "}",
+            .addProcessorP(Cnsts.API + ".{" + EventToFlowDispatcher.ENTITY + "}.{" + EventToFlowDispatcher.ACTION + "}",
                 moduleSystem.require(EventToFlowDispatcher.class)
             );
 
-        final Vertx vertx = Vertx.vertx();
+        Vertx vertx = moduleSystem.require(Vertx.class);
 
         Router router = Router.router(vertx);
 
 //        router.get().handler(event -> event.response().end("ok"));
 
-        router.get().handler(moduleSystem.require(RequestHandler.class));
-        router.post().handler(BodyHandler.create());
-        router.post().handler(moduleSystem.require(RequestHandler.class));
-        router.put().handler(BodyHandler.create());
-        router.put().handler(moduleSystem.require(RequestHandler.class));
-        router.delete().handler(moduleSystem.require(RequestHandler.class));
+        router.get(api("/tablet/:id")).handler(new PerRequestToEventResolver(apiEvent("tablet.find")));
+        router.get(api("/tablet")).handler(new PerRequestToEventResolver(apiEvent("tablet.find-all")));
+        router.post(api("/tablet")).handler(new PerRequestToEventResolver(apiEvent("tablet.create")));
+        router.put(api("/tablet/:id")).handler(new PerRequestToEventResolver(apiEvent("tablet.update")));
+        router.patch(api("/tablet/:id")).handler(new PerRequestToEventResolver(apiEvent("tablet.update")));
+        router.delete(api("/tablet/:id")).handler(new PerRequestToEventResolver(apiEvent("tablet.delete")));
+
+        router.post(API_PREFIX).handler(BodyHandler.create());
+        router.put(API_PREFIX).handler(BodyHandler.create());
+        router.patch(API_PREFIX).handler(BodyHandler.create());
+        router.delete(API_PREFIX).handler(BodyHandler.create());
+        router.route(API_PREFIX).handler(moduleSystem.require(RequestHandler.class));
 
         vertx.createHttpServer().requestHandler(router::accept).listen(85);
         System.out.println("Server Started.");
     }
 
-    private static void registerEventHandlers(ModuleSystem moduleSystem) {
-        SimpleEventBus eventBus = moduleSystem.require(SimpleEventBus.class);
+    private static String apiEvent(String event) {
+        return Cnsts.API + "." + event;
+    }
 
-        Flow.builder(moduleSystem.require(Flow.class, Flows.EVENT_HANDLER_FLOW))
-            .replace(States.ACTION, States.CREATE)
-            .handlersP(States.CREATE, o -> {
-                return null;
-            })
-            .build()
-        ;
+    private static String api(String uri) {
+        return "/api" + uri;
     }
 }
