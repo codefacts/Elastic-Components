@@ -1,6 +1,7 @@
 package elasta.composer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import elasta.composer.module_exporter.ComposerExporter;
 import elasta.composer.module_exporter.DbEventHandlers;
 import elasta.core.eventbus.SimpleEventBus;
@@ -8,6 +9,8 @@ import elasta.core.eventbus.impl.SimpleEventBusImpl;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;
+import elasta.orm.json.core.FieldInfo;
+import elasta.orm.json.core.FieldInfoBuilder;
 import elasta.webutils.app.PerRequestToEventResolver;
 import elasta.webutils.app.RequestHandler;
 import elasta.webutils.app.module.exporter.WebUtilsExporter;
@@ -68,6 +71,12 @@ public class App {
 
         vertx.createHttpServer().requestHandler(router::accept).listen(85);
         System.out.println("Server Started.");
+
+        moduleSystem.require(Db.class).findOne("Tablet", 1, ImmutableList.of(
+            new FieldInfoBuilder()
+                .setFields(ImmutableList.of("id", "name"))
+                .createSqlField()
+        )).then(jsonObject -> System.out.println(jsonObject.encodePrettily())).err(Throwable::printStackTrace);
     }
 
     private static String apiEvent(String event) {

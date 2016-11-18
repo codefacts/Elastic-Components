@@ -97,8 +97,19 @@ public class JpaImpl implements Jpa {
             for (int i = 0; i < params.getList().size(); i++) {
                 query.setParameter(i, params.getValue(i));
             }
-            List<List<Object>> lists = mapper.convertValue(query.getResultList(), listOfList());
-            return lists.stream().map(objects -> new JsonArray(objects)).collect(Collectors.toList());
+            List list = query.getResultList();
+            if (list.size() <= 0) {
+                return ImmutableList.of();
+            }
+            if (list.get(0).getClass() == Object[].class) {
+                List<List<Object>> lists = mapper.convertValue(list, listOfList());
+                return lists.stream().map(JsonArray::new).collect(Collectors.toList());
+            }
+            ImmutableList.Builder<JsonArray> listBuilder = ImmutableList.builder();
+
+            list.forEach(object -> listBuilder.add(new JsonArray(ImmutableList.of(object))));
+
+            return listBuilder.build();
         });
     }
 
@@ -144,13 +155,23 @@ public class JpaImpl implements Jpa {
     @Override
     public Promise<List<JsonArray>> queryArray(Fun1Unckd<CriteriaBuilder, CriteriaQuery<Object[]>> fun1Unckd) {
         return exeQuery(em -> {
-            CriteriaQuery<Object[]> criteriaQuery = fun1Unckd.apply(em.getCriteriaBuilder());
+            CriteriaQuery criteriaQuery = fun1Unckd.apply(em.getCriteriaBuilder());
 
-            List<Object[]> list = em.createQuery(criteriaQuery).getResultList();
+            List<Object> list = em.createQuery(criteriaQuery).getResultList();
 
-            List<List> lists = mapper.convertValue(list, listOfList());
+            if (list.size() <= 0) {
+                return ImmutableList.of();
+            }
 
-            return lists.stream().map(JsonArray::new).collect(Collectors.toList());
+            if (list.get(0).getClass() == Object[].class) {
+
+                List<List> lists = mapper.convertValue(list, listOfList());
+
+                return lists.stream().map(JsonArray::new).collect(Collectors.toList());
+            }
+            ImmutableList.Builder<JsonArray> listBuilder = ImmutableList.builder();
+            list.forEach(element -> listBuilder.add(new JsonArray(ImmutableList.of(element))));
+            return listBuilder.build();
         });
     }
 

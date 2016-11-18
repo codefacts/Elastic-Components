@@ -1,10 +1,15 @@
 package elasta.composer.module_exporter;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.Utils;
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.orm.Db;
+import elasta.orm.json.core.FieldInfo;
+import elasta.orm.json.core.FieldInfoBuilder;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 
 /**
  * Created by Jango on 11/13/2016.
@@ -40,28 +45,42 @@ public interface DbEventHandlers {
             (jsonObject, event, params) ->
                 db.findOne(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
-                        .getValue(DbReqParams.ID),
-                    jsonObject
-                        .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList())
+                        .getValue(DbReqParams.ID), convertToFields(
+                        jsonObject
+                            .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList()
+                    ))
         );
 
         eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_FIND_BY_PARAMS,
             (jsonObject, event, params) ->
                 db.findOne(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
-                        .getJsonObject(DbReqParams.PARAMS),
-                    jsonObject
-                        .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList())
+                        .getJsonObject(DbReqParams.PARAMS), convertToFields(
+                        jsonObject
+                            .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList()
+                    ))
         );
 
         eventBus.<JsonObject, JsonObject>addProcessorP(DbEvents.DB_FIND_ALL,
             (jsonObject, event, params) ->
                 db.findAll(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
-                        .getJsonObject(DbReqParams.PARAMS),
-                    jsonObject
-                        .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList())
+                        .getJsonObject(DbReqParams.PARAMS), convertToFields(
+                        jsonObject
+                            .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList()
+                    ))
                     .map(jsonObjects -> new JsonObject(ImmutableMap.of(DbReqParams.DATA, jsonObjects)))
         );
+    }
+
+    static List<FieldInfo> convertToFields(List<JsonObject> list) {
+        ImmutableList.Builder<FieldInfo> listBuilder = ImmutableList.builder();
+
+        list.forEach(jsonObject -> listBuilder.add(new FieldInfoBuilder()
+            .setPath(jsonObject.getString("path"))
+            .setFields(jsonObject.getJsonArray("fields").getList())
+            .createSqlField()));
+
+        return listBuilder.build();
     }
 }
