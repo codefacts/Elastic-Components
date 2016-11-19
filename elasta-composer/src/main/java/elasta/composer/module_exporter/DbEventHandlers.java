@@ -2,7 +2,7 @@ package elasta.composer.module_exporter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.composer.Utils;
+import elasta.composer.ComposerUtils;
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.orm.Db;
 import elasta.orm.json.core.FieldInfo;
@@ -47,7 +47,7 @@ public interface DbEventHandlers {
                     jsonObject
                         .getValue(DbReqParams.ID), convertToFields(
                         jsonObject
-                            .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList()
+                            .getJsonArray(DbReqParams.PROJECTION, ComposerUtils.emptyJsonArray()).getList()
                     ))
         );
 
@@ -55,9 +55,10 @@ public interface DbEventHandlers {
             (jsonObject, event, params) ->
                 db.findOne(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
-                        .getJsonObject(DbReqParams.PARAMS), convertToFields(
+                        .getJsonObject(DbReqParams.CRITERIA),
+                    convertToFields(
                         jsonObject
-                            .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList()
+                            .getJsonArray(DbReqParams.PROJECTION, ComposerUtils.emptyJsonArray()).getList()
                     ))
         );
 
@@ -65,9 +66,10 @@ public interface DbEventHandlers {
             (jsonObject, event, params) ->
                 db.findAll(jsonObject.getString(DbReqParams.ENTITY),
                     jsonObject
-                        .getJsonObject(DbReqParams.PARAMS), convertToFields(
+                        .getJsonObject(DbReqParams.CRITERIA),
+                    convertToFields(
                         jsonObject
-                            .getJsonArray(DbReqParams.FIELDS, Utils.emptyJsonArray()).getList()
+                            .getJsonArray(DbReqParams.PROJECTION, ComposerUtils.emptyJsonArray()).getList()
                     ))
                     .map(jsonObjects -> new JsonObject(ImmutableMap.of(DbReqParams.DATA, jsonObjects)))
         );

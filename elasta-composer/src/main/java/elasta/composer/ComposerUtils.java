@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * Created by Jango on 11/13/2016.
  */
-public interface Utils {
+public interface ComposerUtils {
 
     JsonObject EMPTY_JSON_OBJECT = new JsonObject(ImmutableMap.of());
     JsonArray EMPTY_JSON_ARRAY = new JsonArray(ImmutableList.of());

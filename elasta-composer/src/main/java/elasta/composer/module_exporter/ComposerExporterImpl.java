@@ -2,7 +2,7 @@ package elasta.composer.module_exporter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.commons.Utils;
+import elasta.composer.ComposerUtils;
 import elasta.composer.Resource;
 import elasta.composer.ResourceBuilder;
 import elasta.composer.EventToFlowDispatcher;
@@ -14,10 +14,14 @@ import elasta.core.eventbus.SimpleEventBus;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
 import elasta.module.ModuleSystem;
+import elasta.orm.Db;
+import elasta.webutils.app.RequestCnsts;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
 
+import static elasta.composer.ComposerUtils.emptyJsonArray;
+import static elasta.composer.ComposerUtils.emptyJsonObject;
 import static elasta.core.flow.Flow.next;
 import static elasta.core.flow.Flow.on;
 import static elasta.core.flow.Flow.triggerNext;
@@ -32,15 +36,18 @@ public class ComposerExporterImpl implements ComposerExporter {
 
         moduleSystem.export(EventToFlowDispatcher.class, module -> module.export(
             (jsonObject, event, params) -> {
-                params.getMap().forEach(jsonObject::put);
+
+                JsonObject meta = jsonObject.getJsonObject(RequestCnsts.META);
+
+                meta.put(
+                    EventToFlowDispatcher.EVENT,
+                    event
+                );
+
+                params.getMap().forEach(meta::put);
+
                 return module.require(Flow.class, Flows.EVENT_HANDLER_FLOW)
-                    .start(
-                        jsonObject
-                            .put(
-                                EventToFlowDispatcher.EVENT,
-                                event
-                            )
-                    );
+                    .start(jsonObject);
             }
         ));
 
@@ -88,7 +95,25 @@ public class ComposerExporterImpl implements ComposerExporter {
         moduleSystem.export(JoJoTransform.class, JoJoTransformations.INITIAL_TRANSFORMATION, module -> module
             .export(new JsonTransformationPipeline(ImmutableList.of(
                 new TrimStringsTransformation(),
-                new RemoveNullsTransformation()
+                new RemoveNullsTransformation(),
+                val -> {
+
+                    JsonObject params = val.getJsonObject(RequestCnsts.META).getJsonObject(RequestCnsts.PARAMS, emptyJsonObject());
+
+                    val.put(DbReqParams.CRITERIA,
+                        params
+                            .getJsonObject(DbReqParams.CRITERIA, emptyJsonObject())
+
+                    ).put(DbReqParams.PROJECTION,
+                        params
+                            .getJsonArray(DbReqParams.PROJECTION, emptyJsonArray())
+                    );
+
+                    params.remove(DbReqParams.CRITERIA);
+                    params.remove(DbReqParams.PROJECTION);
+
+                    return val;
+                }
             ))));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.CONVERTION, module -> module.export(jsonObject -> {
@@ -118,27 +143,28 @@ public class ComposerExporterImpl implements ComposerExporter {
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.ACTION, module -> module.export(
             jsonObject -> {
+
+                JsonObject meta = jsonObject.getJsonObject(RequestCnsts.META);
+
                 Resource resource = (Resource) module.require(Map.class, Configs.RESOURCE_BY_EVENT_PATH_MAP)
                     .get(
-                        jsonObject.getString(EventToFlowDispatcher.ENTITY)
+                        meta.getString(EventToFlowDispatcher.RESOURCE)
                     );
 
-                String action = jsonObject.getString(EventToFlowDispatcher.ACTION);
+                String action = meta.getString(EventToFlowDispatcher.ACTION);
 
                 final String event = DbEvents.DB + "." + action;
 
-                JsonObject dbRequest = event.startsWith(DbEvents.DB_CREATE) || event.startsWith(DbEvents.DB_UPDATE) ? new JsonObject(
+                JsonObject dbRequest = event.startsWith(DbEvents.DB_CREATE) || event.startsWith(DbEvents.DB_UPDATE)
+                    ? new JsonObject(
                     ImmutableMap.of(
                         DbReqParams.ENTITY, resource.getEntity(),
                         DbReqParams.DATA, jsonObject
                     )
                 ) : new JsonObject(
                     ImmutableMap.<String, Object>builder()
-                        .putAll(Utils.call(() -> {
-                            jsonObject.remove(DbReqParams.ENTITY);
-                            return jsonObject;
-                        }))
                         .put(DbReqParams.ENTITY, resource.getEntity())
+                        .putAll(jsonObject)
                         .build()
                 );
 

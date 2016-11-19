@@ -5,8 +5,8 @@ package elasta.composer.module_exporter;
  */
 public interface DbReqParams {
     String ID = "ID".toLowerCase();
-    String DATA = "DATA".toLowerCase();
-    String ENTITY = "ENTITY".toLowerCase();
-    String PARAMS = "PARAMS".toLowerCase();
-    String FIELDS = "FIELDS".toLowerCase();
+    String DATA = "$DATA".toLowerCase();
+    String ENTITY = "$ENTITY".toLowerCase();
+    String CRITERIA = "$CRITERIA".toLowerCase();
+    String PROJECTION = "$PROJECTION".toLowerCase();
 }

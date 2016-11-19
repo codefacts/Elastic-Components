@@ -8,9 +8,11 @@ import java.util.Map;
  */
 public interface NestedMapBuilder<T> {
 
-    NestedMapBuilder<T> put(List<String> path, T value);
+    NestedMapBuilder<T> put(String path, T value);
 
     Map<String, Object> createMap();
+
+    List<Object> createList();
 
     Map<String, Object> build();
 }

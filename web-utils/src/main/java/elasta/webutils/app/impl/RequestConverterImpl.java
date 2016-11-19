@@ -1,6 +1,7 @@
 package elasta.webutils.app.impl;
 
 import elasta.webutils.app.QueryStringToJsonObjectConverter;
+import elasta.webutils.app.RequestCnsts;
 import elasta.webutils.app.RequestConverter;
 import elasta.webutils.app.RequestConvertersionException;
 import io.vertx.core.http.HttpHeaders;
@@ -45,8 +46,12 @@ public class RequestConverterImpl implements RequestConverter<JsonObject> {
             context.request().params().remove(pathVariable);
         });
 
-        JsonObject params = queryStringToJsonObjectConverter.convert(context.request().params());
-
-        return json.put("$params", params);
+        return json.put(
+            RequestCnsts.META,
+            new JsonObject()
+                .put(RequestCnsts.PARAMS,
+                    queryStringToJsonObjectConverter
+                        .convert(context.request().params())
+                ));
     }
 }

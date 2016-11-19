@@ -10,10 +10,12 @@ import java.util.List;
  * Created by Jango on 9/12/2016.
  */
 final public class ReflectionUtils {
-    public static List<String> staticFinalValues(Class aClass) {
+    public static List<String> staticFinalFieldValues(Class aClass) {
         ImmutableList.Builder<String> builder = ImmutableList.builder();
         for (Field field : aClass.getDeclaredFields()) {
-            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers())) {
+            if (Modifier.isPublic(field.getModifiers())
+                && Modifier.isStatic(field.getModifiers())
+                && Modifier.isFinal(field.getModifiers())) {
                 try {
                     builder.add(String.valueOf(field.get(null)));
                 } catch (IllegalAccessException e) {

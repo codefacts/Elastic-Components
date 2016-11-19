@@ -9,7 +9,6 @@ import elasta.core.eventbus.impl.SimpleEventBusImpl;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;
-import elasta.orm.json.core.FieldInfo;
 import elasta.orm.json.core.FieldInfoBuilder;
 import elasta.webutils.app.PerRequestToEventResolver;
 import elasta.webutils.app.RequestHandler;
@@ -46,7 +45,7 @@ public class App {
         DbEventHandlers.registerHandlers(moduleSystem.require(SimpleEventBus.class), moduleSystem.require(Db.class));
 
         moduleSystem.require(SimpleEventBus.class)
-            .addProcessorP(Cnsts.API + ".{" + EventToFlowDispatcher.ENTITY + "}.{" + EventToFlowDispatcher.ACTION + "}",
+            .addProcessorP(Cnsts.API + ".{" + EventToFlowDispatcher.RESOURCE + "}.{" + EventToFlowDispatcher.ACTION + "}",
                 moduleSystem.require(EventToFlowDispatcher.class)
             );
 

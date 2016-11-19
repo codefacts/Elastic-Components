@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by shahadat on 3/5/16.
  */
-public class TrimStringsTransformation implements Transform<JsonObject, JsonObject> {
+public class TrimStringsTransformation implements JoJoTransform {
     private final RecursiveMerge recursiveMerge;
 
     public TrimStringsTransformation() {

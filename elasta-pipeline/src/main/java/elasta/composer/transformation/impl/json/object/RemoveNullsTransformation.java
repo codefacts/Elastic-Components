@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by shahadat on 3/5/16.
  */
-public class RemoveNullsTransformation implements Transform<JsonObject, JsonObject> {
+public class RemoveNullsTransformation implements JoJoTransform {
     private final RecursiveMerge recursiveMerge;
 
     public RemoveNullsTransformation() {

@@ -9,5 +9,5 @@ import io.vertx.core.json.JsonObject;
 public interface EventToFlowDispatcher extends ProcessorP<JsonObject, JsonObject> {
     String EVENT = "$EVENT".toLowerCase();
     String ACTION = "$ACTION".toLowerCase();
-    String ENTITY = "$ENTITY".toLowerCase();
+    String RESOURCE = "$RESOURCE".toLowerCase();
 }

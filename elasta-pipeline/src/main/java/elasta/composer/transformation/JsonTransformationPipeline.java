@@ -9,9 +9,9 @@ import java.util.List;
  * Created by shahadat on 3/1/16.
  */
 public class JsonTransformationPipeline implements JoJoTransform {
-    private final List<Transform<JsonObject, JsonObject>> transformList;
+    private final List<JoJoTransform> transformList;
 
-    public JsonTransformationPipeline(List<Transform<JsonObject, JsonObject>> transformList) {
+    public JsonTransformationPipeline(List<JoJoTransform> transformList) {
         this.transformList = transformList;
     }
 
