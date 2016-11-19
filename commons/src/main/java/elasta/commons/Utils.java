@@ -30,4 +30,9 @@ final public class Utils {
             throw new RuntimeException(e);
         }
     }
+
+    public static Map<String, Object> immutableCopyNestedMap(Map<String, Object> map) {
+
+        return map;
+    }
 }

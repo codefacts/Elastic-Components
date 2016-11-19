@@ -7,7 +7,6 @@ import elasta.webutils.app.impl.RequestConverterImpl;
 import elasta.webutils.app.impl.RequestHandlerImpl;
 import elasta.webutils.app.impl.ResponseGeneratorImpl;
 import elasta.webutils.app.impl.UriToEventTranslatorImpl;
-import io.vertx.core.json.JsonObject;
 
 /**
  * Created by Jango on 11/9/2016.
@@ -24,7 +23,13 @@ public class WebUtilsExporterImpl implements WebUtilsExporter {
             module.require(SimpleEventBus.class)
         )));
 
-        moduleSystem.export(RequestConverter.class, module -> module.export(new RequestConverterImpl()));
+        moduleSystem.export(RequestConverter.class, module -> module.export(new RequestConverterImpl(
+            module.require(QueryStringToJsonObjectConverter.class)
+        )));
+
+        moduleSystem.export(QueryStringToJsonObjectConverter.class, module -> module.export(
+            new QueryStringToJsonObjectConverterImpl()
+        ));
 
         moduleSystem.export(ResponseGenerator.class, module -> module.export(new ResponseGeneratorImpl()));
 
