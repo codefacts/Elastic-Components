@@ -1,7 +1,7 @@
 package elasta.webutils.app;
 
-import elasta.commons.NestedMapBuilder;
-import elasta.commons.NestedMapBuilderImpl;
+import elasta.pipeline.util.NestedMapBuilder;
+import elasta.pipeline.util.NestedMapBuilderImpl;
 import io.vertx.core.MultiMap;
 import io.vertx.core.json.JsonObject;
 

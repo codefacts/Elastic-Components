@@ -12,10 +12,11 @@ repositories {
 
 dependencies {
 
+    compile project(':commons')
     compile project(':elasta-core')
+    compile project(':elasta-pipeline')
     compile project(':vertx-utils')
     compile project(':elasta-module')
-    compile project(':commons')
 
 // https://mvnrepository.com/artifact/io.vertx/vertx-core
     compile group: 'io.vertx', name: 'vertx-core', version: '3.3.3'

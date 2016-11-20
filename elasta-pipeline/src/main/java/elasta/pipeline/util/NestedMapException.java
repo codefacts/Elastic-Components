@@ -1,4 +1,4 @@
-package elasta.commons;
+package elasta.pipeline.util;
 
 /**
  * Created by Jango on 2016-11-19.
