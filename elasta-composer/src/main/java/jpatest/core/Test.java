@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
-import elasta.composer.transformation.impl.json.object.RemoveNullsTransformation;
+import elasta.composer.pipeline.transformation.impl.json.object.RemoveNullsTransformation;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;

@@ -1,9 +1,5 @@
 package elasta.composer.module_exporter;
 
-import elasta.module.ExportScript;
-
-import java.util.Map;
-
 /**
  * Created by Jango on 11/13/2016.
  */

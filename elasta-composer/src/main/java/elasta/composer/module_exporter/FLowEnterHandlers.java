@@ -1,7 +1,5 @@
 package elasta.composer.module_exporter;
 
-import elasta.core.flow.ExitEventHandlerP;
-
 /**
  * Created by Jango on 11/13/2016.
  */

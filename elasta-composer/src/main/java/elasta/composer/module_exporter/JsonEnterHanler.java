@@ -1,6 +1,5 @@
 package elasta.composer.module_exporter;
 
-import elasta.core.flow.EnterEventHandler;
 import elasta.core.flow.EnterEventHandlerP;
 import io.vertx.core.json.JsonObject;
 

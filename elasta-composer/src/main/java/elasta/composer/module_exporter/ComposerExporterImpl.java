@@ -2,27 +2,22 @@ package elasta.composer.module_exporter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.composer.ComposerUtils;
 import elasta.composer.Resource;
 import elasta.composer.ResourceBuilder;
 import elasta.composer.EventToFlowDispatcher;
-import elasta.composer.transformation.JsonTransformationPipeline;
-import elasta.composer.transformation.impl.json.object.JoJoTransform;
-import elasta.composer.transformation.impl.json.object.RemoveNullsTransformation;
-import elasta.composer.transformation.impl.json.object.TrimStringsTransformation;
+import elasta.composer.pipeline.transformation.JoJoTransformation;
+import elasta.composer.pipeline.transformation.impl.json.object.TrimStringsTransformation;
+import elasta.composer.pipeline.transformation.impl.JoJoTransformationImpl;
+import elasta.composer.pipeline.transformation.impl.json.object.RemoveNullsTransformation;
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
 import elasta.module.ModuleSystem;
-import elasta.orm.Db;
-import elasta.orm.json.sql.criteria.CriteriaCns;
 import elasta.webutils.app.RequestCnsts;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
 
-import static elasta.composer.ComposerUtils.emptyJsonArray;
 import static elasta.composer.ComposerUtils.emptyJsonObject;
 import static elasta.core.flow.Flow.next;
 import static elasta.core.flow.Flow.on;
@@ -90,34 +85,39 @@ public class ComposerExporterImpl implements ComposerExporter {
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.START, module -> module.export(jsonObject -> Promises.just(triggerNext(jsonObject))));
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.INITIAL_TRANSFORMATION, module -> module.export(
             jsonObject -> Promises.just(
-                Flow.triggerNext(module.require(JoJoTransform.class, JoJoTransformations.INITIAL_TRANSFORMATION).transform(jsonObject))
+                Flow.triggerNext(module.require(JoJoTransformation.class, JoJoTransformations.INITIAL_TRANSFORMATION).transform(jsonObject))
             )
         ));
 
-        moduleSystem.export(JoJoTransform.class, JoJoTransformations.INITIAL_TRANSFORMATION, module -> module
-            .export(new JsonTransformationPipeline(ImmutableList.of(
+        moduleSystem.export(JoJoTransformation.class, JoJoTransformations.INITIAL_TRANSFORMATION, module -> module
+            .export(new JoJoTransformationImpl(ImmutableList.of(
                 new TrimStringsTransformation(),
                 new RemoveNullsTransformation(),
                 val -> {
 
                     JsonObject params = val.getJsonObject(RequestCnsts.META).getJsonObject(RequestCnsts.PARAMS, emptyJsonObject());
 
-                    JsonArray projection = params
-                        .getJsonArray(DbReqParams.PROJECTION, emptyJsonArray());
+                    JsonObject projection = params
+                        .getJsonObject(DbReqParams.PROJECTION, emptyJsonObject());
 
-                    for (int i = 0; i < projection.size(); i++) {
-                        JsonObject jsonObject = projection.getJsonObject(i);
-                        if (jsonObject.getString(Criterias.PATH).equalsIgnoreCase(Criterias.ROOT)) {
-                            jsonObject.put(Criterias.PATH, "");
-                        }
-                    }
+                    ImmutableList.Builder<JsonObject> projectionListBuilder = ImmutableList.builder();
+                    projection.fieldNames().forEach(name -> {
+                        projectionListBuilder.add(
+                            new JsonObject(
+                                ImmutableMap.of(
+                                    Criterias.PATH, name.equalsIgnoreCase(Criterias.ROOT) ? "" : name,
+                                    Criterias.FIELDS, projection.getJsonArray(name)
+                                )
+                            )
+                        );
+                    });
 
                     val.put(DbReqParams.CRITERIA,
                         params
                             .getJsonObject(DbReqParams.CRITERIA, emptyJsonObject())
 
                     ).put(DbReqParams.PROJECTION,
-                        projection
+                        projectionListBuilder.build()
                     );
 
                     params.remove(DbReqParams.CRITERIA);
