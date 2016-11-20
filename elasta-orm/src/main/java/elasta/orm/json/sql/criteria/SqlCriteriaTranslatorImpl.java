@@ -5,9 +5,7 @@ import elasta.orm.json.exceptions.SqlParameterException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Jango on 9/15/2016.
@@ -18,6 +16,7 @@ public class SqlCriteriaTranslatorImpl implements SqlCriteriaTranslator {
     private static final String _AND_ = " and ";
     private static final String _OR_ = " or ";
     private static final String NOT_ = "not ";
+    private static final String COMMA = ", ";
 
     public SqlCriteriaTranslatorImpl(Map<String, String> functionMap, Map<String, SqlSymbolTranslator> symbolTranslatorMap) {
         this.functionMap = functionMap;
@@ -28,136 +27,179 @@ public class SqlCriteriaTranslatorImpl implements SqlCriteriaTranslator {
     public SqlAndParams toWhereSql(String prefix, JsonObject criteria) {
         StringBuilder stringBuilder = new StringBuilder();
         ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
-        toSql(prefix, criteria, stringBuilder, paramsBuilder);
+        new SqlParser(prefix, stringBuilder, paramsBuilder).toSql(criteria);
         return new SqlAndParams(stringBuilder.toString(), new JsonArray(paramsBuilder.build()));
     }
 
-    private StringBuilder toSql(String prefix, JsonObject criteria, StringBuilder stringBuilder, ImmutableList.Builder<Object> paramsBuilder) {
+    private class SqlParser {
 
-        if (criteria.isEmpty()) return stringBuilder;
+        final String prefix;
+        final StringBuilder stringBuilder;
+        final ImmutableList.Builder<Object> paramsBuilder;
+        int parameterIndex = 1;
 
-        stringBuilder.append("(");
+        private SqlParser(String prefix, StringBuilder stringBuilder, ImmutableList.Builder<Object> paramsBuilder) {
+            this.prefix = prefix;
+            this.stringBuilder = stringBuilder;
+            this.paramsBuilder = paramsBuilder;
+        }
 
-        criteria.forEach(e -> {
+        private StringBuilder toSql(JsonObject criteria) {
 
-            if (e.getKey().equalsIgnoreCase("$or")) {
+            if (criteria.isEmpty()) return stringBuilder;
 
-                stringBuilder.append("(");
+            stringBuilder.append("(");
 
-                if (e.getValue() instanceof JsonArray) {
+            criteria.forEach(e -> {
 
-                    handleOr(prefix, ((JsonArray) e.getValue()).getList(), stringBuilder, paramsBuilder);
+                if (e.getKey().equalsIgnoreCase("$or")) {
 
-                } else if (e.getValue() instanceof List) {
+                    stringBuilder.append("(");
 
-                    handleOr(prefix, (List<JsonObject>) e.getValue(), stringBuilder, paramsBuilder);
+                    if (e.getValue() instanceof JsonArray) {
 
-                } else {
+                        handleOr(((JsonArray) e.getValue()).getList());
 
-                    throw new SqlParameterException("Invalid value given for key '" + e.getKey() + "'. Value: '" + e.getValue() + "'");
-                }
+                    } else if (e.getValue() instanceof List) {
 
-                stringBuilder.append(")");
+                        handleOr((List<JsonObject>) e.getValue());
 
-            } else if (e.getKey().equalsIgnoreCase("$not")) {
+                    } else {
 
-                stringBuilder.append(NOT_);
+                        throw new SqlParameterException("Invalid value given for key '" + e.getKey() + "'. Value: '" + e.getValue() + "'");
+                    }
 
-                if (e.getValue() instanceof JsonObject) {
+                    stringBuilder.append(")");
 
-                    toSql(prefix, (JsonObject) e.getValue(), stringBuilder, paramsBuilder);
+                } else if (e.getKey().equalsIgnoreCase("$not")) {
+
+                    stringBuilder.append(NOT_);
+
+                    if (e.getValue() instanceof JsonObject) {
+
+                        toSql((JsonObject) e.getValue());
+
+                    } else if (e.getValue() instanceof Map) {
+
+                        toSql(new JsonObject((Map<String, Object>) e.getValue()));
+
+                    } else {
+
+                        throw new SqlParameterException("Invalid value given for key '" + e.getKey() + "'. Value: '" + e.getValue() + "'");
+                    }
 
                 } else if (e.getValue() instanceof Map) {
 
-                    toSql(prefix, new JsonObject((Map<String, Object>) e.getValue()), stringBuilder, paramsBuilder);
+                    OperatorValuePair pair = toSqlStr(prefix, e.getKey(), (Map<String, Object>) e.getValue(), stringBuilder);
+
+                    addValue(pair, stringBuilder, paramsBuilder);
+
+                } else if (e.getValue() instanceof JsonObject) {
+
+                    OperatorValuePair pair = toSqlStr(prefix, e.getKey(), ((JsonObject) e.getValue()).getMap(), stringBuilder);
+
+                    addValue(pair, stringBuilder, paramsBuilder);
 
                 } else {
 
-                    throw new SqlParameterException("Invalid value given for key '" + e.getKey() + "'. Value: '" + e.getValue() + "'");
+                    stringBuilder.append(prefix + e.getKey() + " = " + nextParameterAlias());
+                    paramsBuilder.add(e.getValue());
                 }
 
-            } else if (e.getValue() instanceof Map) {
+                stringBuilder.append(_AND_);
 
-                OperatorValuePair pair = toSqlStr(prefix, e.getKey(), (Map<String, Object>) e.getValue(), stringBuilder);
-                stringBuilder.append(" ").append(pair.getOp()).append(" ").append("?");
-                paramsBuilder.add(pair.getValue());
+            });
 
-            } else if (e.getValue() instanceof JsonObject) {
+            stringBuilder.delete(stringBuilder.length() - _AND_.length(), stringBuilder.length());
 
-                OperatorValuePair pair = toSqlStr(prefix, e.getKey(), ((JsonObject) e.getValue()).getMap(), stringBuilder);
-                stringBuilder.append(" ").append(pair.getOp()).append(" ").append("?");
-                paramsBuilder.add(pair.getValue());
+            stringBuilder.append(")");
 
-            } else {
-
-                stringBuilder.append(prefix + e.getKey() + " = ?");
-                paramsBuilder.add(e.getValue());
-            }
-
-            stringBuilder.append(_AND_);
-
-        });
-
-        stringBuilder.delete(stringBuilder.length() - _AND_.length(), stringBuilder.length());
-
-        stringBuilder.append(")");
-
-        return stringBuilder;
-    }
-
-    private void handleOr(String prefix, List<JsonObject> jsonObjects, StringBuilder stringBuilder, ImmutableList.Builder<Object> paramsBuilder) {
-
-        if (jsonObjects.isEmpty()) {
-            return;
+            return stringBuilder;
         }
 
-        jsonObjects.forEach(entries -> {
+        private String nextParameterAlias() {
+            return "?" + (parameterIndex++);
+        }
 
-            toSql(prefix, entries, stringBuilder, paramsBuilder);
-            stringBuilder.append(_OR_);
-        });
+        private void addValue(OperatorValuePair pair, StringBuilder stringBuilder, ImmutableList.Builder<Object> paramsBuilder) {
 
+            if ((pair.getValue() instanceof Collection) && (((Collection) pair.getValue()).size() > 0)) {
 
-        stringBuilder.delete(stringBuilder.length() - _OR_.length(), stringBuilder.length());
+                Collection collection = (Collection) pair.getValue();
 
-    }
+                stringBuilder.append(" ").append(pair.getOp()).append(" ").append("(");
 
-    private OperatorValuePair toSqlStr(String prefix, String key, Map<String, Object> map, StringBuilder stringBuilder) {
-        return map.entrySet().stream().findAny().map(e -> {
+                collection.forEach(value -> {
+                    stringBuilder.append(nextParameterAlias()).append(COMMA);
+                    paramsBuilder.add(value);
+                });
 
-            String $key = e.getKey();
+                stringBuilder.delete(stringBuilder.length() - COMMA.length(), stringBuilder.length());
 
-            if (functionMap.containsKey($key)) {
+                stringBuilder.append(")");
 
-                String function = functionMap.get($key);
-                if (e.getValue() instanceof JsonObject || e.getValue() instanceof Map) {
-
-                    Map<String, Object> js = e.getValue() instanceof JsonObject ? ((JsonObject) e.getValue()).getMap() : (Map<String, Object>) e.getValue();
-
-                    stringBuilder.append(function).append("(");
-                    OperatorValuePair valuePair = toSqlStr(prefix, key, js, stringBuilder);
-                    stringBuilder.append(")");
-
-                    return valuePair;
-
-                } else {
-
-                    stringBuilder.append(function).append("(").append(prefix + key).append(")");
-                    return new OperatorValuePair("=", e.getValue());
-                }
-
-            } else if (symbolTranslatorMap.containsKey($key)) {
-
-                SqlSymbolSpec symbolSpec = symbolTranslatorMap.get($key).translate(prefix + key, e.getValue());
-
-                stringBuilder.append(symbolSpec.getKey());
-
-                return new OperatorValuePair(symbolSpec.getOperator(), symbolSpec.getValue());
             } else {
 
-                throw new SqlParameterException("Invalid key given. key: '" + $key + "'");
+                stringBuilder.append(" ").append(pair.getOp()).append(" ").append("?");
+                paramsBuilder.add(pair.getValue());
             }
-        }).orElseThrow(() -> new SqlParameterException("Invalid value given key '" + key + "'"));
+        }
+
+        private void handleOr(List<JsonObject> jsonObjects) {
+
+            if (jsonObjects.isEmpty()) {
+                return;
+            }
+
+            jsonObjects.forEach(entries -> {
+
+                toSql(entries);
+                stringBuilder.append(_OR_);
+            });
+
+
+            stringBuilder.delete(stringBuilder.length() - _OR_.length(), stringBuilder.length());
+
+        }
+
+        private OperatorValuePair toSqlStr(String prefix, String key, Map<String, Object> map, StringBuilder stringBuilder) {
+            return map.entrySet().stream().findAny().map(e -> {
+
+                String $key = e.getKey();
+
+                if (functionMap.containsKey($key)) {
+
+                    String function = functionMap.get($key);
+                    if (e.getValue() instanceof JsonObject || e.getValue() instanceof Map) {
+
+                        Map<String, Object> js = e.getValue() instanceof JsonObject ? ((JsonObject) e.getValue()).getMap() : (Map<String, Object>) e.getValue();
+
+                        stringBuilder.append(function).append("(");
+                        OperatorValuePair valuePair = toSqlStr(prefix, key, js, stringBuilder);
+                        stringBuilder.append(")");
+
+                        return valuePair;
+
+                    } else {
+
+                        stringBuilder.append(function).append("(").append(prefix + key).append(")");
+                        return new OperatorValuePair("=", e.getValue());
+                    }
+
+                } else if (symbolTranslatorMap.containsKey($key)) {
+
+                    SqlSymbolSpec symbolSpec = symbolTranslatorMap.get($key).translate(prefix + key, e.getValue());
+
+                    stringBuilder.append(symbolSpec.getKey());
+
+                    return new OperatorValuePair(symbolSpec.getOperator(), symbolSpec.getValue());
+                } else {
+
+                    throw new SqlParameterException("Invalid key given. key: '" + $key + "'");
+                }
+            }).orElseThrow(() -> new SqlParameterException("Invalid value given key '" + key + "'"));
+        }
+
     }
 
     public static void main(String[] args) {

@@ -10,6 +10,8 @@ import elasta.orm.json.core.FieldInfoBuilder;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Created by Jango on 11/13/2016.
@@ -75,13 +77,26 @@ public interface DbEventHandlers {
         );
     }
 
-    static List<FieldInfo> convertToFields(List<JsonObject> list) {
+    static List<FieldInfo> convertToFields(List<? extends Object> list) {
         ImmutableList.Builder<FieldInfo> listBuilder = ImmutableList.builder();
 
-        list.forEach(jsonObject -> listBuilder.add(new FieldInfoBuilder()
-            .setPath(jsonObject.getString("path"))
-            .setFields(jsonObject.getJsonArray("fields").getList())
-            .createSqlField()));
+        list.stream().map(o -> {
+
+            if (o instanceof Map) {
+                return new JsonObject((Map) o);
+            }
+
+            return (JsonObject) o;
+
+        }).forEach(new Consumer<JsonObject>() {
+            @Override
+            public void accept(JsonObject jsonObject) {
+                listBuilder.add(new FieldInfoBuilder()
+                    .setPath(jsonObject.getString("path"))
+                    .setFields(jsonObject.getJsonArray("fields").getList())
+                    .createSqlField());
+            }
+        });
 
         return listBuilder.build();
     }

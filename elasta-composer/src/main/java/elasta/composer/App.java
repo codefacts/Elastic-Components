@@ -79,7 +79,7 @@ public class App {
     }
 
     private static String apiEvent(String event) {
-        return Cnsts.API + "." + event;
+        return Cnsts.API + "." + event.replace('-', '.');
     }
 
     private static String api(String uri) {

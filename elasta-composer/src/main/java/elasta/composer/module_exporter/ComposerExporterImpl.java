@@ -15,7 +15,9 @@ import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
 import elasta.module.ModuleSystem;
 import elasta.orm.Db;
+import elasta.orm.json.sql.criteria.CriteriaCns;
 import elasta.webutils.app.RequestCnsts;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
@@ -100,13 +102,22 @@ public class ComposerExporterImpl implements ComposerExporter {
 
                     JsonObject params = val.getJsonObject(RequestCnsts.META).getJsonObject(RequestCnsts.PARAMS, emptyJsonObject());
 
+                    JsonArray projection = params
+                        .getJsonArray(DbReqParams.PROJECTION, emptyJsonArray());
+
+                    for (int i = 0; i < projection.size(); i++) {
+                        JsonObject jsonObject = projection.getJsonObject(i);
+                        if (jsonObject.getString(Criterias.PATH).equalsIgnoreCase(Criterias.ROOT)) {
+                            jsonObject.put(Criterias.PATH, "");
+                        }
+                    }
+
                     val.put(DbReqParams.CRITERIA,
                         params
                             .getJsonObject(DbReqParams.CRITERIA, emptyJsonObject())
 
                     ).put(DbReqParams.PROJECTION,
-                        params
-                            .getJsonArray(DbReqParams.PROJECTION, emptyJsonArray())
+                        projection
                     );
 
                     params.remove(DbReqParams.CRITERIA);
@@ -120,6 +131,11 @@ public class ComposerExporterImpl implements ComposerExporter {
             if (jsonObject.containsKey("id")) {
                 jsonObject.put("id", Long.parseLong(jsonObject.getString("id")));
             }
+
+            if (jsonObject.getJsonObject(DbReqParams.CRITERIA, emptyJsonObject()).containsKey("id")) {
+                jsonObject.getJsonObject(DbReqParams.CRITERIA).put("id", Integer.parseInt(jsonObject.getJsonObject(DbReqParams.CRITERIA).getString("id")));
+            }
+
             return Promises.just(Flow.triggerNext(jsonObject));
         }));
 

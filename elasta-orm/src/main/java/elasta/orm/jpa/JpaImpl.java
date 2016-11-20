@@ -67,7 +67,7 @@ public class JpaImpl implements Jpa {
             Query query = entityManager.createQuery(jpql);
 
             for (int i = 0; i < params.size(); i++) {
-                query.setParameter(i, params.getValue(i));
+                query.setParameter(i + 1, params.getValue(i));
             }
 
             List<Map<String, Object>> maps = mapper.convertValue(query.getResultList(), listOfMap());
@@ -95,7 +95,7 @@ public class JpaImpl implements Jpa {
         return exeQuery(entityManager -> {
             TypedQuery<Object[]> query = entityManager.createQuery(jpql, Object[].class);
             for (int i = 0; i < params.getList().size(); i++) {
-                query.setParameter(i, params.getValue(i));
+                query.setParameter(i + 1, params.getValue(i));
             }
             List list = query.getResultList();
             if (list.size() <= 0) {
@@ -134,7 +134,7 @@ public class JpaImpl implements Jpa {
             TypedQuery<T> query = entityManager.createQuery(jpql, tClass);
             List list = params.getList();
             for (int i = 0, listSize = list.size(); i < listSize; i++) {
-                query.setParameter(i, list.get(i));
+                query.setParameter(i + 1, list.get(i));
             }
             return query.getSingleResult();
         });

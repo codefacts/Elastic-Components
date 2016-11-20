@@ -209,13 +209,26 @@ public class DbImpl implements Db {
 
     @Override
     public Promise<List<JsonObject>> findAll(String model, JsonObject criteria, List<FieldInfo> selectFields) {
-        String select = selectFields.stream().flatMap(fieldInfo -> fieldInfo.getFields().stream()
-            .map(field -> (fieldInfo.getPath() == null || fieldInfo.getPath().isEmpty() ? "m." : "m." + fieldInfo.getPath() + ".") + field)
-        ).collect(Collectors.joining(", "));
+
+        ModelInfo modelInfo = modelInfoProvider.get(model);
+
+        FieldDetailsInfo fieldDetailsInfo = toFieldDetailsList(selectFields, modelInfo);
+
+        String select = fieldDetailsInfo.fieldDetailsList.stream()
+            .flatMap(
+                fieldInfo -> fieldInfo.fields.stream()
+                    .map(field -> ((fieldInfo.pathStr == null || fieldInfo.pathStr.isEmpty())
+                        ? "m." : "m." + fieldInfo.pathStr + ".") + field)
+            ).collect(Collectors.joining(", "));
 
         SqlAndParams sqlAndParams = criteriaUtils.toWhereSql("m.", criteria);
 
-        return jpa.jpqlQuery("select " + select + " from " + model + " m where " + sqlAndParams.getSql(), sqlAndParams.getParams());
+        select = select.isEmpty() ? "m" : select;
+
+        String where = sqlAndParams.getSql().isEmpty() ? "" : "where " + sqlAndParams.getSql();
+
+        return jpa.jpqlQueryArray("select " + select + " from " + model + " m " + where, sqlAndParams.getParams())
+            .map(toJsonObjectList(fieldDetailsInfo, modelInfo));
     }
 
     private ImmutableList<UpdateTpl> toUpdateList(String model, JsonObject data, TableIdPairs tableIdPairs) {
