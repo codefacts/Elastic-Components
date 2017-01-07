@@ -10,7 +10,7 @@ import elasta.module.ModuleSystem;
 import elasta.orm.Db;
 import elasta.orm.OrmExporter;
 import elasta.orm.json.core.FieldInfoBuilder;
-import elasta.webutils.app.PerRequestToEventResolver;
+import elasta.webutils.app.utils.PerRequestToEventResolver;
 import elasta.webutils.app.RequestHandler;
 import elasta.webutils.app.module.exporter.WebUtilsExporter;
 import io.vertx.core.Vertx;

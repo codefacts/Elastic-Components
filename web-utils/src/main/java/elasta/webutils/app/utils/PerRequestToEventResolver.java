@@ -1,4 +1,4 @@
-package elasta.webutils.app;
+package elasta.webutils.app.utils;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
