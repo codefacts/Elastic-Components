@@ -2,6 +2,8 @@ package elasta.orm.nm.upsert.impl;
 
 import elasta.orm.nm.upsert.*;
 
+import java.util.Objects;
+
 /**
  * Created by Jango on 2017-01-10.
  */
@@ -9,6 +11,7 @@ final public class RelationTableUpserFunctionImpl implements RelationTableUpserF
     final RelationTableDataPopulator relationTableDataPopulator;
 
     public RelationTableUpserFunctionImpl(RelationTableDataPopulator relationTableDataPopulator) {
+        Objects.requireNonNull(relationTableDataPopulator);
         this.relationTableDataPopulator = relationTableDataPopulator;
     }
 

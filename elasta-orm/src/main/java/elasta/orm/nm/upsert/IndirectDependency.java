@@ -1,5 +1,7 @@
 package elasta.orm.nm.upsert;
 
+import java.util.Objects;
+
 /**
  * Created by Jango on 2017-01-09.
  */
@@ -9,6 +11,9 @@ final public class IndirectDependency {
     final DependencyColumnValuePopulator dependencyColumnValuePopulator;
 
     public IndirectDependency(String fieldName, IndirectDependencyHandler indirectDependencyHandler, DependencyColumnValuePopulator dependencyColumnValuePopulator) {
+        Objects.requireNonNull(fieldName);
+        Objects.requireNonNull(indirectDependencyHandler);
+        Objects.requireNonNull(dependencyColumnValuePopulator);
         this.fieldName = fieldName;
         this.indirectDependencyHandler = indirectDependencyHandler;
         this.dependencyColumnValuePopulator = dependencyColumnValuePopulator;

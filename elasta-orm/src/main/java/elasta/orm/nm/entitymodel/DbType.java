@@ -1,4 +1,4 @@
-package elasta.orm.nm.upsert;
+package elasta.orm.nm.entitymodel;
 
 /**
  * Created by Jango on 2017-01-08.

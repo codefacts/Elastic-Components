@@ -3,6 +3,8 @@ package elasta.orm.nm.upsert.impl;
 import elasta.orm.nm.upsert.*;
 import io.vertx.core.json.JsonObject;
 
+import java.util.Objects;
+
 /**
  * Created by Jango on 2017-01-09.
  */
@@ -11,6 +13,8 @@ final public class IndirectDependencyHandlerImpl implements IndirectDependencyHa
     final UpsertFunction childUpsertFunction;
 
     public IndirectDependencyHandlerImpl(RelationTableUpserFunction relationTableUpserFunction, UpsertFunction childUpsertFunction) {
+        Objects.requireNonNull(relationTableUpserFunction);
+        Objects.requireNonNull(childUpsertFunction);
         this.relationTableUpserFunction = relationTableUpserFunction;
         this.childUpsertFunction = childUpsertFunction;
     }

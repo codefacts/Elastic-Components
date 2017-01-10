@@ -3,6 +3,7 @@ package elasta.orm.nm.upsert;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -14,6 +15,9 @@ final public class TableData {
     final JsonObject values;
 
     public TableData(String table, String[] primaryColumns, JsonObject values) {
+        Objects.requireNonNull(table);
+        Objects.requireNonNull(primaryColumns);
+        Objects.requireNonNull(values);
         this.table = table;
         this.primaryColumns = primaryColumns;
         this.values = values;

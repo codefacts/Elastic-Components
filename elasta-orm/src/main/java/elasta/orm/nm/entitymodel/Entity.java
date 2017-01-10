@@ -1,4 +1,4 @@
-package elasta.orm.nm.upsert;
+package elasta.orm.nm.entitymodel;
 
 import java.util.Arrays;
 

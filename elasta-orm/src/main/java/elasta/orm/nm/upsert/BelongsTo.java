@@ -1,5 +1,7 @@
 package elasta.orm.nm.upsert;
 
+import java.util.Objects;
+
 /**
  * Created by Jango on 2017-01-09.
  */
@@ -9,6 +11,9 @@ final public class BelongsTo {
     final DependencyColumnValuePopulator dependencyColumnValuePopulator;
 
     public BelongsTo(String fieldName, BelongToHandler belongToHandler, DependencyColumnValuePopulator dependencyColumnValuePopulator) {
+        Objects.requireNonNull(fieldName);
+        Objects.requireNonNull(belongToHandler);
+        Objects.requireNonNull(dependencyColumnValuePopulator);
         this.fieldName = fieldName;
         this.belongToHandler = belongToHandler;
         this.dependencyColumnValuePopulator = dependencyColumnValuePopulator;

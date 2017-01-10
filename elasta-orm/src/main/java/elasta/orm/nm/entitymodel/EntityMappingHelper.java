@@ -1,10 +1,6 @@
-package elasta.orm.nm.upsert;
+package elasta.orm.nm.entitymodel;
 
-import io.vertx.core.json.JsonObject;
-
-import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jango on 2017-01-08.

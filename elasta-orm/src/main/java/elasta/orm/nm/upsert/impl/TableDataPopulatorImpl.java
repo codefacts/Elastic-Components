@@ -6,6 +6,7 @@ import elasta.orm.nm.upsert.TableDataPopulator;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-10.
@@ -16,6 +17,9 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
     private final FieldToColumnMapping[] fieldToColumnMappings;
 
     public TableDataPopulatorImpl(String table, String primaryKey, FieldToColumnMapping[] fieldToColumnMappings) {
+        Objects.requireNonNull(table);
+        Objects.requireNonNull(primaryKey);
+        Objects.requireNonNull(fieldToColumnMappings);
         this.table = table;
         this.primaryKey = primaryKey;
         this.fieldToColumnMappings = fieldToColumnMappings;

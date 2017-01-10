@@ -5,6 +5,7 @@ import elasta.orm.nm.upsert.ForeignColumnMapping;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-10.
@@ -13,6 +14,7 @@ final public class DependencyColumnValuePopulatorImpl implements DependencyColum
     final ForeignColumnMapping[] foreignColumnMappings;
 
     public DependencyColumnValuePopulatorImpl(ForeignColumnMapping[] foreignColumnMappings) {
+        Objects.requireNonNull(foreignColumnMappings);
         this.foreignColumnMappings = foreignColumnMappings;
     }
 

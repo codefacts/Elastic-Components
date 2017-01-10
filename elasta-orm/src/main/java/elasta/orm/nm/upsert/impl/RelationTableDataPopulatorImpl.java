@@ -7,24 +7,20 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-10.
  */
 public class RelationTableDataPopulatorImpl implements RelationTableDataPopulator {
-    private final String srcTable;
-    private final String srcTablePrimaryColumn;
-    private final String dstTable;
-    private final String dstTablePrimaryColumn;
     private final String relationTable;
     private final ColumnToColumnMapping[] srcMappings;
     private final ColumnToColumnMapping[] dstMappings;
 
-    public RelationTableDataPopulatorImpl(String srcTable, String srcTablePrimaryColumn, String dstTable, String dstTablePrimaryColumn, String relationTable, ColumnToColumnMapping[] srcMappings, ColumnToColumnMapping[] dstMappings) {
-        this.srcTable = srcTable;
-        this.srcTablePrimaryColumn = srcTablePrimaryColumn;
-        this.dstTable = dstTable;
-        this.dstTablePrimaryColumn = dstTablePrimaryColumn;
+    public RelationTableDataPopulatorImpl(String relationTable, ColumnToColumnMapping[] srcMappings, ColumnToColumnMapping[] dstMappings) {
+        Objects.requireNonNull(relationTable);
+        Objects.requireNonNull(srcMappings);
+        Objects.requireNonNull(dstMappings);
         this.relationTable = relationTable;
         this.srcMappings = srcMappings;
         this.dstMappings = dstMappings;

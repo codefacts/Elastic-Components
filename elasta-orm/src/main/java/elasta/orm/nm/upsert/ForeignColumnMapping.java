@@ -1,5 +1,7 @@
 package elasta.orm.nm.upsert;
 
+import java.util.Objects;
+
 /**
  * Created by Jango on 2017-01-10.
  */
@@ -8,6 +10,8 @@ final public class ForeignColumnMapping {
     final String column;
 
     public ForeignColumnMapping(String foreignColumn, String column) {
+        Objects.requireNonNull(foreignColumn);
+        Objects.requireNonNull(column);
         this.foreignColumn = foreignColumn;
         this.column = column;
     }
