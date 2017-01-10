@@ -1,5 +1,7 @@
 package elasta.orm.nm.upsert;
 
+import java.util.Arrays;
+
 /**
  * Created by Jango on 2017-01-08.
  */
@@ -28,5 +30,14 @@ final public class DbMapping {
     @Override
     public int hashCode() {
         return table != null ? table.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "DbMapping{" +
+            "table='" + table + '\'' +
+            ", primaryColumn='" + primaryColumn + '\'' +
+            ", dbColumnMappings=" + Arrays.toString(dbColumnMappings) +
+            '}';
     }
 }

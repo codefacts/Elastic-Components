@@ -3,7 +3,7 @@ package elasta.orm.nm.upsert;
 /**
  * Created by Jango on 2017-01-09.
  */
-public class IndirectDependency {
+final public class IndirectDependency {
     final String fieldName;
     final IndirectDependencyHandler indirectDependencyHandler;
     final DependencyColumnValuePopulator dependencyColumnValuePopulator;

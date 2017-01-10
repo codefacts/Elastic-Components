@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-09.
  */
-public class UpsertFunctionImpl implements UpsertFunction {
+final public class UpsertFunctionImpl implements UpsertFunction {
     final String entity;
     final TableDataPopulator tableDataPopulator;
     final DirectDependency[] directDependencies;
@@ -46,7 +46,7 @@ public class UpsertFunctionImpl implements UpsertFunction {
 
         public TableData insert() {
 
-            final TableData tableData = tableDataPopulator.populate(entity, jsonObject);
+            final TableData tableData = tableDataPopulator.populate(jsonObject);
 
             final JsonObject tableValues = tableData.getValues();
 

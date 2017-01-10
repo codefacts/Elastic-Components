@@ -30,4 +30,35 @@ final public class TableData {
     public JsonObject getValues() {
         return values;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TableData tableData = (TableData) o;
+
+        if (table != null ? !table.equals(tableData.table) : tableData.table != null) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!Arrays.equals(primaryColumns, tableData.primaryColumns)) return false;
+        return values != null ? values.equals(tableData.values) : tableData.values == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = table != null ? table.hashCode() : 0;
+        result = 31 * result + Arrays.hashCode(primaryColumns);
+        result = 31 * result + (values != null ? values.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TableData{" +
+            "table='" + table + '\'' +
+            ", primaryColumns=" + Arrays.toString(primaryColumns) +
+            ", values=" + values +
+            '}';
+    }
 }

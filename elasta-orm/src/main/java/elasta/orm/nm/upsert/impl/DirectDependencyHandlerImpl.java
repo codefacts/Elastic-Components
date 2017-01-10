@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * Created by Jango on 2017-01-09.
  */
-public class DirectDependencyHandlerImpl implements DirectDependencyHandler {
+final public class DirectDependencyHandlerImpl implements DirectDependencyHandler {
     final UpsertFunction upsertFunction;
 
     public DirectDependencyHandlerImpl(UpsertFunction upsertFunction) {
