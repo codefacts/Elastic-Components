@@ -1,5 +1,7 @@
 package elasta.orm.nm.entitymodel;
 
+import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
+
 import java.util.Map;
 
 /**

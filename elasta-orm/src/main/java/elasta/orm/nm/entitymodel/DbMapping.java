@@ -1,6 +1,9 @@
 package elasta.orm.nm.entitymodel;
 
+import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
+
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-08.
@@ -11,9 +14,24 @@ final public class DbMapping {
     final DbColumnMapping[] dbColumnMappings;
 
     public DbMapping(String table, String primaryColumn, DbColumnMapping[] dbColumnMappings) {
+        Objects.requireNonNull(table);
+        Objects.requireNonNull(primaryColumn);
+        Objects.requireNonNull(dbColumnMappings);
         this.table = table;
         this.primaryColumn = primaryColumn;
         this.dbColumnMappings = dbColumnMappings;
+    }
+
+    public String getTable() {
+        return table;
+    }
+
+    public String getPrimaryColumn() {
+        return primaryColumn;
+    }
+
+    public DbColumnMapping[] getDbColumnMappings() {
+        return dbColumnMappings;
     }
 
     @Override

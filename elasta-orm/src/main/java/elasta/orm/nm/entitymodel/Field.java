@@ -1,15 +1,34 @@
 package elasta.orm.nm.entitymodel;
 
+import java.util.Objects;
+
 /**
  * Created by Jango on 2017-01-08.
  */
 final public class Field {
     final String name;
     final FieldType fieldType;
+    final Relationship relationship;
 
-    public Field(String name, FieldType fieldType) {
+    public Field(String name, FieldType fieldType, Relationship relationship) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(fieldType);
+        Objects.requireNonNull(relationship);
         this.name = name;
         this.fieldType = fieldType;
+        this.relationship = relationship;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public FieldType getFieldType() {
+        return fieldType;
+    }
+
+    public Relationship getRelationship() {
+        return relationship;
     }
 
     @Override
