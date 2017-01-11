@@ -3,7 +3,7 @@ package elasta.orm.nm.entitymodel;
 /**
  * Created by Jango on 2017-01-08.
  */
-public enum FieldType {
+public enum JavaType {
     INTEGER(Integer.class),
     LONG(Long.class),
     FLOAT(Float.class),
@@ -13,7 +13,7 @@ public enum FieldType {
 
     private final Class aClass;
 
-    FieldType(Class aClass) {
+    JavaType(Class aClass) {
         this.aClass = aClass;
     }
 
@@ -21,7 +21,7 @@ public enum FieldType {
         return aClass;
     }
 
-    public static FieldType of(Class aClass) {
+    public static JavaType of(Class aClass) {
         return aClass == Integer.class ? INTEGER
             : aClass == Long.class ? LONG
             : aClass == Float.class ? FLOAT
@@ -32,7 +32,7 @@ public enum FieldType {
 
     @Override
     public String toString() {
-        return "FieldType{" +
+        return "JavaType{" +
             "aClass=" + aClass +
             '}';
     }
