@@ -13,15 +13,15 @@ import java.util.Objects;
  */
 final public class TableDataPopulatorImpl implements TableDataPopulator {
     private final String table;
-    private final String primaryKey;
+    private final String primaryColumn;
     private final FieldToColumnMapping[] fieldToColumnMappings;
 
-    public TableDataPopulatorImpl(String table, String primaryKey, FieldToColumnMapping[] fieldToColumnMappings) {
+    public TableDataPopulatorImpl(String table, String primaryColumn, FieldToColumnMapping[] fieldToColumnMappings) {
         Objects.requireNonNull(table);
-        Objects.requireNonNull(primaryKey);
+        Objects.requireNonNull(primaryColumn);
         Objects.requireNonNull(fieldToColumnMappings);
         this.table = table;
-        this.primaryKey = primaryKey;
+        this.primaryColumn = primaryColumn;
         this.fieldToColumnMappings = fieldToColumnMappings;
     }
 
@@ -39,6 +39,6 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
             );
         }
 
-        return new TableData(table, new String[]{primaryKey}, new JsonObject(map));
+        return new TableData(table, new String[]{primaryColumn}, new JsonObject(map));
     }
 }

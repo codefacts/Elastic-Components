@@ -11,5 +11,7 @@ public interface VirtualColumnMapping extends DbColumnMapping {
 
     String getReferencingTable();
 
+    String getReferencingEntity();
+
     List<ForeignColumnMapping> getForeignColumnMappingList();
 }

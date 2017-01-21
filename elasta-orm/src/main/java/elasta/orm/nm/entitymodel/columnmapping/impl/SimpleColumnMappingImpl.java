@@ -11,17 +11,17 @@ import java.util.Objects;
  */
 public class SimpleColumnMappingImpl implements SimpleColumnMapping {
     final String field;
-    final String name;
+    final String column;
     final ColumnType columnType;
     final DbType dbType;
 
-    public SimpleColumnMappingImpl(String field, String name, ColumnType columnType, DbType dbType) {
+    public SimpleColumnMappingImpl(String field, String column, ColumnType columnType, DbType dbType) {
         Objects.requireNonNull(field);
-        Objects.requireNonNull(name);
+        Objects.requireNonNull(column);
         Objects.requireNonNull(columnType);
         Objects.requireNonNull(dbType);
         this.field = field;
-        this.name = name;
+        this.column = column;
         this.columnType = columnType;
         this.dbType = dbType;
     }
@@ -31,9 +31,8 @@ public class SimpleColumnMappingImpl implements SimpleColumnMapping {
         return field;
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public String getColumn() {
+        return column;
     }
 
     @Override
@@ -54,7 +53,7 @@ public class SimpleColumnMappingImpl implements SimpleColumnMapping {
         SimpleColumnMappingImpl that = (SimpleColumnMappingImpl) o;
 
         if (field != null ? !field.equals(that.field) : that.field != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (column != null ? !column.equals(that.column) : that.column != null) return false;
         if (columnType != that.columnType) return false;
         return dbType == that.dbType;
 
@@ -63,7 +62,7 @@ public class SimpleColumnMappingImpl implements SimpleColumnMapping {
     @Override
     public int hashCode() {
         int result = field != null ? field.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (column != null ? column.hashCode() : 0);
         result = 31 * result + (columnType != null ? columnType.hashCode() : 0);
         result = 31 * result + (dbType != null ? dbType.hashCode() : 0);
         return result;
@@ -73,7 +72,7 @@ public class SimpleColumnMappingImpl implements SimpleColumnMapping {
     public String toString() {
         return "SimpleColumnMappingImpl{" +
             "field='" + field + '\'' +
-            ", name='" + name + '\'' +
+            ", name='" + column + '\'' +
             ", columnType=" + columnType +
             ", dbType=" + dbType +
             '}';

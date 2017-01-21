@@ -35,4 +35,8 @@ final public class Utils {
 
         return map;
     }
+
+    public static <T> T cast(Object t) {
+        return (T) t;
+    }
 }

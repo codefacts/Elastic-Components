@@ -12,16 +12,19 @@ import java.util.Objects;
  */
 public class VirtualColumnMappingImpl implements VirtualColumnMapping {
     final String referencingTable;
+    final String referencingEntity;
     final List<ForeignColumnMapping> foreignColumnMappingList;
     final String field;
     final ColumnType columnType;
 
-    public VirtualColumnMappingImpl(String referencingTable, List<ForeignColumnMapping> foreignColumnMappingList, String field, ColumnType columnType) {
+    public VirtualColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field, ColumnType columnType) {
         Objects.requireNonNull(referencingTable);
+        Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
         Objects.requireNonNull(field);
         Objects.requireNonNull(columnType);
         this.referencingTable = referencingTable;
+        this.referencingEntity = referencingEntity;
         this.foreignColumnMappingList = foreignColumnMappingList;
         this.field = field;
         this.columnType = columnType;
@@ -30,6 +33,11 @@ public class VirtualColumnMappingImpl implements VirtualColumnMapping {
     @Override
     public String getReferencingTable() {
         return referencingTable;
+    }
+
+    @Override
+    public String getReferencingEntity() {
+        return referencingEntity;
     }
 
     @Override

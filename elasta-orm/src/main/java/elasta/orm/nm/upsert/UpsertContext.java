@@ -11,7 +11,7 @@ public interface UpsertContext {
 
     UpsertContext putOrMerge(String tableAndPrimaryKey, TableData tableData);
 
-    JsonObject get(String tableAndPrimaryKey);
+    TableData get(String tableAndPrimaryKey);
 
     boolean exists(String tableAndPrimaryKey);
 

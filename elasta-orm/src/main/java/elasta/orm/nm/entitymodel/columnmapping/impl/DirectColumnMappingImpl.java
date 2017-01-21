@@ -12,16 +12,19 @@ import java.util.Objects;
  */
 final public class DirectColumnMappingImpl implements DirectColumnMapping {
     final String referencingTable;
+    final String referencingEntity;
     final List<ForeignColumnMapping> foreignColumnMappingList;
     final String field;
     final ColumnType columnType;
 
-    public DirectColumnMappingImpl(String referencingTable, List<ForeignColumnMapping> foreignColumnMappingList, String field, ColumnType columnType) {
+    public DirectColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field, ColumnType columnType) {
         Objects.requireNonNull(referencingTable);
+        Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
         Objects.requireNonNull(field);
         Objects.requireNonNull(columnType);
         this.referencingTable = referencingTable;
+        this.referencingEntity = referencingEntity;
         this.foreignColumnMappingList = foreignColumnMappingList;
         this.field = field;
         this.columnType = columnType;
@@ -30,6 +33,10 @@ final public class DirectColumnMappingImpl implements DirectColumnMapping {
     @Override
     public String getReferencingTable() {
         return referencingTable;
+    }
+
+    public String getReferencingEntity() {
+        return referencingEntity;
     }
 
     @Override

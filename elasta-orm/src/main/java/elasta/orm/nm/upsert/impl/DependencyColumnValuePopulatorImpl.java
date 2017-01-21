@@ -25,9 +25,9 @@ final public class DependencyColumnValuePopulatorImpl implements DependencyColum
 
         for (ForeignColumnMapping foreignColumnMapping : foreignColumnMappings) {
             map.put(
-                foreignColumnMapping.getColumn(),
+                foreignColumnMapping.getSrcColumn(),
                 dependencyTableData.getValue(
-                    foreignColumnMapping.getForeignColumn()
+                    foreignColumnMapping.getDstColumn()
                 )
             );
         }

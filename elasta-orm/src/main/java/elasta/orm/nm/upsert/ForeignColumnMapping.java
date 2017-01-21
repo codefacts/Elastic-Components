@@ -6,22 +6,22 @@ import java.util.Objects;
  * Created by Jango on 2017-01-10.
  */
 final public class ForeignColumnMapping {
-    final String foreignColumn;
-    final String column;
+    final String dstColumn;
+    final String srcColumn;
 
-    public ForeignColumnMapping(String foreignColumn, String column) {
-        Objects.requireNonNull(foreignColumn);
-        Objects.requireNonNull(column);
-        this.foreignColumn = foreignColumn;
-        this.column = column;
+    public ForeignColumnMapping(String srcColumn, String dstColumn) {
+        Objects.requireNonNull(dstColumn);
+        Objects.requireNonNull(srcColumn);
+        this.dstColumn = dstColumn;
+        this.srcColumn = srcColumn;
     }
 
-    public String getForeignColumn() {
-        return foreignColumn;
+    public String getDstColumn() {
+        return dstColumn;
     }
 
-    public String getColumn() {
-        return column;
+    public String getSrcColumn() {
+        return srcColumn;
     }
 
     @Override
@@ -31,24 +31,24 @@ final public class ForeignColumnMapping {
 
         ForeignColumnMapping that = (ForeignColumnMapping) o;
 
-        if (foreignColumn != null ? !foreignColumn.equals(that.foreignColumn) : that.foreignColumn != null)
+        if (dstColumn != null ? !dstColumn.equals(that.dstColumn) : that.dstColumn != null)
             return false;
-        return column != null ? column.equals(that.column) : that.column == null;
+        return srcColumn != null ? srcColumn.equals(that.srcColumn) : that.srcColumn == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = foreignColumn != null ? foreignColumn.hashCode() : 0;
-        result = 31 * result + (column != null ? column.hashCode() : 0);
+        int result = dstColumn != null ? dstColumn.hashCode() : 0;
+        result = 31 * result + (srcColumn != null ? srcColumn.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "ForeignColumnMapping{" +
-            "foreignColumn='" + foreignColumn + '\'' +
-            ", column='" + column + '\'' +
+            "foreignColumn='" + dstColumn + '\'' +
+            ", column='" + srcColumn + '\'' +
             '}';
     }
 }

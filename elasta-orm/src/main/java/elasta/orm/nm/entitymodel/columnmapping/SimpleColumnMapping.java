@@ -7,7 +7,7 @@ import elasta.orm.nm.entitymodel.DbType;
  */
 public interface SimpleColumnMapping extends DbColumnMapping {
 
-    String getName();
+    String getColumn();
 
     DbType getDbType();
 }

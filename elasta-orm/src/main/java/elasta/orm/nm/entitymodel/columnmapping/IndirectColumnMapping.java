@@ -11,6 +11,8 @@ public interface IndirectColumnMapping extends DbColumnMapping {
 
     String getReferencingTable();
 
+    String getReferencingEntity();
+
     String getRelationTable();
 
     List<ForeignColumnMapping> getSrcForeignColumnMappingList();
