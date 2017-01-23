@@ -15,14 +15,13 @@ public class SimpleColumnMappingImpl implements SimpleColumnMapping {
     final ColumnType columnType;
     final DbType dbType;
 
-    public SimpleColumnMappingImpl(String field, String column, ColumnType columnType, DbType dbType) {
+    public SimpleColumnMappingImpl(String field, String column, DbType dbType) {
         Objects.requireNonNull(field);
         Objects.requireNonNull(column);
-        Objects.requireNonNull(columnType);
         Objects.requireNonNull(dbType);
         this.field = field;
         this.column = column;
-        this.columnType = columnType;
+        this.columnType = ColumnType.SIMPLE;
         this.dbType = dbType;
     }
 

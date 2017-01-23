@@ -1,6 +1,7 @@
 package elasta.orm.nm.entitymodel;
 
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.SimpleColumnMapping;
 
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public interface EntityMappingHelper {
 
     Map<String, Field> getFieldNameToFieldMap(String entity);
 
-    Map<String, DbColumnMapping> getColumnNameToColumnMappingMap(String entity);
+    Map<String, SimpleColumnMapping> getColumnNameToColumnMappingMap(String entity);
 
     Map<String, DbColumnMapping> getFieldToColumnMappingMap(String entity);
 

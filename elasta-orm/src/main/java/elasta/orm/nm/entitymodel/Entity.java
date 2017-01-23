@@ -10,8 +10,10 @@ final public class Entity {
     final String name;
     final String primaryKey;
     final Field[] fields;
+    final DbMapping dbMapping;
 
-    public Entity(String name, String primaryKey, Field[] fields) {
+    public Entity(String name, String primaryKey, Field[] fields, DbMapping dbMapping) {
+        this.dbMapping = dbMapping;
         Objects.requireNonNull(name);
         Objects.requireNonNull(primaryKey);
         Objects.requireNonNull(fields);
@@ -30,6 +32,10 @@ final public class Entity {
 
     public Field[] getFields() {
         return fields;
+    }
+
+    public DbMapping getDbMapping() {
+        return dbMapping;
     }
 
     @Override

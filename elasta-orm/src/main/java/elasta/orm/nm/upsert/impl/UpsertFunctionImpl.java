@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static elasta.commons.Utils.not;
+
 /**
  * Created by Jango on 2017-01-09.
  */
@@ -57,6 +59,12 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             for (DirectDependency directDependency : directDependencies) {
 
+                final String field = directDependency.getField();
+
+                if (not(jsonObject.containsKey(field))) {
+                    continue;
+                }
+
                 JsonObject dependencyColumnValues = directDependency.getDependencyColumnValuePopulator()
                     .populate(
                         directDependency
@@ -64,7 +72,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                             .requireUpsert(
                                 jsonObject
                                     .getJsonObject(
-                                        directDependency.getFieldName()
+                                        field
                                     ),
                                 upsertContext
                             )
@@ -89,7 +97,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                     tableData
                 );
 
-                columnValues.forEach(jo -> tableValues.getMap().putAll(jo.getMap()));
+//                columnValues.forEach(jo -> tableValues.getMap().putAll(jo.getMap()));
             }
 
             for (BelongsTo belongsTo : belongsTos) {
@@ -101,9 +109,15 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
         private void handleBelongTo(BelongsTo belongsTo, JsonObject tableValues) {
 
+            final String field = belongsTo.getField();
+
+            if (not(jsonObject.containsKey(field))) {
+                return;
+            }
+
             final Object value = jsonObject
                 .getValue(
-                    belongsTo.getFieldName()
+                    field
                 );
 
             if (value instanceof Map) {
@@ -123,7 +137,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                 handleBelongToJsonObjectList(belongsTo, tableValues, (JsonArray) value);
 
             } else {
-                throw new InvalidValueException("Value should be object or array. Key: '" + belongsTo.getFieldName() + "', Value: " + value);
+                throw new InvalidValueException("Value should be object or array. Key: '" + field + "', Value: " + value);
             }
         }
 
@@ -151,9 +165,15 @@ final public class UpsertFunctionImpl implements UpsertFunction {
         private List<JsonObject> handleIndirectDependency(
             IndirectDependency indirectDependency, TableData tableData) {
 
+            final String field = indirectDependency.getField();
+
+            if (not(jsonObject.containsKey(field))) {
+                return ImmutableList.of();
+            }
+
             final Object value = jsonObject
                 .getValue(
-                    indirectDependency.getFieldName()
+                    field
                 );
 
             if (value instanceof Map) {
@@ -177,7 +197,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                 return handleIndirectJsonObjectList(indirectDependency, tableData, (JsonArray) value);
 
             } else {
-                throw new InvalidValueException("Value should be object or array. Key: '" + indirectDependency.getFieldName() + "', Value: " + value);
+                throw new InvalidValueException("Value should be object or array. Key: '" + field + "', Value: " + value);
             }
         }
 

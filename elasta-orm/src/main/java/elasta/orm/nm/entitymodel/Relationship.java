@@ -61,11 +61,11 @@ final public class Relationship {
             '}';
     }
 
-    enum Name {
+    public enum Name {
         HAS_ONE, HAS_MANY
     }
 
-    enum Type {
+    public enum Type {
         ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY
     }
 }

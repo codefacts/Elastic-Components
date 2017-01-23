@@ -3,7 +3,9 @@ package elasta.orm.nm.upsert;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-21.
@@ -12,10 +14,11 @@ public class UpsertContextImpl implements UpsertContext {
     final Map<String, TableData> map;
 
     public UpsertContextImpl() {
-        this.map = new HashMap<>();
+        this(new LinkedHashMap<>());
     }
 
     public UpsertContextImpl(Map<String, TableData> map) {
+        Objects.requireNonNull(map);
         this.map = map;
     }
 
@@ -27,6 +30,9 @@ public class UpsertContextImpl implements UpsertContext {
 
     @Override
     public UpsertContext putOrMerge(String tableAndPrimaryKey, TableData tableData) {
+        tableData.getValues().forEach(stringObjectEntry -> {
+            Objects.requireNonNull(stringObjectEntry.getValue(), "Null value provided as value for key '" + stringObjectEntry.getKey() + "' table: '" + tableData.table + "'");
+        });
         if (map.containsKey(tableAndPrimaryKey)) {
 
             map.get(tableAndPrimaryKey).getValues().getMap().putAll(tableData.getValues().getMap());

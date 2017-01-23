@@ -6,21 +6,21 @@ import java.util.Objects;
  * Created by Jango on 2017-01-09.
  */
 final public class DirectDependency {
-    final String fieldName;
+    final String field;
     final DirectDependencyHandler dependencyHandler;
     final DependencyColumnValuePopulator dependencyColumnValuePopulator;
 
-    public DirectDependency(String fieldName, DirectDependencyHandler dependencyHandler, DependencyColumnValuePopulator dependencyColumnValuePopulator) {
-        Objects.requireNonNull(fieldName);
+    public DirectDependency(String field, DirectDependencyHandler dependencyHandler, DependencyColumnValuePopulator dependencyColumnValuePopulator) {
+        Objects.requireNonNull(field);
         Objects.requireNonNull(dependencyHandler);
         Objects.requireNonNull(dependencyColumnValuePopulator);
-        this.fieldName = fieldName;
+        this.field = field;
         this.dependencyHandler = dependencyHandler;
         this.dependencyColumnValuePopulator = dependencyColumnValuePopulator;
     }
 
-    public String getFieldName() {
-        return fieldName;
+    public String getField() {
+        return field;
     }
 
     public DirectDependencyHandler getDependencyHandler() {
@@ -38,7 +38,7 @@ final public class DirectDependency {
 
         DirectDependency that = (DirectDependency) o;
 
-        if (fieldName != null ? !fieldName.equals(that.fieldName) : that.fieldName != null) return false;
+        if (field != null ? !field.equals(that.field) : that.field != null) return false;
         if (dependencyHandler != null ? !dependencyHandler.equals(that.dependencyHandler) : that.dependencyHandler != null)
             return false;
         return dependencyColumnValuePopulator != null ? dependencyColumnValuePopulator.equals(that.dependencyColumnValuePopulator) : that.dependencyColumnValuePopulator == null;
@@ -47,7 +47,7 @@ final public class DirectDependency {
 
     @Override
     public int hashCode() {
-        int result = fieldName != null ? fieldName.hashCode() : 0;
+        int result = field != null ? field.hashCode() : 0;
         result = 31 * result + (dependencyHandler != null ? dependencyHandler.hashCode() : 0);
         result = 31 * result + (dependencyColumnValuePopulator != null ? dependencyColumnValuePopulator.hashCode() : 0);
         return result;
@@ -56,7 +56,7 @@ final public class DirectDependency {
     @Override
     public String toString() {
         return "DirectDependency{" +
-            "fieldName='" + fieldName + '\'' +
+            "fieldName='" + field + '\'' +
             ", dependencyHandler=" + dependencyHandler +
             ", dependencyColumnValuePopulator=" + dependencyColumnValuePopulator +
             '}';

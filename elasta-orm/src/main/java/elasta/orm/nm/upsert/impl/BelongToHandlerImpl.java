@@ -21,6 +21,8 @@ final public class BelongToHandlerImpl implements BelongToHandler {
 
         TableData tableData = upsertFunction.upsert(entity, upsertContext);
 
+        tableData.getValues().getMap().putAll(dependencyColumnValues.getMap());
+
         upsertContext.putOrMerge(
             UpsertUtils.toTableAndPrimaryColumnsKey(
                 tableData.getTable(), tableData.getPrimaryColumns(), tableData.getValues()

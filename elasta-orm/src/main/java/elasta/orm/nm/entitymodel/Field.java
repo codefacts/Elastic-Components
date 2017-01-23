@@ -13,6 +13,10 @@ final public class Field {
     final JavaType javaType;
     final Optional<Relationship> relationship;
 
+    public Field(String name, JavaType javaType) {
+        this(name, javaType, Optional.empty());
+    }
+
     public Field(String name, JavaType javaType, Optional<Relationship> relationship) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(javaType);

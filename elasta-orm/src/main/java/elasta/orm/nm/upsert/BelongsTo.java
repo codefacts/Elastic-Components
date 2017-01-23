@@ -6,21 +6,21 @@ import java.util.Objects;
  * Created by Jango on 2017-01-09.
  */
 final public class BelongsTo {
-    final String fieldName;
+    final String field;
     final BelongToHandler belongToHandler;
     final DependencyColumnValuePopulator dependencyColumnValuePopulator;
 
-    public BelongsTo(String fieldName, BelongToHandler belongToHandler, DependencyColumnValuePopulator dependencyColumnValuePopulator) {
-        Objects.requireNonNull(fieldName);
+    public BelongsTo(String field, BelongToHandler belongToHandler, DependencyColumnValuePopulator dependencyColumnValuePopulator) {
+        Objects.requireNonNull(field);
         Objects.requireNonNull(belongToHandler);
         Objects.requireNonNull(dependencyColumnValuePopulator);
-        this.fieldName = fieldName;
+        this.field = field;
         this.belongToHandler = belongToHandler;
         this.dependencyColumnValuePopulator = dependencyColumnValuePopulator;
     }
 
-    public String getFieldName() {
-        return fieldName;
+    public String getField() {
+        return field;
     }
 
     public BelongToHandler getBelongToHandler() {
@@ -38,14 +38,14 @@ final public class BelongsTo {
 
         BelongsTo belongsTo = (BelongsTo) o;
 
-        if (fieldName != null ? !fieldName.equals(belongsTo.fieldName) : belongsTo.fieldName != null) return false;
+        if (field != null ? !field.equals(belongsTo.field) : belongsTo.field != null) return false;
         return belongToHandler != null ? belongToHandler.equals(belongsTo.belongToHandler) : belongsTo.belongToHandler == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = fieldName != null ? fieldName.hashCode() : 0;
+        int result = field != null ? field.hashCode() : 0;
         result = 31 * result + (belongToHandler != null ? belongToHandler.hashCode() : 0);
         return result;
     }
@@ -53,7 +53,7 @@ final public class BelongsTo {
     @Override
     public String toString() {
         return "BelongsTo{" +
-            "fieldName='" + fieldName + '\'' +
+            "fieldName='" + field + '\'' +
             ", belongToHandler=" + belongToHandler +
             '}';
     }

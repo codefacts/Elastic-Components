@@ -1,9 +1,14 @@
 package elasta.orm.nm.entitymodel;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
 /**
  * Created by Jango on 2017-01-08.
  */
 public enum JavaType {
+    OBJECT(JsonObject.class),
+    ARRAY(JsonArray.class),
     INTEGER(Integer.class),
     LONG(Long.class),
     FLOAT(Float.class),

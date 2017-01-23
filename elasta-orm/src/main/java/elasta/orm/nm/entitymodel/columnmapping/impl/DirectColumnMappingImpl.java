@@ -17,17 +17,16 @@ final public class DirectColumnMappingImpl implements DirectColumnMapping {
     final String field;
     final ColumnType columnType;
 
-    public DirectColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field, ColumnType columnType) {
+    public DirectColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
         Objects.requireNonNull(field);
-        Objects.requireNonNull(columnType);
         this.referencingTable = referencingTable;
         this.referencingEntity = referencingEntity;
         this.foreignColumnMappingList = foreignColumnMappingList;
         this.field = field;
-        this.columnType = columnType;
+        this.columnType = ColumnType.DIRECT;
     }
 
     @Override

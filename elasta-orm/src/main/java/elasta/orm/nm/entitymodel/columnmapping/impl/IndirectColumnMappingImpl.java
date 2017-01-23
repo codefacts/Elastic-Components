@@ -19,21 +19,20 @@ public class IndirectColumnMappingImpl implements IndirectColumnMapping {
     final String field;
     final ColumnType columnType;
 
-    public IndirectColumnMappingImpl(String referencingTable, String referencingEntity, String relationTable, List<ForeignColumnMapping> srcForeignColumnMappingList, List<ForeignColumnMapping> dstForeignColumnMappingList, String field, ColumnType columnType) {
+    public IndirectColumnMappingImpl(String referencingTable, String referencingEntity, String relationTable, List<ForeignColumnMapping> srcForeignColumnMappingList, List<ForeignColumnMapping> dstForeignColumnMappingList, String field) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(relationTable);
         Objects.requireNonNull(srcForeignColumnMappingList);
         Objects.requireNonNull(dstForeignColumnMappingList);
         Objects.requireNonNull(field);
-        Objects.requireNonNull(columnType);
         this.referencingTable = referencingTable;
         this.referencingEntity = referencingEntity;
         this.relationTable = relationTable;
         this.srcForeignColumnMappingList = srcForeignColumnMappingList;
         this.dstForeignColumnMappingList = dstForeignColumnMappingList;
         this.field = field;
-        this.columnType = columnType;
+        this.columnType = ColumnType.INDIRECT;
     }
 
     @Override
