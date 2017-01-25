@@ -92,12 +92,10 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             for (IndirectDependency indirectDependency : indirectDependencies) {
 
-                List<JsonObject> columnValues = handleIndirectDependency(
+                handleIndirectDependency(
                     indirectDependency,
                     tableData
                 );
-
-//                columnValues.forEach(jo -> tableValues.getMap().putAll(jo.getMap()));
             }
 
             for (BelongsTo belongsTo : belongsTos) {
@@ -225,17 +223,13 @@ final public class UpsertFunctionImpl implements UpsertFunction {
         private JsonObject handleIndirectJsonObject(
             IndirectDependency indirectDependency, TableData tableData, JsonObject jsonObject) {
             return indirectDependency
-                .getDependencyColumnValuePopulator()
-                .populate(
-                    indirectDependency
-                        .getIndirectDependencyHandler()
-                        .requireUpsert(
-                            tableData,
-                            jsonObject,
-                            upsertContext
-                        )
-                        .getValues()
-                );
+                .getIndirectDependencyHandler()
+                .requireUpsert(
+                    tableData,
+                    jsonObject,
+                    upsertContext
+                )
+                .getValues();
         }
     }
 }

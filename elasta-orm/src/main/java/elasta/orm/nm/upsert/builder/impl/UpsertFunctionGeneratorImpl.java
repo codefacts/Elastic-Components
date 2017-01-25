@@ -146,9 +146,6 @@ public class UpsertFunctionGeneratorImpl implements UpsertFunctionGenerator {
                     )
                 ),
                 createUpsertFunction(indirectColumnMapping.getReferencingEntity())
-            ),
-            new DependencyColumnValuePopulatorImpl(
-                foreignColumnMappings.toArray(new ForeignColumnMapping[foreignColumnMappings.size()])
             )
         );
     }
