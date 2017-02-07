@@ -1,11 +1,13 @@
-package elasta.orm.nm.delete.impl;
+package elasta.orm.nm.delete;
+
+import elasta.orm.nm.delete.IndirectDeleteHandler;
 
 /**
  * Created by Jango on 17/02/07.
  */
-public class DirectDeleteDependency {
+final public class IndirectDeleteDependency {
     private String fieldName;
-    private DirectDeleteHandler deleteHandler;
+    private IndirectDeleteHandler deleteHandler;
 
     public String getFieldName() {
         return fieldName;
@@ -15,11 +17,11 @@ public class DirectDeleteDependency {
         this.fieldName = fieldName;
     }
 
-    public DirectDeleteHandler getDeleteHandler() {
+    public IndirectDeleteHandler getDeleteHandler() {
         return deleteHandler;
     }
 
-    public void setDeleteHandler(DirectDeleteHandler deleteHandler) {
+    public void setDeleteHandler(IndirectDeleteHandler deleteHandler) {
         this.deleteHandler = deleteHandler;
     }
 }

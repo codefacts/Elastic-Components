@@ -1,7 +1,6 @@
 package elasta.orm.nm.upsert;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.entitymodel.*;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
@@ -12,7 +11,7 @@ import elasta.orm.nm.entitymodel.columnmapping.impl.SimpleColumnMappingImpl;
 import elasta.orm.nm.entitymodel.columnmapping.impl.VirtualColumnMappingImpl;
 import elasta.orm.nm.entitymodel.impl.EntityMappingHelperImpl;
 import elasta.orm.nm.upsert.builder.FunctionMapImpl;
-import elasta.orm.nm.upsert.builder.impl.UpsertFunctionGeneratorImpl;
+import elasta.orm.nm.upsert.builder.impl.UpsertFunctionBuilderImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -28,7 +27,7 @@ public interface Main {
 
         FunctionMapImpl functionMap = new FunctionMapImpl();
 
-        UpsertFunctionGeneratorImpl upsertFunctionGenerator = new UpsertFunctionGeneratorImpl(entityMappingHelper, functionMap);
+        UpsertFunctionBuilderImpl upsertFunctionGenerator = new UpsertFunctionBuilderImpl(entityMappingHelper, functionMap);
 
         UpsertFunction upsertFunction = upsertFunctionGenerator.create("employee");
 

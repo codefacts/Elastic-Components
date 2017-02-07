@@ -1,8 +1,6 @@
 package elasta.orm.nm.delete.impl;
 
-import elasta.orm.nm.delete.DeleteContext;
-import elasta.orm.nm.delete.DeleteDataPopulator;
-import elasta.orm.nm.delete.DeleteFunction;
+import elasta.orm.nm.delete.*;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
@@ -10,7 +8,7 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-25.
  */
-public class DeleteFunctionImpl implements DeleteFunction {
+final public class DeleteFunctionImpl implements DeleteFunction {
     final DeleteDataPopulator deleteDataPopulator;
     final DirectDeleteDependency[] directDeleteDependencies;
     final IndirectDeleteDependency[] indirectDeleteDependencies;
@@ -30,6 +28,19 @@ public class DeleteFunctionImpl implements DeleteFunction {
     @Override
     public DeleteData delete(JsonObject entity, DeleteContext context) {
 
+        for (IndirectDeleteDependency indirectDeleteDependency : indirectDeleteDependencies) {
+
+            new JsonDependencyHandler(jsonObject -> {
+                indirectDeleteDependency.getDeleteHandler().delete(entity, jsonObject, context);
+            }).handle(entity.getValue(indirectDeleteDependency.getFieldName()));
+        }
+
+        for (BelongsToDeleteDependency belongsToDeleteDependency : belongsToDeleteDependencies) {
+            new JsonDependencyHandler(jsonObject -> {
+                belongsToDeleteDependency.getDeleteHandler().delete(entity, jsonObject, context);
+            }).handle(entity.getValue(belongsToDeleteDependency.getFieldName()));
+        }
+
         final DeleteData deleteData = deleteDataPopulator.populate(entity);
 
         context.add(deleteData);
@@ -37,21 +48,8 @@ public class DeleteFunctionImpl implements DeleteFunction {
         for (DirectDeleteDependency directDeleteDependency : directDeleteDependencies) {
 
             new JsonDependencyHandler(jsonObject -> {
-                directDeleteDependency.getDeleteHandler().delete(jsonObject);
+                directDeleteDependency.getDeleteHandler().delete(jsonObject, context);
             }).handle(entity.getValue(directDeleteDependency.getFieldName()));
-        }
-
-        for (IndirectDeleteDependency indirectDeleteDependency : indirectDeleteDependencies) {
-
-            new JsonDependencyHandler(jsonObject -> {
-                indirectDeleteDependency.getDeleteHandler().delete(jsonObject);
-            }).handle(entity.getValue(indirectDeleteDependency.getFieldName()));
-        }
-
-        for (BelongsToDeleteDependency belongsToDeleteDependency : belongsToDeleteDependencies) {
-            new JsonDependencyHandler(jsonObject -> {
-                belongsToDeleteDependency.getDeleteHandler().delete(jsonObject);
-            }).handle(entity.getValue(belongsToDeleteDependency.getFieldName()));
         }
 
         return deleteData;

@@ -15,14 +15,14 @@ import static elasta.commons.Utils.not;
 /**
  * Created by Jango on 2017-01-23.
  */
-final public class FunctionMapImpl implements FunctionMap {
-    private Map<String, Optional<UpsertFunction>> functionMap;
+final public class FunctionMapImpl<T> implements FunctionMap<T> {
+    private Map<String, Optional<T>> functionMap;
 
     public FunctionMapImpl() {
         functionMap = new HashMap<>();
     }
 
-    public FunctionMapImpl(Map<String, Optional<UpsertFunction>> functionMap) {
+    public FunctionMapImpl(Map<String, Optional<T>> functionMap) {
         this.functionMap = functionMap;
     }
 
@@ -33,7 +33,7 @@ final public class FunctionMapImpl implements FunctionMap {
     }
 
     @Override
-    public FunctionMap put(String entity, UpsertFunction upsertFunction) {
+    public FunctionMap put(String entity, T upsertFunction) {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(upsertFunction);
         functionMap.put(entity, Optional.of(upsertFunction));
@@ -46,7 +46,7 @@ final public class FunctionMapImpl implements FunctionMap {
     }
 
     @Override
-    public UpsertFunction get(String entity) {
+    public T get(String entity) {
         return functionMap.get(entity).get();
     }
 

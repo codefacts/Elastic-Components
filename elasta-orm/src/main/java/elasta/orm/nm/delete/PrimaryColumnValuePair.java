@@ -1,4 +1,4 @@
-package elasta.orm.nm.delete.impl;
+package elasta.orm.nm.delete;
 
 import java.util.Objects;
 

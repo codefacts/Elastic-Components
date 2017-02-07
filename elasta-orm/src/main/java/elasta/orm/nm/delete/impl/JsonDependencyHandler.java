@@ -1,5 +1,6 @@
 package elasta.orm.nm.delete.impl;
 
+import elasta.orm.nm.delete.JoHandler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -10,7 +11,7 @@ import java.util.Objects;
 /**
  * Created by Jango on 17/02/07.
  */
-public class JsonDependencyHandler {
+final public class JsonDependencyHandler {
     final JoHandler joHandler;
 
     public JsonDependencyHandler(JoHandler joHandler) {

@@ -5,15 +5,15 @@ import elasta.orm.nm.upsert.UpsertFunction;
 /**
  * Created by Jango on 2017-01-23.
  */
-public interface FunctionMap {
+public interface FunctionMap<T> {
 
-    FunctionMap putEmpty(String entity);
+    FunctionMap<T> putEmpty(String entity);
 
-    FunctionMap put(String entity, UpsertFunction upsertFunction);
+    FunctionMap<T> put(String entity, T upsertFunction);
 
     boolean exists(String entity);
 
-    UpsertFunction get(String entity);
+    T get(String entity);
 
     FunctionMap makeImmutable();
 }

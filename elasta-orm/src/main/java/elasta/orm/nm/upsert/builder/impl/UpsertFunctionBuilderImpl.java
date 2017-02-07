@@ -7,7 +7,7 @@ import elasta.orm.nm.entitymodel.columnmapping.*;
 import elasta.orm.nm.upsert.*;
 import elasta.orm.nm.upsert.ForeignColumnMapping;
 import elasta.orm.nm.upsert.builder.FunctionMap;
-import elasta.orm.nm.upsert.builder.UpsertFunctionGenerator;
+import elasta.orm.nm.upsert.builder.UpsertFunctionBuilder;
 import elasta.orm.nm.upsert.impl.*;
 import io.vertx.core.json.JsonObject;
 
@@ -19,11 +19,11 @@ import static elasta.commons.Utils.not;
 /**
  * Created by Jango on 2017-01-21.
  */
-public class UpsertFunctionGeneratorImpl implements UpsertFunctionGenerator {
+public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
     final EntityMappingHelper helper;
-    final FunctionMap functionMap;
+    final FunctionMap<UpsertFunction> functionMap;
 
-    public UpsertFunctionGeneratorImpl(EntityMappingHelper entityMappingHelper, FunctionMap functionMap) {
+    public UpsertFunctionBuilderImpl(EntityMappingHelper entityMappingHelper, FunctionMap<UpsertFunction> functionMap) {
         Objects.requireNonNull(entityMappingHelper);
         Objects.requireNonNull(functionMap);
         this.helper = entityMappingHelper;
@@ -154,7 +154,7 @@ public class UpsertFunctionGeneratorImpl implements UpsertFunctionGenerator {
 
         if (not(functionMap.exists(referencingEntity))) {
 
-            functionMap.put(referencingEntity, new UpsertFunctionGeneratorImpl(helper, functionMap).create(referencingEntity));
+            functionMap.put(referencingEntity, new UpsertFunctionBuilderImpl(helper, functionMap).create(referencingEntity));
         }
 
         return new UpsertFunctionImpl2(referencingEntity, functionMap);
@@ -179,7 +179,7 @@ public class UpsertFunctionGeneratorImpl implements UpsertFunctionGenerator {
 
     private static class UpsertFunctionImpl2 implements UpsertFunction {
         final String referencingEntity;
-        final FunctionMap functionMap;
+        final FunctionMap<UpsertFunction> functionMap;
 
         public UpsertFunctionImpl2(String referencingEntity, FunctionMap functionMap) {
             this.referencingEntity = referencingEntity;

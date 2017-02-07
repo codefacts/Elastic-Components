@@ -1,17 +1,19 @@
-package elasta.orm.nm.delete.impl;
+package elasta.orm.nm.delete;
+
+import elasta.orm.nm.delete.BelongsToDeleteHandler;
 
 /**
  * Created by Jango on 17/02/07.
  */
-public class BelongsToDeleteDependency {
-    private DirectDeleteHandler deleteHandler;
+final public class BelongsToDeleteDependency {
+    private BelongsToDeleteHandler deleteHandler;
     private String fieldName;
 
-    public DirectDeleteHandler getDeleteHandler() {
+    public BelongsToDeleteHandler getDeleteHandler() {
         return deleteHandler;
     }
 
-    public void setDeleteHandler(DirectDeleteHandler deleteHandler) {
+    public void setDeleteHandler(BelongsToDeleteHandler deleteHandler) {
         this.deleteHandler = deleteHandler;
     }
 

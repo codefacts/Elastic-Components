@@ -1,6 +1,5 @@
 package elasta.orm.nm.delete;
 
-import elasta.orm.nm.delete.impl.DeleteData;
 import io.vertx.core.json.JsonObject;
 
 /**

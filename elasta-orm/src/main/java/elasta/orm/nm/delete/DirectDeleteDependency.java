@@ -1,9 +1,11 @@
-package elasta.orm.nm.delete.impl;
+package elasta.orm.nm.delete;
+
+import elasta.orm.nm.delete.DirectDeleteHandler;
 
 /**
  * Created by Jango on 17/02/07.
  */
-public class IndirectDeleteDependency {
+final public class DirectDeleteDependency {
     private String fieldName;
     private DirectDeleteHandler deleteHandler;
 

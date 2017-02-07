@@ -1,4 +1,4 @@
-package elasta.orm.nm.delete.impl;
+package elasta.orm.nm.delete;
 
 import io.vertx.core.json.JsonObject;
 
@@ -6,5 +6,5 @@ import io.vertx.core.json.JsonObject;
  * Created by Jango on 17/02/07.
  */
 public interface DirectDeleteHandler {
-    void delete(JsonObject jsonObject);
+    void delete(JsonObject jsonObject, DeleteContext deleteContext);
 }
