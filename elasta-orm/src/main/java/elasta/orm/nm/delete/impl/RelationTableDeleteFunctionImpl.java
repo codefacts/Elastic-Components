@@ -1,6 +1,9 @@
 package elasta.orm.nm.delete.impl;
 
 import elasta.orm.nm.delete.*;
+import elasta.orm.nm.upsert.RelationTableDataPopulator;
+import elasta.orm.nm.upsert.TableData;
+import elasta.orm.nm.upsert.TableDataPopulator;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
@@ -12,33 +15,33 @@ import java.util.stream.Collectors;
  * Created by Jango on 17/02/07.
  */
 final public class RelationTableDeleteFunctionImpl implements RelationTableDeleteFunction {
-    final String relationTable;
-    final FieldToRelationTableColumnMapping[] srcFieldToRelationTableColumnMappings;
-    final FieldToRelationTableColumnMapping[] dstFieldToRelationTableColumnMappings;
+    final RelationTableDataPopulator relationTableDataPopulator;
+    final TableDataPopulator srcTableDataPopulator;
+    final TableDataPopulator dstTableDataPopulator;
 
-    public RelationTableDeleteFunctionImpl(String relationTable, FieldToRelationTableColumnMapping[] srcFieldToRelationTableColumnMappings, FieldToRelationTableColumnMapping[] dstFieldToRelationTableColumnMappings) {
-        Objects.requireNonNull(relationTable);
-        Objects.requireNonNull(srcFieldToRelationTableColumnMappings);
-        Objects.requireNonNull(dstFieldToRelationTableColumnMappings);
-        this.relationTable = relationTable;
-        this.srcFieldToRelationTableColumnMappings = srcFieldToRelationTableColumnMappings;
-        this.dstFieldToRelationTableColumnMappings = dstFieldToRelationTableColumnMappings;
+    public RelationTableDeleteFunctionImpl(RelationTableDataPopulator relationTableDataPopulator, TableDataPopulator srcTableDataPopulator, TableDataPopulator dstTableDataPopulator) {
+        Objects.requireNonNull(relationTableDataPopulator);
+        Objects.requireNonNull(srcTableDataPopulator);
+        Objects.requireNonNull(dstTableDataPopulator);
+        this.relationTableDataPopulator = relationTableDataPopulator;
+        this.srcTableDataPopulator = srcTableDataPopulator;
+        this.dstTableDataPopulator = dstTableDataPopulator;
     }
 
     @Override
     public void delete(JsonObject parent, JsonObject jsonObject, DeleteContext deleteContext) {
-        List<PrimaryColumnValuePair> pairs = Arrays.asList(srcFieldToRelationTableColumnMappings).stream()
-            .map(mapping -> new PrimaryColumnValuePair(mapping.getRelationColumn(), parent.getValue(mapping.getSrcField())))
-            .collect(Collectors.toList());
 
-        List<PrimaryColumnValuePair> pairs1 = Arrays.asList(dstFieldToRelationTableColumnMappings).stream()
-            .map(mapping -> new PrimaryColumnValuePair(mapping.getRelationColumn(), jsonObject.getValue(mapping.getSrcField())))
-            .collect(Collectors.toList());
+        final TableData tableData = relationTableDataPopulator.populate(
+            srcTableDataPopulator.populate(jsonObject),
+            dstTableDataPopulator.populate(jsonObject)
+        );
 
-        pairs.addAll(pairs1);
+        List<PrimaryColumnValuePair> pairs = Arrays.asList(tableData.getPrimaryColumns()).stream()
+            .map(column -> new PrimaryColumnValuePair(column, tableData.getValues().getValue(column)))
+            .collect(Collectors.toList());
 
         deleteContext.add(
-            new DeleteData(relationTable, pairs.toArray(new PrimaryColumnValuePair[pairs.size()]))
+            new DeleteData(tableData.getTable(), pairs.toArray(new PrimaryColumnValuePair[pairs.size()]))
         );
     }
 }

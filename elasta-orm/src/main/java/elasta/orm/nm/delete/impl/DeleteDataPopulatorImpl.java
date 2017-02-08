@@ -4,6 +4,7 @@ import elasta.orm.nm.delete.DeleteData;
 import elasta.orm.nm.delete.DeleteDataPopulator;
 import elasta.orm.nm.delete.FieldColumnMapping;
 import elasta.orm.nm.delete.PrimaryColumnValuePair;
+import elasta.orm.nm.upsert.FieldToColumnMapping;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
@@ -16,9 +17,9 @@ import java.util.stream.Collectors;
  */
 final public class DeleteDataPopulatorImpl implements DeleteDataPopulator {
     final String table;
-    final FieldColumnMapping[] primaryColumnMappings;
+    final FieldToColumnMapping[] primaryColumnMappings;
 
-    public DeleteDataPopulatorImpl(String table, FieldColumnMapping[] primaryColumnMappings) {
+    public DeleteDataPopulatorImpl(String table, FieldToColumnMapping[] primaryColumnMappings) {
         Objects.requireNonNull(table);
         Objects.requireNonNull(primaryColumnMappings);
         this.table = table;

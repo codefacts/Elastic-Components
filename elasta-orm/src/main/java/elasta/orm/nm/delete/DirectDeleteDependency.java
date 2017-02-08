@@ -1,27 +1,53 @@
 package elasta.orm.nm.delete;
 
-import elasta.orm.nm.delete.DirectDeleteHandler;
+import java.util.Objects;
 
 /**
  * Created by Jango on 17/02/07.
  */
 final public class DirectDeleteDependency {
-    private String fieldName;
-    private DirectDeleteHandler deleteHandler;
+    private final String field;
+    private final DirectDeleteHandler deleteHandler;
 
-    public String getFieldName() {
-        return fieldName;
+    public DirectDeleteDependency(String field, DirectDeleteHandler deleteHandler) {
+        Objects.requireNonNull(field);
+        Objects.requireNonNull(deleteHandler);
+        this.field = field;
+        this.deleteHandler = deleteHandler;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
+    public String getField() {
+        return field;
     }
 
     public DirectDeleteHandler getDeleteHandler() {
         return deleteHandler;
     }
 
-    public void setDeleteHandler(DirectDeleteHandler deleteHandler) {
-        this.deleteHandler = deleteHandler;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DirectDeleteDependency that = (DirectDeleteDependency) o;
+
+        if (field != null ? !field.equals(that.field) : that.field != null) return false;
+        return deleteHandler != null ? deleteHandler.equals(that.deleteHandler) : that.deleteHandler == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = field != null ? field.hashCode() : 0;
+        result = 31 * result + (deleteHandler != null ? deleteHandler.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DirectDeleteDependency{" +
+            "field='" + field + '\'' +
+            ", deleteHandler=" + deleteHandler +
+            '}';
     }
 }
