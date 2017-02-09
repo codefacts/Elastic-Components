@@ -5,8 +5,8 @@ package elasta.orm.json.sql.core;
  */
 public enum JoinType {
     JOIN("join"),
-    LEFT_JOIN("left_join"),
-    RIGHT_JOIN("right_join"),
+    LEFT_JOIN("left join"),
+    RIGHT_JOIN("right join"),
     INNER_JOIN("inner join"),
     LEFT_INNER_JOIN("left inner join"),
     RIGHT_INNER_JOIN("right inner join"),
@@ -18,6 +18,10 @@ public enum JoinType {
 
     JoinType(String value) {
         this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     @Override

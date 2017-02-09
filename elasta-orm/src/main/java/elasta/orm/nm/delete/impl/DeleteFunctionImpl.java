@@ -32,13 +32,13 @@ final public class DeleteFunctionImpl implements DeleteFunction {
 
             new JsonDependencyHandler(jsonObject -> {
                 indirectDeleteDependency.getDeleteHandler().delete(entity, jsonObject, context);
-            }).handle(entity.getValue(indirectDeleteDependency.getFieldName()));
+            }).handle(entity.getValue(indirectDeleteDependency.getField()));
         }
 
         for (BelongsToDeleteDependency belongsToDeleteDependency : belongsToDeleteDependencies) {
             new JsonDependencyHandler(jsonObject -> {
                 belongsToDeleteDependency.getDeleteHandler().delete(entity, jsonObject, context);
-            }).handle(entity.getValue(belongsToDeleteDependency.getFieldName()));
+            }).handle(entity.getValue(belongsToDeleteDependency.getField()));
         }
 
         final DeleteData deleteData = deleteDataPopulator.populate(entity);
@@ -49,7 +49,7 @@ final public class DeleteFunctionImpl implements DeleteFunction {
 
             new JsonDependencyHandler(jsonObject -> {
                 directDeleteDependency.getDeleteHandler().delete(jsonObject, context);
-            }).handle(entity.getValue(directDeleteDependency.getFieldName()));
+            }).handle(entity.getValue(directDeleteDependency.getField()));
         }
 
         return deleteData;
