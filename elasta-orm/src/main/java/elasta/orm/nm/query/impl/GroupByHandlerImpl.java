@@ -1,4 +1,8 @@
-package elasta.orm.nm.query;
+package elasta.orm.nm.query.impl;
+
+import elasta.orm.nm.query.ColumnAliasPair;
+import elasta.orm.nm.query.Cqr;
+import elasta.orm.nm.query.GroupByHandler;
 
 import java.util.List;
 import java.util.Objects;
@@ -18,7 +22,7 @@ final public class GroupByHandlerImpl implements GroupByHandler {
     @Override
     public String toSql() {
         return columnAliasPairs.stream()
-            .map(columnAliasPair -> columnAliasPair.getAlias() + C.PERIOD + columnAliasPair.getColumn())
-            .collect(Collectors.joining(C.COMMA));
+            .map(columnAliasPair -> columnAliasPair.getAlias() + Cqr.PERIOD + columnAliasPair.getColumn())
+            .collect(Collectors.joining(Cqr.COMMA));
     }
 }

@@ -5,6 +5,7 @@ import elasta.orm.nm.criteria.ParamsBuilder;
 import elasta.orm.nm.query.SelectClauseHandler;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -13,10 +14,10 @@ import java.util.stream.Collectors;
  */
 final public class SelectClauseHandlerImpl implements SelectClauseHandler {
     static final String COMMA = ",";
-    final Func[] funcs;
+    final List<Func> funcs;
     final ParamsBuilder paramsBuilder;
 
-    public SelectClauseHandlerImpl(Func[] funcs, ParamsBuilder paramsBuilder) {
+    public SelectClauseHandlerImpl(List<Func> funcs, ParamsBuilder paramsBuilder) {
         Objects.requireNonNull(funcs);
         Objects.requireNonNull(paramsBuilder);
         this.funcs = funcs;
@@ -25,7 +26,7 @@ final public class SelectClauseHandlerImpl implements SelectClauseHandler {
 
     @Override
     public String toSql() {
-        return Arrays.asList(funcs).stream()
+        return funcs.stream()
             .map(func -> func.get(paramsBuilder))
             .collect(Collectors.joining(COMMA));
     }

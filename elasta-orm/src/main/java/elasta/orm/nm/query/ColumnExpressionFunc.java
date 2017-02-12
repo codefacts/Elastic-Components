@@ -9,18 +9,18 @@ import java.util.Objects;
  * Created by Jango on 17/02/08.
  */
 final public class ColumnExpressionFunc implements Func {
-    final ColumnExpression columnExpression;
+    final FieldExpression fieldExpression;
     final PathAliasHandler pathAliasHandler;
 
-    public ColumnExpressionFunc(ColumnExpression columnExpression, PathAliasHandler pathAliasHandler) {
-        Objects.requireNonNull(columnExpression);
+    public ColumnExpressionFunc(FieldExpression fieldExpression, PathAliasHandler pathAliasHandler) {
+        Objects.requireNonNull(fieldExpression);
         Objects.requireNonNull(pathAliasHandler);
-        this.columnExpression = columnExpression;
+        this.fieldExpression = fieldExpression;
         this.pathAliasHandler = pathAliasHandler;
     }
 
     @Override
     public String get(ParamsBuilder paramsBuilder) {
-        return pathAliasHandler.toAliasedColumn(columnExpression);
+        return pathAliasHandler.toAliasedColumn(fieldExpression);
     }
 }

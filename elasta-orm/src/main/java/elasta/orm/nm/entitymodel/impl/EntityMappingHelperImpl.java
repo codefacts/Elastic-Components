@@ -130,4 +130,14 @@ public class EntityMappingHelperImpl implements EntityMappingHelper {
     public String getPrimaryKeyColumnName(String entity) {
         return Utils.<SimpleColumnMapping>cast(getPrimaryKeyColumnMapping(entity)).getColumn();
     }
+
+    @Override
+    public boolean exists(String entity) {
+        return entityMap.containsKey(entity);
+    }
+
+    @Override
+    public String getTable(String entity) {
+        return getEntity(entity).getDbMapping().getTable();
+    }
 }

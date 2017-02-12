@@ -35,4 +35,8 @@ public interface EntityMappingHelper {
     DbColumnMapping getPrimaryKeyColumnMapping(String entity);
 
     String getPrimaryKeyColumnName(String entity);
+
+    boolean exists(String entity);
+
+    String getTable(String entity);
 }

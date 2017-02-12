@@ -3,13 +3,11 @@ package elasta.orm.nm.query;
 /**
  * Created by Jango on 17/02/09.
  */
-public interface ColumnExpression {
+public interface FieldExpression {
 
     PathExpression getParentPath();
 
-    String getParent();
-
-    String getColumn();
+    String getField();
 
     PathExpression toPathExpression();
 }

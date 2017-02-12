@@ -1,11 +1,15 @@
 package elasta.orm.nm.query;
 
+import elasta.orm.nm.query.impl.PathExpressionImpl;
+
+import java.util.Optional;
+
 /**
  * Created by Jango on 17/02/09.
  */
 public interface PathExpression {
 
-    PathExpression getParent();
+    Optional<PathExpression> getParent();
 
     String[] parts();
 
@@ -13,9 +17,13 @@ public interface PathExpression {
 
     int size();
 
+    String root();
+
     String last();
 
     static PathExpression create(String... parts) {
-        return null;
+        return new PathExpressionImpl(parts);
     }
+
+    PathExpression subPath(int startIndex, int newSize);
 }

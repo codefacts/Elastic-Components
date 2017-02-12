@@ -2,7 +2,7 @@ package elasta.orm.nm.query.impl;
 
 import elasta.orm.nm.criteria.Func;
 import elasta.orm.nm.criteria.ParamsBuilder;
-import elasta.orm.nm.query.C;
+import elasta.orm.nm.query.Cqr;
 import elasta.orm.nm.query.WhereClauseHandler;
 
 import java.util.List;
@@ -25,6 +25,6 @@ final public class WhereClauseHandlerImpl implements WhereClauseHandler {
 
     @Override
     public String toSql() {
-        return funcs.stream().map(func -> func.get(paramsBuilder)).collect(Collectors.joining(C.COMMA));
+        return funcs.stream().map(func -> func.get(paramsBuilder)).collect(Collectors.joining(Cqr.COMMA));
     }
 }

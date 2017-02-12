@@ -1,7 +1,9 @@
-package elasta.orm.nm.query;
+package elasta.orm.nm.query.impl;
 
 import elasta.orm.nm.criteria.Func;
 import elasta.orm.nm.criteria.ParamsBuilder;
+import elasta.orm.nm.query.Cqr;
+import elasta.orm.nm.query.HavingClauseHandler;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +26,6 @@ final public class HavingClauseHandlerImpl implements HavingClauseHandler {
     @Override
     public String toSql() {
         return funcs.stream()
-            .map(func -> func.get(paramsBuilder)).collect(Collectors.joining(C.COMMA));
+            .map(func -> func.get(paramsBuilder)).collect(Collectors.joining(Cqr.COMMA));
     }
 }

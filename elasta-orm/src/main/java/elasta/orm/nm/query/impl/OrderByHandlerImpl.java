@@ -1,4 +1,8 @@
-package elasta.orm.nm.query;
+package elasta.orm.nm.query.impl;
+
+import elasta.orm.nm.query.Cqr;
+import elasta.orm.nm.query.OrderByData;
+import elasta.orm.nm.query.OrderByHandler;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +23,6 @@ final public class OrderByHandlerImpl implements OrderByHandler {
     public String toSql() {
         return orderByDatas.stream()
             .map(orderByData -> orderByData.getAlias() + "." + orderByData.getColumn() + " " + orderByData.getOrder())
-            .collect(Collectors.joining(C.COMMA));
+            .collect(Collectors.joining(Cqr.COMMA));
     }
 }
