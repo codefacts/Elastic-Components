@@ -31,10 +31,11 @@ import static elasta.commons.Utils.not;
 final public class QueryImpl implements Query {
     final String sql;
 
-    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper entityMappingHelper) {
+    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper entityMappingHelper) {
         this.sql = new QQ(
             rootEntity,
             rootAlias,
+            selectFieldExpressionResolver,
             expressionResolver,
             selectFuncs,
             fromPathExpressionAndAliasPairs,
@@ -53,6 +54,7 @@ final public class QueryImpl implements Query {
     private class QQ {
         final String rootEntity;
         final String rootAlias;
+        final FieldExpressionResolverImpl selectFieldExpressionResolver;
         final FieldExpressionResolverImpl expressionResolver;
         final List<Func> selectFuncs;
         final List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;
@@ -67,10 +69,10 @@ final public class QueryImpl implements Query {
         int relationAliasCount = 1;
         final ImmutableSet.Builder<JoinTpl> joinTplListBuilder = ImmutableSet.builder();
 
-        public QQ(String rootEntity, String rootAlias, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper) {
-            this.helper = helper;
+        public QQ(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper) {
             Objects.requireNonNull(rootEntity);
             Objects.requireNonNull(rootAlias);
+            Objects.requireNonNull(selectFieldExpressionResolver);
             Objects.requireNonNull(expressionResolver);
             Objects.requireNonNull(selectFuncs);
             Objects.requireNonNull(fromPathExpressionAndAliasPairs);
@@ -80,6 +82,7 @@ final public class QueryImpl implements Query {
             Objects.requireNonNull(havingFuncs);
             this.rootEntity = rootEntity;
             this.rootAlias = rootAlias;
+            this.selectFieldExpressionResolver = selectFieldExpressionResolver;
             this.expressionResolver = expressionResolver;
             this.selectFuncs = selectFuncs;
             this.fromPathExpressionAndAliasPairs = fromPathExpressionAndAliasPairs;
@@ -87,6 +90,7 @@ final public class QueryImpl implements Query {
             this.orderByPairs = orderByPairs;
             this.groupByExpressions = groupByExpressions;
             this.havingFuncs = havingFuncs;
+            this.helper = helper;
         }
 
         public String toSql() {
@@ -105,30 +109,30 @@ final public class QueryImpl implements Query {
 
             sql = from(joinTplListBuilder.build()).toSql();
 
-            builder.append("from ").append(sql);
+            builder.append(" from ").append(sql);
 
             sql = where(whereFuncs, paramsBuilder).toSql();
 
             if (not(sql.trim().isEmpty())) {
-                builder.append("where ").append(sql);
+                builder.append(" where ").append(sql);
             }
 
             sql = having(havingFuncs, paramsBuilder).toSql();
 
             if (not(sql.trim().isEmpty())) {
-                builder.append("having " + sql);
+                builder.append(" having " + sql);
             }
 
             sql = orderBy(orderByPairs, fieldExpressionToAliasAndColumnMap).toSql();
 
             if (not(sql.trim().isEmpty())) {
-                builder.append("order by ").append(sql);
+                builder.append(" order by ").append(sql);
             }
 
             sql = groupBy(groupByExpressions, fieldExpressionToAliasAndColumnMap).toSql();
 
             if (not(sql.trim().isEmpty())) {
-                builder.append("group by " + sql);
+                builder.append(" group by " + sql);
             }
 
             return builder.toString();
@@ -145,6 +149,7 @@ final public class QueryImpl implements Query {
         }
 
         private ImmutableMap<FieldExpression, AliasAndColumn> createFieldExpressionToAliasAndColumnMap() {
+
             final Map<String, PathExpression> aliasToFullPathExpressionMap = new CC(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
                 .getAliasToFullPathExpressionMap();
 
@@ -183,49 +188,56 @@ final public class QueryImpl implements Query {
             final ImmutableMap<String, String> aliasToEntityMap = aliasToEntityMapBuilder.build();
             final ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder = ImmutableMap.builder();
 
+            selectFieldExpressionResolver.getFuncMap().keySet()
+                .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
+
             expressionResolver.getFuncMap().keySet()
-                .forEach(fieldExpression -> {
-
-                    final PathExpression pathExpression = fieldExpression.getParentPath();
-                    final String alias = pathExpression.root();
-
-                    if (not(aliasToEntityMap.containsKey(alias))) {
-                        throw new QueryParserException("Field Expression '" + fieldExpression + "' starts with an invalid alias");
-                    }
-
-                    final String[] parts = pathExpression.parts();
-                    String entity = aliasToEntityMap.get(alias);
-                    String entityAlias = null;
-                    for (int i = 1; i < parts.length; i++) {
-                        final String childEntityField = parts[i];
-                        final String childEntity = getChildEntity(entity, childEntityField);
-                        String als = createAlias();
-                        joinTplListBuilder.add(
-                            new JoinTpl(entityAlias, als, entity, childEntityField, childEntity, Optional.empty())
-                        );
-
-                        entity = childEntity;
-                        entityAlias = als;
-                    }
-
-                    if (entityAlias == null) {
-                        throw new QueryParserException("Invalid field expression '" + fieldExpression + "'");
-                    }
-
-                    fieldExpToAliasedColumnMapBuilder.put(
-                        fieldExpression,
-                        new AliasAndColumn(
-                            entityAlias,
-                            getColumn(
-                                entity,
-                                fieldExpression.getField()
-                            )
-                        )
-                    );
-
-                });
+                .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
 
             return fieldExpToAliasedColumnMapBuilder.build();
+        }
+
+        private void applyFieldExp(
+            FieldExpression fieldExpression,
+            ImmutableMap<String, String> aliasToEntityMap,
+            ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder
+        ) {
+            final PathExpression pathExpression = fieldExpression.getParentPath();
+            final String alias = pathExpression.root();
+
+            if (not(aliasToEntityMap.containsKey(alias))) {
+                throw new QueryParserException("Field Expression '" + fieldExpression + "' starts with an invalid alias");
+            }
+
+            final String[] parts = pathExpression.parts();
+            String entity = aliasToEntityMap.get(alias);
+            String entityAlias = null;
+            for (int i = 1; i < parts.length; i++) {
+                final String childEntityField = parts[i];
+                final String childEntity = getChildEntity(entity, childEntityField);
+                String als = createAlias();
+                joinTplListBuilder.add(
+                    new JoinTpl(entityAlias, als, entity, childEntityField, childEntity, Optional.empty())
+                );
+
+                entity = childEntity;
+                entityAlias = als;
+            }
+
+            if (entityAlias == null) {
+                throw new QueryParserException("Invalid field expression '" + fieldExpression + "'");
+            }
+
+            fieldExpToAliasedColumnMapBuilder.put(
+                fieldExpression,
+                new AliasAndColumn(
+                    entityAlias,
+                    getColumn(
+                        entity,
+                        fieldExpression.getField()
+                    )
+                )
+            );
         }
 
         private Map<String, Optional<JoinType>> toAliasToJoinTypeMap(List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs) {
@@ -567,6 +579,6 @@ final public class QueryImpl implements Query {
     }
 
     public static void main(String[] asdf) {
-        System.out.println("lkasd");
+
     }
 }

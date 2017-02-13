@@ -8,6 +8,8 @@ import elasta.orm.nm.query.Query;
  */
 public interface QueryBuilder {
 
+    FieldExpressionHolderFunc select(String fieldExpression);
+
     FieldExpressionHolderFunc field(String expressionString);
 
     SelectBuilder selectBuilder();

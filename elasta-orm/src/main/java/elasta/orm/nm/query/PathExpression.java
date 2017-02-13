@@ -26,4 +26,6 @@ public interface PathExpression {
     }
 
     PathExpression subPath(int startIndex, int newSize);
+
+    boolean startsWith(String rootAlias);
 }

@@ -7,6 +7,7 @@ import elasta.orm.nm.query.builder.*;
 import elasta.orm.nm.query.impl.FieldExpressionImpl;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 
 /**
@@ -19,6 +20,7 @@ final public class QueryBuilderImpl implements QueryBuilder {
     final OrderByBuilder orderByBuilder;
     final GroupByBuilder groupByBuilder;
     final HavingBuilder havingBuilder;
+    final FieldExpressionResolverImpl selectFieldExpressionResolver;
     final FieldExpressionResolverImpl fieldExpressionResolver;
     final EntityMappingHelper entityMappingHelper;
 
@@ -31,7 +33,19 @@ final public class QueryBuilderImpl implements QueryBuilder {
         orderByBuilder = new OrderByBuilderImpl();
         groupByBuilder = new GroupByBuilderImpl();
         havingBuilder = new HavingBuilderImpl();
-        fieldExpressionResolver = new FieldExpressionResolverImpl(new HashMap<>());
+        this.selectFieldExpressionResolver = new FieldExpressionResolverImpl(new LinkedHashMap<>());
+        this.fieldExpressionResolver = new FieldExpressionResolverImpl(new LinkedHashMap<>());
+    }
+
+    @Override
+    public FieldExpressionHolderFunc select(String fieldExpression) {
+
+        FieldExpressionImpl expression = new FieldExpressionImpl(fieldExpression);
+
+        return new FieldExpressionHolderFuncImpl(
+            expression,
+            selectFieldExpressionResolver.addKey(expression)
+        );
     }
 
     @Override
@@ -80,6 +94,7 @@ final public class QueryBuilderImpl implements QueryBuilder {
         return new QueryImpl(
             fromBuilder.rootEntity(),
             fromBuilder.rootAlias(),
+            selectFieldExpressionResolver,
             fieldExpressionResolver,
             selectBuilder.build(),
             fromBuilder.build(),

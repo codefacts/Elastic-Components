@@ -73,4 +73,9 @@ final public class PathExpressionImpl implements PathExpression {
     public PathExpression subPath(int fromIndex, int toIndex) {
         return new PathExpressionImpl(Arrays.copyOfRange(parts, fromIndex, toIndex));
     }
+
+    @Override
+    public boolean startsWith(String rootAlias) {
+        return root().equals(rootAlias);
+    }
 }
