@@ -2,7 +2,6 @@ package elasta.orm.nm.query;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import elasta.orm.json.sql.core.JoinType;
 import elasta.orm.nm.criteria.Func;
 import elasta.orm.nm.criteria.funcs.ParamsBuilderImpl;
@@ -48,7 +47,7 @@ final public class QueryImpl implements Query {
 
     @Override
     public String toSql() {
-        return null;
+        return sql;
     }
 
     private class QQ {
@@ -67,7 +66,7 @@ final public class QueryImpl implements Query {
         final EntityMappingHelper helper;
         int aliasCount = 1;
         int relationAliasCount = 1;
-        final ImmutableSet.Builder<JoinTpl> joinTplListBuilder = ImmutableSet.builder();
+        final Map<String, Map<String, PartAndJoinTpl>> partAndJoinTplMap = new LinkedHashMap<>();
 
         public QQ(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper) {
             Objects.requireNonNull(rootEntity);
@@ -97,8 +96,13 @@ final public class QueryImpl implements Query {
 
             final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = createFieldExpressionToAliasAndColumnMap();
 
+            final Map<FieldExpression, FieldExpressionHolderFunc> funcMap = funcMap(fieldExpressionToAliasAndColumnMap);
+
+            selectFieldExpressionResolver.setFuncMap(
+                funcMap
+            );
             expressionResolver.setFuncMap(
-                funcMap(fieldExpressionToAliasAndColumnMap)
+                funcMap
             );
 
             final StringBuilder builder = new StringBuilder();
@@ -107,7 +111,7 @@ final public class QueryImpl implements Query {
 
             builder.append("select ").append(sql);
 
-            sql = from(joinTplListBuilder.build()).toSql();
+            sql = from(partAndJoinTplMap).toSql();
 
             builder.append(" from ").append(sql);
 
@@ -159,30 +163,58 @@ final public class QueryImpl implements Query {
 
             Map<String, Optional<JoinType>> aliasToJoinTypeMap = toAliasToJoinTypeMap(fromPathExpressionAndAliasPairs);
 
+            final Map<String, PartAndJoinTpl> rootMap = new LinkedHashMap<>();
+            partAndJoinTplMap.put(rootAlias, rootMap);
+
             aliasToFullPathExpressionMap.forEach((alias, pathExpression) -> {
 
+                partAndJoinTplMap.put(alias, new LinkedHashMap<>());
+
                 final String[] parts = pathExpression.parts();
-                String entityField = parts[1];
+                Map<String, PartAndJoinTpl> tplMap = rootMap;
                 String entity = rootEntity;
                 String entityAlias = rootAlias;
                 for (int i = 1, end = parts.length - 1; i < end; i++) {
                     String childEntityField = parts[i];
-                    String childEntity = getChildEntity(entity, childEntityField);
-                    final String childAlias = createAlias();
-                    joinTplListBuilder.add(
-                        new JoinTpl(entityAlias, childAlias, entity, childEntityField, childEntity, Optional.empty())
-                    );
-                    entity = childEntity;
-                    entityAlias = childAlias;
+
+                    PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
+
+                    if (partAndJoinTpl == null) {
+
+                        String childEntity = getChildEntity(entity, childEntityField);
+
+                        final String childAlias = createAlias();
+
+                        tplMap.put(
+                            childEntityField,
+                            partAndJoinTpl = new PartAndJoinTpl(
+                                new JoinTpl(entityAlias, childAlias, entity, childEntityField, childEntity, Optional.empty())
+                            )
+                        );
+                    }
+
+                    entity = partAndJoinTpl.joinTpl.getChildEntity();
+                    entityAlias = partAndJoinTpl.joinTpl.getChildEntityAlias();
+                    tplMap = partAndJoinTpl.partAndJoinTplMap;
                 }
 
-                final String childEntity = getChildEntity(entity, parts[parts.length - 1]);
+                String childEntityField = parts[parts.length - 1];
 
-                joinTplListBuilder.add(
-                    new JoinTpl(entityAlias, alias, entity, entityField, childEntity, aliasToJoinTypeMap.get(alias))
-                );
+                PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
 
-                aliasToEntityMapBuilder.put(alias, childEntity);
+                if (partAndJoinTpl == null) {
+
+                    String childEntity = getChildEntity(entity, childEntityField);
+
+                    tplMap.put(
+                        childEntityField,
+                        partAndJoinTpl = new PartAndJoinTpl(
+                            new JoinTpl(entityAlias, alias, entity, childEntityField, childEntity, aliasToJoinTypeMap.getOrDefault(alias, Optional.empty()))
+                        )
+                    );
+                }
+
+                aliasToEntityMapBuilder.put(alias, partAndJoinTpl.joinTpl.getChildEntity());
             });
 
             final ImmutableMap<String, String> aliasToEntityMap = aliasToEntityMapBuilder.build();
@@ -210,22 +242,33 @@ final public class QueryImpl implements Query {
             }
 
             final String[] parts = pathExpression.parts();
+
+            Map<String, PartAndJoinTpl> tplMap = partAndJoinTplMap.get(alias);
             String entity = aliasToEntityMap.get(alias);
-            String entityAlias = null;
-            for (int i = 1; i < parts.length; i++) {
-                final String childEntityField = parts[i];
-                final String childEntity = getChildEntity(entity, childEntityField);
-                String als = createAlias();
-                joinTplListBuilder.add(
-                    new JoinTpl(entityAlias, als, entity, childEntityField, childEntity, Optional.empty())
-                );
+            String entityAlias = alias;
 
-                entity = childEntity;
-                entityAlias = als;
-            }
+            for (int i = 1, end = parts.length; i < end; i++) {
+                String childEntityField = parts[i];
 
-            if (entityAlias == null) {
-                throw new QueryParserException("Invalid field expression '" + fieldExpression + "'");
+                PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
+
+                if (partAndJoinTpl == null) {
+
+                    String childEntity = getChildEntity(entity, childEntityField);
+
+                    final String childAlias = createAlias();
+
+                    tplMap.put(
+                        childEntityField,
+                        partAndJoinTpl = new PartAndJoinTpl(
+                            new JoinTpl(entityAlias, childAlias, entity, childEntityField, childEntity, Optional.empty())
+                        )
+                    );
+                }
+
+                entity = partAndJoinTpl.joinTpl.getChildEntity();
+                entityAlias = partAndJoinTpl.joinTpl.getChildEntityAlias();
+                tplMap = partAndJoinTpl.partAndJoinTplMap;
             }
 
             fieldExpToAliasedColumnMapBuilder.put(
@@ -321,13 +364,14 @@ final public class QueryImpl implements Query {
             );
         }
 
-        private FromClauseHandler from(Set<JoinTpl> joinTpls) {
+        private FromClauseHandler from(Map<String, Map<String, PartAndJoinTpl>> joinTplsMap) {
 
             final ImmutableList.Builder<JoinData> joinDataListBuilder = ImmutableList.builder();
 
-            joinTpls.forEach(joinTpl -> joinDataListBuilder.addAll(
-                createJoinData(joinTpl)
-            ));
+            joinTplsMap.forEach((alias, partAndJoinTplMap) -> {
+
+                traverseRecursive(partAndJoinTplMap, joinDataListBuilder);
+            });
 
             return new FromClauseHandlerImpl(
                 ImmutableList.of(
@@ -337,6 +381,15 @@ final public class QueryImpl implements Query {
                     )
                 )
             );
+        }
+
+        private void traverseRecursive(Map<String, PartAndJoinTpl> partAndJoinTplMap, ImmutableList.Builder<JoinData> joinDataListBuilder) {
+            partAndJoinTplMap.forEach((field, partAndJoinTpl) -> {
+                traverseRecursive(partAndJoinTpl.partAndJoinTplMap, joinDataListBuilder);
+                joinDataListBuilder.addAll(
+                    createJoinData(partAndJoinTpl.joinTpl)
+                );
+            });
         }
 
         private List<JoinData> createJoinData(JoinTpl joinTpl) {
@@ -580,5 +633,15 @@ final public class QueryImpl implements Query {
 
     public static void main(String[] asdf) {
 
+    }
+
+    private final static class PartAndJoinTpl {
+        final JoinTpl joinTpl;
+        final Map<String, PartAndJoinTpl> partAndJoinTplMap = new HashMap<>();
+
+        private PartAndJoinTpl(JoinTpl joinTpl) {
+            Objects.requireNonNull(joinTpl);
+            this.joinTpl = joinTpl;
+        }
     }
 }

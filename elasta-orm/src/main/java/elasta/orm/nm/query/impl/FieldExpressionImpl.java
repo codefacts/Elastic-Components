@@ -38,4 +38,25 @@ final public class FieldExpressionImpl implements FieldExpression {
     public PathExpression toPathExpression() {
         return pathExpression;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FieldExpressionImpl that = (FieldExpressionImpl) o;
+
+        return pathExpression != null ? pathExpression.equals(that.pathExpression) : that.pathExpression == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return pathExpression != null ? pathExpression.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return pathExpression.toString();
+    }
 }

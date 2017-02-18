@@ -78,4 +78,26 @@ final public class PathExpressionImpl implements PathExpression {
     public boolean startsWith(String rootAlias) {
         return root().equals(rootAlias);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PathExpressionImpl that = (PathExpressionImpl) o;
+
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        return Arrays.equals(parts, that.parts);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(parts);
+    }
+
+    @Override
+    public String toString() {
+        return Stream.of(parts).collect(Collectors.joining("."));
+    }
 }

@@ -40,6 +40,11 @@ final public class JoinClauseHandlerImpl implements JoinClauseHandler {
                     .append(joinData.getAlias()).append(".").append(columnToColumnMapping.getDstColumn()).append(Cqr._AND_);
             });
             builder.delete(builder.length() - Cqr._AND_.length(), builder.length());
+            builder.append(Cqr.SPACE1);
+        }
+
+        if (joinDatas.size() > 0) {
+            builder.delete(builder.length() - Cqr.SPACE1.length(), builder.length());
         }
 
         return rootTableAliasPair.getTable() + " " + rootTableAliasPair.getAlias() + " " + builder.toString();

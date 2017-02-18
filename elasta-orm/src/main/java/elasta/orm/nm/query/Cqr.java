@@ -7,4 +7,5 @@ public interface Cqr {
     String COMMA = ", ";
     String PERIOD = ".";
     String _AND_ = " and ";
+    String SPACE1 = " ";
 }

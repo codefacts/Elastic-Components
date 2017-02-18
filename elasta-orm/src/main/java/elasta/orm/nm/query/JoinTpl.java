@@ -22,13 +22,12 @@ final public class JoinTpl {
         Objects.requireNonNull(parentEntity);
         Objects.requireNonNull(childEntityField);
         Objects.requireNonNull(childEntity);
-        Objects.requireNonNull(joinType);
         this.parentEntityAlias = parentEntityAlias;
         this.childEntityAlias = childEntityAlias;
         this.parentEntity = parentEntity;
         this.childEntityField = childEntityField;
         this.childEntity = childEntity;
-        this.joinType = joinType;
+        this.joinType = joinType != null ? joinType : Optional.empty();
     }
 
     public String getChildEntityField() {

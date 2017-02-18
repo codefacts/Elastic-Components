@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * Created by Jango on 17/02/08.
  */
 final public class SelectClauseHandlerImpl implements SelectClauseHandler {
-    static final String COMMA = ",";
+    static final String COMMA = ", ";
     final List<Func> funcs;
     final ParamsBuilder paramsBuilder;
 

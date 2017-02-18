@@ -34,15 +34,19 @@ public interface QueryTest {
         q.selectBuilder().add(
             ImmutableList.of(
                 q.select("r.id"),
-                q.select("d.name"),
                 q.select("r.name"),
+                q.select("d.name"),
                 q.select("r.designation.id"),
                 q.select("r.designation.name"),
                 q.select("r.designation2.id"),
                 q.select("r.designation2.name"),
+                q.select("r.designation.id"),
+                q.select("r.designation.name"),
                 q.select("g.id"),
                 q.select("g2.employee.name"),
                 q.select("g2.employee.designation.name"),
+                q.select("g2.employee.designation2.name"),
+                q.select("g.employee.designation.name"),
                 q.select("g2.employee.designation2.name"),
                 q.select("g.employee.designation.name")
             )
