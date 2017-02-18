@@ -21,4 +21,10 @@ public interface EntityUtils {
             )
         );
     }
+
+    static Map<String, Entity> toTableToEntityMap(Collection<Entity> entities) {
+        final ImmutableMap.Builder<String, Entity> mapBuilder = ImmutableMap.builder();
+        entities.forEach(entity -> mapBuilder.put(entity.getDbMapping().getTable(), entity));
+        return mapBuilder.build();
+    }
 }
