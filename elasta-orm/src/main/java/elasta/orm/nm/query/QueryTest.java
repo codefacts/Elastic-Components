@@ -28,7 +28,6 @@ public interface QueryTest {
 
         q.fromBuilder().root("employee", "r");
         q.fromBuilder().join(new PathExpressionImpl("r.groupList"), "g", Optional.empty());
-        q.fromBuilder().join(new PathExpressionImpl("r.groupList"), "g2", Optional.empty());
         q.fromBuilder().join(new PathExpressionImpl("r.designationList"), "d", Optional.empty());
 
         q.selectBuilder().add(
@@ -43,11 +42,11 @@ public interface QueryTest {
                 q.select("r.designation.id"),
                 q.select("r.designation.name"),
                 q.select("g.id"),
-                q.select("g2.employee.name"),
-                q.select("g2.employee.designation.name"),
-                q.select("g2.employee.designation2.name"),
+                q.select("g.employee.name"),
                 q.select("g.employee.designation.name"),
-                q.select("g2.employee.designation2.name"),
+                q.select("g.employee.designation2.name"),
+                q.select("g.employee.designation.name"),
+                q.select("g.employee.designation2.name"),
                 q.select("g.employee.designation.name")
             )
         );

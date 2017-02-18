@@ -51,6 +51,7 @@ final public class QueryImpl implements Query {
     }
 
     private class QQ {
+        private static final String ALIAS_STR = "a";
         final String rootEntity;
         final String rootAlias;
         final FieldExpressionResolverImpl selectFieldExpressionResolver;
@@ -168,13 +169,11 @@ final public class QueryImpl implements Query {
 
             aliasToFullPathExpressionMap.forEach((alias, pathExpression) -> {
 
-                partAndJoinTplMap.put(alias, new LinkedHashMap<>());
-
                 final String[] parts = pathExpression.parts();
                 Map<String, PartAndJoinTpl> tplMap = rootMap;
                 String entity = rootEntity;
                 String entityAlias = rootAlias;
-                for (int i = 1, end = parts.length - 1; i < end; i++) {
+                for (int i = 1, end = parts.length; i < end; i++) {
                     String childEntityField = parts[i];
 
                     PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
@@ -183,12 +182,21 @@ final public class QueryImpl implements Query {
 
                         String childEntity = getChildEntity(entity, childEntityField);
 
-                        final String childAlias = createAlias();
+                        final boolean isLast = (i == parts.length - 1);
+
+                        final String childAlias = isLast ? alias : createAlias();
 
                         tplMap.put(
                             childEntityField,
                             partAndJoinTpl = new PartAndJoinTpl(
-                                new JoinTpl(entityAlias, childAlias, entity, childEntityField, childEntity, Optional.empty())
+                                new JoinTpl(
+                                    entityAlias,
+                                    childAlias,
+                                    entity,
+                                    childEntityField,
+                                    childEntity,
+                                    isLast ? aliasToJoinTypeMap.getOrDefault(alias, Optional.empty()) : Optional.empty()
+                                )
                             )
                         );
                     }
@@ -198,26 +206,12 @@ final public class QueryImpl implements Query {
                     tplMap = partAndJoinTpl.partAndJoinTplMap;
                 }
 
-                String childEntityField = parts[parts.length - 1];
-
-                PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
-
-                if (partAndJoinTpl == null) {
-
-                    String childEntity = getChildEntity(entity, childEntityField);
-
-                    tplMap.put(
-                        childEntityField,
-                        partAndJoinTpl = new PartAndJoinTpl(
-                            new JoinTpl(entityAlias, alias, entity, childEntityField, childEntity, aliasToJoinTypeMap.getOrDefault(alias, Optional.empty()))
-                        )
-                    );
-                }
-
-                aliasToEntityMapBuilder.put(alias, partAndJoinTpl.joinTpl.getChildEntity());
+                aliasToEntityMapBuilder.put(entityAlias, entity);
+                partAndJoinTplMap.put(entityAlias, new LinkedHashMap<>());
             });
 
             final ImmutableMap<String, String> aliasToEntityMap = aliasToEntityMapBuilder.build();
+
             final ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder = ImmutableMap.builder();
 
             selectFieldExpressionResolver.getFuncMap().keySet()
@@ -366,29 +360,32 @@ final public class QueryImpl implements Query {
 
         private FromClauseHandler from(Map<String, Map<String, PartAndJoinTpl>> joinTplsMap) {
 
-            final ImmutableList.Builder<JoinData> joinDataListBuilder = ImmutableList.builder();
+            final ImmutableMap.Builder<String, JoinTpl> joinTplMapBuilder = ImmutableMap.builder();
 
             joinTplsMap.forEach((alias, partAndJoinTplMap) -> {
 
-                traverseRecursive(partAndJoinTplMap, joinDataListBuilder);
+                traverseRecursive(partAndJoinTplMap, joinTplMapBuilder);
             });
 
             return new FromClauseHandlerImpl(
                 ImmutableList.of(
                     new JoinClauseHandlerImpl(
                         new TableAliasPair(helper.getTable(rootEntity), rootAlias),
-                        joinDataListBuilder.build()
+                        generateJoinData(joinTplMapBuilder.build())
                     )
                 )
             );
         }
 
-        private void traverseRecursive(Map<String, PartAndJoinTpl> partAndJoinTplMap, ImmutableList.Builder<JoinData> joinDataListBuilder) {
+        private List<JoinData> generateJoinData(ImmutableMap<String, JoinTpl> aliasToJoinTplMap) {
+
+            return new JoinDataBuilder(rootAlias, aliasToJoinTplMap, this::createJoinData).build();
+        }
+
+        private void traverseRecursive(Map<String, PartAndJoinTpl> partAndJoinTplMap, final ImmutableMap.Builder<String, JoinTpl> joinTplMapBuilder) {
             partAndJoinTplMap.forEach((field, partAndJoinTpl) -> {
-                traverseRecursive(partAndJoinTpl.partAndJoinTplMap, joinDataListBuilder);
-                joinDataListBuilder.addAll(
-                    createJoinData(partAndJoinTpl.joinTpl)
-                );
+                traverseRecursive(partAndJoinTpl.partAndJoinTplMap, joinTplMapBuilder);
+                joinTplMapBuilder.put(partAndJoinTpl.joinTpl.getChildEntityAlias(), partAndJoinTpl.joinTpl);
             });
         }
 
@@ -458,7 +455,7 @@ final public class QueryImpl implements Query {
                 );
             });
 
-            String relationTableAlias = createRelationTableAlias();
+            String relationTableAlias = createAlias();
 
             joinDataListBuilder.add(
                 new JoinData(
@@ -492,10 +489,6 @@ final public class QueryImpl implements Query {
             );
 
             return joinDataListBuilder.build();
-        }
-
-        private String createRelationTableAlias() {
-            return "r" + String.valueOf(relationAliasCount++);
         }
 
         private List<JoinData> directColumnMapping(DirectColumnMapping directColumnMapping, JoinTpl joinTpl) {
@@ -555,7 +548,7 @@ final public class QueryImpl implements Query {
         }
 
         private String createAlias() {
-            return "a" + String.valueOf(aliasCount++);
+            return ALIAS_STR + String.valueOf(aliasCount++);
         }
     }
 
