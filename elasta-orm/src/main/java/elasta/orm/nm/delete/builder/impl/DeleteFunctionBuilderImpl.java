@@ -147,7 +147,7 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
                 .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
                 .collect(Collectors.toList());
 
-            List<ColumnToColumnMapping> dstMappings = indirectColumnMapping.getSrcForeignColumnMappingList().stream()
+            List<ColumnToColumnMapping> dstMappings = indirectColumnMapping.getDstForeignColumnMappingList().stream()
                 .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
                 .collect(Collectors.toList());
 

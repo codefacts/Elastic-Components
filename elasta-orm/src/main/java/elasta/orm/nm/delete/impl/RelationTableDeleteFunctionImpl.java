@@ -32,7 +32,7 @@ final public class RelationTableDeleteFunctionImpl implements RelationTableDelet
     public void delete(JsonObject parent, JsonObject jsonObject, DeleteContext deleteContext) {
 
         final TableData tableData = relationTableDataPopulator.populate(
-            srcTableDataPopulator.populate(jsonObject),
+            srcTableDataPopulator.populate(parent),
             dstTableDataPopulator.populate(jsonObject)
         );
 
