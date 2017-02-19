@@ -39,10 +39,33 @@ public interface DeleteTest {
                 ImmutableMap.of(
                     "id", 1025,
                     "designation", ImmutableMap.of(
-                        "id", 68765
+                        "id", 68765,
+                        "employeeList", ImmutableList.of(
+                            ImmutableMap.of(
+                                "id", 865832
+                            )
+                        )
                     ),
                     "designation2", ImmutableMap.of(
-                        "id", 6668968
+                        "id", 6668968,
+                        "employeeList", ImmutableList.of(
+                            ImmutableMap.of(
+                                "id", 321326,
+                                "groupList", ImmutableList.of(
+                                    ImmutableMap.of(
+                                        "id", 32565
+                                    )
+                                ),
+                                "designation", ImmutableMap.of(
+                                    "id", 31874
+                                ),
+                                "designationList", ImmutableList.of(
+                                    ImmutableMap.of(
+                                        "id", 265682
+                                    )
+                                )
+                            )
+                        )
                     ),
                     "designationList", ImmutableList.of(
                         ImmutableMap.of(
@@ -50,6 +73,14 @@ public interface DeleteTest {
                         ),
                         ImmutableMap.of(
                             "id", 987125
+                        )
+                    ),
+                    "groupList", ImmutableList.of(
+                        ImmutableMap.of(
+                            "id", 8965
+                        ),
+                        ImmutableMap.of(
+                            "id", 897656
                         )
                     )
                 )
