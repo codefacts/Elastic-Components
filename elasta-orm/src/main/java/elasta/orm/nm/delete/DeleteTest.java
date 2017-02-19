@@ -37,31 +37,31 @@ public interface DeleteTest {
         deleteFunction.delete(
             new JsonObject(
                 ImmutableMap.of(
-                    "id", 1025,
+                    "id", "1025",
                     "designation", ImmutableMap.of(
-                        "id", 68765,
+                        "id", "68765",
                         "employeeList", ImmutableList.of(
                             ImmutableMap.of(
-                                "id", 865832
+                                "id", "865832"
                             )
                         )
                     ),
                     "designation2", ImmutableMap.of(
-                        "id", 6668968,
+                        "id", "6668968",
                         "employeeList", ImmutableList.of(
                             ImmutableMap.of(
-                                "id", 321326,
+                                "id", "321326",
                                 "groupList", ImmutableList.of(
                                     ImmutableMap.of(
-                                        "id", 32565
+                                        "id", "32565"
                                     )
                                 ),
                                 "designation", ImmutableMap.of(
-                                    "id", 31874
+                                    "id", "31874"
                                 ),
                                 "designationList", ImmutableList.of(
                                     ImmutableMap.of(
-                                        "id", 265682
+                                        "id", "265682"
                                     )
                                 )
                             )
@@ -69,18 +69,18 @@ public interface DeleteTest {
                     ),
                     "designationList", ImmutableList.of(
                         ImmutableMap.of(
-                            "id", 905665
+                            "id", "905665"
                         ),
                         ImmutableMap.of(
-                            "id", 987125
+                            "id", "987125"
                         )
                     ),
                     "groupList", ImmutableList.of(
                         ImmutableMap.of(
-                            "id", 8965
+                            "id", "8965"
                         ),
                         ImmutableMap.of(
-                            "id", 897656
+                            "id", "897656"
                         )
                     )
                 )

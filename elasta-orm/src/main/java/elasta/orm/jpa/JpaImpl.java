@@ -11,7 +11,7 @@ import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.immutable.Tpl2;
 import elasta.core.touple.immutable.Tpls;
-import elasta.vertxutils.StaticUtils;
+import elasta.vertxutils.VertxUtils;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -229,13 +229,13 @@ public class JpaImpl implements Jpa {
     private <T> Promise<T> exeQuery(Fun1Unckd<EntityManager, T> fun1Unckd) {
         Defer<T> defer = Promises.defer();
 
-        vertx.executeBlocking(queryHandler(fun1Unckd), StaticUtils.deferred(defer));
+        vertx.executeBlocking(queryHandler(fun1Unckd), VertxUtils.deferred(defer));
         return defer.promise();
     }
 
     private Promise<Void> exeUpdate(Consumer1Unckd<EntityManager> consumer1Unckd) {
         Defer<Void> defer = Promises.defer();
-        vertx.executeBlocking(updateHandler(consumer1Unckd), StaticUtils.deferred(defer));
+        vertx.executeBlocking(updateHandler(consumer1Unckd), VertxUtils.deferred(defer));
         return defer.promise();
     }
 

@@ -7,7 +7,7 @@ import io.vertx.core.Handler;
 /**
  * Created by Jango on 10/12/2016.
  */
-public class StaticUtils {
+public class VertxUtils {
     public static <T> Handler<AsyncResult<T>> deferred(Defer defer) {
         return event -> {
             if (event.failed()) {

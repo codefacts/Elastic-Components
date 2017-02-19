@@ -1,10 +1,12 @@
 package elasta.orm.json.sql;
 
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.nm.delete.DeleteData;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -35,4 +37,8 @@ public interface DbSql {
     Promise<Void> updateJo(String table, JsonObject jsonObject, String where, JsonArray params);
 
     Promise<Void> updateJo(List<UpdateTpl> sqlList);
+
+    Promise<Void> delete(String table, JsonObject where);
+
+    Promise<Void> delete(Collection<DeleteData> deleteDataList);
 }

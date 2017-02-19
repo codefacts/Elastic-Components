@@ -4,13 +4,16 @@ import com.google.common.collect.ImmutableList;
 import elasta.commons.SimpleCounter;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.vertxutils.StaticUtils;
+import elasta.orm.nm.delete.ColumnValuePair;
+import elasta.orm.nm.delete.DeleteData;
+import elasta.vertxutils.VertxUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,13 +33,13 @@ public class DbSqlImpl implements DbSql {
     @Override
     public Promise<ResultSet> query(String sql) {
         return withConn(con -> Promises.exec(
-            defer -> con.query(sql, StaticUtils.deferred(defer))));
+            defer -> con.query(sql, VertxUtils.deferred(defer))));
     }
 
     @Override
     public Promise<ResultSet> query(String sql, JsonArray params) {
         return withConn(con -> Promises.exec(
-            defer -> con.queryWithParams(sql, params, StaticUtils.deferred(defer))));
+            defer -> con.queryWithParams(sql, params, VertxUtils.deferred(defer))));
     }
 
     @Override
@@ -52,21 +55,21 @@ public class DbSqlImpl implements DbSql {
     @Override
     public Promise<Void> update(String sql) {
         return withConn(con -> Promises.exec(
-            defer -> con.update(sql, StaticUtils.deferred(defer))).map(o -> null)
+            defer -> con.update(sql, VertxUtils.deferred(defer))).map(o -> null)
         );
     }
 
     @Override
     public Promise<Void> update(String sql, JsonArray params) {
         return withConn(con -> Promises.exec(
-            defer -> con.updateWithParams(sql, params, StaticUtils.deferred(defer))).map(o -> null)
+            defer -> con.updateWithParams(sql, params, VertxUtils.deferred(defer))).map(o -> null)
         );
     }
 
     @Override
     public Promise<Void> update(List<String> sqlList) {
         return execAndCommit(con -> Promises.exec(
-            objectDefer -> con.batch(sqlList, StaticUtils.deferred(objectDefer))));
+            objectDefer -> con.batch(sqlList, VertxUtils.deferred(objectDefer))));
     }
 
     @Override
@@ -74,7 +77,7 @@ public class DbSqlImpl implements DbSql {
         SimpleCounter counter = new SimpleCounter(0);
         return execAndCommit(
             con -> Promises.when(sqlList.stream()
-                .map(sql -> Promises.exec(dfr -> con.updateWithParams(sql, paramsList.get(counter.value++), StaticUtils.deferred(dfr))))
+                .map(sql -> Promises.exec(dfr -> con.updateWithParams(sql, paramsList.get(counter.value++), VertxUtils.deferred(dfr))))
                 .collect(Collectors.toList())
             ).map(objects -> (Void) null));
     }
@@ -129,15 +132,65 @@ public class DbSqlImpl implements DbSql {
                         sqlAndParams = sqlBuilderUtils.deleteSql(updateTpl.getTable(), updateTpl.getWhere(), updateTpl.getJsonArray());
                     }
 
-                    return Promises.exec(objectDefer -> con.updateWithParams(sqlAndParams.getSql(), sqlAndParams.getParams(), StaticUtils.deferred(objectDefer)));
+                    return Promises.exec(objectDefer -> con.updateWithParams(sqlAndParams.getSql(), sqlAndParams.getParams(), VertxUtils.deferred(objectDefer)));
                 }).collect(Collectors.toList())
 
         ).map(objects -> (Void) null));
     }
 
+    @Override
+    public Promise<Void> delete(String table, JsonObject where) {
+        return execAndCommit(sqlConnection -> {
+            final String AND = " and ";
+
+            final StringBuilder builder = new StringBuilder();
+            final ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();
+            where.getMap().forEach((key, val) -> {
+                listBuilder.add(val);
+                builder.append("`" + key + "`" + " = ?").append(AND);
+            });
+            if (where.size() > 0) {
+                builder.delete(builder.length() - AND.length(), builder.length());
+            }
+            final SqlAndParams deleteSql = sqlBuilderUtils.deleteSql(table, builder.toString(), new JsonArray(listBuilder.build()));
+
+            return Promises.exec(voidDefer -> {
+                sqlConnection.updateWithParams(deleteSql.getSql(), deleteSql.getParams(), VertxUtils.deferred(voidDefer));
+            });
+        });
+    }
+
+    @Override
+    public Promise<Void> delete(Collection<DeleteData> deleteDataList) {
+        return execAndCommit(sqlConnection -> {
+            final List<Promise<Object>> promises = deleteDataList.stream().map(deleteData -> {
+
+                final String AND = " and ";
+
+                final StringBuilder builder = new StringBuilder();
+                final ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();
+                for (ColumnValuePair columnValuePair : deleteData.getColumnValuePairs()) {
+                    listBuilder.add(columnValuePair.getValue());
+                    builder.append("`" + columnValuePair.getPrimaryColumn() + "`" + " = ?").append(AND);
+                }
+                if (deleteData.getColumnValuePairs().length > 0) {
+                    builder.delete(builder.length() - AND.length(), builder.length());
+                }
+                final SqlAndParams deleteSql = sqlBuilderUtils.deleteSql(deleteData.getTable(), builder.toString(), new JsonArray(listBuilder.build()));
+
+                return Promises.exec(voidDefer -> {
+                    sqlConnection.updateWithParams(deleteSql.getSql(), deleteSql.getParams(), VertxUtils.deferred(voidDefer));
+                });
+
+            }).collect(Collectors.toList());
+
+            return Promises.when(promises).map(objects -> null);
+        });
+    }
+
     private Promise<SQLConnection> conn() {
         return Promises.exec(defer -> {
-            jdbcClient.getConnection(StaticUtils.deferred(defer));
+            jdbcClient.getConnection(VertxUtils.deferred(defer));
         });
     }
 
@@ -158,13 +211,13 @@ public class DbSqlImpl implements DbSql {
 
     private Promise<Void> execAndCommit(Function<SQLConnection, Promise<Void>> function) {
         return conn()
-            .thenP(con -> Promises.exec(voidDefer -> con.setAutoCommit(false, StaticUtils.deferred(voidDefer))))
+            .thenP(con -> Promises.exec(voidDefer -> con.setAutoCommit(false, VertxUtils.deferred(voidDefer))))
             .mapP(
                 con -> {
                     try {
                         return function.apply(con)
-                            .thenP(aVoid -> Promises.exec(voidDefer -> con.commit(StaticUtils.deferred(voidDefer))))
-                            .errP(e -> Promises.exec(voidDefer -> con.rollback(StaticUtils.deferred(voidDefer))))
+                            .thenP(aVoid -> Promises.exec(voidDefer -> con.commit(VertxUtils.deferred(voidDefer))))
+                            .errP(e -> Promises.exec(voidDefer -> con.rollback(VertxUtils.deferred(voidDefer))))
                             .cmp(signal -> con.close());
                     } catch (Exception e) {
                         con.close();

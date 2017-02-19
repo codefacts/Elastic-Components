@@ -5,11 +5,11 @@ import java.util.Objects;
 /**
  * Created by Jango on 17/02/07.
  */
-final public class PrimaryColumnValuePair {
+final public class ColumnValuePair {
     final String primaryColumn;
     final Object value;
 
-    public PrimaryColumnValuePair(String primaryColumn, Object value) {
+    public ColumnValuePair(String primaryColumn, Object value) {
         Objects.requireNonNull(primaryColumn);
         Objects.requireNonNull(value);
         this.primaryColumn = primaryColumn;
@@ -26,7 +26,7 @@ final public class PrimaryColumnValuePair {
 
     @Override
     public String toString() {
-        return "PrimaryColumnValuePair{" +
+        return "ColumnValuePair{" +
             "primaryColumn='" + primaryColumn + '\'' +
             ", value=" + value +
             '}';
@@ -37,7 +37,7 @@ final public class PrimaryColumnValuePair {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PrimaryColumnValuePair that = (PrimaryColumnValuePair) o;
+        ColumnValuePair that = (ColumnValuePair) o;
 
         if (primaryColumn != null ? !primaryColumn.equals(that.primaryColumn) : that.primaryColumn != null)
             return false;

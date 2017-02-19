@@ -1,8 +1,8 @@
 package elasta.orm.nm.delete.impl;
 
+import elasta.orm.nm.delete.ColumnValuePair;
 import elasta.orm.nm.delete.DeleteContext;
 import elasta.orm.nm.delete.DeleteData;
-import elasta.orm.nm.delete.PrimaryColumnValuePair;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 import elasta.orm.nm.upsert.TableData;
 
@@ -25,11 +25,11 @@ public class PParentDeleteHandlerImpl implements PParentDeleteHandler {
     @Override
     public void delete(TableData childTableData, DeleteContext deleteContext) {
         
-        final PrimaryColumnValuePair[] pairs = new PrimaryColumnValuePair[columnToColumnMappings.length];
+        final ColumnValuePair[] pairs = new ColumnValuePair[columnToColumnMappings.length];
 
         for (int i = 0; i < pairs.length; i++) {
             final ColumnToColumnMapping columnToColumnMapping = columnToColumnMappings[i];
-            pairs[i] = new PrimaryColumnValuePair(
+            pairs[i] = new ColumnValuePair(
                 columnToColumnMapping.getSrcColumn(),
                 childTableData.getValues().getValue(columnToColumnMapping.getDstColumn())
             );

@@ -36,12 +36,12 @@ final public class RelationTableDeleteFunctionImpl implements RelationTableDelet
             dstTableDataPopulator.populate(jsonObject)
         );
 
-        List<PrimaryColumnValuePair> pairs = Arrays.asList(tableData.getPrimaryColumns()).stream()
-            .map(column -> new PrimaryColumnValuePair(column, tableData.getValues().getValue(column)))
+        List<ColumnValuePair> pairs = Arrays.asList(tableData.getPrimaryColumns()).stream()
+            .map(column -> new ColumnValuePair(column, tableData.getValues().getValue(column)))
             .collect(Collectors.toList());
 
         deleteContext.add(
-            new DeleteData(tableData.getTable(), pairs.toArray(new PrimaryColumnValuePair[pairs.size()]))
+            new DeleteData(tableData.getTable(), pairs.toArray(new ColumnValuePair[pairs.size()]))
         );
     }
 }

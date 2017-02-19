@@ -8,21 +8,21 @@ import java.util.Objects;
  */
 final public class DeleteData {
     final String table;
-    final PrimaryColumnValuePair[] primaryColumnValuePairs;
+    final ColumnValuePair[] columnValuePairs;
 
-    public DeleteData(String table, PrimaryColumnValuePair[] primaryColumnValuePairs) {
+    public DeleteData(String table, ColumnValuePair[] columnValuePairs) {
         Objects.requireNonNull(table);
-        Objects.requireNonNull(primaryColumnValuePairs);
+        Objects.requireNonNull(columnValuePairs);
         this.table = table;
-        this.primaryColumnValuePairs = primaryColumnValuePairs;
+        this.columnValuePairs = columnValuePairs;
     }
 
     public String getTable() {
         return table;
     }
 
-    public PrimaryColumnValuePair[] getPrimaryColumnValuePairs() {
-        return primaryColumnValuePairs;
+    public ColumnValuePair[] getColumnValuePairs() {
+        return columnValuePairs;
     }
 
     @Override
@@ -34,14 +34,14 @@ final public class DeleteData {
 
         if (table != null ? !table.equals(that.table) : that.table != null) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        return Arrays.equals(primaryColumnValuePairs, that.primaryColumnValuePairs);
+        return Arrays.equals(columnValuePairs, that.columnValuePairs);
 
     }
 
     @Override
     public int hashCode() {
         int result = table != null ? table.hashCode() : 0;
-        result = 31 * result + Arrays.hashCode(primaryColumnValuePairs);
+        result = 31 * result + Arrays.hashCode(columnValuePairs);
         return result;
     }
 
@@ -49,7 +49,7 @@ final public class DeleteData {
     public String toString() {
         return "DeleteData{" +
             "table='" + table + '\'' +
-            ", primaryColumnValuePairs=" + Arrays.toString(primaryColumnValuePairs) +
+            ", columnValuePairs=" + Arrays.toString(columnValuePairs) +
             '}';
     }
 }

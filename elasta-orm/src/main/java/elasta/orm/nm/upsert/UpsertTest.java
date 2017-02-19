@@ -1,6 +1,11 @@
 package elasta.orm.nm.upsert;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import elasta.core.promise.impl.Promises;
+import elasta.orm.json.sql.DbSql;
+import elasta.orm.json.sql.DbSqlImpl;
+import elasta.orm.json.sql.SqlBuilderUtilsImpl;
 import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.entitymodel.*;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
@@ -12,10 +17,13 @@ import elasta.orm.nm.entitymodel.columnmapping.impl.VirtualColumnMappingImpl;
 import elasta.orm.nm.entitymodel.impl.EntityMappingHelperImpl;
 import elasta.orm.nm.upsert.builder.FunctionMapImpl;
 import elasta.orm.nm.upsert.builder.impl.UpsertFunctionBuilderImpl;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.jdbc.JDBCClient;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Jango on 2017-01-21.
@@ -180,9 +188,34 @@ public interface UpsertTest {
             upsertContext
         );
 
-        map.values().forEach(tableData -> {
-            System.out.println(tableData);
+        map.values().forEach(System.out::println);
+
+        final DbSql dbSql = createDbSql("nm");
+
+        Promises.when(map.values().stream().map(tableData -> {
+            return dbSql.insertJo(tableData.getTable(), tableData.getValues());
+        }).collect(Collectors.toList())).then(voids -> {
+
+        }).err(throwable -> throwable.printStackTrace()).cmp(signal -> {
+            System.out.println("Insert complete");
         });
+
+    }
+
+    static DbSql createDbSql(String db) {
+        final Vertx vertx = Vertx.vertx();
+        final DbSqlImpl dbSql = new DbSqlImpl(
+            JDBCClient.createShared(vertx, new JsonObject(
+                ImmutableMap.of(
+                    "user", "root",
+                    "password", "",
+                    "driver_class", "com.mysql.jdbc.Driver",
+                    "url", "jdbc:mysql://localhost/" + db
+                )
+            )),
+            new SqlBuilderUtilsImpl()
+        );
+        return dbSql;
     }
 
     static Collection<Entity> entities() {
@@ -305,9 +338,7 @@ public interface UpsertTest {
                 "GROUP",
                 "ID",
                 new DbColumnMapping[]{
-                    new SimpleColumnMappingImpl(
-                        "id", "ID", DbType.VARCHAR
-                    ),
+                    new SimpleColumnMappingImpl("id", "ID", DbType.VARCHAR),
                     new SimpleColumnMappingImpl("name", "NAME", DbType.VARCHAR),
                     new DirectColumnMappingImpl(
                         "EMPLOYEE",

@@ -1,9 +1,8 @@
 package elasta.orm.nm.delete.impl;
 
+import elasta.orm.nm.delete.ColumnValuePair;
 import elasta.orm.nm.delete.DeleteData;
 import elasta.orm.nm.delete.DeleteDataPopulator;
-import elasta.orm.nm.delete.FieldColumnMapping;
-import elasta.orm.nm.delete.PrimaryColumnValuePair;
 import elasta.orm.nm.upsert.FieldToColumnMapping;
 import io.vertx.core.json.JsonObject;
 
@@ -29,14 +28,14 @@ final public class DeleteDataPopulatorImpl implements DeleteDataPopulator {
     @Override
     public DeleteData populate(JsonObject jsonObject) {
 
-        final List<PrimaryColumnValuePair> pairs = Arrays.asList(primaryColumnMappings)
+        final List<ColumnValuePair> pairs = Arrays.asList(primaryColumnMappings)
             .stream()
-            .map(mapping -> new PrimaryColumnValuePair(
+            .map(mapping -> new ColumnValuePair(
                 mapping.getColumn(),
                 jsonObject.getValue(mapping.getField()))
             )
             .collect(Collectors.toList());
 
-        return new DeleteData(table, pairs.toArray(new PrimaryColumnValuePair[pairs.size()]));
+        return new DeleteData(table, pairs.toArray(new ColumnValuePair[pairs.size()]));
     }
 }
