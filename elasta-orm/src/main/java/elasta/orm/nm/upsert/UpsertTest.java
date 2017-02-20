@@ -190,20 +190,21 @@ public interface UpsertTest {
 
         map.values().forEach(System.out::println);
 
-        final DbSql dbSql = createDbSql("nm");
+        final Vertx vertx = Vertx.vertx();
 
-        Promises.when(map.values().stream().map(tableData -> {
-            return dbSql.insertJo(tableData.getTable(), tableData.getValues());
-        }).collect(Collectors.toList())).then(voids -> {
+        final DbSql dbSql = createDbSql("nm", vertx);
 
-        }).err(throwable -> throwable.printStackTrace()).cmp(signal -> {
-            System.out.println("Insert complete");
+        vertx.setTimer(1, event -> {
+            Promises.when(map.values().stream().map(tableData -> {
+                return dbSql.insertJo(tableData.getTable(), tableData.getValues()).then(aVoid -> System.out.println("complete: " + tableData));
+            }).collect(Collectors.toList())).then(voids -> {
+                System.out.println("Insert complete");
+            }).err(throwable -> throwable.printStackTrace())
+            ;
         });
-
     }
 
-    static DbSql createDbSql(String db) {
-        final Vertx vertx = Vertx.vertx();
+    static DbSql createDbSql(String db, Vertx vertx) {
         final DbSqlImpl dbSql = new DbSqlImpl(
             JDBCClient.createShared(vertx, new JsonObject(
                 ImmutableMap.of(
@@ -216,6 +217,10 @@ public interface UpsertTest {
             new SqlBuilderUtilsImpl()
         );
         return dbSql;
+    }
+
+    static DbSql createDbSql(String db) {
+        return createDbSql(db, Vertx.vertx());
     }
 
     static Collection<Entity> entities() {

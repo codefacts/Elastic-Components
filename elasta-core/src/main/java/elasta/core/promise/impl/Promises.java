@@ -9,10 +9,7 @@ import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.*;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Created by someone on 16/10/2015.
@@ -96,9 +93,13 @@ final public class Promises {
             counter.counter++;
             if (counter.counter == promises.size()) {
                 if (pStatus.t1) {
-                    ImmutableList.Builder<T> builder = ImmutableList.builder();
-                    promises.forEach(promise -> builder.add(promise.val()));
-                    defer.resolve(builder.build());
+                    Object[] vals = new Object[promises.size()];
+                    int index = 0;
+                    for (Promise<T> promise : promises) {
+                        vals[index] = promise.val();
+                        index = index + 1;
+                    }
+                    defer.resolve(new MyImmutableList<>(vals));
                 } else {
                     defer.reject(pStatus.t2, pStatus.t3);
                 }
