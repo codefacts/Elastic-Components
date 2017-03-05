@@ -2,7 +2,7 @@ package elasta.orm.nm.entitymodel.columnmapping.impl;
 
 import elasta.orm.nm.entitymodel.ColumnType;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.IndirectColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.IndirectDbColumnMapping;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-12.
  */
-public class IndirectColumnMappingImpl implements IndirectColumnMapping {
+public class IndirectDbColumnMappingImpl implements IndirectDbColumnMapping {
     final String referencingTable;
     final String referencingEntity;
     final String relationTable;
@@ -19,7 +19,7 @@ public class IndirectColumnMappingImpl implements IndirectColumnMapping {
     final String field;
     final ColumnType columnType;
 
-    public IndirectColumnMappingImpl(String referencingTable, String referencingEntity, String relationTable, List<ForeignColumnMapping> srcForeignColumnMappingList, List<ForeignColumnMapping> dstForeignColumnMappingList, String field) {
+    public IndirectDbColumnMappingImpl(String referencingTable, String referencingEntity, String relationTable, List<ForeignColumnMapping> srcForeignColumnMappingList, List<ForeignColumnMapping> dstForeignColumnMappingList, String field) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(relationTable);
@@ -74,7 +74,7 @@ public class IndirectColumnMappingImpl implements IndirectColumnMapping {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        IndirectColumnMappingImpl that = (IndirectColumnMappingImpl) o;
+        IndirectDbColumnMappingImpl that = (IndirectDbColumnMappingImpl) o;
 
         if (referencingTable != null ? !referencingTable.equals(that.referencingTable) : that.referencingTable != null)
             return false;
@@ -102,7 +102,7 @@ public class IndirectColumnMappingImpl implements IndirectColumnMapping {
 
     @Override
     public String toString() {
-        return "IndirectColumnMappingImpl{" +
+        return "IndirectDbColumnMappingImpl{" +
             "referencingTable='" + referencingTable + '\'' +
             ", relationTable='" + relationTable + '\'' +
             ", srcForeignColumnMappingList=" + srcForeignColumnMappingList +

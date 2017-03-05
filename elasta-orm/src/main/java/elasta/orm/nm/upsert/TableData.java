@@ -60,7 +60,7 @@ final public class TableData {
     @Override
     public String toString() {
         return "TableData{" +
-            "table='" + table + '\'' +
+            "dependentTable='" + table + '\'' +
             ", primaryColumns=" + Arrays.toString(primaryColumns) +
             ", values=" + values +
             '}';

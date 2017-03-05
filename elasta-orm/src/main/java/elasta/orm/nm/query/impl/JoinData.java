@@ -80,7 +80,7 @@ final public class JoinData {
         return "JoinData{" +
             "parentAlias='" + parentAlias + '\'' +
             ", joinType=" + joinType +
-            ", table='" + table + '\'' +
+            ", dependentTable='" + table + '\'' +
             ", alias='" + alias + '\'' +
             ", columnToColumnMappings=" + columnToColumnMappings +
             '}';

@@ -6,13 +6,12 @@ import elasta.orm.nm.delete.builder.DeleteFunctionBuilder;
 import elasta.orm.nm.delete.impl.*;
 import elasta.orm.nm.entitymodel.*;
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.DirectColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.IndirectColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.SimpleColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.DirectDbColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.SimpleDbColumnMapping;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 import elasta.orm.nm.upsert.FieldToColumnMapping;
 import elasta.orm.nm.upsert.builder.FunctionMap;
-import elasta.orm.nm.upsert.builder.impl.UpsertFunctionBuilderImpl;
 import elasta.orm.nm.upsert.impl.RelationTableDataPopulatorImpl;
 import elasta.orm.nm.upsert.impl.TableDataPopulatorImpl;
 import io.vertx.core.json.JsonObject;
@@ -141,31 +140,31 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
 
         private IndirectDeleteDependency indirectDependency(Field field) {
 
-            final IndirectColumnMapping indirectColumnMapping = (IndirectColumnMapping) mapping;
+            final IndirectDbColumnMapping indirectDbColumnMapping = (IndirectDbColumnMapping) mapping;
 
-            List<ColumnToColumnMapping> srcMappings = indirectColumnMapping.getSrcForeignColumnMappingList().stream()
+            List<ColumnToColumnMapping> srcMappings = indirectDbColumnMapping.getSrcForeignColumnMappingList().stream()
                 .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
                 .collect(Collectors.toList());
 
-            List<ColumnToColumnMapping> dstMappings = indirectColumnMapping.getDstForeignColumnMappingList().stream()
+            List<ColumnToColumnMapping> dstMappings = indirectDbColumnMapping.getDstForeignColumnMappingList().stream()
                 .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
                 .collect(Collectors.toList());
 
             RelationTableDataPopulatorImpl relationTableDataPopulator = new RelationTableDataPopulatorImpl(
-                indirectColumnMapping.getRelationTable(),
+                indirectDbColumnMapping.getRelationTable(),
                 srcMappings.toArray(new ColumnToColumnMapping[srcMappings.size()]),
                 dstMappings.toArray(new ColumnToColumnMapping[dstMappings.size()])
             );
 
             List<FieldToColumnMapping> srcFieldToColumnMappingList = Arrays.asList(ee.getDbMapping().getDbColumnMappings()).stream()
                 .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
-                .map(dbColumnMapping -> (SimpleColumnMapping) dbColumnMapping)
+                .map(dbColumnMapping -> (SimpleDbColumnMapping) dbColumnMapping)
                 .map(ff -> new FieldToColumnMapping(ff.getField(), ff.getColumn()))
                 .collect(Collectors.toList());
 
-            List<FieldToColumnMapping> dstFieldToColumnMappingList = Arrays.asList(helper.getDbMapping(indirectColumnMapping.getReferencingEntity()).getDbColumnMappings()).stream()
+            List<FieldToColumnMapping> dstFieldToColumnMappingList = Arrays.asList(helper.getDbMapping(indirectDbColumnMapping.getReferencingEntity()).getDbColumnMappings()).stream()
                 .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
-                .map(dbColumnMapping -> (SimpleColumnMapping) dbColumnMapping)
+                .map(dbColumnMapping -> (SimpleDbColumnMapping) dbColumnMapping)
                 .map(ff -> new FieldToColumnMapping(ff.getField(), ff.getColumn()))
                 .collect(Collectors.toList());
 
@@ -179,21 +178,21 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
                         srcFieldToColumnMappingList.toArray(new FieldToColumnMapping[srcFieldToColumnMappingList.size()])
                     ),
                     new TableDataPopulatorImpl(
-                        helper.getDbMapping(indirectColumnMapping.getReferencingEntity()).getTable(),
-                        helper.getDbMapping(indirectColumnMapping.getReferencingEntity()).getPrimaryColumn(),
+                        helper.getDbMapping(indirectDbColumnMapping.getReferencingEntity()).getTable(),
+                        helper.getDbMapping(indirectDbColumnMapping.getReferencingEntity()).getPrimaryColumn(),
                         dstFieldToColumnMappingList.toArray(new FieldToColumnMapping[dstFieldToColumnMappingList.size()])
                     )
                 ),
-                deleteFunction(indirectColumnMapping.getReferencingEntity())
+                deleteFunction(indirectDbColumnMapping.getReferencingEntity())
             ));
         }
 
         private DirectDeleteDependency directDeleteDependency(Field field) {
-            DirectColumnMapping directColumnMapping = (DirectColumnMapping) this.mapping;
+            DirectDbColumnMapping directDbColumnMapping = (DirectDbColumnMapping) this.mapping;
             return new DirectDeleteDependency(
                 field.getName(),
                 new DirectDeleteHandlerImpl(
-                    deleteFunction(directColumnMapping.getReferencingEntity())
+                    deleteFunction(directDbColumnMapping.getReferencingEntity())
                 )
             );
         }

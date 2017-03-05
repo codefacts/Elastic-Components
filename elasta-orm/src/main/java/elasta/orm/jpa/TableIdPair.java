@@ -45,7 +45,7 @@ public class TableIdPair {
     @Override
     public String toString() {
         return "TableIdPair{" +
-            "table='" + table + '\'' +
+            "dependentTable='" + table + '\'' +
             ", id=" + id +
             '}';
     }

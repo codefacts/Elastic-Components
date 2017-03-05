@@ -7,11 +7,16 @@ import java.util.List;
 /**
  * Created by Jango on 2017-01-12.
  */
-public interface VirtualColumnMapping extends DbColumnMapping {
+public interface IndirectDbColumnMapping extends DbColumnMapping {
 
     String getReferencingTable();
 
     String getReferencingEntity();
 
-    List<ForeignColumnMapping> getForeignColumnMappingList();
+    String getRelationTable();
+
+    List<ForeignColumnMapping> getSrcForeignColumnMappingList();
+
+    List<ForeignColumnMapping> getDstForeignColumnMappingList();
+
 }

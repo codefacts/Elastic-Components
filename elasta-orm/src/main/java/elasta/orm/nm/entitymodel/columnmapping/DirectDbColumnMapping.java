@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Jango on 2017-01-12.
  */
-public interface DirectColumnMapping extends DbColumnMapping {
+public interface DirectDbColumnMapping extends DbColumnMapping {
 
     String getReferencingTable();
 

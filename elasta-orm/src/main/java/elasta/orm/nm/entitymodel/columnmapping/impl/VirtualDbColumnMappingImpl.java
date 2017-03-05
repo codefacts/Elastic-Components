@@ -2,7 +2,7 @@ package elasta.orm.nm.entitymodel.columnmapping.impl;
 
 import elasta.orm.nm.entitymodel.ColumnType;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.VirtualColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.VirtualDbColumnMapping;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,14 +10,14 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-12.
  */
-public class VirtualColumnMappingImpl implements VirtualColumnMapping {
+public class VirtualDbColumnMappingImpl implements VirtualDbColumnMapping {
     final String referencingTable;
     final String referencingEntity;
     final List<ForeignColumnMapping> foreignColumnMappingList;
     final String field;
     final ColumnType columnType;
 
-    public VirtualColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
+    public VirtualDbColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
@@ -59,7 +59,7 @@ public class VirtualColumnMappingImpl implements VirtualColumnMapping {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        VirtualColumnMappingImpl that = (VirtualColumnMappingImpl) o;
+        VirtualDbColumnMappingImpl that = (VirtualDbColumnMappingImpl) o;
 
         if (referencingTable != null ? !referencingTable.equals(that.referencingTable) : that.referencingTable != null)
             return false;
@@ -81,7 +81,7 @@ public class VirtualColumnMappingImpl implements VirtualColumnMapping {
 
     @Override
     public String toString() {
-        return "VirtualColumnMappingImpl{" +
+        return "VirtualDbColumnMappingImpl{" +
             "referencingTable='" + referencingTable + '\'' +
             ", foreignColumnMappingList=" + foreignColumnMappingList +
             ", field='" + field + '\'' +

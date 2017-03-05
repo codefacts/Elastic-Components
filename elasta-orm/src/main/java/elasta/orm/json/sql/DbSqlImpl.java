@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import elasta.commons.SimpleCounter;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.json.sql.query.SqlQueryGenerator;
 import elasta.orm.nm.delete.ColumnValuePair;
 import elasta.orm.nm.delete.DeleteData;
 import elasta.vertxutils.VertxUtils;
@@ -186,6 +187,14 @@ public class DbSqlImpl implements DbSql {
 
             return Promises.when(promises).map(objects -> null);
         });
+    }
+
+    @Override
+    public Promise<List<JsonObject>> queryWhere(String table, List<String> columns, JsonObject whereCriteria) {
+
+        sqlBuilderUtils.querySql(table, columns, whereCriteria);
+
+        return null;
     }
 
     private Promise<SQLConnection> conn() {

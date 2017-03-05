@@ -70,7 +70,7 @@ public class UpdateTpl {
     public String toString() {
         return "UpdateTpl{" +
             "updateOperationType=" + updateOperationType +
-            ", table='" + table + '\'' +
+            ", dependentTable='" + table + '\'' +
             ", data=" + data +
             ", where='" + where + '\'' +
             ", jsonArray=" + jsonArray +

@@ -39,7 +39,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
         List<FieldToColumnMapping> list = Arrays.asList(dbMapping.getDbColumnMappings()).stream()
             .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
-            .map(dbColumnMapping -> new FieldToColumnMapping(dbColumnMapping.getField(), Utils.<SimpleColumnMapping>cast(dbColumnMapping).getColumn()))
+            .map(dbColumnMapping -> new FieldToColumnMapping(dbColumnMapping.getField(), Utils.<SimpleDbColumnMapping>cast(dbColumnMapping).getColumn()))
             .collect(Collectors.toList());
 
         TableDataPopulatorImpl tableDataPopulator = new TableDataPopulatorImpl(
@@ -59,7 +59,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
                     directDependencyBuilder.add(
                         makeDirectMapping(
-                            (DirectColumnMapping) dbColumnMapping
+                            (DirectDbColumnMapping) dbColumnMapping
                         )
                     );
 
@@ -67,7 +67,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
                     inDirectDependencyBuilder.add(
                         makeIndirectDepedency(
-                            (IndirectColumnMapping) dbColumnMapping
+                            (IndirectDbColumnMapping) dbColumnMapping
                         )
                     );
 
@@ -75,7 +75,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
                     belongsToBuilder.add(
                         makeBelongTo(
-                            (VirtualColumnMapping) dbColumnMapping
+                            (VirtualDbColumnMapping) dbColumnMapping
                         )
                     );
                 }
@@ -99,7 +99,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         return upsertFunction;
     }
 
-    private DirectDependency makeDirectMapping(DirectColumnMapping mapping) {
+    private DirectDependency makeDirectMapping(DirectDbColumnMapping mapping) {
 
         List<ForeignColumnMapping> foreignColumnMappings = mapping.getForeignColumnMappingList().stream()
             .map(foreignColumnMapping -> new ForeignColumnMapping(
@@ -118,34 +118,34 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         );
     }
 
-    private IndirectDependency makeIndirectDepedency(IndirectColumnMapping indirectColumnMapping) {
+    private IndirectDependency makeIndirectDepedency(IndirectDbColumnMapping indirectDbColumnMapping) {
 
         ImmutableList.Builder<ForeignColumnMapping> foreignColumnMappingBuilder = ImmutableList.builder();
 
-        List<ColumnToColumnMapping> srcMappings = indirectColumnMapping.getSrcForeignColumnMappingList().stream()
+        List<ColumnToColumnMapping> srcMappings = indirectDbColumnMapping.getSrcForeignColumnMappingList().stream()
             .peek(foreignColumnMapping -> foreignColumnMappingBuilder.add(
                 new ForeignColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName())
             ))
             .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
             .collect(Collectors.toList());
 
-        List<ColumnToColumnMapping> dstMappings = indirectColumnMapping.getDstForeignColumnMappingList().stream()
+        List<ColumnToColumnMapping> dstMappings = indirectDbColumnMapping.getDstForeignColumnMappingList().stream()
             .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
             .collect(Collectors.toList());
 
         ImmutableList<ForeignColumnMapping> foreignColumnMappings = foreignColumnMappingBuilder.build();
 
         return new IndirectDependency(
-            indirectColumnMapping.getField(),
+            indirectDbColumnMapping.getField(),
             new IndirectDependencyHandlerImpl(
                 new RelationTableUpserFunctionImpl(
                     new RelationTableDataPopulatorImpl(
-                        indirectColumnMapping.getRelationTable(),
+                        indirectDbColumnMapping.getRelationTable(),
                         srcMappings.toArray(new ColumnToColumnMapping[srcMappings.size()]),
                         dstMappings.toArray(new ColumnToColumnMapping[dstMappings.size()])
                     )
                 ),
-                createUpsertFunction(indirectColumnMapping.getReferencingEntity())
+                createUpsertFunction(indirectDbColumnMapping.getReferencingEntity())
             )
         );
     }
@@ -160,7 +160,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         return new UpsertFunctionImpl2(referencingEntity, functionMap);
     }
 
-    private BelongsTo makeBelongTo(VirtualColumnMapping mapping) {
+    private BelongsTo makeBelongTo(VirtualDbColumnMapping mapping) {
 
         List<ForeignColumnMapping> foreignColumnMappings = mapping.getForeignColumnMappingList().stream()
             .map(foreignColumnMapping -> new ForeignColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))

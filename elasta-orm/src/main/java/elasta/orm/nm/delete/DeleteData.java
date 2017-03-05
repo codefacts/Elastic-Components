@@ -48,7 +48,7 @@ final public class DeleteData {
     @Override
     public String toString() {
         return "DeleteData{" +
-            "table='" + table + '\'' +
+            "dependentTable='" + table + '\'' +
             ", columnValuePairs=" + Arrays.toString(columnValuePairs) +
             '}';
     }

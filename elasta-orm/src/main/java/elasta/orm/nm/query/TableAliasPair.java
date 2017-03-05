@@ -27,7 +27,7 @@ final public class TableAliasPair {
     @Override
     public String toString() {
         return "TableAliasPair{" +
-            "table='" + table + '\'' +
+            "dependentTable='" + table + '\'' +
             ", alias='" + alias + '\'' +
             '}';
     }

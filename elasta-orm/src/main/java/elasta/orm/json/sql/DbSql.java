@@ -41,4 +41,6 @@ public interface DbSql {
     Promise<Void> delete(String table, JsonObject where);
 
     Promise<Void> delete(Collection<DeleteData> deleteDataList);
+
+    Promise<List<JsonObject>> queryWhere(String table, List<String> columns, JsonObject whereCriteria);
 }

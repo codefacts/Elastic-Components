@@ -2,20 +2,20 @@ package elasta.orm.nm.entitymodel.columnmapping.impl;
 
 import elasta.orm.nm.entitymodel.ColumnType;
 import elasta.orm.nm.entitymodel.DbType;
-import elasta.orm.nm.entitymodel.columnmapping.SimpleColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.SimpleDbColumnMapping;
 
 import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-12.
  */
-public class SimpleColumnMappingImpl implements SimpleColumnMapping {
+public class SimpleDbColumnMappingImpl implements SimpleDbColumnMapping {
     final String field;
     final String column;
     final ColumnType columnType;
     final DbType dbType;
 
-    public SimpleColumnMappingImpl(String field, String column, DbType dbType) {
+    public SimpleDbColumnMappingImpl(String field, String column, DbType dbType) {
         Objects.requireNonNull(field);
         Objects.requireNonNull(column);
         Objects.requireNonNull(dbType);
@@ -49,7 +49,7 @@ public class SimpleColumnMappingImpl implements SimpleColumnMapping {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SimpleColumnMappingImpl that = (SimpleColumnMappingImpl) o;
+        SimpleDbColumnMappingImpl that = (SimpleDbColumnMappingImpl) o;
 
         if (field != null ? !field.equals(that.field) : that.field != null) return false;
         if (column != null ? !column.equals(that.column) : that.column != null) return false;
@@ -69,7 +69,7 @@ public class SimpleColumnMappingImpl implements SimpleColumnMapping {
 
     @Override
     public String toString() {
-        return "SimpleColumnMappingImpl{" +
+        return "SimpleDbColumnMappingImpl{" +
             "field='" + field + '\'' +
             ", name='" + column + '\'' +
             ", columnType=" + columnType +

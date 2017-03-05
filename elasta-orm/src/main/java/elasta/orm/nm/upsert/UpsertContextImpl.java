@@ -31,7 +31,7 @@ public class UpsertContextImpl implements UpsertContext {
     @Override
     public UpsertContext putOrMerge(String tableAndPrimaryKey, TableData tableData) {
         tableData.getValues().forEach(stringObjectEntry -> {
-            Objects.requireNonNull(stringObjectEntry.getValue(), "Null value provided as value for key '" + stringObjectEntry.getKey() + "' table: '" + tableData.table + "'");
+            Objects.requireNonNull(stringObjectEntry.getValue(), "Null value provided as value for key '" + stringObjectEntry.getKey() + "' dependentTable: '" + tableData.table + "'");
         });
         if (map.containsKey(tableAndPrimaryKey)) {
 
@@ -50,7 +50,7 @@ public class UpsertContextImpl implements UpsertContext {
         TableData tableData = map.get(tableAndPrimaryKey);
 
         if (tableData == null) {
-            throw new NullPointerException("No table data found for key '" + tableAndPrimaryKey + "'");
+            throw new NullPointerException("No dependentTable data found for key '" + tableAndPrimaryKey + "'");
         }
 
         return tableData;

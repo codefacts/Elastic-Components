@@ -799,7 +799,7 @@ public class DbImpl implements Db {
         public String toString() {
             return "InsertOrUpdateOperation{" +
                 "insert=" + insert +
-                ", table='" + table + '\'' +
+                ", dependentTable='" + table + '\'' +
                 ", primaryKey='" + primaryKey + '\'' +
                 ", relationTableColumns=" + relationTableColumns +
                 ", data=" + data +

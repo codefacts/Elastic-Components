@@ -5,10 +5,10 @@ import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.entitymodel.*;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.impl.DirectColumnMappingImpl;
-import elasta.orm.nm.entitymodel.columnmapping.impl.IndirectColumnMappingImpl;
-import elasta.orm.nm.entitymodel.columnmapping.impl.SimpleColumnMappingImpl;
-import elasta.orm.nm.entitymodel.columnmapping.impl.VirtualColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.DirectDbColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.IndirectDbColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.SimpleDbColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.VirtualDbColumnMappingImpl;
 import elasta.orm.nm.entitymodel.impl.EntityMappingHelperImpl;
 import elasta.orm.nm.upsert.builder.FunctionMapImpl;
 import elasta.orm.nm.upsert.builder.impl.UpsertFunctionBuilderImpl;
@@ -210,9 +210,9 @@ public interface Main {
                 "EMPLOYEE",
                 "ID",
                 new DbColumnMapping[]{
-                    new SimpleColumnMappingImpl("id", "ID", DbType.VARCHAR),
-                    new SimpleColumnMappingImpl("name", "NAME", DbType.VARCHAR),
-                    new DirectColumnMappingImpl(
+                    new SimpleDbColumnMappingImpl("id", "ID", DbType.VARCHAR),
+                    new SimpleDbColumnMappingImpl("name", "NAME", DbType.VARCHAR),
+                    new DirectDbColumnMappingImpl(
                         "designation".toUpperCase(),
                         "designation",
                         ImmutableList.of(
@@ -220,7 +220,7 @@ public interface Main {
                         ),
                         "designation"
                     ),
-                    new DirectColumnMappingImpl(
+                    new DirectDbColumnMappingImpl(
                         "designation".toUpperCase(),
                         "designation",
                         ImmutableList.of(
@@ -228,7 +228,7 @@ public interface Main {
                         ),
                         "designation2"
                     ),
-                    new IndirectColumnMappingImpl(
+                    new IndirectDbColumnMappingImpl(
                         "designationList".toUpperCase(),
                         "designation",
                         "EMPLOY_DESIGNATION",
@@ -246,7 +246,7 @@ public interface Main {
                         ),
                         "designationList"
                     ),
-                    new VirtualColumnMappingImpl(
+                    new VirtualDbColumnMappingImpl(
                         "GROUP",
                         "group",
                         ImmutableList.of(
@@ -275,9 +275,9 @@ public interface Main {
                 "designation".toUpperCase(),
                 "ID",
                 new DbColumnMapping[]{
-                    new SimpleColumnMappingImpl("id", "ID", DbType.VARCHAR),
-                    new SimpleColumnMappingImpl("name", "NAME", DbType.VARCHAR),
-                    new VirtualColumnMappingImpl("EMPLOYEE", "employee", ImmutableList.of(
+                    new SimpleDbColumnMappingImpl("id", "ID", DbType.VARCHAR),
+                    new SimpleDbColumnMappingImpl("name", "NAME", DbType.VARCHAR),
+                    new VirtualDbColumnMappingImpl("EMPLOYEE", "employee", ImmutableList.of(
                         new ForeignColumnMapping(
                             new Column("DESIGNATION_ID", DbType.VARCHAR),
                             new Column("ID", DbType.VARCHAR)
@@ -299,11 +299,11 @@ public interface Main {
                 "GROUP",
                 "ID",
                 new DbColumnMapping[]{
-                    new SimpleColumnMappingImpl(
+                    new SimpleDbColumnMappingImpl(
                         "id", "ID", DbType.VARCHAR
                     ),
-                    new SimpleColumnMappingImpl("name", "NAME", DbType.VARCHAR),
-                    new DirectColumnMappingImpl(
+                    new SimpleDbColumnMappingImpl("name", "NAME", DbType.VARCHAR),
+                    new DirectDbColumnMappingImpl(
                         "EMPLOYEE",
                         "employee",
                         ImmutableList.of(

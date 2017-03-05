@@ -404,19 +404,19 @@ final public class QueryImpl implements Query {
             switch (columnMapping.getColumnType()) {
 
                 case DIRECT:
-                    return directColumnMapping((DirectColumnMapping) columnMapping, joinTpl);
+                    return directColumnMapping((DirectDbColumnMapping) columnMapping, joinTpl);
 
                 case INDIRECT:
-                    return indirectColumnMapping((IndirectColumnMapping) columnMapping, joinTpl);
+                    return indirectColumnMapping((IndirectDbColumnMapping) columnMapping, joinTpl);
 
                 case VIRTUAL:
-                    return virtualColumnMapping((VirtualColumnMapping) columnMapping, joinTpl);
+                    return virtualColumnMapping((VirtualDbColumnMapping) columnMapping, joinTpl);
             }
 
             throw new QueryParserException("Invalid or no relationship between parent '" + joinTpl.getParentEntity() + "' and child '" + joinTpl.getChildEntity() + "'");
         }
 
-        private List<JoinData> virtualColumnMapping(VirtualColumnMapping columnMapping, JoinTpl joinTpl) {
+        private List<JoinData> virtualColumnMapping(VirtualDbColumnMapping columnMapping, JoinTpl joinTpl) {
 
             ImmutableList.Builder<ColumnToColumnMapping> listBuilder = ImmutableList.builder();
 
@@ -440,7 +440,7 @@ final public class QueryImpl implements Query {
             );
         }
 
-        private List<JoinData> indirectColumnMapping(IndirectColumnMapping columnMapping, JoinTpl joinTpl) {
+        private List<JoinData> indirectColumnMapping(IndirectDbColumnMapping columnMapping, JoinTpl joinTpl) {
 
             ImmutableList.Builder<JoinData> joinDataListBuilder = ImmutableList.builder();
 
@@ -491,10 +491,10 @@ final public class QueryImpl implements Query {
             return joinDataListBuilder.build();
         }
 
-        private List<JoinData> directColumnMapping(DirectColumnMapping directColumnMapping, JoinTpl joinTpl) {
+        private List<JoinData> directColumnMapping(DirectDbColumnMapping directDbColumnMapping, JoinTpl joinTpl) {
             ImmutableList.Builder<ColumnToColumnMapping> mappingListBuilder = ImmutableList.builder();
 
-            directColumnMapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
+            directDbColumnMapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
                 mappingListBuilder.add(
                     new ColumnToColumnMapping(
                         foreignColumnMapping.getSrcColumn().getName(),
@@ -522,7 +522,7 @@ final public class QueryImpl implements Query {
                 throw new QueryParserException(entity + "." + field + " does not map to simple column type");
             }
 
-            return ((SimpleColumnMapping) columnMapping).getColumn();
+            return ((SimpleDbColumnMapping) columnMapping).getColumn();
         }
 
         private String getChildEntity(String entity, String childEntityField) {

@@ -1,14 +1,13 @@
 package elasta.orm.nm.entitymodel.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.nm.entitymodel.*;
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.SimpleColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.SimpleDbColumnMapping;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +51,7 @@ public class EntityMappingHelperImpl implements EntityMappingHelper {
     public Entity getEntityByTable(String table) {
         Entity entity = tableToEntityMap.get(table);
         if (entity == null) {
-            throw new NullPointerException("No Entity found for table '" + table + "'");
+            throw new NullPointerException("No Entity found for dependentTable '" + table + "'");
         }
         return entity;
     }
@@ -82,12 +81,12 @@ public class EntityMappingHelperImpl implements EntityMappingHelper {
     }
 
     @Override
-    public Map<String, SimpleColumnMapping> getColumnNameToColumnMappingMap(String entity) {
-        ImmutableMap.Builder<String, SimpleColumnMapping> map = ImmutableMap.builder();
+    public Map<String, SimpleDbColumnMapping> getColumnNameToColumnMappingMap(String entity) {
+        ImmutableMap.Builder<String, SimpleDbColumnMapping> map = ImmutableMap.builder();
         Arrays.asList(getEntity(entity).getDbMapping().getDbColumnMappings())
             .stream()
             .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
-            .map(Utils::<SimpleColumnMapping>cast)
+            .map(Utils::<SimpleDbColumnMapping>cast)
             .forEach(dbColumnMapping -> map.put(dbColumnMapping.getColumn(), dbColumnMapping));
         return map.build();
     }
@@ -128,7 +127,7 @@ public class EntityMappingHelperImpl implements EntityMappingHelper {
 
     @Override
     public String getPrimaryKeyColumnName(String entity) {
-        return Utils.<SimpleColumnMapping>cast(getPrimaryKeyColumnMapping(entity)).getColumn();
+        return Utils.<SimpleDbColumnMapping>cast(getPrimaryKeyColumnMapping(entity)).getColumn();
     }
 
     @Override
@@ -139,5 +138,15 @@ public class EntityMappingHelperImpl implements EntityMappingHelper {
     @Override
     public String getTable(String entity) {
         return getEntity(entity).getDbMapping().getTable();
+    }
+
+    @Override
+    public DbMapping getDbMappingByTable(String table) {
+        return getEntityByTable(table).getDbMapping();
+    }
+
+    @Override
+    public Set<String> getTables() {
+        return tableToEntityMap.keySet();
     }
 }

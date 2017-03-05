@@ -2,7 +2,7 @@ package elasta.orm.nm.entitymodel.columnmapping.impl;
 
 import elasta.orm.nm.entitymodel.ColumnType;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.DirectColumnMapping;
+import elasta.orm.nm.entitymodel.columnmapping.DirectDbColumnMapping;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,14 +10,14 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-12.
  */
-final public class DirectColumnMappingImpl implements DirectColumnMapping {
+final public class DirectDbColumnMappingImpl implements DirectDbColumnMapping {
     final String referencingTable;
     final String referencingEntity;
     final List<ForeignColumnMapping> foreignColumnMappingList;
     final String field;
     final ColumnType columnType;
 
-    public DirectColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
+    public DirectDbColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
@@ -58,7 +58,7 @@ final public class DirectColumnMappingImpl implements DirectColumnMapping {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DirectColumnMappingImpl that = (DirectColumnMappingImpl) o;
+        DirectDbColumnMappingImpl that = (DirectDbColumnMappingImpl) o;
 
         if (referencingTable != null ? !referencingTable.equals(that.referencingTable) : that.referencingTable != null)
             return false;
@@ -80,7 +80,7 @@ final public class DirectColumnMappingImpl implements DirectColumnMapping {
 
     @Override
     public String toString() {
-        return "DirectColumnMappingImpl{" +
+        return "DirectDbColumnMappingImpl{" +
             "referencingTable='" + referencingTable + '\'' +
             ", foreignColumnMappingList=" + foreignColumnMappingList +
             ", field='" + field + '\'' +

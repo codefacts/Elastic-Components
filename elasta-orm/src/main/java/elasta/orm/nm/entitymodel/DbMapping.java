@@ -53,7 +53,7 @@ final public class DbMapping {
     @Override
     public String toString() {
         return "DbMapping{" +
-            "table='" + table + '\'' +
+            "dependentTable='" + table + '\'' +
             ", primaryColumn='" + primaryColumn + '\'' +
             ", dbColumnMappings=" + Arrays.toString(dbColumnMappings) +
             '}';

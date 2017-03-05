@@ -42,7 +42,7 @@ public class TablePrimary {
     @Override
     public String toString() {
         return "TablePrimary{" +
-            "table='" + table + '\'' +
+            "dependentTable='" + table + '\'' +
             ", primaryKey='" + primaryKey + '\'' +
             '}';
     }

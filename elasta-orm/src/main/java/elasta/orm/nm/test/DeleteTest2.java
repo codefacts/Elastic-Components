@@ -33,7 +33,7 @@ public interface DeleteTest2 {
 
         final DeleteFunction deleteFunction = deleteFunctionBuilder.create("employee");
 
-        final DbSql nm = UpsertTest.createDbSql("nm");
+        final DbSql nm = UpsertTest.dbSql("nm");
 
         {
             final LinkedHashSet<DeleteData> deleteDataSet = new LinkedHashSet<>();

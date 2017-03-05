@@ -10,10 +10,10 @@ import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.entitymodel.*;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.impl.DirectColumnMappingImpl;
-import elasta.orm.nm.entitymodel.columnmapping.impl.IndirectColumnMappingImpl;
-import elasta.orm.nm.entitymodel.columnmapping.impl.SimpleColumnMappingImpl;
-import elasta.orm.nm.entitymodel.columnmapping.impl.VirtualColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.DirectDbColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.IndirectDbColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.SimpleDbColumnMappingImpl;
+import elasta.orm.nm.entitymodel.columnmapping.impl.VirtualDbColumnMappingImpl;
 import elasta.orm.nm.entitymodel.impl.EntityMappingHelperImpl;
 import elasta.orm.nm.upsert.builder.FunctionMapImpl;
 import elasta.orm.nm.upsert.builder.impl.UpsertFunctionBuilderImpl;
@@ -192,7 +192,7 @@ public interface UpsertTest {
 
         final Vertx vertx = Vertx.vertx();
 
-        final DbSql dbSql = createDbSql("nm", vertx);
+        final DbSql dbSql = dbSql("nm", vertx);
 
         vertx.setTimer(1, event -> {
             Promises.when(map.values().stream().map(tableData -> {
@@ -204,7 +204,7 @@ public interface UpsertTest {
         });
     }
 
-    static DbSql createDbSql(String db, Vertx vertx) {
+    static DbSql dbSql(String db, Vertx vertx) {
         final DbSqlImpl dbSql = new DbSqlImpl(
             JDBCClient.createShared(vertx, new JsonObject(
                 ImmutableMap.of(
@@ -219,8 +219,8 @@ public interface UpsertTest {
         return dbSql;
     }
 
-    static DbSql createDbSql(String db) {
-        return createDbSql(db, Vertx.vertx());
+    static DbSql dbSql(String db) {
+        return dbSql(db, Vertx.vertx());
     }
 
     static Collection<Entity> entities() {
@@ -248,9 +248,9 @@ public interface UpsertTest {
                 "EMPLOYEE",
                 "ID",
                 new DbColumnMapping[]{
-                    new SimpleColumnMappingImpl("id", "ID", DbType.VARCHAR),
-                    new SimpleColumnMappingImpl("name", "NAME", DbType.VARCHAR),
-                    new DirectColumnMappingImpl(
+                    new SimpleDbColumnMappingImpl("id", "ID", DbType.VARCHAR),
+                    new SimpleDbColumnMappingImpl("name", "NAME", DbType.VARCHAR),
+                    new DirectDbColumnMappingImpl(
                         "designation".toUpperCase(),
                         "designation",
                         ImmutableList.of(
@@ -258,16 +258,16 @@ public interface UpsertTest {
                         ),
                         "designation"
                     ),
-                    new DirectColumnMappingImpl(
+                    new DirectDbColumnMappingImpl(
                         "designation".toUpperCase(),
                         "designation",
                         ImmutableList.of(
-                            new ForeignColumnMapping(new Column("DESIGNATION2_ID", DbType.VARCHAR), new Column("ID", DbType.VARCHAR))
+                            new ForeignColumnMapping(new Column("DESIGNATION2_NAME", DbType.VARCHAR), new Column("NAME", DbType.VARCHAR))
                         ),
                         "designation2"
                     ),
-                    new IndirectColumnMappingImpl(
-                        "designationList".toUpperCase(),
+                    new IndirectDbColumnMappingImpl(
+                        "designation".toUpperCase(),
                         "designation",
                         "EMPLOY_DESIGNATION",
                         ImmutableList.of(
@@ -284,7 +284,7 @@ public interface UpsertTest {
                         ),
                         "designationList"
                     ),
-                    new VirtualColumnMappingImpl(
+                    new VirtualDbColumnMappingImpl(
                         "GROUP",
                         "group",
                         ImmutableList.of(
@@ -313,9 +313,9 @@ public interface UpsertTest {
                 "designation".toUpperCase(),
                 "ID",
                 new DbColumnMapping[]{
-                    new SimpleColumnMappingImpl("id", "ID", DbType.VARCHAR),
-                    new SimpleColumnMappingImpl("name", "NAME", DbType.VARCHAR),
-                    new VirtualColumnMappingImpl("EMPLOYEE", "employee", ImmutableList.of(
+                    new SimpleDbColumnMappingImpl("id", "ID", DbType.VARCHAR),
+                    new SimpleDbColumnMappingImpl("name", "NAME", DbType.VARCHAR),
+                    new VirtualDbColumnMappingImpl("EMPLOYEE", "employee", ImmutableList.of(
                         new ForeignColumnMapping(
                             new Column("DESIGNATION_ID", DbType.VARCHAR),
                             new Column("ID", DbType.VARCHAR)
@@ -343,15 +343,15 @@ public interface UpsertTest {
                 "GROUP",
                 "ID",
                 new DbColumnMapping[]{
-                    new SimpleColumnMappingImpl("id", "ID", DbType.VARCHAR),
-                    new SimpleColumnMappingImpl("name", "NAME", DbType.VARCHAR),
-                    new DirectColumnMappingImpl(
+                    new SimpleDbColumnMappingImpl("id", "ID", DbType.VARCHAR),
+                    new SimpleDbColumnMappingImpl("name", "NAME", DbType.VARCHAR),
+                    new DirectDbColumnMappingImpl(
                         "EMPLOYEE",
                         "employee",
                         ImmutableList.of(
                             new ForeignColumnMapping(
-                                new Column("EMPLOYEE_ID", DbType.VARCHAR),
-                                new Column("ID", DbType.VARCHAR)
+                                new Column("EMPLOYEE_NAME", DbType.VARCHAR),
+                                new Column("NAME", DbType.VARCHAR)
                             )
                         ),
                         "employee"
@@ -361,5 +361,11 @@ public interface UpsertTest {
         );
 
         return Arrays.asList(employee, designation, group);
+    }
+
+    static EntityMappingHelper helper() {
+        return new EntityMappingHelperImpl(
+            EntityUtils.toEntityNameToEntityMap(entities())
+        );
     }
 }
