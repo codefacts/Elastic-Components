@@ -8,6 +8,7 @@ import io.vertx.ext.sql.ResultSet;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Jango on 9/25/2016.
@@ -17,6 +18,8 @@ public interface DbSql {
     Promise<ResultSet> query(String sql);
 
     Promise<ResultSet> query(String sql, JsonArray params);
+
+    Promise<List<JsonObject>> queryJo(Collection<SqlSelection> sqlSelections, SqlFrom sqlFrom, Collection<SqlJoin> sqlJoins, Collection<SqlCriteria> sqlCriterias);
 
     <T> Promise<T> queryScalar(String sql);
 
@@ -42,5 +45,5 @@ public interface DbSql {
 
     Promise<Void> delete(Collection<DeleteData> deleteDataList);
 
-    Promise<List<JsonObject>> queryWhere(String table, List<String> columns, JsonObject whereCriteria);
+    Promise<List<JsonObject>> queryWhereJo(String table, List<String> columns, JsonObject whereCriteria);
 }

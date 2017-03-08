@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableList;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -81,6 +83,61 @@ public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
             ,
             new JsonArray(paramsBuilder.build())
         );
+    }
+
+    @Override
+    public SqlAndParams querySql(Collection<SqlSelection> sqlSelections, SqlFrom sqlFrom, Collection<SqlJoin> sqlJoins, Collection<SqlCriteria> sqlCriterias) {
+        String select = toSqlSelect(sqlSelections);
+        String from = toSqlFrom(sqlFrom);
+        String join = toSqlJoin(sqlJoins);
+        ImmutableList.Builder<Object> builder = ImmutableList.builder();
+        String whereSql = toWhere(sqlCriterias, builder);
+        return new SqlAndParams(
+            "SELECT " + select + " FROM " + from + join + (whereSql.isEmpty() ? "" : " WHERE " + whereSql),
+            new JsonArray(builder.build())
+        );
+    }
+
+    private String toWhere(Collection<SqlCriteria> sqlCriterias, ImmutableList.Builder<Object> builder) {
+        return sqlCriterias.stream().peek(sqlCriteria -> builder.add(sqlCriteria.getValue()))
+            .map(sqlCriteria -> sqlCriteria.getAlias().map(alias -> alias + ".").orElse("") + column(sqlCriteria.getColumn()) + " = ?")
+            .collect(Collectors.joining(" AND "));
+    }
+
+    private String toSqlJoin(Collection<SqlJoin> sqlJoins) {
+        return sqlJoins.stream()
+            .map(
+                sqlJoin -> sqlJoin.getJoinType().getValue().toUpperCase()
+                    + " " + table(sqlJoin.getJoinTable())
+                    + sqlJoin.getAlias().map(alias -> " " + alias)
+                    + " ON "
+                    + sqlJoin
+                    .getSqlJoinColumns()
+                    .stream()
+                    .map(
+                        sqlJoinColumn -> sqlJoin.getAlias().map(alias -> alias + ".").orElse("")
+                            + column(sqlJoinColumn.getJoinTableColumn()) + " = "
+                            + sqlJoinColumn.getParentTableAlias().map(alias -> alias + ".").orElse("") + column(sqlJoinColumn.getParentTableColumn())
+                    ).collect(Collectors.joining(" AND "))
+            )
+            .collect(Collectors.joining(" "));
+    }
+
+    private String toSqlFrom(SqlFrom sqlFrom) {
+        return table(sqlFrom.getTable()) + sqlFrom.getAlias().map(alias -> " " + alias).orElse("");
+    }
+
+    private String toSqlSelect(Collection<SqlSelection> sqlSelections) {
+        return sqlSelections.stream()
+            .map(
+                sqlSelection ->
+                    sqlSelection
+                        .getAlias()
+                        .map(alias -> alias + ".")
+                        .orElse("")
+                        + column(sqlSelection.getColumn())
+            )
+            .collect(Collectors.joining(", "));
     }
 
     private String table(String table) {

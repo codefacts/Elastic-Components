@@ -1,5 +1,7 @@
 package elasta.orm.json.sql.core;
 
+import java.util.Objects;
+
 /**
  * Created by Jango on 9/15/2016.
  */
@@ -17,6 +19,7 @@ public enum JoinType {
     private final String value;
 
     JoinType(String value) {
+        Objects.requireNonNull(value);
         this.value = value;
     }
 

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import elasta.commons.SimpleCounter;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.json.sql.query.SqlQueryGenerator;
 import elasta.orm.nm.delete.ColumnValuePair;
 import elasta.orm.nm.delete.DeleteData;
 import elasta.vertxutils.VertxUtils;
@@ -16,6 +15,7 @@ import io.vertx.ext.sql.SQLConnection;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,6 +41,12 @@ public class DbSqlImpl implements DbSql {
     public Promise<ResultSet> query(String sql, JsonArray params) {
         return withConn(con -> Promises.exec(
             defer -> con.queryWithParams(sql, params, VertxUtils.deferred(defer))));
+    }
+
+    @Override
+    public Promise<List<JsonObject>> queryJo(Collection<SqlSelection> sqlSelections, SqlFrom sqlFrom, Collection<SqlJoin> sqlJoins, Collection<SqlCriteria> sqlCriterias) {
+        SqlAndParams sqlAndParams = sqlBuilderUtils.querySql(sqlSelections, sqlFrom, sqlJoins, sqlCriterias);
+        return query(sqlAndParams.getSql(), sqlAndParams.getParams()).map(ResultSet::getRows);
     }
 
     @Override
@@ -190,11 +196,11 @@ public class DbSqlImpl implements DbSql {
     }
 
     @Override
-    public Promise<List<JsonObject>> queryWhere(String table, List<String> columns, JsonObject whereCriteria) {
+    public Promise<List<JsonObject>> queryWhereJo(String table, List<String> columns, JsonObject whereCriteria) {
 
-        sqlBuilderUtils.querySql(table, columns, whereCriteria);
+        SqlAndParams sqlAndParams = sqlBuilderUtils.querySql(table, columns, whereCriteria);
 
-        return null;
+        return query(sqlAndParams.getSql(), sqlAndParams.getParams()).map(ResultSet::getRows);
     }
 
     private Promise<SQLConnection> conn() {

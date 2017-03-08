@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import elasta.orm.json.sql.DbSql;
 import elasta.orm.nm.delete.dependency.DependencyDataLoader;
 import elasta.orm.nm.delete.dependency.DependencyDataLoaderBuilder;
-import elasta.orm.nm.delete.dependency.IndirectDependencyDataLoaderImpl;
 import elasta.orm.nm.delete.dependency.ex.DependencyDataLoaderException;
 import elasta.orm.nm.entitymodel.EntityMappingHelper;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
