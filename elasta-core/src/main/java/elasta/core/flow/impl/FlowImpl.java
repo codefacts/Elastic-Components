@@ -48,7 +48,7 @@ public class FlowImpl implements Flow {
             final NextStateAndMessage nextStateAndMessage = nextStateAndMessage(trigger, state);
 
             if (nextStateAndMessage.nextState == null) {
-                return Promises.just((R) nextStateAndMessage.message);
+                return Promises.of((R) nextStateAndMessage.message);
             }
 
             return execState(nextStateAndMessage.nextState, nextStateAndMessage.message);

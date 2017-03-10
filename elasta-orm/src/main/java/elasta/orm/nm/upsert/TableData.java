@@ -1,5 +1,9 @@
 package elasta.orm.nm.upsert;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import elasta.commons.Utils;
+import elasta.orm.nm.upsert.ex.TableDataException;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
@@ -13,14 +17,30 @@ final public class TableData {
     final String table;
     final String[] primaryColumns;
     final JsonObject values;
+    final int hash;
 
     public TableData(String table, String[] primaryColumns, JsonObject values) {
         Objects.requireNonNull(table);
         Objects.requireNonNull(primaryColumns);
         Objects.requireNonNull(values);
+        values = new JsonObject(
+            ImmutableMap.copyOf(
+                values.getMap()
+            )
+        );
+        checkPrimaryColumnValuesGivenForEachColumn(primaryColumns, values);
         this.table = table;
         this.primaryColumns = primaryColumns;
         this.values = values;
+        this.hash = calHashCode();
+    }
+
+    private void checkPrimaryColumnValuesGivenForEachColumn(String[] primaryColumns, JsonObject values) {
+        for (String primaryColumn : primaryColumns) {
+            if (values.getValue(primaryColumn) == null) {
+                throw new TableDataException("No value is given for primary column '" + table + "." + primaryColumn + "'");
+            }
+        }
     }
 
     public String getTable() {
@@ -42,19 +62,22 @@ final public class TableData {
 
         TableData tableData = (TableData) o;
 
-        if (table != null ? !table.equals(tableData.table) : tableData.table != null) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!table.equals(tableData.table)) return false;
         if (!Arrays.equals(primaryColumns, tableData.primaryColumns)) return false;
-        return values != null ? values.equals(tableData.values) : tableData.values == null;
-
+        for (String primaryColumn : primaryColumns) {
+            boolean equals = values.getValue(primaryColumn).equals(
+                tableData.getValues().getValue(primaryColumn)
+            );
+            if (Utils.not(equals)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = table != null ? table.hashCode() : 0;
-        result = 31 * result + Arrays.hashCode(primaryColumns);
-        result = 31 * result + (values != null ? values.hashCode() : 0);
-        return result;
+        return hash;
     }
 
     @Override
@@ -64,5 +87,18 @@ final public class TableData {
             ", primaryColumns=" + Arrays.toString(primaryColumns) +
             ", values=" + values +
             '}';
+    }
+
+    private int calHashCode() {
+        int result = table.hashCode();
+        result = 31 * result + Arrays.hashCode(primaryColumns);
+
+        ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();
+        for (String primaryColumn : primaryColumns) {
+            listBuilder.add(values.getValue(primaryColumn));
+        }
+
+        result = 31 * result + listBuilder.build().hashCode();
+        return result;
     }
 }

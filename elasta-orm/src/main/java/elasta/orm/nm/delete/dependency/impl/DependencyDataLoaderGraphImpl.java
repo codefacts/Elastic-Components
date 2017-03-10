@@ -28,6 +28,10 @@ final public class DependencyDataLoaderGraphImpl implements DependencyDataLoader
         return loaders;
     }
 
+    public Map<String, Collection<DependencyDataLoader>> asMap() {
+        return tableToDependencyDataLoadersMap;
+    }
+
     @Override
     public String toString() {
         return "DependencyDataLoaderGraphImpl{" +

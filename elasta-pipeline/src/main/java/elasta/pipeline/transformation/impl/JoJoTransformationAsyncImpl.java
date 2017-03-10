@@ -25,7 +25,7 @@ public class JoJoTransformationAsyncImpl implements JoJoTransformationAsync {
         try {
 
             if (list.size() <= 0) {
-                return Promises.just(val);
+                return Promises.of(val);
             }
 
             Promise<JsonObject> promise;

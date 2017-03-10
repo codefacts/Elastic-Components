@@ -21,7 +21,7 @@ public class JsonObjectValidationPipelineAsync implements JsonObjectValidatorAsy
 
     public Promise<List<ValidationResult>> validate(JsonObject jsonObject) {
 
-        if (list.isEmpty()) return Promises.just(null);
+        if (list.isEmpty()) return Promises.of(null);
 
         final ImmutableList.Builder<ValidationResult> builder = ImmutableList.<ValidationResult>builder();
 

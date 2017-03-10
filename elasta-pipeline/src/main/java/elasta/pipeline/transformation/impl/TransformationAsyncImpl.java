@@ -23,7 +23,7 @@ public class TransformationAsyncImpl<T, R> implements TransformationAsync<T, R> 
         try {
 
             if (list.size() <= 0) {
-                return Promises.just((R) val);
+                return Promises.of((R) val);
             }
 
             Promise<Object> promise;

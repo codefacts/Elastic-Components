@@ -17,10 +17,10 @@ import java.util.*;
 final public class Promises {
 
     public static <R> Promise<R> empty() {
-        return just(null);
+        return of(null);
     }
 
-    public static <T> Promise<T> just(final T val) {
+    public static <T> Promise<T> of(final T val) {
         final PromiseImpl<T> promise = new PromiseImpl<>(SignalImpl.success(val));
         return promise;
     }
@@ -77,7 +77,7 @@ final public class Promises {
 
     public static <T> Promise<List<T>> when(final Collection<Promise<T>> promises) {
         if (promises.size() == 0) {
-            return Promises.just(ImmutableList.of());
+            return Promises.of(ImmutableList.of());
         }
         Defer<List<T>> defer = defer();
         final SimpleCounter counter = new SimpleCounter(0);

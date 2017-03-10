@@ -45,7 +45,7 @@ public class SimpleEventBusImpl implements SimpleEventBus {
             if (isNext) {
                 return context.next(o);
             } else {
-                return Promises.just(o);
+                return Promises.of(o);
             }
         });
 
@@ -61,7 +61,7 @@ public class SimpleEventBusImpl implements SimpleEventBus {
                     return context.next(value);
                 }
 
-                return Promises.<Object>just(value);
+                return Promises.<Object>of(value);
             }));
         return this;
     }
@@ -145,7 +145,7 @@ public class SimpleEventBusImpl implements SimpleEventBus {
     private <T, R> Promise<R> executeHandlers(List<EventMatchInfo> handlers, String event, T t, Map<String, ?> extra) {
 
         if (handlers.isEmpty()) {
-            return Promises.just((R) t);
+            return Promises.of((R) t);
         }
 
         Iterator<EventMatchInfo> iterator = handlers.iterator();
@@ -157,7 +157,7 @@ public class SimpleEventBusImpl implements SimpleEventBus {
         MutableTpl1<ContextImpl> tpl1 = new MutableTpl1<>();
         tpl1.t1 = new ContextImpl(event, map, val -> {
             if (!iterator.hasNext()) {
-                return Promises.just(val);
+                return Promises.of(val);
             }
             EventMatchInfo matchInfo = iterator.next();
             tpl1.t1.params().putAll(matchInfo.params);

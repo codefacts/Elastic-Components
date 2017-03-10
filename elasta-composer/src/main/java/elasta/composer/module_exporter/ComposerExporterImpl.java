@@ -82,9 +82,9 @@ public class ComposerExporterImpl implements ComposerExporter {
                 .build()
         ));
 
-        moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.START, module -> module.export(jsonObject -> Promises.just(triggerNext(jsonObject))));
+        moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.START, module -> module.export(jsonObject -> Promises.of(triggerNext(jsonObject))));
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.INITIAL_TRANSFORMATION, module -> module.export(
-            jsonObject -> Promises.just(
+            jsonObject -> Promises.of(
                 Flow.triggerNext(module.require(JoJoTransformation.class, JoJoTransformations.INITIAL_TRANSFORMATION).transform(jsonObject))
             )
         ));
@@ -136,26 +136,26 @@ public class ComposerExporterImpl implements ComposerExporter {
                 jsonObject.getJsonObject(DbReqParams.CRITERIA).put("id", Integer.parseInt(jsonObject.getJsonObject(DbReqParams.CRITERIA).getString("id")));
             }
 
-            return Promises.just(Flow.triggerNext(jsonObject));
+            return Promises.of(Flow.triggerNext(jsonObject));
         }));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.CONVERTION_ERROR_TO_VALIDATION_ERROR_TRANSLATION, module -> module.export(
-            jsonObject -> Promises.just(
+            jsonObject -> Promises.of(
                 Flow.triggerNext(jsonObject)
             )
         ));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.VALIDATION, module -> module.export(
-            jsonObject -> Promises.just(Flow.triggerNext(jsonObject))
+            jsonObject -> Promises.of(Flow.triggerNext(jsonObject))
         ));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.VALIDATION_ERROR, module -> module.export(
-            jsonObject -> Promises.just(
+            jsonObject -> Promises.of(
                 Flow.triggerNext(jsonObject)
             )
         ));
 
-        moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.TRANSFORMATION, module -> module.export(jsonObject -> Promises.just(Flow.triggerNext(jsonObject))));
+        moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.TRANSFORMATION, module -> module.export(jsonObject -> Promises.of(Flow.triggerNext(jsonObject))));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.ACTION, module -> module.export(
             jsonObject -> {
@@ -194,11 +194,11 @@ public class ComposerExporterImpl implements ComposerExporter {
         ));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.RESULT_PREPERATION, module -> module.export(
-            jsonObject -> Promises.just(Flow.triggerNext(jsonObject))
+            jsonObject -> Promises.of(Flow.triggerNext(jsonObject))
         ));
 
         moduleSystem.export(JsonEnterHanler.class, FLowEnterHandlers.END, module -> module.export(
-            jsonObject -> Promises.just(Flow.triggerNext(jsonObject))
+            jsonObject -> Promises.of(Flow.triggerNext(jsonObject))
         ));
 
         moduleSystem.export(Map.class, Configs.RESOURCE_BY_EVENT_PATH_MAP, module -> module.export(ImmutableMap.of(

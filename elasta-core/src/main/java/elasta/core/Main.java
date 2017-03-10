@@ -10,9 +10,9 @@ import elasta.core.promise.intfs.Promise;
 public class Main {
     public static void main(String[] args) {
 
-        Promises.just("ok")
+        Promises.of("ok")
             .mapP(val -> {
-                return Promises.just("mapP >> " + val)
+                return Promises.of("mapP >> " + val)
                     .then(val1 -> {
                         System.out.println("mapP: " + val1);
                     });
@@ -31,14 +31,14 @@ public class Main {
     }
 
     private static void test7() {
-        Promises.just("ok")
+        Promises.of("ok")
             .then(val -> System.out.println("val: " + val))
-            .mapP(s -> Promises.just(s + " then"))
+            .mapP(s -> Promises.of(s + " then"))
             .then(val -> System.out.println("mapP: " + val))
             .cmpP(
                 signal ->
                     Promises
-                        .just(signal.val() + " complete")
+                        .of(signal.val() + " complete")
                         .then(val -> System.out.println("cmpP: " + val))
                         .map(Promises.toVoid())
             )
@@ -59,7 +59,7 @@ public class Main {
         promise1.then(val -> {
         });
 
-        Promises.just(978)
+        Promises.of(978)
             .filter(integer -> integer.equals(868))
             .then(val -> System.out.println("Value Got: " + val))
             .err(Throwable::printStackTrace)
@@ -68,7 +68,7 @@ public class Main {
     }
 
     public void test5() {
-        Promises.just("val")
+        Promises.of("val")
             .filter(o -> true)
             .map(v -> v.toUpperCase())
             .filter(o -> o == "ok")
@@ -91,7 +91,7 @@ public class Main {
     }
 
     public void test4() {
-        Promises.just("val")
+        Promises.of("val")
             .filter(o -> true)
             .filter(o -> true)
             .err(val -> System.out.println("error: " + val))
@@ -153,7 +153,7 @@ public class Main {
             .cmp(v -> System.out.println("ok: " + v))
         ;
 
-        Promises.just("value")
+        Promises.of("value")
             .err(val -> System.out.println("error: " + val))
             .then(p -> System.out.println("p: " + p))
             .cmp(v -> System.out.println("ok: " + v))

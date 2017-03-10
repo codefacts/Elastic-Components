@@ -19,7 +19,7 @@ public class StateTransitionHandlers<T, R> {
     }
 
     private static <T, R> EnterEventHandlerP<T, R> defE() {
-        return t -> Promises.just(null);
+        return t -> Promises.of(null);
     }
 
     public EnterEventHandlerP<T, R> getOnEnter() {

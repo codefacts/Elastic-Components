@@ -24,7 +24,7 @@ public class FlowTest {
                 on("fuck", "fuckState"))
             .exec("errState", Flow.execP(o -> {
                 System.out.println("errState");
-                return Promises.just(Flow.triggerExit("errState"));
+                return Promises.of(Flow.triggerExit("errState"));
             }, null))
             .exec("fuckState", Flow.execP(null, () -> {
                 System.out.println("fuckState: end");
@@ -32,14 +32,14 @@ public class FlowTest {
             }))
             .exec("respond", Flow.execP(t -> {
                 System.out.println("res");
-                return Promises.just(Flow.triggerExit());
+                return Promises.of(Flow.triggerExit());
             }, () -> {
                 System.out.println("res:end");
                 return Promises.empty();
             }))
             .exec("start", Flow.execP(o -> {
                 System.out.println("ok gury");
-                return Promises.just(Flow.<String>trigger("fuck", "ok"));
+                return Promises.of(Flow.<String>trigger("fuck", "ok"));
             }, () -> {
                 System.out.println("start: end");
                 return Promises.empty();

@@ -64,7 +64,7 @@ public interface Flow {
     public static <T, R> StateTransitionHandlers<T, R> exec(
         Fun1Unckd<T, StateTrigger<R>> onEnter,
         RunnableUnckd onExit) {
-        return new StateTransitionHandlers<>(t -> Promises.just(
+        return new StateTransitionHandlers<>(t -> Promises.of(
             onEnter.apply(t)
         ), () -> Promises.runnable(onExit));
     }
@@ -76,7 +76,7 @@ public interface Flow {
     }
 
     public static <T, R> StateTransitionHandlers onEnter(Fun1Unckd<T, StateTrigger<R>> startHandler) {
-        return Flow.<T, R>execP(o -> Promises.just(
+        return Flow.<T, R>execP(o -> Promises.of(
             startHandler.apply(o)
         ), null);
     }

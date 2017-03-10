@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import elasta.core.flow.*;
 import elasta.core.promise.impl.Promises;
-import elasta.core.promise.intfs.Promise;
 
 import java.util.*;
 
@@ -145,7 +144,7 @@ public class FlowBuilderImpl implements FlowBuilder {
 
     @Override
     public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter) {
-        this.<T, R>handlersP(state, o -> Promises.just(
+        this.<T, R>handlersP(state, o -> Promises.of(
             onEnter.handle(o)
         ));
         return this;
@@ -153,7 +152,7 @@ public class FlowBuilderImpl implements FlowBuilder {
 
     @Override
     public <T, R> FlowBuilder handlers(String state, EnterEventHandler<T, R> onEnter, ExitEventHandler onExit) {
-        this.<T, R>handlersP(state, o -> Promises.just(
+        this.<T, R>handlersP(state, o -> Promises.of(
             onEnter.handle(o)
         ), () -> Promises.runnable(onExit::handle));
         return this;
@@ -243,11 +242,11 @@ public class FlowBuilderImpl implements FlowBuilder {
             .when("end", Flow.end())
             .exec("start", Flow.onEnterP(o -> {
                 System.out.println("onStart: " + o);
-                return Promises.just(Flow.trigger("err", new NullPointerException("ok")));
+                return Promises.of(Flow.trigger("err", new NullPointerException("ok")));
             }))
             .exec("errState", Flow.execP(
                 o -> {
-                    return Promises.just(Flow.triggerNext(o));
+                    return Promises.of(Flow.triggerNext(o));
                 },
                 () -> {
                     System.out.println("onExist errorState: ");
@@ -255,12 +254,12 @@ public class FlowBuilderImpl implements FlowBuilder {
                 }))
             .exec("process", Flow.onEnterP(o -> {
                 System.out.println("onEnter process: " + o);
-                return Promises.just(Flow.triggerNext(o));
+                return Promises.of(Flow.triggerNext(o));
             }))
             .exec("end", Flow.execP(o -> {
 
                 System.out.println("onEnter: end -> " + o);
-                return Promises.just(Flow.triggerValue(o));
+                return Promises.of(Flow.triggerValue(o));
             }, () -> {
 
                 System.out.println("onExit: end -> ");

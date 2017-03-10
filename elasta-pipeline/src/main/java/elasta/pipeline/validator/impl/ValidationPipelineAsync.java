@@ -20,7 +20,7 @@ public class ValidationPipelineAsync<T> implements ValidatorAsync<T> {
 
     public Promise<List<ValidationResult>> validate(T jsonObject) {
 
-        if (list.isEmpty()) return Promises.just(null);
+        if (list.isEmpty()) return Promises.of(null);
 
         final ImmutableList.Builder<ValidationResult> builder = ImmutableList.<ValidationResult>builder();
 
