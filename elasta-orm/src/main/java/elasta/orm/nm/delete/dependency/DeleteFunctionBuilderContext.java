@@ -7,7 +7,7 @@ public interface DeleteFunctionBuilderContext {
 
     boolean containsTable(String table);
 
-    boolean containsDeleteFunction(String table);
+    boolean contains(String table);
 
     DeleteFunctionBuilderContext putEmpty(String table);
 

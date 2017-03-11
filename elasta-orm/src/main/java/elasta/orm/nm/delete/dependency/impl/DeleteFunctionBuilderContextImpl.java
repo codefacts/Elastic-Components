@@ -28,7 +28,7 @@ final public class DeleteFunctionBuilderContextImpl implements DeleteFunctionBui
     }
 
     @Override
-    public boolean containsDeleteFunction(String table) {
+    public boolean contains(String table) {
         return functionMap.containsKey(table) && getByTable(table).isPresent();
     }
 

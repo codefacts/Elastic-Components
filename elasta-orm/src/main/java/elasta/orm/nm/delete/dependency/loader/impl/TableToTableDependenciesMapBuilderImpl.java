@@ -3,6 +3,7 @@ package elasta.orm.nm.delete.dependency.loader.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.nm.EntityUtils;
+import elasta.orm.nm.delete.dependency.loader.TableToTableDependenciesMapBuilder;
 import elasta.orm.nm.entitymodel.DbMapping;
 import elasta.orm.nm.entitymodel.EntityMappingHelper;
 import elasta.orm.nm.entitymodel.columnmapping.DirectDbColumnMapping;
@@ -15,10 +16,10 @@ import java.util.*;
 /**
  * Created by sohan on 3/5/2017.
  */
-final public class TableToTableDependenciesMapBuilder {
+final public class TableToTableDependenciesMapBuilderImpl implements TableToTableDependenciesMapBuilder {
     final EntityMappingHelper helper;
 
-    public TableToTableDependenciesMapBuilder(EntityMappingHelper helper) {
+    public TableToTableDependenciesMapBuilderImpl(EntityMappingHelper helper) {
         this.helper = helper;
     }
 
@@ -66,13 +67,13 @@ final public class TableToTableDependenciesMapBuilder {
                 UpsertTest.entities()
             )
         );
-        Map<String, List<DependencyInfo>> map = new TableToTableDependenciesMapBuilder(helper).build();
+        Map<String, List<DependencyInfo>> map = new TableToTableDependenciesMapBuilderImpl(helper).build();
         System.out.println(map);
     }
 
     @Override
     public String toString() {
-        return "TableToTableDependenciesMapBuilder{" +
+        return "TableToTableDependenciesMapBuilderImpl{" +
             "helper=" + helper +
             '}';
     }

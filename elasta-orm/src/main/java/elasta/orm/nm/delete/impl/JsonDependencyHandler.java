@@ -19,7 +19,7 @@ final public class JsonDependencyHandler {
         this.joHandler = joHandler;
     }
 
-    void handle(Object value) {
+    public void handle(Object value) {
 
         if (value instanceof JsonObject) {
 

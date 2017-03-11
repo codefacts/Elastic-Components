@@ -3,7 +3,6 @@ package elasta.orm.nm.delete.dependency.impl;
 import com.google.common.collect.ImmutableList;
 import elasta.orm.nm.delete.dependency.*;
 import elasta.orm.nm.delete.dependency.loader.impl.DependencyInfo;
-import elasta.orm.nm.entitymodel.DbMapping;
 import elasta.orm.nm.entitymodel.EntityMappingHelper;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
@@ -29,7 +28,7 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
     @Override
     public DeleteFunction build(String table, DeleteFunctionBuilderContext context, Map<String, List<DependencyInfo>> tableToTableDependenciesMap) {
 
-        if (context.containsTable(table)) {
+        if (context.contains(table)) {
             return context.get(table);
         }
 
@@ -86,7 +85,7 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
 
     private DeleteFunction createDeleteFunction(String dependentTable, DeleteFunctionBuilderContext context, Map<String, List<DependencyInfo>> tableToTableDependenciesMap) {
 
-        if (context.containsDeleteFunction(dependentTable)) {
+        if (context.contains(dependentTable)) {
             return context.get(dependentTable);
         }
 

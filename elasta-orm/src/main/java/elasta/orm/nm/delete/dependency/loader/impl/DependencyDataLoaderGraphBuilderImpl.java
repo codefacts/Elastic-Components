@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static elasta.commons.Utils.not;
-
 /**
  * Created by sohan on 3/5/2017.
  */
@@ -61,7 +59,7 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
     }
 
     public static void main(String[] asfd) {
-        TableToTableDependenciesMapBuilder mapBuilder = new TableToTableDependenciesMapBuilder(
+        TableToTableDependenciesMapBuilderImpl mapBuilder = new TableToTableDependenciesMapBuilderImpl(
             UpsertTest.helper()
         );
         DependencyDataLoaderGraphBuilderImpl graphBuilder = new DependencyDataLoaderGraphBuilderImpl(
