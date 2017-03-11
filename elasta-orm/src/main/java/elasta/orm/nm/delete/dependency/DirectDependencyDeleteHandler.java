@@ -1,0 +1,14 @@
+package elasta.orm.nm.delete.dependency;
+
+import elasta.orm.nm.delete.DeleteContext;
+import elasta.orm.nm.upsert.TableData;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by sohan on 3/11/2017.
+ */
+public interface DirectDependencyDeleteHandler {
+    void delete(TableData tableData, DeleteContext context, Map<String, List<TableData>> tableToTableDataMap);
+}

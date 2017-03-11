@@ -1,7 +1,7 @@
-package elasta.orm.nm.delete.dependency.impl;
+package elasta.orm.nm.delete.dependency.loader.impl;
 
-import elasta.orm.nm.delete.dependency.DependencyDataLoader;
-import elasta.orm.nm.delete.dependency.DependencyDataLoaderGraph;
+import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
+import elasta.orm.nm.delete.dependency.loader.DependencyDataLoaderGraph;
 import elasta.orm.nm.delete.dependency.ex.DependencyDataLoaderException;
 
 import java.util.Collection;

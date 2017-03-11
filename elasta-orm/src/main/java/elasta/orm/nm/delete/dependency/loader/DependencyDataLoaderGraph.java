@@ -1,4 +1,4 @@
-package elasta.orm.nm.delete.dependency;
+package elasta.orm.nm.delete.dependency.loader;
 
 import java.util.Collection;
 import java.util.Map;

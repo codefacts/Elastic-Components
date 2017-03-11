@@ -1,4 +1,4 @@
-package elasta.orm.nm.delete.dependency;
+package elasta.orm.nm.delete.dependency.loader;
 
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.nm.upsert.TableData;

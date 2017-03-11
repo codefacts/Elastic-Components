@@ -1,10 +1,8 @@
-package elasta.orm.nm.delete.dependency;
+package elasta.orm.nm.delete.dependency.loader;
 
-import elasta.orm.nm.delete.dependency.impl.DependencyInfo;
-import elasta.orm.nm.entitymodel.Entity;
+import elasta.orm.nm.delete.dependency.loader.impl.DependencyInfo;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by sohan on 3/4/2017.

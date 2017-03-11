@@ -1,11 +1,10 @@
-package elasta.orm.nm.delete.dependency.impl;
+package elasta.orm.nm.delete.dependency.loader.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.json.sql.*;
 import elasta.orm.json.sql.core.JoinType;
-import elasta.orm.nm.delete.dependency.DependencyDataLoader;
+import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 import elasta.orm.nm.upsert.TableData;
 

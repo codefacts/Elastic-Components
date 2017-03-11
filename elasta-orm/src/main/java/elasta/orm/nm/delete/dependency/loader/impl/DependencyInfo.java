@@ -1,4 +1,4 @@
-package elasta.orm.nm.delete.dependency.impl;
+package elasta.orm.nm.delete.dependency.loader.impl;
 
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
 

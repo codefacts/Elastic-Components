@@ -1,14 +1,12 @@
-package elasta.orm.nm.delete.dependency.impl;
+package elasta.orm.nm.delete.dependency.loader.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.entitymodel.DbMapping;
 import elasta.orm.nm.entitymodel.EntityMappingHelper;
-import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.DirectDbColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.IndirectDbColumnMapping;
-import elasta.orm.nm.entitymodel.columnmapping.VirtualDbColumnMapping;
 import elasta.orm.nm.entitymodel.impl.EntityMappingHelperImpl;
 import elasta.orm.nm.upsert.UpsertTest;
 

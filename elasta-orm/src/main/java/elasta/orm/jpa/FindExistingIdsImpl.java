@@ -90,7 +90,7 @@ public class FindExistingIdsImpl implements FindExistingIds {
             Object idValue = data.getValue(modelInfo.getPrimaryKey());
 
             if (idValue == null) {
-                throw new OrmException("Entity Object does not contains primary key value. Primary key '" + modelInfo.getPrimaryKey() + "' = " + idValue);
+                throw new OrmException("Entity Object does not containsTable primary key value. Primary key '" + modelInfo.getPrimaryKey() + "' = " + idValue);
             }
 
             tableIdSetBuilder.put(modelInfo.getTable(), idValue);
