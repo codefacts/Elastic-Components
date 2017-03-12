@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by sohan on 3/8/2017.
+ * Created by sohan on 3/12/2017.
  */
-public interface EntityDependenciesLoader {
-    Promise<Map<String, List<TableData>>> load(TableData parentTableData);
+public interface MultiTableDependenciesLoader {
+    Promise<Map<String, List<TableData>>> load(List<TableData> parentTableDataList);
 }
