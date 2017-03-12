@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.nm.delete.dependency.TableToTableDataMap;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoaderGraph;
 import elasta.orm.nm.delete.dependency.loader.TableDependenciesLoader;
@@ -26,7 +27,7 @@ final public class TableDependenciesLoaderImpl implements TableDependenciesLoade
     }
 
     @Override
-    public Promise<Map<String, List<TableData>>> load(TableData parentTableData) {
+    public Promise<TableToTableDataMap> load(TableData parentTableData) {
 
         final Map<TableData, TableData> dataMap = new HashMap<>();
 
@@ -38,30 +39,7 @@ final public class TableDependenciesLoaderImpl implements TableDependenciesLoade
             )
         )
             .load(parentTableData)
-            .map(aVoid -> {
-                final Map<String, List<TableData>> map = new HashMap<>();
-
-                dataMap.forEach((td, tableData) -> {
-                    final String table = tableData.getTable();
-                    List<TableData> tableDataList = map.get(table);
-                    if (tableDataList == null) {
-                        map.put(table, tableDataList = new ArrayList<>());
-                    }
-                    tableDataList.add(
-                        tableData
-                    );
-                });
-
-                return copyRecursive(map);
-            });
-    }
-
-    private Map<String, List<TableData>> copyRecursive(Map<String, List<TableData>> map) {
-        ImmutableMap.Builder<String, List<TableData>> mapBuilder = ImmutableMap.builder();
-        map.forEach((table, tableDatas) -> {
-            mapBuilder.put(table, ImmutableList.copyOf(tableDatas));
-        });
-        return mapBuilder.build();
+            .map(aVoid -> TableDependenciesLoaderByDataMap.toTableToTableDependenciesDataMap(dataMap));
     }
 
 }

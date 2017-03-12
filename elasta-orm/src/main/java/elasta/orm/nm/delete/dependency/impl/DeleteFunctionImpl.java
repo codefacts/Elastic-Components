@@ -6,6 +6,7 @@ import elasta.orm.nm.delete.dependency.DeleteFunction;
 import elasta.orm.nm.delete.DeleteUtils;
 import elasta.orm.nm.delete.dependency.DirectDependencyDeleteHandler;
 import elasta.orm.nm.delete.dependency.IndirectDependencyDeleteHandler;
+import elasta.orm.nm.delete.dependency.TableToTableDataMap;
 import elasta.orm.nm.upsert.TableData;
 
 import java.util.List;
@@ -27,7 +28,7 @@ final public class DeleteFunctionImpl implements DeleteFunction {
     }
 
     @Override
-    public void delete(TableData tableData, DeleteContext context, Map<String, List<TableData>> tableToTableDataMap) {
+    public void delete(TableData tableData, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
 
         Objects.requireNonNull(tableData);
         Objects.requireNonNull(context);

@@ -10,5 +10,5 @@ import java.util.Map;
  * Created by sohan on 3/11/2017.
  */
 public interface DirectDependencyDeleteHandler {
-    void delete(TableData tableData, DeleteContext context, Map<String, List<TableData>> tableToTableDataMap);
+    void delete(TableData tableData, DeleteContext context, TableToTableDataMap tableToTableDataMap);
 }

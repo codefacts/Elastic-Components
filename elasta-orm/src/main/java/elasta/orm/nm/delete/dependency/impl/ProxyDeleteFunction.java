@@ -3,6 +3,7 @@ package elasta.orm.nm.delete.dependency.impl;
 import elasta.orm.nm.delete.DeleteContext;
 import elasta.orm.nm.delete.dependency.DeleteFunction;
 import elasta.orm.nm.delete.dependency.DeleteFunctionBuilderContext;
+import elasta.orm.nm.delete.dependency.TableToTableDataMap;
 import elasta.orm.nm.upsert.TableData;
 
 import java.util.List;
@@ -24,7 +25,7 @@ final public class ProxyDeleteFunction implements DeleteFunction {
     }
 
     @Override
-    public void delete(TableData tableData, DeleteContext context, Map<String, List<TableData>> tableToTableDataMap) {
+    public void delete(TableData tableData, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
         this.context.get(dependentTable).delete(tableData, context, tableToTableDataMap);
     }
 }

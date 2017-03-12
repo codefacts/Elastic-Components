@@ -5,10 +5,12 @@ import elasta.orm.nm.delete.ColumnValuePair;
 import elasta.orm.nm.delete.DeleteContext;
 import elasta.orm.nm.delete.dependency.DeleteFunction;
 import elasta.orm.nm.delete.dependency.DirectDependencyDeleteHandler;
+import elasta.orm.nm.delete.dependency.TableToTableDataMap;
 import elasta.orm.nm.delete.dependency.ex.DirectDependencyDeleteHandlerException;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 import elasta.orm.nm.upsert.TableData;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,8 +33,8 @@ final public class DirectDependencyDeleteHandlerImpl implements DirectDependency
     }
 
     @Override
-    public void delete(TableData parentTableData, DeleteContext context, Map<String, List<TableData>> tableToTableDataMap) {
-        List<TableData> tableDatas = tableToTableDataMap.get(dependentTable);
+    public void delete(TableData parentTableData, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
+        Collection<TableData> tableDatas = tableToTableDataMap.getAsCollection(dependentTable);
         Objects.requireNonNull(tableDatas);
 
         final ColumnValuePair[] columnValuePairs = new ColumnValuePair[columnToColumnMappings.length];

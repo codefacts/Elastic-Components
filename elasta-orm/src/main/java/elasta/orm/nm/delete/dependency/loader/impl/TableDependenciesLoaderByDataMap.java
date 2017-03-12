@@ -1,9 +1,13 @@
 package elasta.orm.nm.delete.dependency.loader.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.nm.delete.dependency.TableToTableDataMap;
+import elasta.orm.nm.delete.dependency.TableToTableDataMapImpl;
+import elasta.orm.nm.delete.dependency.TableToTableDeleteFunctionMap;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.upsert.TableData;
 import io.vertx.core.json.JsonObject;
@@ -103,5 +107,33 @@ final public class TableDependenciesLoaderByDataMap {
                 )
             );
         });
+    }
+
+    public static TableToTableDataMap toTableToTableDependenciesDataMap(Map<TableData, TableData> dataMap) {
+        final Map<String, Map<TableData, TableData>> map = new HashMap<>();
+
+        dataMap.forEach((td, tableData) -> {
+            final String table = tableData.getTable();
+            Map<TableData, TableData> tableDataMap = map.get(table);
+            if (tableDataMap == null) {
+                map.put(table, tableDataMap = new HashMap<>());
+            }
+            tableDataMap.put(
+                tableData,
+                tableData
+            );
+        });
+
+        return new TableToTableDataMapImpl(
+            copyRecursive(map)
+        );
+    }
+
+    private static Map<String, Map<TableData, TableData>> copyRecursive(Map<String, Map<TableData, TableData>> map) {
+        ImmutableMap.Builder<String, Map<TableData, TableData>> mapBuilder = ImmutableMap.builder();
+        map.forEach((table, tableDatas) -> {
+            mapBuilder.put(table, ImmutableMap.copyOf(tableDatas));
+        });
+        return mapBuilder.build();
     }
 }
