@@ -13,6 +13,7 @@ import elasta.orm.nm.entitymodel.columnmapping.IndirectDbColumnMapping;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,7 +37,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
 
         String primaryColumn = helper.getDbMappingByTable(dependentTable).getPrimaryColumn();
 
-        ImmutableList<String> columns = ImmutableList.<String>builder().add(primaryColumn).addAll(Arrays.asList(dependencyColumns(dependentTableDependencies))).build();
+        List<String> columns = createDependencyColumns(Collections.singletonList(primaryColumn), dependentTableDependencies);
 
         switch (dependencyInfo.getDbColumnMapping().getColumnType()) {
 //            case INDIRECT: {
@@ -90,6 +91,10 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
         throw new DependencyDataLoaderException("Invalid dependencyInfo.getDbColumnMapping().getColumnType() '" + dependencyInfo.getDbColumnMapping().getColumnType() + "'");
     }
 
+    public static List<String> createDependencyColumns(List<String> primaryColumns, List<DependencyInfo> dependentTableDependencies) {
+        return ImmutableList.<String>builder().addAll(primaryColumns).addAll(Arrays.asList(dependencyColumns(dependentTableDependencies))).build();
+    }
+
     private ColumnToColumnMapping[] directColumnMappings(DbColumnMapping dbColumnMapping) {
         switch (dbColumnMapping.getColumnType()) {
             case DIRECT: {
@@ -110,7 +115,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
         throw new DependencyDataLoaderException("Invalid db column mapping '" + dbColumnMapping + "'");
     }
 
-    private String[] dependencyColumns(List<DependencyInfo> dependencyTables) {
+    private static String[] dependencyColumns(List<DependencyInfo> dependencyTables) {
 
         ImmutableList.Builder<String> columnListBuilder = ImmutableList.builder();
 

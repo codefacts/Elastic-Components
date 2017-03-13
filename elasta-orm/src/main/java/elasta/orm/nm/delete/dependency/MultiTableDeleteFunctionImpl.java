@@ -20,9 +20,9 @@ final public class MultiTableDeleteFunctionImpl implements MultiTableDeleteFunct
 
     @Override
     public void delete(List<TableData> tableDataListToDelete, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
-        tableDataListToDelete.forEach(tableData -> {
-            tableToTableDeleteFunctionMap.get(tableData.getTable())
-                .delete(tableData, context, tableToTableDataMap);
-        });
+        tableDataListToDelete.forEach(
+            tableData -> tableToTableDeleteFunctionMap.get(tableData.getTable())
+                .delete(tableData, context, tableToTableDataMap)
+        );
     }
 }

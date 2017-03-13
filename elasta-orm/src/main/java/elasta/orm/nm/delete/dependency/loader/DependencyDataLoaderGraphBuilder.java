@@ -1,5 +1,6 @@
 package elasta.orm.nm.delete.dependency.loader;
 
+import elasta.orm.nm.delete.dependency.TableToTableDependenciesMap;
 import elasta.orm.nm.delete.dependency.loader.impl.DependencyInfo;
 
 import java.util.List;
@@ -10,5 +11,5 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface DependencyDataLoaderGraphBuilder {
-    DependencyDataLoaderGraph build(Map<String, List<DependencyInfo>> tableToTableDependenciesMap);
+    DependencyDataLoaderGraph build(TableToTableDependenciesMap tableToTableDependenciesMap);
 }

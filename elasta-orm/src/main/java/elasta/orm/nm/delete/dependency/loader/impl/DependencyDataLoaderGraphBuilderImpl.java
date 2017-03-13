@@ -2,6 +2,8 @@ package elasta.orm.nm.delete.dependency.loader.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.orm.nm.delete.dependency.TableToTableDependenciesMap;
+import elasta.orm.nm.delete.dependency.TableToTableDependenciesMapImpl;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoaderBuilder;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoaderGraph;
@@ -24,7 +26,7 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
         this.dependencyDataLoaderBuilder = dependencyDataLoaderBuilder;
     }
 
-    public DependencyDataLoaderGraph build(Map<String, List<DependencyInfo>> tableToTableDependenciesMap) {
+    public DependencyDataLoaderGraph build(TableToTableDependenciesMap tableToTableDependenciesMap) {
 
         ImmutableMap.Builder<String, Collection<DependencyDataLoader>> tableToDependencyDataLoadersMapBuilder = ImmutableMap.builder();
 
@@ -69,7 +71,7 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
             )
         );
 
-        Map<String, List<DependencyInfo>> map = mapBuilder.build();
+        TableToTableDependenciesMap map = mapBuilder.build();
 
         System.out.println(map);
 

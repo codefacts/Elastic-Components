@@ -26,7 +26,7 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
     }
 
     @Override
-    public DeleteFunction build(String table, DeleteFunctionBuilderContext context, Map<String, List<DependencyInfo>> tableToTableDependenciesMap) {
+    public DeleteFunction build(String table, DeleteFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
         if (context.contains(table)) {
             return context.get(table);
@@ -41,7 +41,7 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
         return deleteFunction;
     }
 
-    private DeleteFunction buildDeleteFunction(String table, DeleteFunctionBuilderContext context, Map<String, List<DependencyInfo>> tableToTableDependenciesMap) {
+    private DeleteFunction buildDeleteFunction(String table, DeleteFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
         ImmutableList.Builder<IndirectDependencyDeleteHandler> indirectListBuilder = ImmutableList.builder();
         ImmutableList.Builder<DirectDependencyDeleteHandler> directListBuilder = ImmutableList.builder();
@@ -83,7 +83,7 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
         );
     }
 
-    private DeleteFunction createDeleteFunction(String dependentTable, DeleteFunctionBuilderContext context, Map<String, List<DependencyInfo>> tableToTableDependenciesMap) {
+    private DeleteFunction createDeleteFunction(String dependentTable, DeleteFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
         if (context.contains(dependentTable)) {
             return context.get(dependentTable);

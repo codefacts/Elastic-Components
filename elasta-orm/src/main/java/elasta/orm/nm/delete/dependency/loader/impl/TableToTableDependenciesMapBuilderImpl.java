@@ -3,6 +3,8 @@ package elasta.orm.nm.delete.dependency.loader.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.nm.EntityUtils;
+import elasta.orm.nm.delete.dependency.TableToTableDependenciesMap;
+import elasta.orm.nm.delete.dependency.TableToTableDependenciesMapImpl;
 import elasta.orm.nm.delete.dependency.loader.TableToTableDependenciesMapBuilder;
 import elasta.orm.nm.entitymodel.DbMapping;
 import elasta.orm.nm.entitymodel.EntityMappingHelper;
@@ -23,7 +25,7 @@ final public class TableToTableDependenciesMapBuilderImpl implements TableToTabl
         this.helper = helper;
     }
 
-    public Map<String, List<DependencyInfo>> build() {
+    public TableToTableDependenciesMap build() {
         Set<String> tables = helper.getTables();
         Map<String, List<DependencyInfo>> map = new HashMap<>();
         tables.forEach(table -> {
@@ -44,13 +46,7 @@ final public class TableToTableDependenciesMapBuilderImpl implements TableToTabl
                     }
                 });
         });
-        return toImmutable(map);
-    }
-
-    private Map<String, List<DependencyInfo>> toImmutable(Map<String, List<DependencyInfo>> map) {
-        ImmutableMap.Builder<String, List<DependencyInfo>> mapBuilder = ImmutableMap.builder();
-        map.forEach((key, values) -> mapBuilder.put(key, ImmutableList.copyOf(values)));
-        return mapBuilder.build();
+        return new TableToTableDependenciesMapImpl(map);
     }
 
     private void putInMap(Map<String, List<DependencyInfo>> map, final String referencingTable, DependencyInfo dependencyInfo) {
@@ -67,7 +63,7 @@ final public class TableToTableDependenciesMapBuilderImpl implements TableToTabl
                 UpsertTest.entities()
             )
         );
-        Map<String, List<DependencyInfo>> map = new TableToTableDependenciesMapBuilderImpl(helper).build();
+        TableToTableDependenciesMap map = new TableToTableDependenciesMapBuilderImpl(helper).build();
         System.out.println(map);
     }
 
