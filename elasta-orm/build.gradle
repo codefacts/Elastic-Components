@@ -21,7 +21,7 @@ dependencies {
     compile group: 'io.vertx', name: 'vertx-jdbc-client', version: '3.3.3'
 
     // https://mvnrepository.com/artifact/org.eclipse.persistence/org.eclipse.persistence.jpa
-    compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '2.6.4'
+//    compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '2.6.4'
 
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'

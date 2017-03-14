@@ -1,7 +1,5 @@
 package elasta.orm.nm.entitymodel;
 
-import elasta.orm.json.core.RelationTable;
-
 import java.util.Objects;
 import java.util.Optional;
 
