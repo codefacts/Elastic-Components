@@ -83,7 +83,7 @@ public class SqlDBImpl implements SqlDB {
     }
 
     @Override
-    public Promise<ResultSet> queryWhere(String table, Collection<String> columns, JsonObject whereCriteria) {
+    public Promise<ResultSet> query(String table, Collection<String> columns, JsonObject whereCriteria) {
 
         SqlAndParams sqlAndParams = sqlBuilderUtils.querySql(table, columns, whereCriteria);
 

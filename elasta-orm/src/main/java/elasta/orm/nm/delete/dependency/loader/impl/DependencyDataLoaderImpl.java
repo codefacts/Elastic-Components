@@ -51,7 +51,7 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
             );
         }
         return sqlDB
-            .queryWhere(
+            .query(
                 dependentTable,
                 ImmutableList.<String>builder().add(primaryColumns).add(columns).build(),
                 new JsonObject(mapBuilder.build())

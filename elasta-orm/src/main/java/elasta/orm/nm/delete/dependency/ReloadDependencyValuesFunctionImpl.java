@@ -46,7 +46,7 @@ final public class ReloadDependencyValuesFunctionImpl implements ReloadTableData
                 return Promises.of(tableData);
             }
 
-            return sqlDB.queryWhere(tableData.getTable(), columns, primaryColumnValuesCriteria(tableData))
+            return sqlDB.query(tableData.getTable(), columns, primaryColumnValuesCriteria(tableData))
                 .map(ResultSet::getRows)
                 .map(jsonObjects -> {
                     if (jsonObjects.size() < 1) {

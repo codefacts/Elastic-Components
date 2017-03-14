@@ -31,5 +31,5 @@ public interface SqlDB {
 
     Promise<Void> delete(Collection<DeleteData> deleteDataList);
 
-    Promise<ResultSet> queryWhere(String table, Collection<String> columns, JsonObject whereCriteria);
+    Promise<ResultSet> query(String table, Collection<String> columns, JsonObject whereCriteria);
 }
