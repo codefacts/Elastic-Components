@@ -3,9 +3,9 @@ package elasta.orm.nm.upsert;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
-import elasta.orm.json.sql.DbSql;
-import elasta.orm.json.sql.impl.DbSqlImpl;
-import elasta.orm.json.sql.impl.SqlBuilderUtilsImpl;
+import elasta.orm.sql.sql.DbSql;
+import elasta.orm.sql.sql.impl.DbSqlImpl;
+import elasta.orm.sql.sql.impl.SqlBuilderUtilsImpl;
 import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.entitymodel.*;
 import elasta.orm.nm.entitymodel.ForeignColumnMapping;
@@ -17,6 +17,7 @@ import elasta.orm.nm.entitymodel.columnmapping.impl.VirtualDbColumnMappingImpl;
 import elasta.orm.nm.entitymodel.impl.EntityMappingHelperImpl;
 import elasta.orm.nm.upsert.builder.FunctionMapImpl;
 import elasta.orm.nm.upsert.builder.impl.UpsertFunctionBuilderImpl;
+import elasta.orm.sql.sql.impl.SqlExecutorImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -206,14 +207,16 @@ public interface UpsertTest {
 
     static DbSql dbSql(String db, Vertx vertx) {
         final DbSqlImpl dbSql = new DbSqlImpl(
-            JDBCClient.createShared(vertx, new JsonObject(
-                ImmutableMap.of(
-                    "user", "root",
-                    "password", "",
-                    "driver_class", "com.mysql.jdbc.Driver",
-                    "url", "jdbc:mysql://localhost/" + db
-                )
-            )),
+            new SqlExecutorImpl(
+                JDBCClient.createShared(vertx, new JsonObject(
+                    ImmutableMap.of(
+                        "user", "root",
+                        "password", "",
+                        "driver_class", "com.mysql.jdbc.Driver",
+                        "url", "jdbc:mysql://localhost/" + db
+                    )
+                ))
+            ),
             new SqlBuilderUtilsImpl()
         );
         return dbSql;

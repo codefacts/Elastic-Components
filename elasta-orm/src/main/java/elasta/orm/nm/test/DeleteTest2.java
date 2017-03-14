@@ -2,7 +2,7 @@ package elasta.orm.nm.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.json.sql.DbSql;
+import elasta.orm.sql.sql.DbSql;
 import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.delete.DeleteData;
 import elasta.orm.nm.delete.DeleteFunction;

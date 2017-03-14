@@ -3,7 +3,7 @@ package elasta.orm.nm.delete.dependency.loader.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.json.sql.DbSql;
+import elasta.orm.sql.sql.DbSql;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 import elasta.orm.nm.upsert.TableData;
@@ -51,13 +51,13 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
             );
         }
         return dbSql
-            .queryWhereJo(
+            .queryWhere(
                 dependentTable,
                 ImmutableList.<String>builder().add(primaryColumns).add(columns).build(),
                 new JsonObject(mapBuilder.build())
             )
             .map(
-                jsonObjects -> jsonObjects.stream()
+                resultSet -> resultSet.getRows().stream()
                     .map(jsonObject -> new TableData(dependentTable, primaryColumns, jsonObject))
                     .collect(Collectors.toList())
             );

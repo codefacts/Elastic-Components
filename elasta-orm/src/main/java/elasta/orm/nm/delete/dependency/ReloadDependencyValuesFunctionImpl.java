@@ -4,11 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.json.sql.DbSql;
+import elasta.orm.sql.sql.DbSql;
 import elasta.orm.nm.delete.dependency.ex.ReloadDependencyValuesFunctionException;
 import elasta.orm.nm.delete.dependency.loader.impl.DependencyDataLoaderBuilderImpl;
 import elasta.orm.nm.upsert.TableData;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +46,8 @@ final public class ReloadDependencyValuesFunctionImpl implements ReloadTableData
                 return Promises.of(tableData);
             }
 
-            return dbSql.queryWhereJo(tableData.getTable(), columns, primaryColumnValuesCriteria(tableData))
+            return dbSql.queryWhere(tableData.getTable(), columns, primaryColumnValuesCriteria(tableData))
+                .map(ResultSet::getRows)
                 .map(jsonObjects -> {
                     if (jsonObjects.size() < 1) {
                         throw new ReloadDependencyValuesFunctionException("No data found for tableData '" + tableData.toString() + "'");

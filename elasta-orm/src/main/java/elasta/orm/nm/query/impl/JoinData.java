@@ -1,6 +1,6 @@
 package elasta.orm.nm.query.impl;
 
-import elasta.orm.json.sql.core.JoinType;
+import elasta.orm.sql.sql.core.JoinType;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package elasta.composer.moc;
 
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.json.core.FieldInfo;
+import elasta.orm.sql.core.FieldInfo;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;

@@ -2,8 +2,8 @@ package elasta.orm.nm.delete.dependency.loader.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.json.sql.*;
-import elasta.orm.json.sql.core.*;
+import elasta.orm.sql.sql.*;
+import elasta.orm.sql.sql.core.*;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 import elasta.orm.nm.upsert.TableData;
@@ -66,12 +66,13 @@ final public class IndirectDependencyDataLoaderImpl implements DependencyDataLoa
             );
         }
 
-        return dbSql.queryJo(
+        return dbSql.query(
             sqlSelections(alias, primaryColumns, columns),
             new SqlFrom(dependentTable, Optional.of(alias)),
             sqlJoins(relationTable, alias, relationTableAlias, dstColumnMappings),
             listBuilder.build()
-        ).map(jsonObjects -> jsonObjects.stream().map(jo -> new TableData(dependentTable, primaryColumns, jo)).collect(Collectors.toList()));
+        ).map(resultSet -> resultSet.getRows().stream().map(jo -> new TableData(dependentTable, primaryColumns, jo))
+            .collect(Collectors.toList()));
     }
 
     private List<SqlJoin> sqlJoins(String relationTable, String parentAlias, String alias, ColumnToColumnMapping[] dstColumnMappings) {

@@ -1,12 +1,11 @@
 package elasta.orm.nm.delete.dependency.loader.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.json.sql.DbSql;
+import elasta.orm.sql.sql.DbSql;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoaderBuilder;
 import elasta.orm.nm.delete.dependency.ex.DependencyDataLoaderException;
 import elasta.orm.nm.entitymodel.EntityMappingHelper;
-import elasta.orm.nm.entitymodel.ForeignColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.DbColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.DirectDbColumnMapping;
 import elasta.orm.nm.entitymodel.columnmapping.IndirectDbColumnMapping;

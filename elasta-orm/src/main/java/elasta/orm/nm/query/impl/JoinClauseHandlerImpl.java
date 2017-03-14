@@ -1,7 +1,7 @@
 package elasta.orm.nm.query.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.json.sql.core.JoinType;
+import elasta.orm.sql.sql.core.JoinType;
 import elasta.orm.nm.query.Cqr;
 import elasta.orm.nm.query.JoinClauseHandler;
 import elasta.orm.nm.query.TableAliasPair;

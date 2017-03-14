@@ -2,7 +2,7 @@ package elasta.orm.nm.query;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.json.sql.core.JoinType;
+import elasta.orm.sql.sql.core.JoinType;
 import elasta.orm.nm.criteria.Func;
 import elasta.orm.nm.criteria.funcs.ParamsBuilderImpl;
 import elasta.orm.nm.entitymodel.ColumnType;

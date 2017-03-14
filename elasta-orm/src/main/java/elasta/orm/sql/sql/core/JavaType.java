@@ -1,4 +1,4 @@
-package elasta.orm.json.sql.core;
+package elasta.orm.sql.sql.core;
 
 /**
  * Created by Jango on 9/15/2016.

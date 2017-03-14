@@ -1,4 +1,4 @@
-package elasta.orm.json.sql.core;
+package elasta.orm.sql.sql.core;
 
 import java.util.Objects;
 

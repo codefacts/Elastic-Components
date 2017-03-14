@@ -31,7 +31,7 @@ public class RequestConverterImpl implements RequestConverter<JsonObject> {
                 throw new RequestConvertersionException("Content-Type is not present. Content-Type: '" + contentType + "'");
             }
 
-            if (!contentType.trim().startsWith("application/json")) {
+            if (!contentType.trim().startsWith("application/sql")) {
                 throw new RequestConvertersionException("Unsupported content-type. Content-Type: '" + contentType + "'");
             }
         }

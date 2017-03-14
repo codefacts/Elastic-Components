@@ -1,6 +1,6 @@
 package elasta.orm.nm.query;
 
-import elasta.orm.json.sql.core.JoinType;
+import elasta.orm.sql.sql.core.JoinType;
 
 import java.util.Objects;
 import java.util.Optional;
