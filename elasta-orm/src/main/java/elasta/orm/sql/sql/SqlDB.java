@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Jango on 9/25/2016.
  */
-public interface DbSql {
+public interface SqlDB {
 
     Promise<ResultSet> query(
         Collection<SqlSelection> sqlSelections,

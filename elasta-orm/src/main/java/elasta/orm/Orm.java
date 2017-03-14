@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Jango on 9/14/2016.
  */
-public interface Db {
+public interface Orm {
 
     <T> Promise<JsonObject> findOne(String model, T id);
 

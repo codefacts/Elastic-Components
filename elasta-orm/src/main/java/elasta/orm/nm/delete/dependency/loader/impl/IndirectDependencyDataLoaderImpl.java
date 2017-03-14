@@ -24,23 +24,23 @@ final public class IndirectDependencyDataLoaderImpl implements DependencyDataLoa
     final ColumnToColumnMapping[] dstColumnMappings;
     final String[] primaryColumns;
     final String[] columns;
-    final DbSql dbSql;
+    final SqlDB sqlDB;
 
-    public IndirectDependencyDataLoaderImpl(String dependentTable, String relationTable, ColumnToColumnMapping[] srcColumnMappings, ColumnToColumnMapping[] dstColumnMappings, String[] primaryColumns, String[] columns, DbSql dbSql) {
+    public IndirectDependencyDataLoaderImpl(String dependentTable, String relationTable, ColumnToColumnMapping[] srcColumnMappings, ColumnToColumnMapping[] dstColumnMappings, String[] primaryColumns, String[] columns, SqlDB sqlDB) {
         Objects.requireNonNull(dependentTable);
         Objects.requireNonNull(relationTable);
         Objects.requireNonNull(srcColumnMappings);
         Objects.requireNonNull(dstColumnMappings);
         Objects.requireNonNull(primaryColumns);
         Objects.requireNonNull(columns);
-        Objects.requireNonNull(dbSql);
+        Objects.requireNonNull(sqlDB);
         this.dependentTable = dependentTable;
         this.relationTable = relationTable;
         this.srcColumnMappings = srcColumnMappings;
         this.dstColumnMappings = dstColumnMappings;
         this.primaryColumns = primaryColumns;
         this.columns = columns;
-        this.dbSql = dbSql;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -66,7 +66,7 @@ final public class IndirectDependencyDataLoaderImpl implements DependencyDataLoa
             );
         }
 
-        return dbSql.query(
+        return sqlDB.query(
             sqlSelections(alias, primaryColumns, columns),
             new SqlFrom(dependentTable, Optional.of(alias)),
             sqlJoins(relationTable, alias, relationTableAlias, dstColumnMappings),

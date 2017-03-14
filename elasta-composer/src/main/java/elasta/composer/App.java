@@ -7,7 +7,7 @@ import elasta.composer.module_exporter.DbEventHandlers;
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.core.eventbus.impl.SimpleEventBusImpl;
 import elasta.module.ModuleSystem;
-import elasta.orm.Db;
+import elasta.orm.Orm;
 import elasta.orm.OrmExporter;
 import elasta.orm.sql.core.FieldInfoBuilder;
 import elasta.webutils.app.utils.PerRequestToEventResolver;
@@ -42,7 +42,7 @@ public class App {
         moduleSystem.export(ObjectMapper.class, module -> module.export(new ObjectMapper()));
         moduleSystem.export(JsonObject.class, "db-config", module -> module.export(Test.DB_CONFIG));
         //---------------
-        DbEventHandlers.registerHandlers(moduleSystem.require(SimpleEventBus.class), moduleSystem.require(Db.class));
+        DbEventHandlers.registerHandlers(moduleSystem.require(SimpleEventBus.class), moduleSystem.require(Orm.class));
 
         moduleSystem.require(SimpleEventBus.class)
             .addProcessorP(Cnsts.API + ".{" + EventToFlowDispatcher.RESOURCE + "}.{" + EventToFlowDispatcher.ACTION + "}",
@@ -71,7 +71,7 @@ public class App {
         vertx.createHttpServer().requestHandler(router::accept).listen(85);
         System.out.println("Server Started.");
 
-        moduleSystem.require(Db.class).findOne("Tablet", 1, ImmutableList.of(
+        moduleSystem.require(Orm.class).findOne("Tablet", 1, ImmutableList.of(
             new FieldInfoBuilder()
                 .setFields(ImmutableList.of("id", "name"))
                 .createSqlField()

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.sql.sql.DbSql;
+import elasta.orm.sql.sql.SqlDB;
 import elasta.orm.nm.delete.dependency.ex.ReloadDependencyValuesFunctionException;
 import elasta.orm.nm.delete.dependency.loader.impl.DependencyDataLoaderBuilderImpl;
 import elasta.orm.nm.upsert.TableData;
@@ -21,13 +21,13 @@ import java.util.stream.Collectors;
  */
 final public class ReloadDependencyValuesFunctionImpl implements ReloadTableDataFunction {
     final TableToTableDependenciesMap tableToTableDependenciesMap;
-    final DbSql dbSql;
+    final SqlDB sqlDB;
 
-    public ReloadDependencyValuesFunctionImpl(TableToTableDependenciesMap tableToTableDependenciesMap, DbSql dbSql) {
+    public ReloadDependencyValuesFunctionImpl(TableToTableDependenciesMap tableToTableDependenciesMap, SqlDB sqlDB) {
         Objects.requireNonNull(tableToTableDependenciesMap);
-        Objects.requireNonNull(dbSql);
+        Objects.requireNonNull(sqlDB);
         this.tableToTableDependenciesMap = tableToTableDependenciesMap;
-        this.dbSql = dbSql;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -46,7 +46,7 @@ final public class ReloadDependencyValuesFunctionImpl implements ReloadTableData
                 return Promises.of(tableData);
             }
 
-            return dbSql.queryWhere(tableData.getTable(), columns, primaryColumnValuesCriteria(tableData))
+            return sqlDB.queryWhere(tableData.getTable(), columns, primaryColumnValuesCriteria(tableData))
                 .map(ResultSet::getRows)
                 .map(jsonObjects -> {
                     if (jsonObjects.size() < 1) {

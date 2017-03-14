@@ -3,7 +3,7 @@ package elasta.orm.nm.delete.dependency.loader.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.sql.sql.DbSql;
+import elasta.orm.sql.sql.SqlDB;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.upsert.ColumnToColumnMapping;
 import elasta.orm.nm.upsert.TableData;
@@ -22,18 +22,18 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
     final ColumnToColumnMapping[] columnMappings;
     final String[] primaryColumns;
     final String[] columns;
-    final DbSql dbSql;
+    final SqlDB sqlDB;
 
-    public DependencyDataLoaderImpl(String dependentTable, ColumnToColumnMapping[] columnMappings, String[] primaryColumns, String[] columns, DbSql dbSql) {
+    public DependencyDataLoaderImpl(String dependentTable, ColumnToColumnMapping[] columnMappings, String[] primaryColumns, String[] columns, SqlDB sqlDB) {
         Objects.requireNonNull(dependentTable);
         Objects.requireNonNull(columnMappings);
         Objects.requireNonNull(columns);
-        Objects.requireNonNull(dbSql);
+        Objects.requireNonNull(sqlDB);
         this.dependentTable = dependentTable;
         this.columnMappings = columnMappings;
         this.primaryColumns = primaryColumns;
         this.columns = columns;
-        this.dbSql = dbSql;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -50,7 +50,7 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
                 parentTableData.getValues().getValue(columnMapping.getDstColumn())
             );
         }
-        return dbSql
+        return sqlDB
             .queryWhere(
                 dependentTable,
                 ImmutableList.<String>builder().add(primaryColumns).add(columns).build(),
@@ -70,7 +70,7 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
             ", columnMappings=" + Arrays.toString(columnMappings) +
             ", primaryColumns=" + Arrays.toString(primaryColumns) +
             ", columns=" + Arrays.toString(columns) +
-            ", dbSql=" + dbSql +
+            ", sqlDB=" + sqlDB +
             '}';
     }
 }

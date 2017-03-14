@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
+import elasta.orm.Orm;
 import elasta.pipeline.transformation.impl.json.object.RemoveNullsTransformation;
 import elasta.module.ModuleSystem;
-import elasta.orm.Db;
 import elasta.orm.OrmExporter;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -47,13 +47,13 @@ public class Test {
             moduleSystem.export(JDBCClient.class, module -> module.export(JDBCClient.createShared(module.require(Vertx.class), DB_CONFIG)));
             moduleSystem.export(ObjectMapper.class, module -> module.export(new ObjectMapper()));
 
-            Db db = moduleSystem.require(Db.class);
+            Orm orm = moduleSystem.require(Orm.class);
 
-//            db.count("Br").then(aLong -> System.out.println("count: " + aLong));
-//            db.findOne("Br", 1L).then(entries -> System.out.println(entries));
-//            db.findAll("Br", Arrays.asList(1L, 2L, 3L)).then(entries -> System.out.println(entries));
+//            orm.count("Br").then(aLong -> System.out.println("count: " + aLong));
+//            orm.findOne("Br", 1L).then(entries -> System.out.println(entries));
+//            orm.findAll("Br", Arrays.asList(1L, 2L, 3L)).then(entries -> System.out.println(entries));
 
-//            db.findAll("Br", Arrays.asList(16L, 66L, 116L), ImmutableList.of(
+//            orm.findAll("Br", Arrays.asList(16L, 66L, 116L), ImmutableList.of(
 //                new FieldInfoBuilder()
 //                    .setFields(Arrays.asList("firstName", "lastName", "email", "phone", "dateOfBirth"))
 //                    .setPath("")
@@ -69,7 +69,7 @@ public class Test {
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(dateFormat);
 
-            db.insertOrUpdate("Br",
+            orm.insertOrUpdate("Br",
                 new RemoveNullsTransformation(null, null)
                     .transform(
                         new JsonObject(

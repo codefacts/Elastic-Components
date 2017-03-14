@@ -1,7 +1,7 @@
 package elasta.orm.nm.delete.dependency.loader.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.sql.sql.DbSql;
+import elasta.orm.sql.sql.SqlDB;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoader;
 import elasta.orm.nm.delete.dependency.loader.DependencyDataLoaderBuilder;
 import elasta.orm.nm.delete.dependency.ex.DependencyDataLoaderException;
@@ -21,13 +21,13 @@ import java.util.Objects;
  */
 final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoaderBuilder {
     final EntityMappingHelper helper;
-    final DbSql dbSql;
+    final SqlDB sqlDB;
 
-    public DependencyDataLoaderBuilderImpl(EntityMappingHelper helper, DbSql dbSql) {
+    public DependencyDataLoaderBuilderImpl(EntityMappingHelper helper, SqlDB sqlDB) {
         Objects.requireNonNull(helper);
-        Objects.requireNonNull(dbSql);
+        Objects.requireNonNull(sqlDB);
         this.helper = helper;
-        this.dbSql = dbSql;
+        this.sqlDB = sqlDB;
     }
 
     private DependencyDataLoader buildDependencyLoader(DependencyInfo dependencyInfo, List<DependencyInfo> dependentTableDependencies) {
@@ -74,7 +74,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
 //                    dstList.toArray(new ColumnToColumnMapping[dstList.size()]),
 //                    new String[]{primaryColumn},
 //                    columns.toArray(new String[columns.size()]),
-//                    dbSql
+//                    sqlDB
 //                );
 //            }
             case DIRECT: {
@@ -83,7 +83,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
                     directColumnMappings(dependencyInfo.getDbColumnMapping()),
                     new String[]{primaryColumn},
                     columns.toArray(new String[columns.size()]),
-                    dbSql
+                    sqlDB
                 );
             }
         }
@@ -153,7 +153,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
     public String toString() {
         return "DependencyDataLoaderBuilderImpl{" +
             "helper=" + helper +
-            ", dbSql=" + dbSql +
+            ", sqlDB=" + sqlDB +
             '}';
     }
 }

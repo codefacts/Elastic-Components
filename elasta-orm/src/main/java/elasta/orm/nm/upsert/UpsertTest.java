@@ -3,8 +3,8 @@ package elasta.orm.nm.upsert;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
-import elasta.orm.sql.sql.DbSql;
-import elasta.orm.sql.sql.impl.DbSqlImpl;
+import elasta.orm.sql.sql.SqlDB;
+import elasta.orm.sql.sql.impl.SqlDBImpl;
 import elasta.orm.sql.sql.impl.SqlBuilderUtilsImpl;
 import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.entitymodel.*;
@@ -193,11 +193,11 @@ public interface UpsertTest {
 
         final Vertx vertx = Vertx.vertx();
 
-        final DbSql dbSql = dbSql("nm", vertx);
+        final SqlDB sqlDB = dbSql("nm", vertx);
 
         vertx.setTimer(1, event -> {
             Promises.when(map.values().stream().map(tableData -> {
-                return dbSql.insertJo(tableData.getTable(), tableData.getValues()).then(aVoid -> System.out.println("complete: " + tableData));
+                return sqlDB.insertJo(tableData.getTable(), tableData.getValues()).then(aVoid -> System.out.println("complete: " + tableData));
             }).collect(Collectors.toList())).then(voids -> {
                 System.out.println("Insert complete");
             }).err(throwable -> throwable.printStackTrace())
@@ -205,8 +205,8 @@ public interface UpsertTest {
         });
     }
 
-    static DbSql dbSql(String db, Vertx vertx) {
-        final DbSqlImpl dbSql = new DbSqlImpl(
+    static SqlDB dbSql(String db, Vertx vertx) {
+        final SqlDBImpl dbSql = new SqlDBImpl(
             new SqlExecutorImpl(
                 JDBCClient.createShared(vertx, new JsonObject(
                     ImmutableMap.of(
@@ -222,7 +222,7 @@ public interface UpsertTest {
         return dbSql;
     }
 
-    static DbSql dbSql(String db) {
+    static SqlDB dbSql(String db) {
         return dbSql(db, Vertx.vertx());
     }
 

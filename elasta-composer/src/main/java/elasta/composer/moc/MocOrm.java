@@ -2,6 +2,7 @@ package elasta.composer.moc;
 
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.Orm;
 import elasta.orm.sql.core.FieldInfo;
 import io.vertx.core.json.JsonObject;
 
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * Created by Jango on 11/13/2016.
  */
-public class MocDb implements elasta.orm.Db {
+public class MocOrm implements Orm {
     @Override
     public <T> Promise<JsonObject> findOne(String model, T id) {
         return Promises.empty();

@@ -2,7 +2,7 @@ package elasta.orm.nm.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.sql.sql.DbSql;
+import elasta.orm.sql.sql.SqlDB;
 import elasta.orm.nm.EntityUtils;
 import elasta.orm.nm.delete.DeleteData;
 import elasta.orm.nm.delete.DeleteFunction;
@@ -33,7 +33,7 @@ public interface DeleteTest2 {
 
         final DeleteFunction deleteFunction = deleteFunctionBuilder.create("employee");
 
-        final DbSql nm = UpsertTest.dbSql("nm");
+        final SqlDB nm = UpsertTest.dbSql("nm");
 
         {
             final LinkedHashSet<DeleteData> deleteDataSet = new LinkedHashSet<>();

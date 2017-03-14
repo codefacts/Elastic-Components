@@ -3,7 +3,7 @@ package elasta.orm.sql.sql.impl;
 import com.google.common.collect.ImmutableList;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.nm.delete.DeleteData;
-import elasta.orm.sql.sql.DbSql;
+import elasta.orm.sql.sql.SqlDB;
 import elasta.orm.sql.sql.SqlBuilderUtils;
 import elasta.orm.sql.sql.SqlExecutor;
 import elasta.orm.sql.sql.core.*;
@@ -17,11 +17,11 @@ import java.util.Objects;
 /**
  * Created by Jango on 9/25/2016.
  */
-public class DbSqlImpl implements DbSql {
+public class SqlDBImpl implements SqlDB {
     private final SqlExecutor sqlExecutor;
     private final SqlBuilderUtils sqlBuilderUtils;
 
-    public DbSqlImpl(SqlExecutor sqlExecutor, SqlBuilderUtils sqlBuilderUtils) {
+    public SqlDBImpl(SqlExecutor sqlExecutor, SqlBuilderUtils sqlBuilderUtils) {
         Objects.requireNonNull(sqlExecutor);
         Objects.requireNonNull(sqlBuilderUtils);
         this.sqlExecutor = sqlExecutor;
