@@ -9,4 +9,7 @@ include 'commons'
 include 'elasta-orm'
 include 'java-test'
 include 'simple-eventbus'
+include 'sql'
+include 'elasta-sql'
+include 'elasta-criteria'
 
