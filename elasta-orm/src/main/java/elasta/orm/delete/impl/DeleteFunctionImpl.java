@@ -1,58 +1,49 @@
 package elasta.orm.delete.impl;
 
-import elasta.orm.delete.*;
-import elasta.sql.core.DeleteData;
-import io.vertx.core.json.JsonObject;
+import elasta.orm.delete.DeleteFunction;
+import elasta.orm.delete.DirectDependencyDeleteHandler;
+import elasta.orm.delete.IndirectDependencyDeleteHandler;
+import elasta.orm.delete.DeleteContext;import elasta.sql.core.DeleteData;import elasta.orm.delete.DeleteUtils;
+import elasta.orm.delete.TableToTableDataMap;
+import elasta.orm.upsert.TableData;
 
 import java.util.Objects;
 
 /**
- * Created by Jango on 2017-01-25.
+ * Created by sohan on 3/11/2017.
  */
 final public class DeleteFunctionImpl implements DeleteFunction {
-    final DeleteDataPopulator deleteDataPopulator;
-    final DirectDeleteDependency[] directDeleteDependencies;
-    final IndirectDeleteDependency[] indirectDeleteDependencies;
-    final BelongsToDeleteDependency[] belongsToDeleteDependencies;
+    final DirectDependencyDeleteHandler[] directDependencyDeleteHandlers;
+    final IndirectDependencyDeleteHandler[] indirectDependencyDeleteHandlers;
 
-    public DeleteFunctionImpl(DeleteDataPopulator deleteDataPopulator, DirectDeleteDependency[] directDeleteDependencies, IndirectDeleteDependency[] indirectDeleteDependencies, BelongsToDeleteDependency[] belongsToDeleteDependencies) {
-        Objects.requireNonNull(deleteDataPopulator);
-        Objects.requireNonNull(directDeleteDependencies);
-        Objects.requireNonNull(indirectDeleteDependencies);
-        Objects.requireNonNull(belongsToDeleteDependencies);
-        this.deleteDataPopulator = deleteDataPopulator;
-        this.directDeleteDependencies = directDeleteDependencies;
-        this.indirectDeleteDependencies = indirectDeleteDependencies;
-        this.belongsToDeleteDependencies = belongsToDeleteDependencies;
+    public DeleteFunctionImpl(DirectDependencyDeleteHandler[] directDependencyDeleteHandlers, IndirectDependencyDeleteHandler[] indirectDependencyDeleteHandlers) {
+        Objects.requireNonNull(directDependencyDeleteHandlers);
+        Objects.requireNonNull(indirectDependencyDeleteHandlers);
+        this.directDependencyDeleteHandlers = directDependencyDeleteHandlers;
+        this.indirectDependencyDeleteHandlers = indirectDependencyDeleteHandlers;
     }
 
     @Override
-    public DeleteData delete(JsonObject entity, DeleteContext context) {
+    public void delete(TableData tableData, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
 
-        for (IndirectDeleteDependency indirectDeleteDependency : indirectDeleteDependencies) {
+        Objects.requireNonNull(tableData);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(tableToTableDataMap);
 
-            new JsonDependencyHandler(jsonObject -> {
-                indirectDeleteDependency.getDeleteHandler().delete(entity, jsonObject, context);
-            }).handle(entity.getValue(indirectDeleteDependency.getField()));
+        for (DirectDependencyDeleteHandler directDependencyDeleteHandler : directDependencyDeleteHandlers) {
+            directDependencyDeleteHandler.delete(tableData, context, tableToTableDataMap);
         }
 
-        for (BelongsToDeleteDependency belongsToDeleteDependency : belongsToDeleteDependencies) {
-            new JsonDependencyHandler(jsonObject -> {
-                belongsToDeleteDependency.getDeleteHandler().delete(entity, jsonObject, context);
-            }).handle(entity.getValue(belongsToDeleteDependency.getField()));
+        for (IndirectDependencyDeleteHandler indirectDependencyDeleteHandler : indirectDependencyDeleteHandlers) {
+            indirectDependencyDeleteHandler.delete(tableData, context);
         }
 
-        final DeleteData deleteData = deleteDataPopulator.populate(entity);
-
-        context.add(deleteData);
-
-        for (DirectDeleteDependency directDeleteDependency : directDeleteDependencies) {
-
-            new JsonDependencyHandler(jsonObject -> {
-                directDeleteDependency.getDeleteHandler().delete(jsonObject, context);
-            }).handle(entity.getValue(directDeleteDependency.getField()));
-        }
-
-        return deleteData;
+        context.add(
+            new DeleteData(
+                tableData.getTable(),
+                DeleteUtils.columnValuePairs(tableData)
+            )
+        );
     }
+
 }

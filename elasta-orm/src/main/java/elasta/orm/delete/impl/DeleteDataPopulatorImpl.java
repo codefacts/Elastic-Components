@@ -1,8 +1,8 @@
 package elasta.orm.delete.impl;
 
+import elasta.orm.delete.DeleteDataPopulator;
 import elasta.sql.core.ColumnValuePair;
 import elasta.sql.core.DeleteData;
-import elasta.orm.delete.DeleteDataPopulator;
 import elasta.orm.upsert.FieldToColumnMapping;
 import io.vertx.core.json.JsonObject;
 
