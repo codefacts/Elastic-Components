@@ -1,4 +1,4 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity.core;
 
 import java.util.Objects;
 
@@ -6,21 +6,21 @@ import java.util.Objects;
  * Created by Jango on 2017-01-12.
  */
 final public class ForeignColumnMapping {
-    final Column srcColumn;
-    final Column dstColumn;
+    final String srcColumn;
+    final String dstColumn;
 
-    public ForeignColumnMapping(Column srcColumn, Column dstColumn) {
+    public ForeignColumnMapping(String srcColumn, String dstColumn) {
         Objects.requireNonNull(srcColumn);
         Objects.requireNonNull(dstColumn);
         this.srcColumn = srcColumn;
         this.dstColumn = dstColumn;
     }
 
-    public Column getSrcColumn() {
+    public String getSrcColumn() {
         return srcColumn;
     }
 
-    public Column getDstColumn() {
+    public String getDstColumn() {
         return dstColumn;
     }
 
@@ -31,23 +31,22 @@ final public class ForeignColumnMapping {
 
         ForeignColumnMapping that = (ForeignColumnMapping) o;
 
-        if (srcColumn != null ? !srcColumn.equals(that.srcColumn) : that.srcColumn != null) return false;
-        return dstColumn != null ? dstColumn.equals(that.dstColumn) : that.dstColumn == null;
-
+        if (!srcColumn.equals(that.srcColumn)) return false;
+        return dstColumn.equals(that.dstColumn);
     }
 
     @Override
     public int hashCode() {
-        int result = srcColumn != null ? srcColumn.hashCode() : 0;
-        result = 31 * result + (dstColumn != null ? dstColumn.hashCode() : 0);
+        int result = srcColumn.hashCode();
+        result = 31 * result + dstColumn.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
         return "ForeignColumnMapping{" +
-            "srcColumn=" + srcColumn +
-            ", dstColumn=" + dstColumn +
+            "srcColumn='" + srcColumn + '\'' +
+            ", dstColumn='" + dstColumn + '\'' +
             '}';
     }
 }

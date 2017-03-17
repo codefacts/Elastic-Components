@@ -1,4 +1,4 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity.core;
 
 import java.util.Objects;
 
@@ -31,15 +31,14 @@ final public class Column {
 
         Column column = (Column) o;
 
-        if (name != null ? !name.equals(column.name) : column.name != null) return false;
+        if (!name.equals(column.name)) return false;
         return dbType == column.dbType;
-
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (dbType != null ? dbType.hashCode() : 0);
+        int result = name.hashCode();
+        result = 31 * result + dbType.hashCode();
         return result;
     }
 

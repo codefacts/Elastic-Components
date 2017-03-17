@@ -1,8 +1,8 @@
-package elasta.orm.entitymodel.columnmapping.impl;
+package elasta.orm.entity.core.columnmapping.impl;
 
-import elasta.orm.entitymodel.ColumnType;
-import elasta.orm.entitymodel.ForeignColumnMapping;
-import elasta.orm.entitymodel.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.ForeignColumnMapping;
+import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-12.
  */
-public class IndirectDbColumnMappingImpl implements IndirectDbColumnMapping {
+final public class IndirectDbColumnMappingImpl implements IndirectDbColumnMapping {
     final String referencingTable;
     final String referencingEntity;
     final String relationTable;

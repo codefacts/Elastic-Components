@@ -1,7 +1,10 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity;
 
-import elasta.orm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.entitymodel.columnmapping.SimpleDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
+import elasta.orm.entity.core.DbMapping;
+import elasta.orm.entity.core.Entity;
+import elasta.orm.entity.core.Field;
 
 import java.util.Map;
 import java.util.Set;

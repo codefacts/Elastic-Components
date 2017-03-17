@@ -1,10 +1,13 @@
-package elasta.orm.entitymodel.impl;
+package elasta.orm.entity.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
-import elasta.orm.entitymodel.*;import elasta.orm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.entitymodel.columnmapping.SimpleDbColumnMapping;
+import elasta.orm.entity.*;import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
+import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.DbMapping;
+import elasta.orm.entity.core.Entity;
+import elasta.orm.entity.core.Field;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Jango on 2017-01-21.
  */
-public class EntityMappingHelperImpl implements EntityMappingHelper {
+final public class EntityMappingHelperImpl implements EntityMappingHelper {
     final Map<String, Entity> entityMap;
     final Map<String, Entity> tableToEntityMap;
 

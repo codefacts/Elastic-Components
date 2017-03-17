@@ -8,8 +8,8 @@ import elasta.orm.delete.impl.DirectChildHandlerImpl;
 import elasta.orm.delete.impl.IndirectChildHandlerImpl;
 import elasta.orm.delete.impl.ListTablesToDeleteFunctionImpl;
 import elasta.orm.delete.impl.VirtualChildHandlerImpl;
-import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.DbMapping;import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.columnmapping.DirectDbColumnMapping;import elasta.orm.entitymodel.columnmapping.IndirectDbColumnMapping;import elasta.orm.entitymodel.columnmapping.SimpleDbColumnMapping;import elasta.orm.entitymodel.columnmapping.VirtualDbColumnMapping;
-import elasta.orm.entitymodel.ForeignColumnMapping;
+import elasta.orm.entity.core.ColumnType;import elasta.orm.entity.core.DbMapping;import elasta.orm.entity.EntityMappingHelper;import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
+import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.upsert.ColumnToColumnMapping;
 import elasta.orm.upsert.FieldToColumnMapping;
 import elasta.orm.upsert.TableDataPopulator;
@@ -120,8 +120,8 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
         ColumnToColumnMapping[] mappings = new ColumnToColumnMapping[foreignColumnMappingList.size()];
         for (int i = 0; i < foreignColumnMappingList.size(); i++) {
             mappings[i] = new ColumnToColumnMapping(
-                foreignColumnMappingList.get(i).getSrcColumn().getName(),
-                foreignColumnMappingList.get(i).getDstColumn().getName()
+                foreignColumnMappingList.get(i).getSrcColumn(),
+                foreignColumnMappingList.get(i).getDstColumn()
             );
         }
         return mappings;

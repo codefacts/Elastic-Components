@@ -7,8 +7,7 @@ import elasta.orm.delete.impl.ReloadTableDataFunctionImpl;
 import elasta.orm.delete.loader.DependencyDataLoaderGraph;
 import elasta.orm.delete.loader.MultiTableDependenciesLoader;
 import elasta.orm.delete.loader.MultiTableDependenciesLoaderImpl;
-import elasta.orm.entitymodel.DbMapping;
-import elasta.orm.entitymodel.EntityMappingHelper;
+import elasta.orm.entity.EntityMappingHelper;
 import elasta.sql.SqlDB;
 
 import java.util.Objects;

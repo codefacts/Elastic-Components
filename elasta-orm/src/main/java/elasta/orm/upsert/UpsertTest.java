@@ -3,18 +3,15 @@ package elasta.orm.upsert;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
-import elasta.orm.entitymodel.*;import elasta.orm.entitymodel.columnmapping.DbColumnMapping;import elasta.orm.entitymodel.columnmapping.impl.DirectDbColumnMappingImpl;import elasta.orm.entitymodel.columnmapping.impl.IndirectDbColumnMappingImpl;import elasta.orm.entitymodel.impl.EntityMappingHelperImpl;import elasta.orm.upsert.builder.FunctionMapImpl;import elasta.sql.SqlDB;
+import elasta.orm.entity.*;import elasta.orm.entity.core.columnmapping.DbColumnMapping;import elasta.orm.entity.core.columnmapping.impl.DirectDbColumnMappingImpl;import elasta.orm.entity.core.columnmapping.impl.IndirectDbColumnMappingImpl;
+import elasta.orm.entity.core.*;
+import elasta.orm.entity.core.ForeignColumnMapping;
+import elasta.orm.entity.impl.EntityMappingHelperImpl;import elasta.orm.upsert.builder.FunctionMapImpl;import elasta.sql.SqlDB;
 import elasta.sql.impl.SqlDBImpl;
 import elasta.sql.impl.SqlBuilderUtilsImpl;
-import elasta.orm.EntityUtils;
-import elasta.orm.entitymodel.ForeignColumnMapping;
-import elasta.orm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.entitymodel.columnmapping.impl.DirectDbColumnMappingImpl;
-import elasta.orm.entitymodel.columnmapping.impl.IndirectDbColumnMappingImpl;
-import elasta.orm.entitymodel.columnmapping.impl.SimpleDbColumnMappingImpl;
-import elasta.orm.entitymodel.columnmapping.impl.VirtualDbColumnMappingImpl;
-import elasta.orm.entitymodel.impl.EntityMappingHelperImpl;
-import elasta.orm.upsert.builder.FunctionMapImpl;
+import elasta.orm.entity.EntityUtils;
+import elasta.orm.entity.core.columnmapping.impl.SimpleDbColumnMappingImpl;
+import elasta.orm.entity.core.columnmapping.impl.VirtualDbColumnMappingImpl;
 import elasta.orm.upsert.builder.impl.UpsertFunctionBuilderImpl;
 import elasta.sql.impl.SqlExecutorImpl;
 import io.vertx.core.Vertx;
@@ -256,7 +253,7 @@ public interface UpsertTest {
                         "designation".toUpperCase(),
                         "designation",
                         ImmutableList.of(
-                            new ForeignColumnMapping(new Column("DESIGNATION_ID", DbType.VARCHAR), new Column("ID", DbType.VARCHAR))
+                            new ForeignColumnMapping("DESIGNATION_ID", "ID")
                         ),
                         "designation"
                     ),
@@ -264,7 +261,7 @@ public interface UpsertTest {
                         "designation".toUpperCase(),
                         "designation",
                         ImmutableList.of(
-                            new ForeignColumnMapping(new Column("DESIGNATION2_NAME", DbType.VARCHAR), new Column("NAME", DbType.VARCHAR))
+                            new ForeignColumnMapping("DESIGNATION2_NAME", "NAME")
                         ),
                         "designation2"
                     ),
@@ -274,14 +271,14 @@ public interface UpsertTest {
                         "EMPLOY_DESIGNATION",
                         ImmutableList.of(
                             new ForeignColumnMapping(
-                                new Column("ID", DbType.VARCHAR),
-                                new Column("EMPLOYEE_ID", DbType.VARCHAR)
+                                "ID",
+                                "EMPLOYEE_ID"
                             )
                         ),
                         ImmutableList.of(
                             new ForeignColumnMapping(
-                                new Column("ID", DbType.VARCHAR),
-                                new Column("DESIGNATION_ID", DbType.VARCHAR)
+                                "ID",
+                                "DESIGNATION_ID"
                             )
                         ),
                         "designationList"
@@ -291,8 +288,8 @@ public interface UpsertTest {
                         "group",
                         ImmutableList.of(
                             new ForeignColumnMapping(
-                                new Column("EMPLOYEE_ID", DbType.VARCHAR),
-                                new Column("ID", DbType.VARCHAR)
+                                "EMPLOYEE_ID",
+                                "ID"
                             )
                         ),
                         "groupList"
@@ -319,8 +316,8 @@ public interface UpsertTest {
                     new SimpleDbColumnMappingImpl("name", "NAME", DbType.VARCHAR),
                     new VirtualDbColumnMappingImpl("EMPLOYEE", "employee", ImmutableList.of(
                         new ForeignColumnMapping(
-                            new Column("DESIGNATION_ID", DbType.VARCHAR),
-                            new Column("ID", DbType.VARCHAR)
+                            "DESIGNATION_ID",
+                            "ID"
                         )
                     ), "employeeList")
                 }
@@ -352,8 +349,8 @@ public interface UpsertTest {
                         "employee",
                         ImmutableList.of(
                             new ForeignColumnMapping(
-                                new Column("EMPLOYEE_NAME", DbType.VARCHAR),
-                                new Column("NAME", DbType.VARCHAR)
+                                "EMPLOYEE_NAME",
+                                "NAME"
                             )
                         ),
                         "employee"

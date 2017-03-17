@@ -2,11 +2,12 @@ package elasta.orm.upsert.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
-import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.DbMapping;import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.columnmapping.DirectDbColumnMapping;import elasta.orm.entitymodel.columnmapping.IndirectDbColumnMapping;import elasta.orm.entitymodel.columnmapping.SimpleDbColumnMapping;import elasta.orm.entitymodel.columnmapping.VirtualDbColumnMapping;
+import elasta.orm.entity.core.ColumnType;import elasta.orm.entity.core.DbMapping;import elasta.orm.entity.EntityMappingHelper;import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
 import elasta.orm.upsert.ForeignColumnMapping;
 import elasta.orm.upsert.builder.FunctionMap;
 import elasta.orm.upsert.builder.UpsertFunctionBuilder;
-import elasta.orm.upsert.*;import elasta.orm.upsert.builder.FunctionMap;import elasta.orm.upsert.builder.UpsertFunctionBuilder;import elasta.orm.upsert.impl.*;import io.vertx.core.json.JsonObject;
+import elasta.orm.upsert.*;
+import elasta.orm.upsert.impl.*;import io.vertx.core.json.JsonObject;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -100,8 +101,8 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
         List<ForeignColumnMapping> foreignColumnMappings = mapping.getForeignColumnMappingList().stream()
             .map(foreignColumnMapping -> new ForeignColumnMapping(
-                foreignColumnMapping.getSrcColumn().getName(),
-                foreignColumnMapping.getDstColumn().getName()
+                foreignColumnMapping.getSrcColumn(),
+                foreignColumnMapping.getDstColumn()
             )).collect(Collectors.toList());
 
         return new DirectDependency(
@@ -121,13 +122,13 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
         List<ColumnToColumnMapping> srcMappings = indirectDbColumnMapping.getSrcForeignColumnMappingList().stream()
             .peek(foreignColumnMapping -> foreignColumnMappingBuilder.add(
-                new ForeignColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName())
+                new ForeignColumnMapping(foreignColumnMapping.getSrcColumn(), foreignColumnMapping.getDstColumn())
             ))
-            .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
+            .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn(), foreignColumnMapping.getDstColumn()))
             .collect(Collectors.toList());
 
         List<ColumnToColumnMapping> dstMappings = indirectDbColumnMapping.getDstForeignColumnMappingList().stream()
-            .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
+            .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn(), foreignColumnMapping.getDstColumn()))
             .collect(Collectors.toList());
 
         ImmutableList<ForeignColumnMapping> foreignColumnMappings = foreignColumnMappingBuilder.build();
@@ -160,7 +161,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
     private BelongsTo makeBelongTo(VirtualDbColumnMapping mapping) {
 
         List<ForeignColumnMapping> foreignColumnMappings = mapping.getForeignColumnMappingList().stream()
-            .map(foreignColumnMapping -> new ForeignColumnMapping(foreignColumnMapping.getSrcColumn().getName(), foreignColumnMapping.getDstColumn().getName()))
+            .map(foreignColumnMapping -> new ForeignColumnMapping(foreignColumnMapping.getSrcColumn(), foreignColumnMapping.getDstColumn()))
             .collect(Collectors.toList());
 
         return new BelongsTo(

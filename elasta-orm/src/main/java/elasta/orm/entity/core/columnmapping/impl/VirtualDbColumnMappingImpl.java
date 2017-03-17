@@ -1,8 +1,8 @@
-package elasta.orm.entitymodel.columnmapping.impl;
+package elasta.orm.entity.core.columnmapping.impl;
 
-import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.columnmapping.VirtualDbColumnMapping;import elasta.orm.entitymodel.ColumnType;
-import elasta.orm.entitymodel.ForeignColumnMapping;
-import elasta.orm.entitymodel.columnmapping.VirtualDbColumnMapping;
+import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
+import elasta.orm.entity.core.ForeignColumnMapping;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-12.
  */
-public class VirtualDbColumnMappingImpl implements VirtualDbColumnMapping {
+final public class VirtualDbColumnMappingImpl implements VirtualDbColumnMapping {
     final String referencingTable;
     final String referencingEntity;
     final List<ForeignColumnMapping> foreignColumnMappingList;

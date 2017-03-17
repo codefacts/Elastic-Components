@@ -1,6 +1,6 @@
 package elasta.orm.query.builder.impl;
 
-import elasta.orm.entitymodel.EntityMappingHelper;
+import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.query.Query;
 import elasta.orm.query.impl.QueryImpl;
 import elasta.orm.query.builder.*;import elasta.orm.query.impl.FieldExpressionImpl;

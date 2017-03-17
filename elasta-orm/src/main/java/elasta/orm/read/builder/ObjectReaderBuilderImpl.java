@@ -1,13 +1,13 @@
 package elasta.orm.read.builder;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.EntityMappingHelper;
-import elasta.orm.entitymodel.Field;
+import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.entity.core.Field;
 import elasta.orm.query.FieldExpression;
 import elasta.orm.query.PathExpression;
 import elasta.orm.read.ObjectReader;
 import elasta.orm.read.builder.ex.ObjectReaderException;
-import elasta.orm.query.PathExpression;import elasta.orm.read.builder.ex.ObjectReaderException;import elasta.orm.read.impl.*;
+import elasta.orm.read.impl.*;
 
 import java.util.*;
 

@@ -1,4 +1,4 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity.core;
 
 /**
  * Created by Jango on 2017-01-08.

@@ -1,11 +1,11 @@
 package elasta.orm.delete.loader.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.delete.loader.DependencyDataLoader;import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.columnmapping.IndirectDbColumnMapping;import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.SqlDB;
+import elasta.orm.delete.loader.DependencyDataLoader;import elasta.orm.entity.EntityMappingHelper;import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.SqlDB;
 import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
 import elasta.orm.delete.ex.DependencyDataLoaderException;
-import elasta.orm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.entitymodel.columnmapping.DirectDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,8 +98,8 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
                 mapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
                     listBuilder.add(
                         new ColumnToColumnMapping(
-                            foreignColumnMapping.getSrcColumn().getName(),
-                            foreignColumnMapping.getDstColumn().getName()
+                            foreignColumnMapping.getSrcColumn(),
+                            foreignColumnMapping.getDstColumn()
                         )
                     );
                 });
@@ -120,7 +120,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
                     IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
                     mapping.getDstForeignColumnMappingList().forEach(foreignColumnMapping -> {
                         columnListBuilder.add(
-                            foreignColumnMapping.getSrcColumn().getName()
+                            foreignColumnMapping.getSrcColumn()
                         );
                     });
                 }
@@ -129,7 +129,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
                     DirectDbColumnMapping mapping = (DirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
                     mapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
                         columnListBuilder.add(
-                            foreignColumnMapping.getDstColumn().getName()
+                            foreignColumnMapping.getDstColumn()
                         );
                     });
                     break;

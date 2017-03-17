@@ -1,8 +1,8 @@
-package elasta.orm.entitymodel.columnmapping.impl;
+package elasta.orm.entity.core.columnmapping.impl;
 
-import elasta.orm.entitymodel.ColumnType;
-import elasta.orm.entitymodel.ForeignColumnMapping;
-import elasta.orm.entitymodel.columnmapping.DirectDbColumnMapping;
+import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.ForeignColumnMapping;
+import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 
 import java.util.List;
 import java.util.Objects;

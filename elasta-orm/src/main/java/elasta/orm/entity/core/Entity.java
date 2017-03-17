@@ -1,4 +1,4 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity.core;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -13,13 +13,14 @@ final public class Entity {
     final DbMapping dbMapping;
 
     public Entity(String name, String primaryKey, Field[] fields, DbMapping dbMapping) {
-        this.dbMapping = dbMapping;
         Objects.requireNonNull(name);
         Objects.requireNonNull(primaryKey);
         Objects.requireNonNull(fields);
+        Objects.requireNonNull(dbMapping);
         this.name = name;
         this.primaryKey = primaryKey;
         this.fields = fields;
+        this.dbMapping = dbMapping;
     }
 
     public String getName() {

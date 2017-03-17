@@ -1,4 +1,4 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity.core;
 
 import java.util.Objects;
 import java.util.Optional;

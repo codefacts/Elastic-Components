@@ -1,9 +1,9 @@
 package elasta.orm.query;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.EntityUtils;
-import elasta.orm.entitymodel.Entity;
-import elasta.orm.entitymodel.impl.EntityMappingHelperImpl;
+import elasta.orm.entity.EntityUtils;
+import elasta.orm.entity.core.Entity;
+import elasta.orm.entity.impl.EntityMappingHelperImpl;
 import elasta.orm.query.builder.QueryBuilder;
 import elasta.orm.query.builder.impl.QueryBuilderImpl;
 import elasta.orm.query.impl.PathExpressionImpl;

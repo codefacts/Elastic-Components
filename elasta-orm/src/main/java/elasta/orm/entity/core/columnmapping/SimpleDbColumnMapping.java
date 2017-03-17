@@ -1,6 +1,6 @@
-package elasta.orm.entitymodel.columnmapping;
+package elasta.orm.entity.core.columnmapping;
 
-import elasta.orm.entitymodel.DbType;import elasta.orm.entitymodel.DbType;
+import elasta.orm.entity.core.DbType;
 
 /**
  * Created by Jango on 2017-01-12.

@@ -1,4 +1,4 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity.core;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

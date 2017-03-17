@@ -1,6 +1,6 @@
-package elasta.orm.entitymodel;
+package elasta.orm.entity.core;
 
-import elasta.orm.entitymodel.columnmapping.DbColumnMapping;import elasta.orm.entitymodel.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 
 import java.util.Arrays;
 import java.util.Objects;

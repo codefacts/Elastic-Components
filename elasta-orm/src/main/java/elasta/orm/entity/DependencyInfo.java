@@ -1,25 +1,27 @@
-package elasta.orm.delete.loader.impl;
+package elasta.orm.entity;
 
+import elasta.orm.entity.core.Entity;
+import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 
 import java.util.Objects;
 
 /**
- * Created by sohan on 3/5/2017.
+ * Created by sohan on 3/17/2017.
  */
 final public class DependencyInfo {
-    final String dependentTable;
+    final Field field;
     final DbColumnMapping dbColumnMapping;
 
-    public DependencyInfo(String dependentTable, DbColumnMapping dbColumnMapping) {
-        Objects.requireNonNull(dependentTable);
+    public DependencyInfo(Field field, DbColumnMapping dbColumnMapping) {
+        Objects.requireNonNull(field);
         Objects.requireNonNull(dbColumnMapping);
-        this.dependentTable = dependentTable;
+        this.field = field;
         this.dbColumnMapping = dbColumnMapping;
     }
 
-    public String getDependentTable() {
-        return dependentTable;
+    public Field getField() {
+        return field;
     }
 
     public DbColumnMapping getDbColumnMapping() {
@@ -33,14 +35,13 @@ final public class DependencyInfo {
 
         DependencyInfo that = (DependencyInfo) o;
 
-        if (dependentTable != null ? !dependentTable.equals(that.dependentTable) : that.dependentTable != null)
-            return false;
+        if (field != null ? !field.equals(that.field) : that.field != null) return false;
         return dbColumnMapping != null ? dbColumnMapping.equals(that.dbColumnMapping) : that.dbColumnMapping == null;
     }
 
     @Override
     public int hashCode() {
-        int result = dependentTable != null ? dependentTable.hashCode() : 0;
+        int result = field != null ? field.hashCode() : 0;
         result = 31 * result + (dbColumnMapping != null ? dbColumnMapping.hashCode() : 0);
         return result;
     }
@@ -48,7 +49,7 @@ final public class DependencyInfo {
     @Override
     public String toString() {
         return "DependencyInfo{" +
-            "dependentTable='" + dependentTable + '\'' +
+            "field=" + field +
             ", dbColumnMapping=" + dbColumnMapping +
             '}';
     }

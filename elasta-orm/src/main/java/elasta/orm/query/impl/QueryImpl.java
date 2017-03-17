@@ -2,7 +2,7 @@ package elasta.orm.query.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.Func;import elasta.criteria.funcs.ParamsBuilderImpl;import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.Field;import elasta.orm.entitymodel.Relationship;import elasta.orm.entitymodel.columnmapping.*;
+import elasta.criteria.Func;import elasta.criteria.funcs.ParamsBuilderImpl;import elasta.orm.entity.core.ColumnType;import elasta.orm.entity.EntityMappingHelper;import elasta.orm.entity.core.Field;import elasta.orm.entity.core.Relationship;import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.query.*;
 import elasta.orm.query.builder.FieldExpressionAndOrderPair;import elasta.orm.query.builder.FieldExpressionHolderFunc;import elasta.orm.query.builder.impl.PathExpressionAndAliasPair;
 import elasta.orm.query.core.*;
@@ -414,8 +414,8 @@ final public class QueryImpl implements Query {
             columnMapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
                 listBuilder.add(
                     new ColumnToColumnMapping(
-                        foreignColumnMapping.getDstColumn().getName(),
-                        foreignColumnMapping.getSrcColumn().getName()
+                        foreignColumnMapping.getDstColumn(),
+                        foreignColumnMapping.getSrcColumn()
                     )
                 );
             });
@@ -440,8 +440,8 @@ final public class QueryImpl implements Query {
             columnMapping.getSrcForeignColumnMappingList().forEach(foreignColumnMapping -> {
                 mappingBuilder1.add(
                     new ColumnToColumnMapping(
-                        foreignColumnMapping.getSrcColumn().getName(),
-                        foreignColumnMapping.getDstColumn().getName()
+                        foreignColumnMapping.getSrcColumn(),
+                        foreignColumnMapping.getDstColumn()
                     )
                 );
             });
@@ -463,8 +463,8 @@ final public class QueryImpl implements Query {
             columnMapping.getDstForeignColumnMappingList().forEach(foreignColumnMapping -> {
                 mappingBuilder2.add(
                     new ColumnToColumnMapping(
-                        foreignColumnMapping.getDstColumn().getName(),
-                        foreignColumnMapping.getSrcColumn().getName()
+                        foreignColumnMapping.getDstColumn(),
+                        foreignColumnMapping.getSrcColumn()
                     )
                 );
             });
@@ -488,8 +488,8 @@ final public class QueryImpl implements Query {
             directDbColumnMapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
                 mappingListBuilder.add(
                     new ColumnToColumnMapping(
-                        foreignColumnMapping.getSrcColumn().getName(),
-                        foreignColumnMapping.getDstColumn().getName()
+                        foreignColumnMapping.getSrcColumn(),
+                        foreignColumnMapping.getDstColumn()
                     )
                 );
             });

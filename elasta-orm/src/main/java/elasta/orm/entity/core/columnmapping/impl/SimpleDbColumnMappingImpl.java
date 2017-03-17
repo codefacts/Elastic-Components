@@ -1,15 +1,14 @@
-package elasta.orm.entitymodel.columnmapping.impl;
+package elasta.orm.entity.core.columnmapping.impl;
 
-import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.DbType;import elasta.orm.entitymodel.ColumnType;
-import elasta.orm.entitymodel.DbType;
-import elasta.orm.entitymodel.columnmapping.SimpleDbColumnMapping;
+import elasta.orm.entity.core.ColumnType;import elasta.orm.entity.core.DbType;
+import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
 
 import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-12.
  */
-public class SimpleDbColumnMappingImpl implements SimpleDbColumnMapping {
+final public class SimpleDbColumnMappingImpl implements SimpleDbColumnMapping {
     final String field;
     final String column;
     final ColumnType columnType;
@@ -21,8 +20,8 @@ public class SimpleDbColumnMappingImpl implements SimpleDbColumnMapping {
         Objects.requireNonNull(dbType);
         this.field = field;
         this.column = column;
-        this.columnType = ColumnType.SIMPLE;
         this.dbType = dbType;
+        this.columnType = ColumnType.SIMPLE;
     }
 
     @Override

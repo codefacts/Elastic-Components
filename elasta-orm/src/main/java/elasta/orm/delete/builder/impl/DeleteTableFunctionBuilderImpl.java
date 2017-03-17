@@ -7,11 +7,11 @@ import elasta.orm.delete.builder.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.impl.DeleteTableFunctionImpl;
 import elasta.orm.delete.impl.DirectDependencyDeleteHandlerImpl;
 import elasta.orm.delete.impl.IndirectDependencyDeleteHandlerImpl;
-import elasta.orm.entitymodel.EntityMappingHelper;
-import elasta.orm.entitymodel.columnmapping.DbColumnMapping;
-import elasta.orm.entitymodel.columnmapping.IndirectDbColumnMapping;
-import elasta.orm.entitymodel.ForeignColumnMapping;
-import elasta.orm.entitymodel.columnmapping.DirectDbColumnMapping;
+import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.entity.core.ForeignColumnMapping;
+import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 import elasta.orm.upsert.ColumnToColumnMapping;
 
 import java.util.List;
@@ -110,8 +110,8 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
         for (int i = 0; i < foreignColumnMappingList.size(); i++) {
             ForeignColumnMapping foreignColumnMapping = foreignColumnMappingList.get(i);
             columnToColumnMappings[i] = new ColumnToColumnMapping(
-                foreignColumnMapping.getSrcColumn().getName(),
-                foreignColumnMapping.getDstColumn().getName()
+                foreignColumnMapping.getSrcColumn(),
+                foreignColumnMapping.getDstColumn()
             );
         }
         return columnToColumnMappings;
@@ -122,8 +122,8 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
         for (int i = 0; i < columnToColumnMappings.length; i++) {
             ForeignColumnMapping foreignColumnMapping = foreignColumnMappings.get(i);
             columnToColumnMappings[i] = new ColumnToColumnMapping(
-                foreignColumnMapping.getSrcColumn().getName(),
-                foreignColumnMapping.getDstColumn().getName()
+                foreignColumnMapping.getSrcColumn(),
+                foreignColumnMapping.getDstColumn()
             );
         }
         return columnToColumnMappings;

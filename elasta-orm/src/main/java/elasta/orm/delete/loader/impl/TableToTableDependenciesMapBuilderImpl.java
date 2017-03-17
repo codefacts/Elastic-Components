@@ -3,12 +3,12 @@ package elasta.orm.delete.loader.impl;
 import elasta.orm.delete.TableToTableDependenciesMap;
 import elasta.orm.delete.impl.TableToTableDependenciesMapImpl;
 import elasta.orm.delete.loader.TableToTableDependenciesMapBuilder;
-import elasta.orm.entitymodel.DbMapping;
-import elasta.orm.entitymodel.EntityMappingHelper;
-import elasta.orm.entitymodel.columnmapping.IndirectDbColumnMapping;
-import elasta.orm.entitymodel.impl.EntityMappingHelperImpl;
-import elasta.orm.EntityUtils;
-import elasta.orm.entitymodel.columnmapping.DirectDbColumnMapping;
+import elasta.orm.entity.core.DbMapping;
+import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.entity.impl.EntityMappingHelperImpl;
+import elasta.orm.entity.EntityUtils;
+import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 import elasta.orm.upsert.UpsertTest;
 
 import java.util.*;
