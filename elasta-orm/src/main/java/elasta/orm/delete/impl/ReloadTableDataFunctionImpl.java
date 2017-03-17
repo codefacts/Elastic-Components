@@ -6,12 +6,15 @@ import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.delete.ReloadTableDataFunction;
 import elasta.orm.delete.TableToTableDependenciesMap;
-import elasta.orm.delete.ex.ReloadDependencyValuesFunctionException;import elasta.orm.delete.loader.impl.DependencyDataLoaderBuilderImpl;
-import elasta.orm.upsert.TableData;import elasta.sql.SqlDB;
+import elasta.orm.delete.ex.ReloadDependencyValuesFunctionException;
+import elasta.orm.delete.loader.impl.DependencyDataLoaderBuilderImpl;
+import elasta.orm.upsert.TableData;
+import elasta.sql.SqlDB;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -19,11 +22,11 @@ import java.util.stream.Collectors;
 /**
  * Created by sohan on 3/13/2017.
  */
-final public class ReloadDependencyValuesFunctionImpl implements ReloadTableDataFunction {
+final public class ReloadTableDataFunctionImpl implements ReloadTableDataFunction {
     final TableToTableDependenciesMap tableToTableDependenciesMap;
     final SqlDB sqlDB;
 
-    public ReloadDependencyValuesFunctionImpl(TableToTableDependenciesMap tableToTableDependenciesMap, SqlDB sqlDB) {
+    public ReloadTableDataFunctionImpl(TableToTableDependenciesMap tableToTableDependenciesMap, SqlDB sqlDB) {
         Objects.requireNonNull(tableToTableDependenciesMap);
         Objects.requireNonNull(sqlDB);
         this.tableToTableDependenciesMap = tableToTableDependenciesMap;
@@ -31,7 +34,7 @@ final public class ReloadDependencyValuesFunctionImpl implements ReloadTableData
     }
 
     @Override
-    public Promise<List<TableData>> reloadIfNecessary(List<TableData> tableDataList) {
+    public Promise<List<TableData>> reloadIfNecessary(Collection<TableData> tableDataList) {
 
         List<Promise<TableData>> promiseList = tableDataList.stream().map(tableData -> {
             List<String> columns = DependencyDataLoaderBuilderImpl.createDependencyColumns(Arrays.asList(tableData.getPrimaryColumns()), tableToTableDependenciesMap.get(tableData.getTable()));

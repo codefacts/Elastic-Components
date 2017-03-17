@@ -1,4 +1,6 @@
-package elasta.orm.delete;
+package elasta.orm.delete.builder;
+
+import elasta.orm.delete.DeleteTableFunction;
 
 /**
  * Created by sohan on 3/11/2017.

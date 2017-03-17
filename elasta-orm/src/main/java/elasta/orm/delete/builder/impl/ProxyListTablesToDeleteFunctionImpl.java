@@ -1,8 +1,8 @@
-package elasta.orm.delete.impl;
+package elasta.orm.delete.builder.impl;
 
 import elasta.orm.delete.ListTablesToDeleteContext;
 import elasta.orm.delete.ListTablesToDeleteFunction;
-import elasta.orm.delete.ListTablesToDeleteFunctionBuilderContext;
+import elasta.orm.delete.builder.ListTablesToDeleteFunctionBuilderContext;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;

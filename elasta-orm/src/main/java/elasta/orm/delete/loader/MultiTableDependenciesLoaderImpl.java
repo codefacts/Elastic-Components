@@ -22,7 +22,7 @@ final public class MultiTableDependenciesLoaderImpl implements MultiTableDepende
     }
 
     @Override
-    public Promise<TableToTableDataMap> load(List<TableData> parentTableDataList) {
+    public Promise<TableToTableDataMap> load(Collection<TableData> parentTableDataList) {
 
         final Map<TableData, TableData> dataMap = new HashMap<>();
 

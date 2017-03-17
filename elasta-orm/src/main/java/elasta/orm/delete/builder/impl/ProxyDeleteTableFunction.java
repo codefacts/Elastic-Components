@@ -1,8 +1,8 @@
-package elasta.orm.delete.impl;
+package elasta.orm.delete.builder.impl;
 
 import elasta.orm.delete.DeleteContext;
 import elasta.orm.delete.DeleteTableFunction;
-import elasta.orm.delete.DeleteTableFunctionBuilderContext;
+import elasta.orm.delete.builder.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.upsert.TableData;
 

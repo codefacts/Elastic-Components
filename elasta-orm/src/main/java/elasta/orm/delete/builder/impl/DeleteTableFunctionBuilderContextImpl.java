@@ -1,9 +1,9 @@
-package elasta.orm.delete.impl;
+package elasta.orm.delete.builder.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.delete.DeleteTableFunction;
-import elasta.orm.delete.DeleteTableFunctionBuilderContext;
+import elasta.orm.delete.builder.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.ex.DeleteFuctionBuilderContextException;
 
 import java.util.Map;
