@@ -3,10 +3,15 @@ package elasta.orm.upsert;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
-import elasta.orm.entity.*;import elasta.orm.entity.core.columnmapping.DbColumnMapping;import elasta.orm.entity.core.columnmapping.impl.DirectDbColumnMappingImpl;import elasta.orm.entity.core.columnmapping.impl.IndirectDbColumnMappingImpl;
+import elasta.orm.entity.*;
+import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.impl.DirectDbColumnMappingImpl;
+import elasta.orm.entity.core.columnmapping.impl.IndirectDbColumnMappingImpl;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.ForeignColumnMapping;
-import elasta.orm.entity.impl.EntityMappingHelperImpl;import elasta.orm.upsert.builder.FunctionMapImpl;import elasta.sql.SqlDB;
+import elasta.orm.entity.impl.EntityMappingHelperImpl;
+import elasta.orm.upsert.builder.FunctionMapImpl;
+import elasta.sql.SqlDB;
 import elasta.sql.impl.SqlDBImpl;
 import elasta.sql.impl.SqlBuilderUtilsImpl;
 import elasta.orm.entity.EntityUtils;
@@ -288,8 +293,8 @@ public interface UpsertTest {
                         "group",
                         ImmutableList.of(
                             new ForeignColumnMapping(
-                                "EMPLOYEE_ID",
-                                "ID"
+                                "EMPLOYEE_NAME",
+                                "NAME"
                             )
                         ),
                         "groupList"
