@@ -198,7 +198,7 @@ final public class EntityValidatorImpl implements EntityValidator {
         }
 
 
-        private class IndirectColumnMappingValidator {
+        final private class IndirectColumnMappingValidator {
             final Entity entity;
             final Field field;
             final IndirectDbColumnMapping mapping;
@@ -281,6 +281,26 @@ final public class EntityValidatorImpl implements EntityValidator {
                         entityNameToEntityMap.get(mapping.getReferencingEntity()).getDbMapping().getDbColumnMappings(), mapping.getDstForeignColumnMappingList()
                     );
                 }
+
+                Relationship relationship = field.getRelationship().get();
+                checkFieldTypeAndName(relationship, field);
+
+                Relationship relationshipOther = info.get().getField().getRelationship().get();
+
+                if (Utils.not(
+                    (relationship.getType() == Relationship.Type.ONE_TO_ONE
+                        && relationshipOther.getType() == Relationship.Type.ONE_TO_ONE)
+                        || (relationship.getType() == Relationship.Type.ONE_TO_MANY
+                        && relationshipOther.getType() == Relationship.Type.MANY_TO_ONE)
+                        || (relationship.getType() == Relationship.Type.MANY_TO_ONE
+                        && relationshipOther.getType() == Relationship.Type.ONE_TO_MANY)
+                        || (relationship.getType() == Relationship.Type.MANY_TO_MANY
+                        && relationshipOther.getType() == Relationship.Type.MANY_TO_MANY)
+                )) {
+                    throw new EntityValidationException(
+                        "Relationship type '" + field.getRelationship().get().getType() + "' is invalid for mapping type '" + mapping.getColumnType() + "'"
+                    );
+                }
             }
 
             private void checkMappingValidity(IndirectDbColumnMapping mapping, IndirectDbColumnMapping depMapping, DependencyTpl dependencyTpl, DependencyInfo dependencyInfo) {
@@ -350,7 +370,7 @@ final public class EntityValidatorImpl implements EntityValidator {
             }
         }
 
-        private class DirectColumnValidator {
+        final private class DirectColumnValidator {
             final Entity entity;
             final Field field;
             final DirectDbColumnMapping mapping;
@@ -393,13 +413,8 @@ final public class EntityValidatorImpl implements EntityValidator {
                     .findAny().orElseThrow(() -> new EntityValidationException("No Mapping found in the opposite side for mapping '" + mapping + "' in relationship '" + entity.getName() + "." + field.getName() + "' <- '" + dependencyTpl.getEntity().getName() + "'"));
 
                 Relationship relationship = field.getRelationship().get();
-                if (Utils.not(
-                    relationship.getName() == Relationship.Name.HAS_ONE
-                )) {
-                    throw new EntityValidationException(
-                        "javaType '" + field.getJavaType() + "' is not valid for relationship name '" + relationship.getName() + "' in field '" + field.getName() + "'"
-                    );
-                }
+
+                checkFieldTypeAndName(relationship, field);
 
                 if (Utils.not(relationship.getType() == Relationship.Type.ONE_TO_ONE || relationship.getType() == Relationship.Type.MANY_TO_ONE)) {
                     throw new EntityValidationException(
@@ -475,19 +490,8 @@ final public class EntityValidatorImpl implements EntityValidator {
                     .findAny().orElseThrow(() -> new EntityValidationException("No Mapping found in the opposite side for mapping '" + mapping + "' in relationship '" + entity.getName() + "." + field.getName() + "' <- '" + dependencyTpl.getEntity().getName() + "'"));
 
                 Relationship relationship = field.getRelationship().get();
-                if (Utils.not(
-                    (
-                        field.getJavaType() == JavaType.OBJECT
-                            && relationship.getName() == Relationship.Name.HAS_ONE
-                    ) || (
-                        field.getJavaType() == JavaType.ARRAY
-                            && relationship.getName() == Relationship.Name.HAS_MANY
-                    )
-                )) {
-                    throw new EntityValidationException(
-                        "javaType '" + field.getJavaType() + "' is not valid for relationship name '" + relationship.getName() + "' in field '" + field.getName() + "'"
-                    );
-                }
+
+                checkFieldTypeAndName(relationship, field);
 
                 if (Utils.not(relationship.getType() == Relationship.Type.ONE_TO_ONE || relationship.getType() == Relationship.Type.MANY_TO_ONE)) {
                     throw new EntityValidationException(
@@ -516,6 +520,23 @@ final public class EntityValidatorImpl implements EntityValidator {
                         );
                     }
                 }
+            }
+
+        }
+
+        private void checkFieldTypeAndName(Relationship relationship, Field field) {
+            if (Utils.not(
+                (
+                    field.getJavaType() == JavaType.OBJECT
+                        && relationship.getName() == Relationship.Name.HAS_ONE
+                ) || (
+                    field.getJavaType() == JavaType.ARRAY
+                        && relationship.getName() == Relationship.Name.HAS_MANY
+                )
+            )) {
+                throw new EntityValidationException(
+                    "javaType '" + field.getJavaType() + "' is not valid for relationship name '" + relationship.getName() + "' in field '" + field.getName() + "'"
+                );
             }
         }
     }
