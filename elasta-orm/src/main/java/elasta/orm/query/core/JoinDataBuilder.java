@@ -1,7 +1,7 @@
-package elasta.orm.query;
+package elasta.orm.query.core;
 
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.query.impl.JoinData;import elasta.orm.query.impl.JoinData;
+import elasta.orm.query.impl.JoinData;
 
 import java.util.*;
 import java.util.function.Function;

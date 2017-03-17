@@ -1,7 +1,9 @@
-package elasta.orm.query;
+package elasta.orm.query.impl;
 
 import elasta.criteria.Func;import elasta.criteria.ParamsBuilder;import elasta.criteria.Func;
 import elasta.criteria.ParamsBuilder;
+import elasta.orm.query.FieldExpression;
+import elasta.orm.query.PathAliasHandler;
 
 import java.util.Objects;
 

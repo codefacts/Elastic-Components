@@ -1,5 +1,9 @@
-package elasta.orm.delete;
+package elasta.orm.delete.impl;
 
+import elasta.orm.delete.DeleteContext;
+import elasta.orm.delete.MultiTableDeleteFunction;
+import elasta.orm.delete.TableToTableDataMap;
+import elasta.orm.delete.TableToTableDeleteFunctionMap;
 import elasta.orm.upsert.TableData;
 
 import java.util.List;

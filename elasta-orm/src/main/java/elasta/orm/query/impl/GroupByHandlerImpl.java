@@ -1,6 +1,6 @@
 package elasta.orm.query.impl;
 
-import elasta.orm.query.ColumnAliasPair;
+import elasta.orm.query.core.ColumnAliasPair;
 import elasta.orm.query.Cqr;
 import elasta.orm.query.GroupByHandler;
 

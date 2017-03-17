@@ -1,4 +1,4 @@
-package elasta.orm.query;
+package elasta.orm.query.impl;
 
 import elasta.criteria.ParamsBuilder;import elasta.criteria.ParamsBuilder;
 import elasta.orm.query.builder.FieldExpressionHolderFunc;

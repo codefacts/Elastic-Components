@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.delete.TableToTableDataMap;import elasta.orm.delete.TableToTableDataMapImpl;import elasta.orm.delete.loader.DependencyDataLoader;
+import elasta.orm.delete.TableToTableDataMap;import elasta.orm.delete.impl.TableToTableDataMapImpl;import elasta.orm.delete.loader.DependencyDataLoader;
 import elasta.orm.upsert.TableData;
 import io.vertx.core.json.JsonObject;
 

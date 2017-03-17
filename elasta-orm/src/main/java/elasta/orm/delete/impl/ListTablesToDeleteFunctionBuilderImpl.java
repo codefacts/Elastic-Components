@@ -1,6 +1,7 @@
-package elasta.orm.delete;
+package elasta.orm.delete.impl;
 
 import com.google.common.collect.ImmutableList;
+import elasta.orm.delete.*;
 import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.DbMapping;import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.columnmapping.DirectDbColumnMapping;import elasta.orm.entitymodel.columnmapping.IndirectDbColumnMapping;import elasta.orm.entitymodel.columnmapping.SimpleDbColumnMapping;import elasta.orm.entitymodel.columnmapping.VirtualDbColumnMapping;
 import elasta.orm.entitymodel.ForeignColumnMapping;
 import elasta.orm.upsert.ColumnToColumnMapping;

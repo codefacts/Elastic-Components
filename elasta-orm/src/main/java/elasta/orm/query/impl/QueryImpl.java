@@ -1,10 +1,13 @@
-package elasta.orm.query;
+package elasta.orm.query.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.Func;import elasta.criteria.funcs.ParamsBuilderImpl;import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.Field;import elasta.orm.entitymodel.Relationship;import elasta.orm.entitymodel.columnmapping.*;import elasta.orm.query.builder.FieldExpressionAndOrderPair;import elasta.orm.query.builder.FieldExpressionHolderFunc;import elasta.orm.query.builder.impl.PathExpressionAndAliasPair;import elasta.orm.query.ex.PathExpressionException;import elasta.orm.query.ex.QueryParserException;import elasta.orm.query.impl.*;import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.core.JoinType;
-import elasta.criteria.Func;
-import elasta.criteria.funcs.ParamsBuilderImpl;
+import elasta.criteria.Func;import elasta.criteria.funcs.ParamsBuilderImpl;import elasta.orm.entitymodel.ColumnType;import elasta.orm.entitymodel.EntityMappingHelper;import elasta.orm.entitymodel.Field;import elasta.orm.entitymodel.Relationship;import elasta.orm.entitymodel.columnmapping.*;
+import elasta.orm.query.*;
+import elasta.orm.query.builder.FieldExpressionAndOrderPair;import elasta.orm.query.builder.FieldExpressionHolderFunc;import elasta.orm.query.builder.impl.PathExpressionAndAliasPair;
+import elasta.orm.query.core.*;
+import elasta.orm.query.ex.PathExpressionException;import elasta.orm.query.ex.QueryParserException;
+import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.core.JoinType;
 import elasta.orm.query.builder.FieldExpressionResolverImpl;
 
 import java.util.*;

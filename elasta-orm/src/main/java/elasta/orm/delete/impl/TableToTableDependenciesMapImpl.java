@@ -1,7 +1,8 @@
-package elasta.orm.delete;
+package elasta.orm.delete.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.orm.delete.TableToTableDependenciesMap;
 import elasta.orm.delete.loader.impl.DependencyInfo;
 
 import java.util.List;

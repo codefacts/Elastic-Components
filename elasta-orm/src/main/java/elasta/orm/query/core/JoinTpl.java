@@ -1,4 +1,4 @@
-package elasta.orm.query;
+package elasta.orm.query.core;
 
 import elasta.sql.core.JoinType;
 

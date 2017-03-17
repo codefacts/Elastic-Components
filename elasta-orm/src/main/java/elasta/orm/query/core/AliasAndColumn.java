@@ -1,22 +1,19 @@
-package elasta.orm.query;
+package elasta.orm.query.core;
 
 import java.util.Objects;
 
 /**
- * Created by Jango on 17/02/09.
+ * Created by Jango on 17/02/11.
  */
-public class OrderByData {
+public class AliasAndColumn {
     final String alias;
     final String column;
-    final Order order;
 
-    public OrderByData(String alias, String column, Order order) {
+    public AliasAndColumn(String alias, String column) {
         Objects.requireNonNull(alias);
         Objects.requireNonNull(column);
-        Objects.requireNonNull(order);
         this.alias = alias;
         this.column = column;
-        this.order = order;
     }
 
     public String getAlias() {
@@ -27,20 +24,15 @@ public class OrderByData {
         return column;
     }
 
-    public Order getOrder() {
-        return order;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        OrderByData that = (OrderByData) o;
+        AliasAndColumn that = (AliasAndColumn) o;
 
         if (alias != null ? !alias.equals(that.alias) : that.alias != null) return false;
-        if (column != null ? !column.equals(that.column) : that.column != null) return false;
-        return order == that.order;
+        return column != null ? column.equals(that.column) : that.column == null;
 
     }
 
@@ -48,16 +40,18 @@ public class OrderByData {
     public int hashCode() {
         int result = alias != null ? alias.hashCode() : 0;
         result = 31 * result + (column != null ? column.hashCode() : 0);
-        result = 31 * result + (order != null ? order.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "OrderByData{" +
+        return "AliasAndColumn{" +
             "alias='" + alias + '\'' +
             ", column='" + column + '\'' +
-            ", order=" + order +
             '}';
+    }
+
+    public String toSql() {
+        return alias + "." + column;
     }
 }

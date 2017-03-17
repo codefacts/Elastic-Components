@@ -1,8 +1,8 @@
 package elasta.orm.query.impl;
 
 import elasta.orm.query.Cqr;
-import elasta.orm.query.OrderByData;
-import elasta.orm.query.OrderByHandler;import elasta.orm.query.Cqr;import elasta.orm.query.OrderByData;import elasta.orm.query.OrderByHandler;
+import elasta.orm.query.core.OrderByData;
+import elasta.orm.query.OrderByHandler;
 
 import java.util.List;
 import java.util.Objects;

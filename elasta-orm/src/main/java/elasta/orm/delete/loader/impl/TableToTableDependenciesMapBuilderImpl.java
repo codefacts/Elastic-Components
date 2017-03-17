@@ -1,7 +1,7 @@
 package elasta.orm.delete.loader.impl;
 
 import elasta.orm.delete.TableToTableDependenciesMap;
-import elasta.orm.delete.TableToTableDependenciesMapImpl;
+import elasta.orm.delete.impl.TableToTableDependenciesMapImpl;
 import elasta.orm.delete.loader.TableToTableDependenciesMapBuilder;
 import elasta.orm.entitymodel.DbMapping;
 import elasta.orm.entitymodel.EntityMappingHelper;

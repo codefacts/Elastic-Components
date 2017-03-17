@@ -2,9 +2,9 @@ package elasta.orm.query.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.orm.query.FieldExpression;
-import elasta.orm.query.Order;
+import elasta.orm.query.core.Order;
 import elasta.orm.query.builder.FieldExpressionAndOrderPair;
-import elasta.orm.query.builder.OrderByBuilder;import elasta.orm.query.Order;import elasta.orm.query.builder.FieldExpressionAndOrderPair;import elasta.orm.query.builder.OrderByBuilder;
+import elasta.orm.query.builder.OrderByBuilder;
 
 import java.util.ArrayList;
 import java.util.List;

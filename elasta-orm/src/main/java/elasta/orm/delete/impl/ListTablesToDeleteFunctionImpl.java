@@ -1,6 +1,7 @@
-package elasta.orm.delete;
+package elasta.orm.delete.impl;
 
 import elasta.commons.Utils;
+import elasta.orm.delete.*;
 import elasta.orm.delete.impl.JsonDependencyHandler;
 import elasta.orm.upsert.TableDataPopulator;
 import io.vertx.core.json.JsonObject;

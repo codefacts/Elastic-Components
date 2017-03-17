@@ -1,4 +1,4 @@
-package elasta.orm.query;
+package elasta.orm.query.core;
 
 /**
  * Created by Jango on 17/02/09.

@@ -1,5 +1,6 @@
-package elasta.orm.delete;
+package elasta.orm.delete.impl;
 
+import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.delete.ex.TableDataMapException;
 import elasta.orm.upsert.TableData;
 
