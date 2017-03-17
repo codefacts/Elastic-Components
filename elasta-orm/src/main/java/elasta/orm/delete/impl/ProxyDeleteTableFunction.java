@@ -1,8 +1,8 @@
 package elasta.orm.delete.impl;
 
 import elasta.orm.delete.DeleteContext;
-import elasta.orm.delete.DeleteFunction;
-import elasta.orm.delete.DeleteFunctionBuilderContext;
+import elasta.orm.delete.DeleteTableFunction;
+import elasta.orm.delete.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.upsert.TableData;
 
@@ -11,11 +11,11 @@ import java.util.Objects;
 /**
  * Created by sohan on 3/11/2017.
  */
-final public class ProxyDeleteFunction implements DeleteFunction {
+final public class ProxyDeleteTableFunction implements DeleteTableFunction {
     final String dependentTable;
-    final DeleteFunctionBuilderContext context;
+    final DeleteTableFunctionBuilderContext context;
 
-    public ProxyDeleteFunction(String dependentTable, DeleteFunctionBuilderContext context) {
+    public ProxyDeleteTableFunction(String dependentTable, DeleteTableFunctionBuilderContext context) {
         Objects.requireNonNull(dependentTable);
         Objects.requireNonNull(context);
         this.dependentTable = dependentTable;

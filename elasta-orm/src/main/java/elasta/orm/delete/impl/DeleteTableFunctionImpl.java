@@ -1,6 +1,6 @@
 package elasta.orm.delete.impl;
 
-import elasta.orm.delete.DeleteFunction;
+import elasta.orm.delete.DeleteTableFunction;
 import elasta.orm.delete.DirectDependencyDeleteHandler;
 import elasta.orm.delete.IndirectDependencyDeleteHandler;
 import elasta.orm.delete.DeleteContext;import elasta.sql.core.DeleteData;import elasta.orm.delete.DeleteUtils;
@@ -12,11 +12,11 @@ import java.util.Objects;
 /**
  * Created by sohan on 3/11/2017.
  */
-final public class DeleteFunctionImpl implements DeleteFunction {
+final public class DeleteTableFunctionImpl implements DeleteTableFunction {
     final DirectDependencyDeleteHandler[] directDependencyDeleteHandlers;
     final IndirectDependencyDeleteHandler[] indirectDependencyDeleteHandlers;
 
-    public DeleteFunctionImpl(DirectDependencyDeleteHandler[] directDependencyDeleteHandlers, IndirectDependencyDeleteHandler[] indirectDependencyDeleteHandlers) {
+    public DeleteTableFunctionImpl(DirectDependencyDeleteHandler[] directDependencyDeleteHandlers, IndirectDependencyDeleteHandler[] indirectDependencyDeleteHandlers) {
         Objects.requireNonNull(directDependencyDeleteHandlers);
         Objects.requireNonNull(indirectDependencyDeleteHandlers);
         this.directDependencyDeleteHandlers = directDependencyDeleteHandlers;

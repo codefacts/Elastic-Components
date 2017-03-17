@@ -2,8 +2,8 @@ package elasta.orm.delete.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
-import elasta.orm.delete.DeleteFunction;
-import elasta.orm.delete.DeleteFunctionBuilderContext;
+import elasta.orm.delete.DeleteTableFunction;
+import elasta.orm.delete.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.ex.DeleteFuctionBuilderContextException;
 
 import java.util.Map;
@@ -13,10 +13,10 @@ import java.util.Optional;
 /**
  * Created by sohan on 3/11/2017.
  */
-final public class DeleteFunctionBuilderContextImpl implements DeleteFunctionBuilderContext {
-    Map<String, Optional<DeleteFunction>> functionMap;
+final public class DeleteTableFunctionBuilderContextImpl implements DeleteTableFunctionBuilderContext {
+    Map<String, Optional<DeleteTableFunction>> functionMap;
 
-    public DeleteFunctionBuilderContextImpl(Map<String, Optional<DeleteFunction>> functionMap) {
+    public DeleteTableFunctionBuilderContextImpl(Map<String, Optional<DeleteTableFunction>> functionMap) {
         Objects.requireNonNull(functionMap);
         this.functionMap = functionMap;
     }
@@ -32,27 +32,27 @@ final public class DeleteFunctionBuilderContextImpl implements DeleteFunctionBui
     }
 
     @Override
-    public DeleteFunctionBuilderContext putEmpty(String table) {
+    public DeleteTableFunctionBuilderContext putEmpty(String table) {
         functionMap.put(table, Optional.empty());
         return this;
     }
 
     @Override
-    public DeleteFunctionBuilderContext put(String table, DeleteFunction deleteFunction) {
+    public DeleteTableFunctionBuilderContext put(String table, DeleteTableFunction deleteTableFunction) {
         functionMap.put(
             table,
-            Optional.of(deleteFunction)
+            Optional.of(deleteTableFunction)
         );
         return this;
     }
 
     @Override
-    public DeleteFunction get(String table) {
+    public DeleteTableFunction get(String table) {
         return getByTable(table).orElseThrow(() -> new DeleteFuctionBuilderContextException("No Delete Function exists for table '" + table + "'"));
     }
 
-    private Optional<DeleteFunction> getByTable(String table) {
-        Optional<DeleteFunction> deleteFunction = functionMap.get(table);
+    private Optional<DeleteTableFunction> getByTable(String table) {
+        Optional<DeleteTableFunction> deleteFunction = functionMap.get(table);
         if (deleteFunction == null) {
             throw new DeleteFuctionBuilderContextException("No Delete Function exists for table '" + table + "'");
         }
@@ -60,7 +60,7 @@ final public class DeleteFunctionBuilderContextImpl implements DeleteFunctionBui
     }
 
     @Override
-    public DeleteFunctionBuilderContext makeImmutable() {
+    public DeleteTableFunctionBuilderContext makeImmutable() {
         functionMap = ImmutableMap.copyOf(functionMap);
         return this;
     }

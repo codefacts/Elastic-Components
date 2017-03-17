@@ -1,7 +1,7 @@
 package elasta.orm.delete.impl;
 
 import elasta.commons.Utils;
-import elasta.orm.delete.DeleteFunction;
+import elasta.orm.delete.DeleteTableFunction;
 import elasta.orm.delete.DirectDependencyDeleteHandler;
 import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.delete.DeleteContext;
@@ -18,15 +18,15 @@ import java.util.Objects;
 final public class DirectDependencyDeleteHandlerImpl implements DirectDependencyDeleteHandler {
     final String dependentTable;
     final ColumnToColumnMapping[] columnToColumnMappings;
-    final DeleteFunction dependentTableDeleteFunction;
+    final DeleteTableFunction dependentTableDeleteTableFunction;
 
-    public DirectDependencyDeleteHandlerImpl(String dependentTable, ColumnToColumnMapping[] columnToColumnMappings, DeleteFunction dependentTableDeleteFunction) {
+    public DirectDependencyDeleteHandlerImpl(String dependentTable, ColumnToColumnMapping[] columnToColumnMappings, DeleteTableFunction dependentTableDeleteTableFunction) {
         Objects.requireNonNull(dependentTable);
         Objects.requireNonNull(columnToColumnMappings);
-        Objects.requireNonNull(dependentTableDeleteFunction);
+        Objects.requireNonNull(dependentTableDeleteTableFunction);
         this.dependentTable = dependentTable;
         this.columnToColumnMappings = columnToColumnMappings;
-        this.dependentTableDeleteFunction = dependentTableDeleteFunction;
+        this.dependentTableDeleteTableFunction = dependentTableDeleteTableFunction;
     }
 
     @Override
@@ -59,7 +59,7 @@ final public class DirectDependencyDeleteHandlerImpl implements DirectDependency
             .findAny()
             .orElseThrow(() -> new DirectDependencyDeleteHandlerException("No dependency data found for " + this.toString() + ""));
 
-        dependentTableDeleteFunction.delete(tableData, context, tableToTableDataMap);
+        dependentTableDeleteTableFunction.delete(tableData, context, tableToTableDataMap);
     }
 
     @Override
