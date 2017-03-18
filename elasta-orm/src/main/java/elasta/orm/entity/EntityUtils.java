@@ -180,18 +180,18 @@ public interface EntityUtils {
     }
 
     class TableMapAndDependencyMappingInfo {
-        final Map<String, TableDependency> dependencyMap;
+        final Map<String, TableDependency> tableToTableDependencyMap;
         final Map<String, Entity> entityNameToEntityMap;
 
-        public TableMapAndDependencyMappingInfo(Map<String, TableDependency> dependencyMap, Map<String, Entity> entityNameToEntityMap) {
-            Objects.requireNonNull(dependencyMap);
+        public TableMapAndDependencyMappingInfo(Map<String, TableDependency> tableToTableDependencyMap, Map<String, Entity> entityNameToEntityMap) {
+            Objects.requireNonNull(tableToTableDependencyMap);
             Objects.requireNonNull(entityNameToEntityMap);
-            this.dependencyMap = dependencyMap;
+            this.tableToTableDependencyMap = tableToTableDependencyMap;
             this.entityNameToEntityMap = entityNameToEntityMap;
         }
 
-        public Map<String, TableDependency> getDependencyMap() {
-            return dependencyMap;
+        public Map<String, TableDependency> getTableToTableDependencyMap() {
+            return tableToTableDependencyMap;
         }
 
         public Map<String, Entity> getEntityNameToEntityMap() {

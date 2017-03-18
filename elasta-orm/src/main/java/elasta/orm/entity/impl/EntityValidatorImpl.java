@@ -580,6 +580,6 @@ final public class EntityValidatorImpl implements EntityValidator {
         EntitiesValidatorImpl entitiesValidator = new EntitiesValidatorImpl(
             new EntityValidatorImpl()
         );
-        entitiesValidator.validate(UpsertTest.entities());
+//        entitiesValidator.validate(UpsertTest.entities());
     }
 }

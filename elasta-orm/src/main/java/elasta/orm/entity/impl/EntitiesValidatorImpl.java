@@ -20,19 +20,17 @@ final public class EntitiesValidatorImpl implements EntitiesValidator {
     }
 
     @Override
-    public void validate(Collection<Entity> entities) {
+    public void validate(Params params) {
 
-        EntityUtils.TableMapAndDependencyMappingInfo info = EntityUtils.toTableToTableDependencyMap(entities);
-
-        entities.forEach(
+        params.getEntities().forEach(
             entity -> entityValidator.validate(
                 new EntityValidator.ParamsBuilder()
                     .setEntity(entity)
                     .setDependencyMap(
-                        info.getDependencyMap()
+                        params.getTableToTableDependencyMap()
                     )
                     .setEntityNameToEntityMap(
-                        info.getEntityNameToEntityMap()
+                        params.getEntityNameToEntityMap()
                     )
                     .createParams()
             ));
