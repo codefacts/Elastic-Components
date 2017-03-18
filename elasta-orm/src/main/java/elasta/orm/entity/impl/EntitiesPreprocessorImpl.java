@@ -6,6 +6,7 @@ import elasta.orm.entity.DependencyTpl;
 import elasta.orm.entity.EntitiesPreprocessor;
 import elasta.orm.entity.TableDependency;
 import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.entity.core.columnmapping.DbColumnMapping;
@@ -45,14 +46,21 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
         }
 
         private Entity processEntity(Entity entity) {
-            Arrays.stream(entity.getDbMapping().getDbColumnMappings())
-                .map(dbColumnMapping -> {
-
-                    return processColumnMapping(entity, dbColumnMapping);
-
-                })
+            
+            List<DbColumnMapping> mappingList = Arrays.stream(entity.getDbMapping().getDbColumnMappings())
+                .map(dbColumnMapping -> processColumnMapping(entity, dbColumnMapping))
                 .collect(Collectors.toList());
-            return entity;
+
+            return new Entity(
+                entity.getName(),
+                entity.getPrimaryKey(),
+                entity.getFields(),
+                new DbMapping(
+                    entity.getDbMapping().getTable(),
+                    entity.getDbMapping().getPrimaryColumn(),
+                    mappingList.toArray(new DbColumnMapping[mappingList.size()])
+                )
+            );
         }
 
         private DbColumnMapping processColumnMapping(Entity entity, DbColumnMapping dbColumnMapping) {
