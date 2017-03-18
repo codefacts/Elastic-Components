@@ -27,7 +27,6 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
     }
 
     final private class InternalEntityPreprocessorImpl {
-        final Map<String, Entity> entityMap = new HashMap<>();
         private final Collection<Entity> entities;
         private final Map<String, Entity> entityNameToEntityMap;
         private final Map<String, TableDependency> tableToTableDependencyMap;
@@ -40,13 +39,15 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
 
         public List<Entity> process() {
 
-            entities.forEach(this::processEntity);
+            ImmutableList.Builder<Entity> listBuilder = ImmutableList.builder();
 
-            return ImmutableList.copyOf(entityMap.values());
+            entities.stream().map(this::processEntity).forEach(listBuilder::add);
+
+            return listBuilder.build();
         }
 
         private Entity processEntity(Entity entity) {
-            
+
             List<DbColumnMapping> mappingList = Arrays.stream(entity.getDbMapping().getDbColumnMappings())
                 .map(dbColumnMapping -> processColumnMapping(entity, dbColumnMapping))
                 .collect(Collectors.toList());
