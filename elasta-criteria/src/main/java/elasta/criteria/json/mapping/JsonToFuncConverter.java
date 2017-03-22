@@ -1,6 +1,6 @@
 package elasta.criteria.json.mapping;
 
-import elasta.criteria.Func;import elasta.criteria.Func;
+import elasta.criteria.Func;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -8,5 +8,5 @@ import io.vertx.core.json.JsonObject;
  */
 @FunctionalInterface
 public interface JsonToFuncConverter {
-    Func convert(JsonObject jsonObject, JsonToFuncConverterRegistry registry);
+    Func convert(JsonObject jsonObject, JsonToFuncConverterMap converterMap);
 }

@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -87,6 +88,20 @@ public class SqlDBImpl implements SqlDB {
         SqlAndParams sqlAndParams = sqlBuilderUtils.querySql(table, columns, whereCriteria);
 
         return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams());
+    }
+
+    @Override
+    public Promise<Boolean> exists(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias) {
+        SqlAndParams sqlAndParams = sqlBuilderUtils.existSql(table, primaryKey, sqlCriterias);
+        return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams())
+            .map(
+                resultSet -> resultSet.getResults().stream()
+                    .limit(1)
+                    .map(objects -> objects.getLong(0))
+                    .map(count -> count > 0)
+                    .findAny()
+                    .orElse(false)
+            );
     }
 
     public static void main(String[] arg) {

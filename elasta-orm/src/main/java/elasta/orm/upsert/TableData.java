@@ -4,7 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.upsert.ex.TableDataException;
-import elasta.orm.upsert.ex.TableDataException;import io.vertx.core.json.JsonObject;
+import elasta.orm.upsert.ex.TableDataException;
+import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -22,6 +23,9 @@ final public class TableData {
         Objects.requireNonNull(table);
         Objects.requireNonNull(primaryColumns);
         Objects.requireNonNull(values);
+        if (primaryColumns.length <= 0) {
+            throw new TableDataException("No primary column is given for table '" + table + "'");
+        }
         values = new JsonObject(
             ImmutableMap.copyOf(
                 values.getMap()

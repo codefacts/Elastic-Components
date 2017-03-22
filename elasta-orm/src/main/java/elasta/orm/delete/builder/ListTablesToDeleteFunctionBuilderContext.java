@@ -10,7 +10,7 @@ public interface ListTablesToDeleteFunctionBuilderContext {
 
     ListTablesToDeleteFunction get(String entity);
 
-    void putEmpty();
+    void putEmpty(String entity);
 
     void put(String entity, ListTablesToDeleteFunction listTablesToDeleteFunction);
 

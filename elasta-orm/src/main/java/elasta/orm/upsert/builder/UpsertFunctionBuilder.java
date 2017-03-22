@@ -6,5 +6,5 @@ import elasta.orm.upsert.UpsertFunction;
  * Created by Jango on 2017-01-21.
  */
 public interface UpsertFunctionBuilder {
-    UpsertFunction create(String entity);
+    UpsertFunction build(String entity, FunctionMap<UpsertFunction> functionMap);
 }

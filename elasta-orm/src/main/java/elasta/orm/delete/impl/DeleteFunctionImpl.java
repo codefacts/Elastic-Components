@@ -66,4 +66,8 @@ final public class DeleteFunctionImpl implements DeleteFunction {
 
         return tableDataSet;
     }
+
+    public static void main(String[] asdf) {
+
+    }
 }

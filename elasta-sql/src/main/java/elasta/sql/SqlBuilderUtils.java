@@ -26,4 +26,6 @@ public interface SqlBuilderUtils {
     SqlAndParams deleteSql(String table, JsonObject where);
 
     SqlAndParams deleteSql(Collection<DeleteData> deleteDataList);
+
+    SqlAndParams existSql(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias);
 }

@@ -11,28 +11,28 @@ import java.util.List;
  */
 public interface Orm {
 
-    <T> Promise<JsonObject> findOne(String model, T id);
+    <T> Promise<JsonObject> findOne(String entity, T id);
 
-    <T> Promise<JsonObject> findOne(String model, T id, List<FieldInfo> selectFields);
+    <T> Promise<JsonObject> findOne(String entity, T id, List<FieldInfo> selectFields);
 
-    <T> Promise<List<JsonObject>> findAll(String model, List<T> ids);
+    <T> Promise<List<JsonObject>> findAll(String entity, List<T> ids);
 
-    <T> Promise<List<JsonObject>> findAll(String model, List<T> ids, List<FieldInfo> selectFields);
+    <T> Promise<List<JsonObject>> findAll(String entity, List<T> ids, List<FieldInfo> selectFields);
 
-    Promise<JsonObject> insertOrUpdate(String model, JsonObject data);
+    Promise<JsonObject> upsert(String entity, JsonObject data);
 
-    Promise<List<JsonObject>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects);
+    Promise<List<JsonObject>> upsertAll(String entity, List<JsonObject> jsonObjects);
 
-    <T> Promise<T> delete(String model, T id);
+    <T> Promise<T> delete(String entity, T id);
 
-    <T> Promise<List<T>> deleteAll(String model, List<T> ids);
+    <T> Promise<List<T>> deleteAll(String entity, List<T> ids);
 
-    Promise<Long> count(String model);
+    Promise<Long> count(String entity);
 
-    Promise<Long> count(String model, JsonObject criteria);
+    Promise<Long> count(String entity, JsonObject criteria);
 
-    Promise<List<JsonObject>> findAll(String model, JsonObject criteria);
+    Promise<List<JsonObject>> findAll(String entity, JsonObject criteria);
 
-    Promise<List<JsonObject>> findAll(String model, JsonObject criteria, List<FieldInfo> selectFields);
+    Promise<List<JsonObject>> findAll(String entity, JsonObject criteria, List<FieldInfo> selectFields);
 
 }

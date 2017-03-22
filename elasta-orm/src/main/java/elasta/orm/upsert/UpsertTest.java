@@ -31,180 +31,180 @@ import java.util.stream.Collectors;
  * Created by Jango on 2017-01-21.
  */
 public interface UpsertTest {
-    public static void main(String[] sdlk) {
-
-        EntityMappingHelper entityMappingHelper = new EntityMappingHelperImpl(EntityUtils.toEntityNameToEntityMap(entities()));
-
-        FunctionMapImpl functionMap = new FunctionMapImpl();
-
-        UpsertFunctionBuilderImpl upsertFunctionGenerator = new UpsertFunctionBuilderImpl(entityMappingHelper, functionMap);
-
-        UpsertFunction upsertFunction = upsertFunctionGenerator.create("employee");
-
-        functionMap.makeImmutable();
-
-        HashMap<String, TableData> map = new LinkedHashMap<>();
-        UpsertContextImpl upsertContext = new UpsertContextImpl(map);
-
-        upsertFunction.upsert(
-            new JsonObject()
-                .put("id", "employee-id-2")
-                .put("name", "sohan")
-                .put(
-                    "designation",
-                    new JsonObject()
-                        .put("id", "designation-id-1")
-                        .put("name", "coder")
-                        .put(
-                            "employeeList",
-                            new JsonArray()
-                                .add(
-                                    new JsonObject()
-                                        .put("id", "employee-id-2")
-                                        .put("name", "kony-2")
-                                )
-                                .add(
-                                    new JsonObject()
-                                        .put("id", "employee-id-3")
-                                        .put("name", "mony-3")
-                                )
-                        )
-                )
-                .put(
-                    "designation2",
-                    new JsonObject()
-                        .put("id", "designation-id-2")
-                        .put("name", "coder2")
-                        .put(
-                            "employeeList",
-                            new JsonArray()
-                                .add(
-                                    new JsonObject()
-                                        .put("id", "employee-id-1")
-                                        .put("name", "sohan")
-                                        .put(
-                                            "designation",
-                                            new JsonObject()
-                                                .put("id", "designation-id-1")
-                                                .put("name", "coder")
-                                                .put(
-                                                    "employeeList",
-                                                    new JsonArray()
-                                                        .add(
-                                                            new JsonObject()
-                                                                .put("id", "employee-id-2")
-                                                                .put("name", "kony-2")
-                                                        )
-                                                        .add(
-                                                            new JsonObject()
-                                                                .put("id", "employee-id-3")
-                                                                .put("name", "mony-3")
-                                                        )
-                                                )
-                                        )
-                                        .put(
-                                            "designation2",
-                                            new JsonObject()
-                                                .put("id", "designation-id-2")
-                                                .put("name", "coder2")
-                                        )
-                                        .put(
-                                            "designationList",
-                                            new JsonArray()
-                                                .add(
-                                                    new JsonObject()
-                                                        .put("id", "designation-id-3")
-                                                        .put("name", "coder3")
-                                                )
-                                                .add(
-                                                    new JsonObject()
-                                                        .put("id", "designation-id-4")
-                                                        .put("name", "coder4")
-                                                )
-                                                .add(
-                                                    new JsonObject()
-                                                        .put("id", "designation-id-5")
-                                                        .put("name", "coder5")
-                                                )
-                                        )
-                                        .put(
-                                            "groupList",
-                                            new JsonArray()
-                                                .add(
-                                                    new JsonObject()
-                                                        .put("id", "group-id-3")
-                                                        .put("name", "group3")
-                                                )
-                                                .add(
-                                                    new JsonObject()
-                                                        .put("id", "group-id-4")
-                                                        .put("name", "group4")
-                                                )
-                                                .add(
-                                                    new JsonObject()
-                                                        .put("id", "group-id-5")
-                                                        .put("name", "group5")
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .put(
-                    "designationList",
-                    new JsonArray()
-                        .add(
-                            new JsonObject()
-                                .put("id", "designation-id-3")
-                                .put("name", "coder3")
-                        )
-                        .add(
-                            new JsonObject()
-                                .put("id", "designation-id-4")
-                                .put("name", "coder4")
-                        )
-                        .add(
-                            new JsonObject()
-                                .put("id", "designation-id-5")
-                                .put("name", "coder5")
-                        )
-                )
-                .put(
-                    "groupList",
-                    new JsonArray()
-                        .add(
-                            new JsonObject()
-                                .put("id", "group-id-3")
-                                .put("name", "group3")
-                        )
-                        .add(
-                            new JsonObject()
-                                .put("id", "group-id-4")
-                                .put("name", "group4")
-                        )
-                        .add(
-                            new JsonObject()
-                                .put("id", "group-id-5")
-                                .put("name", "group5")
-                        )
-                ),
-            upsertContext
-        );
-
-        map.values().forEach(System.out::println);
-
-        final Vertx vertx = Vertx.vertx();
-
-        final SqlDB sqlDB = dbSql("orm", vertx);
-
-        vertx.setTimer(1, event -> {
-            Promises.when(map.values().stream().map(tableData -> {
-                return sqlDB.insertJo(tableData.getTable(), tableData.getValues()).then(aVoid -> System.out.println("complete: " + tableData));
-            }).collect(Collectors.toList())).then(voids -> {
-                System.out.println("Insert complete");
-            }).err(throwable -> throwable.printStackTrace())
-            ;
-        });
-    }
+//    public static void main(String[] sdlk) {
+//
+//        EntityMappingHelper entityMappingHelper = new EntityMappingHelperImpl(EntityUtils.toEntityNameToEntityMap(entities()));
+//
+//        FunctionMapImpl functionMap = new FunctionMapImpl();
+//
+//        UpsertFunctionBuilderImpl upsertFunctionGenerator = new UpsertFunctionBuilderImpl(entityMappingHelper, functionMap);
+//
+//        UpsertFunction upsertFunction = upsertFunctionGenerator.build("employee");
+//
+//        functionMap.makeImmutable();
+//
+//        HashMap<String, TableData> map = new LinkedHashMap<>();
+//        UpsertContextImpl upsertContext = new UpsertContextImpl(map);
+//
+//        upsertFunction.upsert(
+//            new JsonObject()
+//                .put("id", "employee-id-2")
+//                .put("name", "sohan")
+//                .put(
+//                    "designation",
+//                    new JsonObject()
+//                        .put("id", "designation-id-1")
+//                        .put("name", "coder")
+//                        .put(
+//                            "employeeList",
+//                            new JsonArray()
+//                                .add(
+//                                    new JsonObject()
+//                                        .put("id", "employee-id-2")
+//                                        .put("name", "kony-2")
+//                                )
+//                                .add(
+//                                    new JsonObject()
+//                                        .put("id", "employee-id-3")
+//                                        .put("name", "mony-3")
+//                                )
+//                        )
+//                )
+//                .put(
+//                    "designation2",
+//                    new JsonObject()
+//                        .put("id", "designation-id-2")
+//                        .put("name", "coder2")
+//                        .put(
+//                            "employeeList",
+//                            new JsonArray()
+//                                .add(
+//                                    new JsonObject()
+//                                        .put("id", "employee-id-1")
+//                                        .put("name", "sohan")
+//                                        .put(
+//                                            "designation",
+//                                            new JsonObject()
+//                                                .put("id", "designation-id-1")
+//                                                .put("name", "coder")
+//                                                .put(
+//                                                    "employeeList",
+//                                                    new JsonArray()
+//                                                        .add(
+//                                                            new JsonObject()
+//                                                                .put("id", "employee-id-2")
+//                                                                .put("name", "kony-2")
+//                                                        )
+//                                                        .add(
+//                                                            new JsonObject()
+//                                                                .put("id", "employee-id-3")
+//                                                                .put("name", "mony-3")
+//                                                        )
+//                                                )
+//                                        )
+//                                        .put(
+//                                            "designation2",
+//                                            new JsonObject()
+//                                                .put("id", "designation-id-2")
+//                                                .put("name", "coder2")
+//                                        )
+//                                        .put(
+//                                            "designationList",
+//                                            new JsonArray()
+//                                                .add(
+//                                                    new JsonObject()
+//                                                        .put("id", "designation-id-3")
+//                                                        .put("name", "coder3")
+//                                                )
+//                                                .add(
+//                                                    new JsonObject()
+//                                                        .put("id", "designation-id-4")
+//                                                        .put("name", "coder4")
+//                                                )
+//                                                .add(
+//                                                    new JsonObject()
+//                                                        .put("id", "designation-id-5")
+//                                                        .put("name", "coder5")
+//                                                )
+//                                        )
+//                                        .put(
+//                                            "groupList",
+//                                            new JsonArray()
+//                                                .add(
+//                                                    new JsonObject()
+//                                                        .put("id", "group-id-3")
+//                                                        .put("name", "group3")
+//                                                )
+//                                                .add(
+//                                                    new JsonObject()
+//                                                        .put("id", "group-id-4")
+//                                                        .put("name", "group4")
+//                                                )
+//                                                .add(
+//                                                    new JsonObject()
+//                                                        .put("id", "group-id-5")
+//                                                        .put("name", "group5")
+//                                                )
+//                                        )
+//                                )
+//                        )
+//                )
+//                .put(
+//                    "designationList",
+//                    new JsonArray()
+//                        .add(
+//                            new JsonObject()
+//                                .put("id", "designation-id-3")
+//                                .put("name", "coder3")
+//                        )
+//                        .add(
+//                            new JsonObject()
+//                                .put("id", "designation-id-4")
+//                                .put("name", "coder4")
+//                        )
+//                        .add(
+//                            new JsonObject()
+//                                .put("id", "designation-id-5")
+//                                .put("name", "coder5")
+//                        )
+//                )
+//                .put(
+//                    "groupList",
+//                    new JsonArray()
+//                        .add(
+//                            new JsonObject()
+//                                .put("id", "group-id-3")
+//                                .put("name", "group3")
+//                        )
+//                        .add(
+//                            new JsonObject()
+//                                .put("id", "group-id-4")
+//                                .put("name", "group4")
+//                        )
+//                        .add(
+//                            new JsonObject()
+//                                .put("id", "group-id-5")
+//                                .put("name", "group5")
+//                        )
+//                ),
+//            upsertContext
+//        );
+//
+//        map.values().forEach(System.out::println);
+//
+//        final Vertx vertx = Vertx.vertx();
+//
+//        final SqlDB sqlDB = dbSql("orm", vertx);
+//
+//        vertx.setTimer(1, event -> {
+//            Promises.when(map.values().stream().map(tableData -> {
+//                return sqlDB.insertJo(tableData.getTable(), tableData.getValues()).then(aVoid -> System.out.println("complete: " + tableData));
+//            }).collect(Collectors.toList())).then(voids -> {
+//                System.out.println("Insert complete");
+//            }).err(throwable -> throwable.printStackTrace())
+//            ;
+//        });
+//    }
 
     static SqlDB dbSql(String db, Vertx vertx) {
         final SqlDBImpl dbSql = new SqlDBImpl(

@@ -2,6 +2,8 @@ package elasta.orm.delete.builder;
 
 import elasta.orm.delete.DeleteFunction;
 import elasta.orm.delete.builder.impl.DeleteFunctionBuilderImpl;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.Objects;
 
@@ -13,6 +15,8 @@ public interface DeleteFunctionBuilder {
         Params params
     );
 
+    @Value
+    @Builder
     final class Params {
         final String entity;
         final DeleteTableFunctionBuilderContext deleteTableFunctionBuilderContext;
@@ -25,18 +29,6 @@ public interface DeleteFunctionBuilder {
             this.entity = entity;
             this.deleteTableFunctionBuilderContext = deleteTableFunctionBuilderContext;
             this.listTablesToDeleteFunctionBuilderContext = listTablesToDeleteFunctionBuilderContext;
-        }
-
-        public String getEntity() {
-            return entity;
-        }
-
-        public DeleteTableFunctionBuilderContext getDeleteTableFunctionBuilderContext() {
-            return deleteTableFunctionBuilderContext;
-        }
-
-        public ListTablesToDeleteFunctionBuilderContext getListTablesToDeleteFunctionBuilderContext() {
-            return listTablesToDeleteFunctionBuilderContext;
         }
     }
 

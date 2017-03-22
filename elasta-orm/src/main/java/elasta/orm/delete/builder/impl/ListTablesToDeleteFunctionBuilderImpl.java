@@ -40,7 +40,7 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
             return context.get(entity);
         }
 
-        context.putEmpty();
+        context.putEmpty(entity);
 
         final ListTablesToDeleteFunction listTablesToDeleteFunction = createListTablesToDeleteFunction(entity, context);
 

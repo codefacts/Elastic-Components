@@ -115,6 +115,18 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         return null;
     }
 
+    @Override
+    public SqlAndParams existSql(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias) {
+        ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
+        String where = toWhere(sqlCriterias, paramsBuilder);
+        return new SqlAndParams(
+            "SELECT COUNT(" + column(primaryKey, "") + ") FROM " + table(table, "") + " WHERE " + (where.isEmpty() ? "1" : where),
+            new JsonArray(
+                paramsBuilder.build()
+            )
+        );
+    }
+
     private SqlAndParams createUpdateSql(UpdateTpl updateTpl) {
         ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
 
