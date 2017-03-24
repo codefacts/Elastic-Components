@@ -22,7 +22,11 @@ final public class ListTablesToDeleteFunctionBuilderContextImpl implements ListT
 
     @Override
     public boolean contains(String entity) {
-        return functionMap.containsKey(entity);
+        Optional<ListTablesToDeleteFunction> listTablesToDeleteFunction = functionMap.get(entity);
+        if (listTablesToDeleteFunction == null) {
+            return false;
+        }
+        return listTablesToDeleteFunction.isPresent();
     }
 
     @Override

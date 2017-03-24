@@ -24,6 +24,7 @@ final public class CriteriaBuilderJsonToFuncConverterMap implements JsonToFuncCo
 
     @Override
     public JsonToFuncConverter get(String operation) {
+        Objects.requireNonNull(operation);
         if (FIELD.equals(operation)) {
             return (jsonObject, converterMap) -> qb.field(jsonObject.getString(Mp.arg1));
         }

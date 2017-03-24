@@ -1,6 +1,8 @@
 package elasta.orm.entity.core;
 
 import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -8,6 +10,8 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-08.
  */
+@Value
+@Builder
 final public class DbMapping {
     final String table;
     final String primaryColumn;

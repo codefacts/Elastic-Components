@@ -1,6 +1,8 @@
 package elasta.orm.entity;
 
 import elasta.orm.entity.core.Entity;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.Collection;
 import java.util.Map;
@@ -13,6 +15,8 @@ import java.util.Objects;
 public interface EntitiesValidator {
     void validate(Params params);
 
+    @Value
+    @Builder
     final class Params {
         final Collection<Entity> entities;
         final Map<String, TableDependency> tableToTableDependencyMap;
@@ -25,43 +29,6 @@ public interface EntitiesValidator {
             this.entities = entities;
             this.tableToTableDependencyMap = tableToTableDependencyMap;
             this.entityNameToEntityMap = entityNameToEntityMap;
-        }
-
-        public Collection<Entity> getEntities() {
-            return entities;
-        }
-
-        public Map<String, TableDependency> getTableToTableDependencyMap() {
-            return tableToTableDependencyMap;
-        }
-
-        public Map<String, Entity> getEntityNameToEntityMap() {
-            return entityNameToEntityMap;
-        }
-    }
-
-    final class ParamsBuilder {
-        private Collection<Entity> entities;
-        private Map<String, TableDependency> tableToTableDependencyMap;
-        private Map<String, Entity> entityNameToEntityMap;
-
-        public ParamsBuilder setEntities(Collection<Entity> entities) {
-            this.entities = entities;
-            return this;
-        }
-
-        public ParamsBuilder setTableToTableDependencyMap(Map<String, TableDependency> tableToTableDependencyMap) {
-            this.tableToTableDependencyMap = tableToTableDependencyMap;
-            return this;
-        }
-
-        public ParamsBuilder setEntityNameToEntityMap(Map<String, Entity> entityNameToEntityMap) {
-            this.entityNameToEntityMap = entityNameToEntityMap;
-            return this;
-        }
-
-        public Params createParams() {
-            return new Params(entities, tableToTableDependencyMap, entityNameToEntityMap);
         }
     }
 }

@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,7 +29,7 @@ final public class ObjectReaderImpl implements ObjectReader {
     @Override
     public JsonObject read(JsonArray data, List<JsonArray> dataList) {
 
-        HashMap<String, Object> map = new HashMap<>();
+        HashMap<String, Object> map = new LinkedHashMap<>();
 
         fieldAndIndexPairs.forEach(fieldAndIndexPair -> {
             map.put(fieldAndIndexPair.getField(), data.getValue(fieldAndIndexPair.getIndex()));

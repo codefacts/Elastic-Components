@@ -2,6 +2,7 @@ package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.commons.Utils;
 import elasta.core.promise.intfs.Promise;
 import elasta.criteria.Func;
 import elasta.criteria.funcs.ParamsBuilderImpl;
@@ -173,12 +174,12 @@ final public class QueryImpl implements Query {
 
             aliasToFullPathExpressionMap.forEach((alias, pathExpression) -> {
 
-                final String[] parts = pathExpression.parts();
+                final List<String> parts = pathExpression.parts();
                 Map<String, PartAndJoinTpl> tplMap = rootMap;
                 String entity = rootEntity;
                 String entityAlias = rootAlias;
-                for (int i = 1, end = parts.length; i < end; i++) {
-                    String childEntityField = parts[i];
+                for (int i = 1, end = parts.size(); i < end; i++) {
+                    String childEntityField = parts.get(i);
 
                     PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
 
@@ -186,7 +187,7 @@ final public class QueryImpl implements Query {
 
                         String childEntity = getChildEntity(entity, childEntityField);
 
-                        final boolean isLast = (i == parts.length - 1);
+                        final boolean isLast = (i == parts.size() - 1);
 
                         final String childAlias = isLast ? alias : createAlias();
 
@@ -239,14 +240,14 @@ final public class QueryImpl implements Query {
                 throw new QueryParserException("Field Expression '" + fieldExpression + "' starts with an invalid alias");
             }
 
-            final String[] parts = pathExpression.parts();
+            final List<String> parts = pathExpression.parts();
 
             Map<String, PartAndJoinTpl> tplMap = partAndJoinTplMap.get(alias);
             String entity = aliasToEntityMap.get(alias);
             String entityAlias = alias;
 
-            for (int i = 1, end = parts.length; i < end; i++) {
-                String childEntityField = parts[i];
+            for (int i = 1, end = parts.size(); i < end; i++) {
+                String childEntityField = parts.get(i);
 
                 PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
 
@@ -656,7 +657,9 @@ final public class QueryImpl implements Query {
 
             for (; ; ) {
 
-                if (!map.containsKey(pathExpression.root())) {
+                if (Utils.not(
+                    map.containsKey(pathExpression.root())
+                )) {
 
                     if (not(pathExpression.root().equals(rootAlias))) {
                         throw new PathExpressionException("Path '" + pathExpression + "' must start with root alias '" + rootAlias + "'");
@@ -672,19 +675,13 @@ final public class QueryImpl implements Query {
             return fullPathExpression(pathExpListBuilder.build());
         }
 
-        private PathExpression fullPathExpression(ImmutableList<PathExpression> list) {
+        private PathExpression fullPathExpression(ImmutableList<PathExpression> pathExpressions) {
 
-            List<String> partList = new ArrayList<>();
-            partList.add(rootAlias);
-
-            list.forEach(pathExpression -> {
-                final String[] parts = pathExpression.parts();
-                for (int i = 1; i < parts.length; i++) {
-                    partList.add(parts[i]);
-                }
-            });
-
-            return new PathExpressionImpl(partList.toArray(new String[partList.size()]));
+            return PathExpression.create(rootAlias).concat(
+                pathExpressions
+                    .stream().map(pathExpression -> pathExpression.subPath(1, pathExpression.size()))
+                    .collect(Collectors.toList())
+            );
         }
     }
 

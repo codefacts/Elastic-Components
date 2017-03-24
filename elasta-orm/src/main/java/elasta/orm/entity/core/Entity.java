@@ -1,11 +1,16 @@
 package elasta.orm.entity.core;
 
+import lombok.Builder;
+import lombok.Value;
+
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-08.
  */
+@Value
+@Builder
 final public class Entity {
     final String name;
     final String primaryKey;

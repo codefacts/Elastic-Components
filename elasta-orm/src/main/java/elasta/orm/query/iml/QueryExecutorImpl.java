@@ -21,7 +21,6 @@ import java.util.Objects;
  * Created by sohan on 3/19/2017.
  */
 final public class QueryExecutorImpl implements QueryExecutor {
-    static final String ROOT_ALIAS = "root";
     final EntityMappingHelper helper;
     final JsonToFuncConverterMap jsonToFuncConverterMap;
     final JsonToFuncConverter jsonToFuncConverter;
@@ -57,6 +56,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
             qb, Params.builder()
                 .criteria(params.getCriteria())
                 .entity(params.getEntity())
+                .alias(params.getAlias())
                 .groupBy(params.getGroupBy())
                 .orderBy(params.getOrderBy())
                 .having(params.getHaving())
@@ -76,6 +76,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
             qb, Params.builder()
                 .criteria(params.getCriteria())
                 .entity(params.getEntity())
+                .alias(params.getAlias())
                 .groupBy(params.getGroupBy())
                 .orderBy(params.getOrderBy())
                 .having(params.getHaving())
@@ -85,7 +86,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
 
     private Query prepareAndExecute(QueryBuilderImpl qb, Params params) {
 
-        qb.fromBuilder().root(params.getEntity(), ROOT_ALIAS);
+        qb.fromBuilder().root(params.getEntity(), params.getAlias());
 
         final CriteriaBuilderJsonToFuncConverterMap converterMap = new CriteriaBuilderJsonToFuncConverterMap(jsonToFuncConverterMap, qb);
 
@@ -106,7 +107,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
         });
 
         qb.havingBuilder().add(
-            jsonToFuncConverter.convert(params.getCriteria(), converterMap)
+            jsonToFuncConverter.convert(params.getHaving(), converterMap)
         );
 
         return qb.build();
@@ -120,5 +121,6 @@ final public class QueryExecutorImpl implements QueryExecutor {
         final List<OrderTpl> orderBy;
         final List<String> groupBy;
         final JsonObject having;
+        final String alias;
     }
 }

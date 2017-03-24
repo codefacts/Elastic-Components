@@ -118,16 +118,18 @@ final public class EntityValidatorImpl implements EntityValidator {
             });
         }
 
-        private DependencyTpl checkCommonRelationalValidity(RelationMapping mapping) {
-            DependencyTpl dependencyTpl = getDependencyTpl(entity, mapping);
+        private Optional<DependencyTpl> checkCommonRelationalValidity(RelationMapping mapping) {
+            Optional<DependencyTpl> dependencyTplOptional = getDependencyTpl(entity, mapping);
 
-            boolean mappingEntityInfoIsCorrect = mapping.getReferencingTable().equals(dependencyTpl.getEntity().getDbMapping().getTable())
-                && mapping.getReferencingEntity().equals(dependencyTpl.getEntity().getName());
+            return dependencyTplOptional.map(dependencyTpl -> {
+                boolean mappingEntityInfoIsCorrect = mapping.getReferencingTable().equals(dependencyTpl.getEntity().getDbMapping().getTable())
+                    && mapping.getReferencingEntity().equals(dependencyTpl.getEntity().getName());
 
-            if (Utils.not(mappingEntityInfoIsCorrect)) {
-                throw new EntityValidationException("Referencing Entity '" + mapping.getReferencingEntity() + "' or Table '" + mapping.getReferencingTable() + "' does not match with actual Referencing Entity '" + dependencyTpl.getEntity().getName() + "' or Table '" + dependencyTpl.getEntity().getDbMapping().getTable() + "'");
-            }
-            return dependencyTpl;
+                if (Utils.not(mappingEntityInfoIsCorrect)) {
+                    throw new EntityValidationException("Referencing Entity '" + mapping.getReferencingEntity() + "' or Table '" + mapping.getReferencingTable() + "' does not match with actual Referencing Entity '" + dependencyTpl.getEntity().getName() + "' or Table '" + dependencyTpl.getEntity().getDbMapping().getTable() + "'");
+                }
+                return dependencyTpl;
+            });
         }
 
         private boolean isEqualDirectAndVirtual(List<ForeignColumnMapping> foreignColumnMappingList, List<ForeignColumnMapping> foreignColumnMappingList1) {
@@ -173,10 +175,11 @@ final public class EntityValidatorImpl implements EntityValidator {
             );
         }
 
-        private DependencyTpl getDependencyTpl(Entity entity, RelationMapping mapping) {
+        private Optional<DependencyTpl> getDependencyTpl(Entity entity, RelationMapping mapping) {
             TableDependency tableDependency = tableToTableDependencyMap.get(entity.getDbMapping().getTable());
             if (tableDependency == null) {
-                throw new EntityValidationException("No TableDependency found for table '" + entity.getDbMapping().getTable() + " that has a mapping '" + mapping + "'");
+                return Optional.empty();
+//                throw new EntityValidationException("No TableDependency found for table '" + entity.getDbMapping().getTable() + " that has a mapping '" + mapping + "'");
             }
             Map<String, DependencyTpl> tableToDependencyInfoMap = tableDependency.getTableToDependencyInfoMap();
 
@@ -186,7 +189,7 @@ final public class EntityValidatorImpl implements EntityValidator {
                     "No dependency found for referencingTable '" + mapping.getReferencingTable() + "' in relationship '" + entity.getName() + "." + mapping.getField() + "' - '" + mapping.getReferencingEntity() + "'"
                 );
             }
-            return dependencyTpl;
+            return Optional.of(dependencyTpl);
         }
 
         private void valdatePrimaryKey() {
@@ -257,21 +260,28 @@ final public class EntityValidatorImpl implements EntityValidator {
                     return;
                 }
 
-                DependencyTpl dependencyTpl = checkCommonRelationalValidity(mapping);
+                Relationship relationship = field.getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
+                checkFieldTypeAndName(relationship, field);
 
-                Optional<DependencyInfo> info = dependencyTpl.getFieldToDependencyInfoMap().values().stream()
-                    .filter(dependencyInfo -> {
-                        if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.INDIRECT) {
+                Optional<DependencyTpl> dependencyTplOptional = checkCommonRelationalValidity(mapping);
 
-                            IndirectDbColumnMapping depMapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+                Optional<DependencyInfo> info = dependencyTplOptional.flatMap(dependencyTpl -> {
 
-                            if (mapping.getRelationTable().equals(depMapping.getRelationTable())) {
-                                return true;
+                    return dependencyTpl.getFieldToDependencyInfoMap().values().stream()
+                        .filter(dependencyInfo -> {
+                            if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.INDIRECT) {
+
+                                IndirectDbColumnMapping depMapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+
+                                if (mapping.getRelationTable().equals(depMapping.getRelationTable())) {
+                                    return true;
+                                }
                             }
-                        }
-                        return false;
-                    })
-                    .findAny();
+                            return false;
+                        })
+                        .findAny();
+
+                });
 
                 if (info.isPresent()) {
 
@@ -280,7 +290,7 @@ final public class EntityValidatorImpl implements EntityValidator {
                     checkMappingValidity(
                         mapping,
                         (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping(),
-                        dependencyTpl,
+                        dependencyTplOptional.get(),
                         dependencyInfo
                     );
 
@@ -292,9 +302,6 @@ final public class EntityValidatorImpl implements EntityValidator {
                         entityNameToEntityMap.get(mapping.getReferencingEntity()).getDbMapping(), mapping.getDstForeignColumnMappingList()
                     );
                 }
-
-                Relationship relationship = field.getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
-                checkFieldTypeAndName(relationship, field);
 
                 info.ifPresent(dependencyInfo -> {
                     Relationship relationshipOther = dependencyInfo.getField().getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
@@ -404,34 +411,9 @@ final public class EntityValidatorImpl implements EntityValidator {
                     throw new EntityValidationException("Field '" + field.getName() + "' has an invalid type '" + field.getJavaType() + "' for dbColumnMappingType '"
                         + mapping.getColumnType() + "'");
                 }
-                DependencyTpl dependencyTpl = checkCommonRelationalValidity(mapping);
 
-//                checkAllColumnExistInBothTables(
-//                    entity.getDbMapping(),
-//                    dependencyTpl.getEntity().getDbMapping(),
-//                    mapping.getForeignColumnMappingList()
-//                );
-
-                Optional<DependencyInfo> infoOptional = dependencyTpl.getFieldToDependencyInfoMap().values().stream()
-                    .filter(dependencyInfo -> {
-                        if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.VIRTUAL) {
-                            VirtualDbColumnMapping depMapping = (VirtualDbColumnMapping) dependencyInfo.getDbColumnMapping();
-                            if (mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size()) {
-                                throw new EntityValidationException(
-                                    "mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size() in relationship '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "'"
-                                );
-                            }
-                            if (isEqualDirectAndVirtual(
-                                mapping.getForeignColumnMappingList(), depMapping.getForeignColumnMappingList()
-                            )) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    })
-                    .findAny();
-
-                Relationship relationship = field.getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
+                Relationship relationship = field.getRelationship()
+                    .orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
 
                 checkFieldTypeAndName(relationship, field);
 
@@ -441,7 +423,38 @@ final public class EntityValidatorImpl implements EntityValidator {
                     );
                 }
 
-                infoOptional.ifPresent(info -> {
+                Optional<DependencyTpl> dependencyTplOptional = checkCommonRelationalValidity(mapping);
+
+//                checkAllColumnExistInBothTables(
+//                    entity.getDbMapping(),
+//                    dependencyTpl.getEntity().getDbMapping(),
+//                    mapping.getForeignColumnMappingList()
+//                );
+
+                dependencyTplOptional.flatMap(dependencyTpl -> {
+
+                    return dependencyTpl.getFieldToDependencyInfoMap().values().stream()
+                        .filter(dependencyInfo -> {
+                            if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.VIRTUAL) {
+                                VirtualDbColumnMapping depMapping = (VirtualDbColumnMapping) dependencyInfo.getDbColumnMapping();
+                                if (mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size()) {
+                                    throw new EntityValidationException(
+                                        "mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size() in relationship '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "'"
+                                    );
+                                }
+                                if (isEqualDirectAndVirtual(
+                                    mapping.getForeignColumnMappingList(), depMapping.getForeignColumnMappingList()
+                                )) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        })
+                        .findAny();
+
+                }).ifPresent(info -> {
+
+                    DependencyTpl dependencyTpl = dependencyTplOptional.get();
 
                     Relationship relationshipOther = info.getField().getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + dependencyTpl.getEntity().getDbMapping().getTable() + "'"));
 
@@ -450,6 +463,7 @@ final public class EntityValidatorImpl implements EntityValidator {
                             relationshipOther.getType() == Relationship.Type.ONE_TO_ONE
                                 && relationship.getType() == Relationship.Type.ONE_TO_ONE
                         )) {
+
                             throw new EntityValidationException(
                                 "invalid relationship type '" + relationship.getType() + "' in relation '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "." + info.getField().getName() + "'"
                             );
@@ -491,7 +505,7 @@ final public class EntityValidatorImpl implements EntityValidator {
                         + mapping.getColumnType() + "'");
                 }
 
-                DependencyTpl dependencyTpl = checkCommonRelationalValidity(mapping);
+                Optional<DependencyTpl> dependencyTplOptional = checkCommonRelationalValidity(mapping);
 
 //                checkAllColumnExistInBothTables(
 //                    dependencyTpl.getEntity().getDbMapping(),
@@ -499,26 +513,31 @@ final public class EntityValidatorImpl implements EntityValidator {
 //                    mapping.getForeignColumnMappingList()
 //                );
 
-                DependencyInfo info = dependencyTpl.getFieldToDependencyInfoMap().values().stream()
-                    .filter(dependencyInfo -> {
-                        if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.DIRECT) {
-                            DirectDbColumnMapping depMapping = (DirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+                DependencyInfo info = dependencyTplOptional.flatMap(dependencyTpl -> {
 
-                            if (mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size()) {
-                                throw new EntityValidationException(
-                                    "mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size() in relationship '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "'"
-                                );
-                            }
+                    return dependencyTpl.getFieldToDependencyInfoMap().values().stream()
+                        .filter(dependencyInfo -> {
+                            if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.DIRECT) {
+                                DirectDbColumnMapping depMapping = (DirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
 
-                            if (isEqualDirectAndVirtual(
-                                depMapping.getForeignColumnMappingList(), mapping.getForeignColumnMappingList()
-                            )) {
-                                return true;
+                                if (mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size()) {
+                                    throw new EntityValidationException(
+                                        "mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size() in relationship '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "'"
+                                    );
+                                }
+
+                                if (isEqualDirectAndVirtual(
+                                    depMapping.getForeignColumnMappingList(), mapping.getForeignColumnMappingList()
+                                )) {
+                                    return true;
+                                }
                             }
-                        }
-                        return false;
-                    })
-                    .findAny().orElseThrow(() -> new EntityValidationException("No Mapping found in the opposite side for mapping '" + mapping + "' in relationship '" + entity.getName() + "." + field.getName() + "' <- '" + dependencyTpl.getEntity().getName() + "'"));
+                            return false;
+                        })
+                        .findAny();
+                }).orElseThrow(() -> new EntityValidationException("No Mapping found in the opposite side for mapping '" + mapping + "' in relationship '" + entity.getName() + "." + field.getName() + "' <- '" + dependencyTplOptional.map(dependencyTpl -> dependencyTpl.getEntity().getName()).orElse("") + "'"));
+
+                DependencyTpl dependencyTpl = dependencyTplOptional.get();
 
                 Relationship relationship = field.getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
 

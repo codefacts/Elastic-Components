@@ -3,6 +3,7 @@ package elasta.orm.delete.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.delete.TableToTableDependenciesMap;
+import elasta.orm.delete.ex.TableToTableDependenciesMapException;
 import elasta.orm.delete.loader.impl.DependencyInfo;
 
 import java.util.List;
@@ -23,7 +24,8 @@ final public class TableToTableDependenciesMapImpl implements TableToTableDepend
 
     @Override
     public List<DependencyInfo> get(String table) {
-        return map.get(table);
+        List<DependencyInfo> dependencyInfos = map.get(table);
+        return dependencyInfos == null ? ImmutableList.of() : dependencyInfos;
     }
 
     @Override

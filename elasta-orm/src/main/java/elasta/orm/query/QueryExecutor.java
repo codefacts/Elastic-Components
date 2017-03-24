@@ -4,6 +4,7 @@ import elasta.core.promise.intfs.Promise;
 import elasta.orm.query.expression.core.Order;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.Builder;
 import lombok.Value;
 
 import java.util.List;
@@ -23,22 +24,26 @@ public interface QueryExecutor {
     );
 
     @Value
+    @Builder
     final class QueryArrayParams {
         final String entity;
+        final String alias;
         final JsonObject criteria;
         final List<JsonObject> selections;
         final List<OrderTpl> orderBy;
         final List<String> groupBy;
         final JsonObject having;
 
-        public QueryArrayParams(String entity, JsonObject criteria, List<JsonObject> selections, List<OrderTpl> orderBy, List<String> groupBy, JsonObject having) {
+        public QueryArrayParams(String entity, String alias, JsonObject criteria, List<JsonObject> selections, List<OrderTpl> orderBy, List<String> groupBy, JsonObject having) {
             Objects.requireNonNull(entity);
+            Objects.requireNonNull(alias);
             Objects.requireNonNull(criteria);
             Objects.requireNonNull(selections);
             Objects.requireNonNull(orderBy);
             Objects.requireNonNull(groupBy);
             Objects.requireNonNull(having);
             this.entity = entity;
+            this.alias = alias;
             this.criteria = criteria;
             this.selections = selections;
             this.orderBy = orderBy;
@@ -48,22 +53,26 @@ public interface QueryExecutor {
     }
 
     @Value
+    @Builder
     final class QueryParams {
         final String entity;
+        final String alias;
         final JsonObject criteria;
         final List<String> selections;
         final List<OrderTpl> orderBy;
         final List<String> groupBy;
         final JsonObject having;
 
-        public QueryParams(String entity, JsonObject criteria, List<String> selections, List<OrderTpl> orderBy, List<String> groupBy, JsonObject having) {
+        public QueryParams(String entity, String alias, JsonObject criteria, List<String> selections, List<OrderTpl> orderBy, List<String> groupBy, JsonObject having) {
             Objects.requireNonNull(entity);
+            Objects.requireNonNull(alias);
             Objects.requireNonNull(criteria);
             Objects.requireNonNull(selections);
             Objects.requireNonNull(orderBy);
             Objects.requireNonNull(groupBy);
             Objects.requireNonNull(having);
             this.entity = entity;
+            this.alias = alias;
             this.criteria = criteria;
             this.selections = selections;
             this.orderBy = orderBy;

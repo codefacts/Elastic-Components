@@ -2,12 +2,14 @@ package elasta.orm.entity.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
-import elasta.orm.entity.*;import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.*;
+import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
 import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
+import elasta.orm.entity.ex.EntityMappingHelperExcpetion;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -106,7 +108,7 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
         return Arrays.asList(getEntity(entity).getFields())
             .stream()
             .filter(ff -> ff.getName().equals(field))
-            .findAny().get();
+            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("Field '" + field + "' does not exists in '" + entity + "'"));
     }
 
     @Override

@@ -1,6 +1,8 @@
 package elasta.orm.entity;
 
 import elasta.orm.entity.core.Entity;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.Objects;
 public interface EntitiesPreprocessor {
     List<Entity> process(Params params);
 
+    @Value
+    @Builder
     final class Params {
         final Collection<Entity> entities;
         final Map<String, TableDependency> tableToTableDependencyMap;
@@ -26,43 +30,6 @@ public interface EntitiesPreprocessor {
             this.entities = entities;
             this.tableToTableDependencyMap = tableToTableDependencyMap;
             this.entityNameToEntityMap = entityNameToEntityMap;
-        }
-
-        public Collection<Entity> getEntities() {
-            return entities;
-        }
-
-        public Map<String, TableDependency> getTableToTableDependencyMap() {
-            return tableToTableDependencyMap;
-        }
-
-        public Map<String, Entity> getEntityNameToEntityMap() {
-            return entityNameToEntityMap;
-        }
-    }
-
-    final class ParamsBuilder {
-        private Collection<Entity> entities;
-        private Map<String, TableDependency> tableToTableDependencyMap;
-        private Map<String, Entity> entityNameToEntityMap;
-
-        public EntitiesPreprocessor.ParamsBuilder setEntities(Collection<Entity> entities) {
-            this.entities = entities;
-            return this;
-        }
-
-        public EntitiesPreprocessor.ParamsBuilder setTableToTableDependencyMap(Map<String, TableDependency> tableToTableDependencyMap) {
-            this.tableToTableDependencyMap = tableToTableDependencyMap;
-            return this;
-        }
-
-        public EntitiesPreprocessor.ParamsBuilder setEntityNameToEntityMap(Map<String, Entity> entityNameToEntityMap) {
-            this.entityNameToEntityMap = entityNameToEntityMap;
-            return this;
-        }
-
-        public EntitiesPreprocessor.Params createParams() {
-            return new EntitiesPreprocessor.Params(entities, tableToTableDependencyMap, entityNameToEntityMap);
         }
     }
 }

@@ -1,7 +1,9 @@
 package elasta.orm.query.expression;
 
+import com.google.common.collect.ImmutableList;
 import elasta.orm.query.expression.impl.PathExpressionImpl;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,7 +13,7 @@ public interface PathExpression {
 
     Optional<PathExpression> getParent();
 
-    String[] parts();
+    List<String> parts();
 
     String getAt(int index);
 
@@ -22,10 +24,42 @@ public interface PathExpression {
     String last();
 
     static PathExpression create(String... parts) {
-        return new PathExpressionImpl(parts);
+        return new PathExpressionImpl(ImmutableList.copyOf(parts));
     }
 
-    PathExpression subPath(int startIndex, int newSize);
+    static PathExpression create(List<String>... partsList) {
+        ImmutableList.Builder<String> listBuilder = ImmutableList.builder();
+        for (List<String> parts : partsList) {
+            listBuilder.addAll(parts);
+        }
+        return new PathExpressionImpl(listBuilder.build());
+    }
+
+    static PathExpression create(String[]... partsList) {
+        ImmutableList.Builder<String> listBuilder = ImmutableList.builder();
+        for (String[] parts : partsList) {
+            listBuilder.add(parts);
+        }
+        return new PathExpressionImpl(listBuilder.build());
+    }
+
+    static PathExpression create(List<PathExpression> pathExpList) {
+        ImmutableList.Builder<String> listBuilder = ImmutableList.builder();
+        for (PathExpression pathExpression : pathExpList) {
+            listBuilder.addAll(pathExpression.parts());
+        }
+        return new PathExpressionImpl(listBuilder.build());
+    }
+
+    PathExpression subPath(int fromIndex, int toIndex);
 
     boolean startsWith(String rootAlias);
+
+    PathExpression concat(PathExpression... pathExpression);
+
+    PathExpression concat(List<PathExpression> pathExpression);
+
+    PathExpression concat(String... parts);
+
+    PathExpression concat(List<String>... parts);
 }
