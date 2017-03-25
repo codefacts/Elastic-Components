@@ -3,12 +3,10 @@ package elasta.orm.builder.impl;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.BaseOrm;
 import elasta.orm.builder.BaseOrmBuilder;
-import elasta.orm.delete.DeleteFunction;
-import elasta.orm.delete.DeleteTableFunction;
-import elasta.orm.delete.ListTablesToDeleteFunction;
-import elasta.orm.delete.TableToTableDependenciesMap;
+import elasta.orm.delete.*;
 import elasta.orm.delete.builder.*;
 import elasta.orm.delete.builder.impl.*;
+import elasta.orm.delete.impl.TableToDeleteTableFunctionMapImpl;
 import elasta.orm.delete.loader.DependencyDataLoaderGraph;
 import elasta.orm.delete.loader.impl.DependencyDataLoaderBuilderImpl;
 import elasta.orm.delete.loader.impl.DependencyDataLoaderGraphBuilderImpl;
@@ -17,7 +15,6 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.impl.BaseOrmImpl;
 import elasta.orm.query.QueryExecutor;
-import elasta.orm.query.read.builder.ObjectReaderBuilder;
 import elasta.orm.upsert.UpsertFunction;
 import elasta.orm.upsert.builder.FunctionMap;
 import elasta.orm.upsert.builder.FunctionMapImpl;
@@ -63,6 +60,8 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
                 entityAndEntityOperation -> mapBuilder
                     .put(entityAndEntityOperation.getEntity(), entityAndEntityOperation.getEntityOperation())
             );
+        operationBuilder.deleteTableFunctionBuilderContext.makeImmutable();
+        operationBuilder.listTablesToDeleteFunctionBuilderContext.makeImmutable();
         return mapBuilder.build();
     }
 
@@ -90,22 +89,26 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
         final FunctionMap<UpsertFunction> upsertFunctionFunctionMap;
 
         public InternalEntityOperationBuilder() {
-            upsertFunctionBuilder = new UpsertFunctionBuilderImpl(
-                helper
-            );
-            this.deleteFunctionBuilder = deleteFunctionBuilder();
+
             this.deleteTableFunctionMap = new LinkedHashMap<>();
             this.deleteTableFunctionBuilderContext = new DeleteTableFunctionBuilderContextImpl(
                 deleteTableFunctionMap
             );
+
             this.listTablesToDeleteFunctionMap = new LinkedHashMap<>();
             this.listTablesToDeleteFunctionBuilderContext = new ListTablesToDeleteFunctionBuilderContextImpl(
                 listTablesToDeleteFunctionMap
             );
+
             this.upsertFunctionMap = new LinkedHashMap<>();
             this.upsertFunctionFunctionMap = new FunctionMapImpl<>(
                 upsertFunctionMap
             );
+
+            upsertFunctionBuilder = new UpsertFunctionBuilderImpl(
+                helper
+            );
+            this.deleteFunctionBuilder = deleteFunctionBuilder();
         }
 
         private DeleteFunctionBuilder deleteFunctionBuilder() {
@@ -114,11 +117,23 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
 
             return new DeleteFunctionBuilderImpl(
                 helper,
-                deleteTableFunctionBuilder(),
                 listTablesToDeleteFunctionBuilder(),
                 tableToTableDependenciesMap,
+                tableToDeleteTableFunctionMap(tableToTableDependenciesMap),
                 dependencyDataLoaderGraph(tableToTableDependenciesMap),
                 sqlDB
+            );
+        }
+
+        private TableToDeleteTableFunctionMap tableToDeleteTableFunctionMap(TableToTableDependenciesMap tableToTableDependenciesMap) {
+            DeleteTableFunctionBuilder deleteTableFunctionBuilder = deleteTableFunctionBuilder();
+            ImmutableMap.Builder<String, DeleteTableFunction> mapBuilder = ImmutableMap.builder();
+            List<String> tables = helper.getTables();
+            tables.forEach(table -> {
+                mapBuilder.put(table, deleteTableFunctionBuilder.build(table, deleteTableFunctionBuilderContext, tableToTableDependenciesMap));
+            });
+            return new TableToDeleteTableFunctionMapImpl(
+                mapBuilder.build()
             );
         }
 

@@ -62,4 +62,8 @@ public interface PathExpression {
     PathExpression concat(String... parts);
 
     PathExpression concat(List<String>... parts);
+
+    static PathExpression parseAndCreate(String path) {
+        return new PathExpressionImpl(path);
+    }
 }

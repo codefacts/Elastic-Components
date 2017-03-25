@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by sohan on 3/22/2017.
@@ -22,20 +23,16 @@ public class Employee {
     @ManyToOne
     @JoinColumn(name = "DEPARTMENT_ID", referencedColumnName = "ID")
     private Department department;
+    @ManyToMany
+    private List<Department> departments;
 
-    public Employee(int eid, String ename, double salary, String deg) {
-        this.eid = eid;
-        this.ename = ename;
-        this.salary = salary;
-        this.deg = deg;
-    }
-
-    public Employee(int eid, String ename, double salary, String deg, Department department) {
+    public Employee(int eid, String ename, double salary, String deg, Department department, List<Department> departments) {
         this.eid = eid;
         this.ename = ename;
         this.salary = salary;
         this.deg = deg;
         this.department = department;
+        this.departments = departments;
     }
 
     public Employee() {

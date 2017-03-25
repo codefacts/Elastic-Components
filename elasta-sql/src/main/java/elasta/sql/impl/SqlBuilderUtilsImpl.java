@@ -8,7 +8,9 @@ import elasta.sql.ex.SqlBuilderUtilsException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -111,8 +113,36 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     @Override
-    public SqlAndParams deleteSql(Collection<DeleteData> deleteDataList) {
-        return null;
+    public SqlListAndParamsList deleteSql(Collection<DeleteData> deleteDataList) {
+
+        ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
+
+        deleteDataList.forEach(deleteData -> {
+
+            SqlAndParams sqlAndParams = toDeleteSql(deleteData);
+            sqlListBuilder.add(sqlAndParams.getSql());
+            paramsListBuilder.add(sqlAndParams.getParams());
+        });
+
+        return SqlListAndParamsList.builder()
+            .sqlList(sqlListBuilder.build())
+            .paramsList(paramsListBuilder.build())
+            .build();
+    }
+
+    private SqlAndParams toDeleteSql(DeleteData deleteData) {
+        ImmutableList.Builder<Object> lsitBuilder = ImmutableList.builder();
+
+        String where = Arrays.stream(deleteData.getColumnValuePairs())
+            .peek(columnValuePair -> lsitBuilder.add(columnValuePair.getValue()))
+            .map(columnValuePair -> column(columnValuePair.getPrimaryColumn(), "") + " = ?")
+            .collect(Collectors.joining(" AND "));
+
+        return new SqlAndParams(
+            "DELETE FROM " + table(deleteData.getTable(), "") + " WHERE " + (where.isEmpty() ? "1" : where),
+            new JsonArray(lsitBuilder.build())
+        );
     }
 
     @Override
@@ -120,11 +150,16 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
         String where = toWhere(sqlCriterias, paramsBuilder);
         return new SqlAndParams(
-            "SELECT COUNT(" + column(primaryKey, "") + ") FROM " + table(table, "") + " WHERE " + (where.isEmpty() ? "1" : where),
+            "SELECT COUNT(*) FROM " + table(table, "") + " WHERE " + (where.isEmpty() ? "1" : where),
             new JsonArray(
                 paramsBuilder.build()
             )
         );
+    }
+
+    @Override
+    public SqlAndParams deleteSql(DeleteData deleteData) {
+        return toDeleteSql(deleteData);
     }
 
     private SqlAndParams createUpdateSql(UpdateTpl updateTpl) {

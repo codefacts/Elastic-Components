@@ -68,27 +68,28 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
             switch (dbColumnMapping.getColumnType()) {
                 case INDIRECT:
                     IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dbColumnMapping;
-                    DependencyTpl dependencyTpl = checkCommonRelationalValidity(entity.getDbMapping().getTable(), mapping);
+                    Optional<DependencyTpl> dependencyTplOptional = checkCommonRelationalValidity(entity.getDbMapping().getTable(), mapping);
 
-                    return dependencyTpl.getFieldToDependencyInfoMap().values().stream()
-                        .filter(dependencyInfo -> {
-                            if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.INDIRECT) {
+                    return dependencyTplOptional
+                        .flatMap(dependencyTpl -> dependencyTpl.getFieldToDependencyInfoMap().values().stream()
+                            .filter(dependencyInfo -> {
+                                if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.INDIRECT) {
 
-                                IndirectDbColumnMapping depMapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+                                    IndirectDbColumnMapping depMapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
 
-                                if (mapping.getRelationTable().equals(depMapping.getRelationTable())) {
-                                    return true;
+                                    if (mapping.getRelationTable().equals(depMapping.getRelationTable())) {
+                                        return true;
+                                    }
                                 }
-                            }
-                            return false;
-                        })
-                        .findAny()
-                        .map(
-                            dependencyInfo -> setValuesIfNecessary(
-                                (IndirectDbColumnMapping) dbColumnMapping,
-                                (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping()
-                            ))
-                        .orElse(dbColumnMapping);
+                                return false;
+                            })
+                            .findAny()
+                            .map(
+                                dependencyInfo -> setValuesIfNecessary(
+                                    (IndirectDbColumnMapping) dbColumnMapping,
+                                    (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping()
+                                ))).orElse(dbColumnMapping);
+
             }
             return dbColumnMapping;
         }
@@ -108,13 +109,19 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
             );
         }
 
-        private DependencyTpl checkCommonRelationalValidity(String table, RelationMapping mapping) {
+        private Optional<DependencyTpl> checkCommonRelationalValidity(String table, RelationMapping mapping) {
 
             TableDependency tableDependency = tableToTableDependencyMap.get(table);
 
+            if (tableDependency == null) {
+                return Optional.empty();
+            }
+
             Map<String, DependencyTpl> tableToDependencyInfoMap = tableDependency.getTableToDependencyInfoMap();
 
-            return tableToDependencyInfoMap.get(mapping.getReferencingTable());
+            return Optional.of(
+                tableToDependencyInfoMap.get(mapping.getReferencingTable())
+            );
         }
     }
 }

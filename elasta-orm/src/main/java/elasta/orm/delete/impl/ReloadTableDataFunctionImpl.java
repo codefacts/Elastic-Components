@@ -8,27 +8,28 @@ import elasta.orm.delete.ReloadTableDataFunction;
 import elasta.orm.delete.TableToTableDependenciesMap;
 import elasta.orm.delete.ex.ReloadDependencyValuesFunctionException;
 import elasta.orm.delete.loader.impl.DependencyDataLoaderBuilderImpl;
+import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.upsert.TableData;
 import elasta.sql.SqlDB;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Created by sohan on 3/13/2017.
  */
 final public class ReloadTableDataFunctionImpl implements ReloadTableDataFunction {
+    final EntityMappingHelper helper;
     final TableToTableDependenciesMap tableToTableDependenciesMap;
     final SqlDB sqlDB;
 
-    public ReloadTableDataFunctionImpl(TableToTableDependenciesMap tableToTableDependenciesMap, SqlDB sqlDB) {
+    public ReloadTableDataFunctionImpl(EntityMappingHelper helper, TableToTableDependenciesMap tableToTableDependenciesMap, SqlDB sqlDB) {
+        Objects.requireNonNull(helper);
         Objects.requireNonNull(tableToTableDependenciesMap);
         Objects.requireNonNull(sqlDB);
+        this.helper = helper;
         this.tableToTableDependenciesMap = tableToTableDependenciesMap;
         this.sqlDB = sqlDB;
     }
@@ -37,7 +38,9 @@ final public class ReloadTableDataFunctionImpl implements ReloadTableDataFunctio
     public Promise<List<TableData>> reloadIfNecessary(Collection<TableData> tableDataList) {
 
         List<Promise<TableData>> promiseList = tableDataList.stream().map(tableData -> {
-            List<String> columns = DependencyDataLoaderBuilderImpl.createDependencyColumns(Arrays.asList(tableData.getPrimaryColumns()), tableToTableDependenciesMap.get(tableData.getTable()));
+            Set<String> columns = DependencyDataLoaderBuilderImpl.createDependencyColumns(
+                helper.getDbMappingByTable(tableData.getTable())
+            );
 
             boolean reloadTableData = false;
 
@@ -53,7 +56,8 @@ final public class ReloadTableDataFunctionImpl implements ReloadTableDataFunctio
                 .map(ResultSet::getRows)
                 .map(jsonObjects -> {
                     if (jsonObjects.size() < 1) {
-                        throw new ReloadDependencyValuesFunctionException("No data found for tableData '" + tableData.toString() + "'");
+                        return tableData.getValues();
+//                        throw new ReloadDependencyValuesFunctionException("No data found for tableData '" + tableData.toString() + "'");
                     }
                     return jsonObjects.get(0);
                 })

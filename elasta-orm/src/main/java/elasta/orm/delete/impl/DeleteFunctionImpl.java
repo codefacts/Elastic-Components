@@ -4,6 +4,7 @@ import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.immutable.Tpls;
 import elasta.orm.delete.*;
+import elasta.orm.delete.builder.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.loader.MultiTableDependenciesLoader;
 import elasta.orm.upsert.TableData;
 import io.vertx.core.json.JsonObject;
@@ -20,17 +21,17 @@ final public class DeleteFunctionImpl implements DeleteFunction {
     final ListTablesToDeleteFunction listTablesToDeleteFunction;
     final MultiTableDependenciesLoader multiTableDependenciesLoader;
     final ReloadTableDataFunction reloadTableDataFunction;
-    final DeleteTableFunction deleteTableFunction;
+    final TableToDeleteTableFunctionMap tableToDeleteTableFunctionMap;
 
-    public DeleteFunctionImpl(ListTablesToDeleteFunction listTablesToDeleteFunction, MultiTableDependenciesLoader multiTableDependenciesLoader, ReloadTableDataFunction reloadTableDataFunction, DeleteTableFunction deleteTableFunction) {
+    public DeleteFunctionImpl(ListTablesToDeleteFunction listTablesToDeleteFunction, MultiTableDependenciesLoader multiTableDependenciesLoader, ReloadTableDataFunction reloadTableDataFunction, TableToDeleteTableFunctionMap tableToDeleteTableFunctionMap) {
         Objects.requireNonNull(listTablesToDeleteFunction);
         Objects.requireNonNull(multiTableDependenciesLoader);
         Objects.requireNonNull(reloadTableDataFunction);
-        Objects.requireNonNull(deleteTableFunction);
+        Objects.requireNonNull(tableToDeleteTableFunctionMap);
         this.listTablesToDeleteFunction = listTablesToDeleteFunction;
         this.multiTableDependenciesLoader = multiTableDependenciesLoader;
         this.reloadTableDataFunction = reloadTableDataFunction;
-        this.deleteTableFunction = deleteTableFunction;
+        this.tableToDeleteTableFunctionMap = tableToDeleteTableFunctionMap;
     }
 
     @Override
@@ -51,7 +52,7 @@ final public class DeleteFunctionImpl implements DeleteFunction {
             )
             .then(tpl2 -> tpl2.accept(
                 (tableToTableDataMap, tableDatas) -> tableDatas.forEach(
-                    tableData -> deleteTableFunction
+                    tableData -> tableToDeleteTableFunctionMap.get(tableData.getTable())
                         .delete(tableData, deleteContext, tableToTableDataMap)
                 ))
             ).map(tpl2 -> entity);

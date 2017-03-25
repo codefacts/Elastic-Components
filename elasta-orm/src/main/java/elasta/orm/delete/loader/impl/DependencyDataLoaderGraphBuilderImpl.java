@@ -3,9 +3,11 @@ package elasta.orm.delete.loader.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.delete.TableToTableDependenciesMap;
-import elasta.orm.delete.loader.DependencyDataLoader;import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
+import elasta.orm.delete.loader.DependencyDataLoader;
+import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
 import elasta.orm.delete.loader.DependencyDataLoaderGraph;
 import elasta.orm.delete.loader.DependencyDataLoaderGraphBuilder;
+import elasta.orm.entity.core.ColumnType;
 import elasta.orm.upsert.UpsertTest;
 
 import java.util.Collection;
@@ -30,16 +32,18 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
 
             ImmutableList.Builder<DependencyDataLoader> listBuilder = ImmutableList.builder();
 
-            tableDependencies.forEach(dependencyInfo -> {
+            tableDependencies.stream()
+                .filter(dependencyInfo -> dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.DIRECT)
+                .forEach(dependencyInfo -> {
 
 //                if (not(tableToTableDependenciesMap.containsKey(dependencyInfo.getDependentTable()))) {
 //                    return;
 //                }
 
-                listBuilder.add(
-                    dependencyDataLoaderBuilder.build(dependencyInfo, tableToTableDependenciesMap.get(dependencyInfo.getDependentTable()))
-                );
-            });
+                    listBuilder.add(
+                        dependencyDataLoaderBuilder.build(dependencyInfo, tableToTableDependenciesMap.get(dependencyInfo.getDependentTable()))
+                    );
+                });
 
             tableToDependencyDataLoadersMapBuilder.put(table, listBuilder.build());
         });

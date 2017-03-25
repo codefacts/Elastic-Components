@@ -42,6 +42,9 @@ final public class FieldExpressionResolverImpl implements FieldExpressionResolve
     }
 
     public FieldExpressionResolverImpl addKey(FieldExpression fieldExpression) {
+        if (funcMap.containsKey(fieldExpression)) {
+            throw new FieldExpressionResolverException("Same fieldExpression '" + fieldExpression + "' more than once is not supported in selections");
+        }
         funcMap.put(fieldExpression, new NoOpsFieldExpressionHolderFuncImpl());
         return this;
     }

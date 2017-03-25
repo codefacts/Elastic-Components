@@ -1,5 +1,6 @@
 package elasta.orm.delete.impl;
 
+import com.google.common.collect.ImmutableMap;
 import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.delete.ex.TableDataMapException;
 import elasta.orm.upsert.TableData;
@@ -27,7 +28,8 @@ final public class TableToTableDataMapImpl implements TableToTableDataMap {
     private Map<TableData, TableData> getTableDataMap(String dependentTable) {
         Map<TableData, TableData> tableDataMap = tableToTableDataMap.get(dependentTable);
         if (tableDataMap == null) {
-            throw new TableDataMapException("No TableData exists for table '" + dependentTable + "'");
+            return ImmutableMap.of();
+//            throw new TableDataMapException("No TableData exists for table '" + dependentTable + "'");
         }
         return tableDataMap;
     }

@@ -2,12 +2,14 @@ package elasta.orm.entity.core.columnmapping.impl;
 
 import elasta.orm.entity.core.ColumnType;import elasta.orm.entity.core.DbType;
 import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
+import lombok.Value;
 
 import java.util.Objects;
 
 /**
  * Created by Jango on 2017-01-12.
  */
+@Value
 final public class SimpleDbColumnMappingImpl implements SimpleDbColumnMapping {
     final String field;
     final String column;
@@ -41,38 +43,5 @@ final public class SimpleDbColumnMappingImpl implements SimpleDbColumnMapping {
     @Override
     public DbType getDbType() {
         return dbType;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SimpleDbColumnMappingImpl that = (SimpleDbColumnMappingImpl) o;
-
-        if (field != null ? !field.equals(that.field) : that.field != null) return false;
-        if (column != null ? !column.equals(that.column) : that.column != null) return false;
-        if (columnType != that.columnType) return false;
-        return dbType == that.dbType;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = field != null ? field.hashCode() : 0;
-        result = 31 * result + (column != null ? column.hashCode() : 0);
-        result = 31 * result + (columnType != null ? columnType.hashCode() : 0);
-        result = 31 * result + (dbType != null ? dbType.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "SimpleDbColumnMappingImpl{" +
-            "field='" + field + '\'' +
-            ", name='" + column + '\'' +
-            ", columnType=" + columnType +
-            ", dbType=" + dbType +
-            '}';
     }
 }

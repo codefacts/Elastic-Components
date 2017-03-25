@@ -186,10 +186,14 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
             if (not(pathExpression.startsWith(rootAlias))) {
 
                 PathExpression fullPath = aliasToFullPathExpressionMap.get(pathExpression.root());
+
                 if (fullPath == null) {
                     throw new ObjectReaderException("Invalid path expression '" + pathExpression + "' not found in the aliasToFullPathExpressionMap");
                 }
-                return fullPath;
+
+                return fullPath.concat(
+                    pathExpression.subPath(1, pathExpression.size())
+                );
             }
             return pathExpression;
         }

@@ -1,5 +1,6 @@
 package elasta.orm.entity.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.entity.*;
@@ -150,7 +151,16 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     }
 
     @Override
-    public Set<String> getTables() {
-        return tableToEntityMap.keySet();
+    public List<String> getTables() {
+        return ImmutableList.copyOf(
+            tableToEntityMap.keySet()
+        );
+    }
+
+    @Override
+    public List<Entity> getEntities() {
+        return ImmutableList.copyOf(
+            entityMap.values()
+        );
     }
 }

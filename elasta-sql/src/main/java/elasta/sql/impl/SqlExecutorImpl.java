@@ -28,28 +28,33 @@ final public class SqlExecutorImpl implements SqlExecutor {
 
     @Override
     public Promise<ResultSet> query(String sql) {
+        System.out.println("Query => " + sql);
         return withConn(con -> Promises.exec(
             defer -> con.query(sql, VertxUtils.deferred(defer))));
     }
 
     @Override
     public Promise<ResultSet> query(String sql, JsonArray params) {
+        System.out.println("Query => " + sql + " Params: " + params.encode());
         return withConn(con -> Promises.exec(
             defer -> con.queryWithParams(sql, params, VertxUtils.deferred(defer))));
     }
 
     @Override
     public <T> Promise<T> queryScalar(String sql) {
+        System.out.println("Query => " + sql);
         return query(sql).map(resultSet -> (T) resultSet.getResults().get(0).getValue(0));
     }
 
     @Override
     public <T> Promise<T> queryScalar(String sql, JsonArray params) {
+        System.out.println("Query => " + sql + " Params: " + params.encode());
         return query(sql, params).map(resultSet -> (T) resultSet.getResults().get(0).getValue(0));
     }
 
     @Override
     public Promise<Void> update(String sql) {
+        System.out.println("Query => " + sql);
         return withConn(con -> Promises.exec(
             defer -> con.update(sql, VertxUtils.deferred(defer))).map(o -> null)
         );
@@ -57,6 +62,7 @@ final public class SqlExecutorImpl implements SqlExecutor {
 
     @Override
     public Promise<Void> update(String sql, JsonArray params) {
+        System.out.println("Query => " + sql + " Params: " + params.encode());
         return withConn(con -> Promises.exec(
             defer -> con.updateWithParams(sql, params, VertxUtils.deferred(defer))).map(o -> null)
         );
@@ -64,12 +70,15 @@ final public class SqlExecutorImpl implements SqlExecutor {
 
     @Override
     public Promise<Void> update(List<String> sqlList) {
+        System.out.println("Queries => " + "[\n" + sqlList.stream().collect(Collectors.joining("\n")) + "\n]");
         return execAndCommit(con -> Promises.exec(
             objectDefer -> con.batch(sqlList, VertxUtils.deferred(objectDefer))));
     }
 
     @Override
     public Promise<Void> update(List<String> sqlList, List<JsonArray> paramsList) {
+        SimpleCounter simpleCounter = new SimpleCounter();
+        System.out.println("Queries => " + "[\n" + sqlList.stream().map(s -> s + " Params: " + paramsList.get(simpleCounter.value++).encode()).collect(Collectors.joining("\n")) + "\n]");
         SimpleCounter counter = new SimpleCounter(0);
         return execAndCommit(
             con -> Promises.when(sqlList.stream()

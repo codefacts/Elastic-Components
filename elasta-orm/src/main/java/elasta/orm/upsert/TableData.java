@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by Jango on 2017-01-09.
@@ -28,7 +29,7 @@ final public class TableData {
         }
         values = new JsonObject(
             ImmutableMap.copyOf(
-                values.getMap()
+                values.getMap().entrySet().stream().filter(stringObjectEntry -> stringObjectEntry.getValue() != null).collect(Collectors.toList())
             )
         );
         checkPrimaryColumnValuesGivenForEachColumn(primaryColumns, values);
@@ -86,9 +87,10 @@ final public class TableData {
     @Override
     public String toString() {
         return "TableData{" +
-            "dependentTable='" + table + '\'' +
+            "table='" + table + '\'' +
             ", primaryColumns=" + Arrays.toString(primaryColumns) +
             ", values=" + values +
+            ", hash=" + hash +
             '}';
     }
 

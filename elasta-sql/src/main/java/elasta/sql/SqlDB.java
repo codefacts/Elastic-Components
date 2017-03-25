@@ -28,7 +28,9 @@ public interface SqlDB {
 
     Promise<Void> delete(String table, JsonObject where);
 
-    Promise<Void> delete(Collection<DeleteData> deleteDataList);
+    Promise<Void> delete(DeleteData deleteData);
+
+    Promise<Void> delete(Collection<DeleteData> deleteDatas);
 
     Promise<ResultSet> query(String table, Collection<String> columns, JsonObject whereCriteria);
 

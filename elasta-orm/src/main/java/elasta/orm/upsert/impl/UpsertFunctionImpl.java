@@ -1,10 +1,14 @@
 package elasta.orm.upsert.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.upsert.*;import elasta.orm.upsert.ex.InvalidValueException;
-import elasta.orm.upsert.ex.InvalidValueException;import io.vertx.core.json.JsonArray;
+import com.google.common.collect.ImmutableMap;
+import elasta.orm.upsert.*;
+import elasta.orm.upsert.ex.InvalidValueException;
+import elasta.orm.upsert.ex.InvalidValueException;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,9 +56,41 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
         public TableData insert() {
 
-            final TableData tableData = tableDataPopulator.populate(jsonObject);
+            final TableData tableData = tableData();
 
             final JsonObject tableValues = tableData.getValues();
+
+            upsertContext
+                .putOrMerge(
+                    UpsertUtils.toTableAndPrimaryColumnsKey(
+                        tableData.getTable(), tableData.getPrimaryColumns(), tableValues
+                    ),
+                    tableData
+                );
+
+            for (IndirectDependency indirectDependency : indirectDependencies) {
+
+                handleIndirectDependency(
+                    indirectDependency,
+                    tableData
+                );
+            }
+
+            for (BelongsTo belongsTo : belongsTos) {
+                handleBelongTo(belongsTo, tableValues);
+            }
+
+            return tableData;
+        }
+
+        private TableData tableData() {
+            TableData tableData = tableDataPopulator.populate(jsonObject);
+
+            JsonObject tableValues = new JsonObject(
+                new HashMap<>(
+                    tableData.getValues().getMap()
+                )
+            );
 
             for (DirectDependency directDependency : directDependencies) {
 
@@ -81,27 +117,11 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                 tableValues.getMap().putAll(dependencyColumnValues.getMap());
             }
 
-            upsertContext
-                .putOrMerge(
-                    UpsertUtils.toTableAndPrimaryColumnsKey(
-                        tableData.getTable(), tableData.getPrimaryColumns(), tableValues
-                    ),
-                    tableData
-                );
-
-            for (IndirectDependency indirectDependency : indirectDependencies) {
-
-                handleIndirectDependency(
-                    indirectDependency,
-                    tableData
-                );
-            }
-
-            for (BelongsTo belongsTo : belongsTos) {
-                handleBelongTo(belongsTo, tableValues);
-            }
-
-            return tableData;
+            return new TableData(
+                tableData.getTable(),
+                tableData.getPrimaryColumns(),
+                new JsonObject(ImmutableMap.copyOf(tableValues.getMap()))
+            );
         }
 
         private void handleBelongTo(BelongsTo belongsTo, JsonObject tableValues) {

@@ -1,12 +1,14 @@
 package elasta.orm.delete.loader.impl;
 
 import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import lombok.Value;
 
 import java.util.Objects;
 
 /**
  * Created by sohan on 3/5/2017.
  */
+@Value
 final public class DependencyInfo {
     final String dependentTable;
     final DbColumnMapping dbColumnMapping;
@@ -16,40 +18,5 @@ final public class DependencyInfo {
         Objects.requireNonNull(dbColumnMapping);
         this.dependentTable = dependentTable;
         this.dbColumnMapping = dbColumnMapping;
-    }
-
-    public String getDependentTable() {
-        return dependentTable;
-    }
-
-    public DbColumnMapping getDbColumnMapping() {
-        return dbColumnMapping;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DependencyInfo that = (DependencyInfo) o;
-
-        if (dependentTable != null ? !dependentTable.equals(that.dependentTable) : that.dependentTable != null)
-            return false;
-        return dbColumnMapping != null ? dbColumnMapping.equals(that.dbColumnMapping) : that.dbColumnMapping == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = dependentTable != null ? dependentTable.hashCode() : 0;
-        result = 31 * result + (dbColumnMapping != null ? dbColumnMapping.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "DependencyInfo{" +
-            "dependentTable='" + dependentTable + '\'' +
-            ", dbColumnMapping=" + dbColumnMapping +
-            '}';
     }
 }

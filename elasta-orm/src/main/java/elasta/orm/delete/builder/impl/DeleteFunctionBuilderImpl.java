@@ -17,23 +17,23 @@ import java.util.Objects;
  */
 final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
     final EntityMappingHelper helper;
-    final DeleteTableFunctionBuilder deleteTableFunctionBuilder;
     final ListTablesToDeleteFunctionBuilder listTablesToDeleteFunctionBuilder;
     final TableToTableDependenciesMap tableToTableDependenciesMap;
+    final TableToDeleteTableFunctionMap tableToDeleteTableFunctionMap;
     final DependencyDataLoaderGraph dependencyDataLoaderGraph;
     final SqlDB sqlDB;
 
-    public DeleteFunctionBuilderImpl(EntityMappingHelper helper, DeleteTableFunctionBuilder deleteTableFunctionBuilder, ListTablesToDeleteFunctionBuilder listTablesToDeleteFunctionBuilder, TableToTableDependenciesMap tableToTableDependenciesMap, DependencyDataLoaderGraph dependencyDataLoaderGraph, SqlDB sqlDB) {
+    public DeleteFunctionBuilderImpl(EntityMappingHelper helper, ListTablesToDeleteFunctionBuilder listTablesToDeleteFunctionBuilder, TableToTableDependenciesMap tableToTableDependenciesMap, TableToDeleteTableFunctionMap tableToDeleteTableFunctionMap, DependencyDataLoaderGraph dependencyDataLoaderGraph, SqlDB sqlDB) {
         Objects.requireNonNull(helper);
-        Objects.requireNonNull(deleteTableFunctionBuilder);
         Objects.requireNonNull(listTablesToDeleteFunctionBuilder);
         Objects.requireNonNull(tableToTableDependenciesMap);
+        Objects.requireNonNull(tableToDeleteTableFunctionMap);
         Objects.requireNonNull(dependencyDataLoaderGraph);
         Objects.requireNonNull(sqlDB);
         this.helper = helper;
-        this.deleteTableFunctionBuilder = deleteTableFunctionBuilder;
         this.listTablesToDeleteFunctionBuilder = listTablesToDeleteFunctionBuilder;
         this.tableToTableDependenciesMap = tableToTableDependenciesMap;
+        this.tableToDeleteTableFunctionMap = tableToDeleteTableFunctionMap;
         this.dependencyDataLoaderGraph = dependencyDataLoaderGraph;
         this.sqlDB = sqlDB;
     }
@@ -50,26 +50,13 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
             ),
             multiTableDependenciesLoader(),
             reloadTableDataFunction(),
-            deleteTableFunction(
-                helper.getTable(entity),
-                params.getDeleteTableFunctionBuilderContext()
-            )
+            tableToDeleteTableFunctionMap
         );
-    }
-
-    private DeleteTableFunction deleteTableFunction(String table, DeleteTableFunctionBuilderContext deleteTableFunctionBuilderContext) {
-
-        return deleteTableFunctionBuilder
-            .build(
-                table,
-                deleteTableFunctionBuilderContext,
-                tableToTableDependenciesMap
-            );
     }
 
     private ReloadTableDataFunction reloadTableDataFunction() {
         return new ReloadTableDataFunctionImpl(
-            tableToTableDependenciesMap,
+            helper, tableToTableDependenciesMap,
             sqlDB
         );
     }

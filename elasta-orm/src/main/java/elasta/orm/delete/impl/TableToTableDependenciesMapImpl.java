@@ -9,6 +9,7 @@ import elasta.orm.delete.loader.impl.DependencyInfo;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
@@ -17,7 +18,7 @@ import java.util.function.BiConsumer;
 final public class TableToTableDependenciesMapImpl implements TableToTableDependenciesMap {
     final Map<String, List<DependencyInfo>> map;
 
-    public TableToTableDependenciesMapImpl(Map<String, List<DependencyInfo>> map) {
+    public TableToTableDependenciesMapImpl(Map<String, Set<DependencyInfo>> map) {
         Objects.requireNonNull(map);
         this.map = toImmutable(map);
     }
@@ -33,7 +34,7 @@ final public class TableToTableDependenciesMapImpl implements TableToTableDepend
         map.forEach(action);
     }
 
-    private Map<String, List<DependencyInfo>> toImmutable(Map<String, List<DependencyInfo>> map) {
+    private Map<String, List<DependencyInfo>> toImmutable(Map<String, Set<DependencyInfo>> map) {
         ImmutableMap.Builder<String, List<DependencyInfo>> mapBuilder = ImmutableMap.builder();
         map.forEach((key, values) -> mapBuilder.put(key, ImmutableList.copyOf(values)));
         return mapBuilder.build();

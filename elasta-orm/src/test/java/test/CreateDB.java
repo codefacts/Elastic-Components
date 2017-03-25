@@ -1,5 +1,6 @@
 package test;
 
+import com.google.common.collect.ImmutableList;
 import test.model.Department;
 import test.model.Employee;
 
@@ -44,6 +45,7 @@ public interface CreateDB {
         entitymanager.persist(department);
 
         employee.setDepartment(department);
+        employee.setDepartments(ImmutableList.of(department));
         entitymanager.persist(employee);
 
         entitymanager.getTransaction().commit();

@@ -4,6 +4,7 @@ import elasta.core.promise.intfs.Promise;
 import elasta.orm.query.QueryExecutor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.Builder;
 import lombok.Value;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public interface BaseOrm {
     );
 
     @Value
+    @Builder
     final class UpsertParams {
         final String entity;
         final JsonObject jsonObject;
@@ -40,6 +42,7 @@ public interface BaseOrm {
     }
 
     @Value
+    @Builder
     final class DeleteParams {
         final String entity;
         final JsonObject jsonObject;

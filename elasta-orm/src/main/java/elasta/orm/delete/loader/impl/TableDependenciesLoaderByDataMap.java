@@ -1,10 +1,13 @@
 package elasta.orm.delete.loader.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.delete.TableToTableDataMap;import elasta.orm.delete.impl.TableToTableDataMapImpl;import elasta.orm.delete.loader.DependencyDataLoader;
+import elasta.orm.delete.TableToTableDataMap;
+import elasta.orm.delete.impl.TableToTableDataMapImpl;
+import elasta.orm.delete.loader.DependencyDataLoader;
 import elasta.orm.upsert.TableData;
 import io.vertx.core.json.JsonObject;
 
@@ -50,6 +53,8 @@ final public class TableDependenciesLoaderByDataMap {
 
         context.add(parentTableData);
 
+        putInTable(parentTableData);
+
         final List<Promise<List<TableData>>> promises = dependencyDataLoaders.stream()
             .map(dependencyDataLoader -> dependencyDataLoader.load(parentTableData))
             .map(
@@ -57,12 +62,10 @@ final public class TableDependenciesLoaderByDataMap {
                     .thenP(
                         tableDatas -> {
 
-                            putInTable(dataMap, tableDatas);
-
                             final List<Promise<Void>> promiseList = tableDatas.stream()
                                 .map(
                                     tableData -> loadTableDataRecursive(
-                                        map.get(tableData.getTable()),
+                                        map.getOrDefault(tableData.getTable(), ImmutableList.of()),
                                         tableData
                                     ))
                                 .collect(Collectors.toList());
@@ -77,32 +80,36 @@ final public class TableDependenciesLoaderByDataMap {
 
     private void putInTable(Map<TableData, TableData> dataMap, List<TableData> tableDatas) {
 
-        tableDatas.forEach(tableData -> {
+        tableDatas.forEach(this::putInTable);
+    }
 
-            final String table = tableData.getTable();
+    private void putInTable(TableData tableData) {
+        final String table = tableData.getTable();
 
-            if (Utils.not(
-                dataMap.containsKey(tableData)
-            )) {
-                dataMap.put(tableData, tableData);
-                return;
-            }
+        if (Utils.not(
+            dataMap.containsKey(tableData)
+        )) {
+            dataMap.put(tableData, tableData);
+            return;
+        }
 
-            TableData data = dataMap.get(tableData);
-            dataMap.put(
-                tableData,
-                new TableData(
-                    table,
-                    tableData.getPrimaryColumns(),
-                    new JsonObject(
-                        ImmutableMap.<String, Object>builder()
-                            .putAll(tableData.getValues())
-                            .putAll(data.getValues())
-                            .build()
-                    )
+        TableData data = dataMap.get(tableData);
+        dataMap.put(
+            tableData,
+            new TableData(
+                table,
+                tableData.getPrimaryColumns(),
+                new JsonObject(
+                    merge(tableData.getValues(), data.getValues())
                 )
-            );
-        });
+            )
+        );
+    }
+
+    private Map<String, Object> merge(JsonObject values, JsonObject values1) {
+        LinkedHashMap<String, Object> hashMap = new LinkedHashMap<>(values.getMap());
+        hashMap.putAll(values1.getMap());
+        return ImmutableMap.copyOf(hashMap);
     }
 
     public static TableToTableDataMap toTableToTableDependenciesDataMap(Map<TableData, TableData> dataMap) {

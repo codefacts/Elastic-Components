@@ -1,6 +1,7 @@
 package elasta.orm.delete.builder.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import elasta.orm.delete.*;
 import elasta.orm.delete.builder.DeleteTableFunctionBuilder;
 import elasta.orm.delete.builder.DeleteTableFunctionBuilderContext;
@@ -14,8 +15,10 @@ import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 import elasta.orm.upsert.ColumnToColumnMapping;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Created by sohan on 3/11/2017.
@@ -31,6 +34,8 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
     @Override
     public DeleteTableFunction build(String table, DeleteTableFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
+        requireNonNulls(table, context, tableToTableDependenciesMap);
+
         if (context.contains(table)) {
             return context.get(table);
         }
@@ -44,10 +49,16 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
         return deleteTableFunction;
     }
 
+    private void requireNonNulls(String table, DeleteTableFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
+        Objects.requireNonNull(table);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(tableToTableDependenciesMap);
+    }
+
     private DeleteTableFunction buildDeleteFunction(String table, DeleteTableFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
-        ImmutableList.Builder<IndirectDependencyDeleteHandler> indirectListBuilder = ImmutableList.builder();
-        ImmutableList.Builder<DirectDependencyDeleteHandler> directListBuilder = ImmutableList.builder();
+        ImmutableSet.Builder<IndirectDependencyDeleteHandler> indirectListBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<DirectDependencyDeleteHandler> directListBuilder = ImmutableSet.builder();
 
         tableToTableDependenciesMap.get(table)
             .forEach(dependencyInfo -> {
@@ -77,8 +88,22 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
                 }
             });
 
-        ImmutableList<DirectDependencyDeleteHandler> directDependencyDeleteHandlers = directListBuilder.build();
-        ImmutableList<IndirectDependencyDeleteHandler> indirectDependencyDeleteHandlers = indirectListBuilder.build();
+        Arrays.stream(helper.getDbMappingByTable(table).getDbColumnMappings()).forEach(dbColumnMapping -> {
+            switch (dbColumnMapping.getColumnType()) {
+                case INDIRECT: {
+                    IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dbColumnMapping;
+                    indirectListBuilder.add(
+                        new IndirectDependencyDeleteHandlerImpl(
+                            mapping.getRelationTable(),
+                            columnToColumnMappingsIndirect(mapping.getSrcForeignColumnMappingList())
+                        )
+                    );
+                }
+            }
+        });
+
+        Set<DirectDependencyDeleteHandler> directDependencyDeleteHandlers = directListBuilder.build();
+        Set<IndirectDependencyDeleteHandler> indirectDependencyDeleteHandlers = indirectListBuilder.build();
 
         return new DeleteTableFunctionImpl(
             directDependencyDeleteHandlers.toArray(new DirectDependencyDeleteHandler[directDependencyDeleteHandlers.size()]),
@@ -96,9 +121,7 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
             return new ProxyDeleteTableFunction(dependentTable, context);
         }
 
-        return new DeleteTableFunctionBuilderImpl(
-            helper
-        ).build(dependentTable, context, tableToTableDependenciesMap);
+        return this.build(dependentTable, context, tableToTableDependenciesMap);
     }
 
     private ColumnToColumnMapping[] columnToColumnMappingsDirect(DirectDbColumnMapping mapping) {

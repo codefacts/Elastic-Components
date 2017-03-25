@@ -44,7 +44,7 @@ final public class BaseOrmImpl implements BaseOrm {
     public Promise<JsonObject> upsert(UpsertParams params) {
 
         LinkedHashMap<String, TableData> map = new LinkedHashMap<>();
-        
+
         getOperation(params.getEntity()).upsertFunction.upsert(
             params.getJsonObject(),
             new UpsertContextImpl(
@@ -73,18 +73,19 @@ final public class BaseOrmImpl implements BaseOrm {
             }).collect(Collectors.toList());
 
         return Promises.when(promiseList)
-            .thenP(sqlDB::update)
+            .thenP((sqlList) -> sqlDB.update(sqlList))
             .map(updateTpls -> params.getJsonObject());
     }
 
     @Override
     public Promise<JsonObject> delete(DeleteParams params) {
         LinkedHashSet<DeleteData> deleteDatas = new LinkedHashSet<>();
-        return getOperation(params.getEntity()).deleteFunction.delete(
-            params.getJsonObject(), new DeleteContextImpl(
-                deleteDatas
-            )
-        ).thenP(jsonObject -> sqlDB.delete(deleteDatas));
+        return getOperation(params.getEntity()).deleteFunction
+            .delete(
+                params.getJsonObject(), new DeleteContextImpl(
+                    deleteDatas
+                )
+            ).thenP(jsonObject -> sqlDB.delete(deleteDatas));
     }
 
     private EntityOperation getOperation(String entity) {

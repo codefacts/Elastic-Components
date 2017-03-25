@@ -5,6 +5,7 @@ import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.JavaType;
 import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 import elasta.orm.entity.core.columnmapping.impl.DirectDbColumnMappingImpl;
+import elasta.orm.entity.core.columnmapping.impl.IndirectDbColumnMappingImpl;
 import elasta.orm.entity.core.columnmapping.impl.SimpleDbColumnMappingImpl;
 import elasta.sql.core.*;
 
@@ -43,11 +44,21 @@ public interface Employees {
                             "department"
                         )
                     )
+                ),
+                new Field(
+                    "departments", JavaType.ARRAY,
+                    Optional.of(
+                        new Relationship(
+                            Relationship.Type.MANY_TO_MANY,
+                            Relationship.Name.HAS_MANY,
+                            "department"
+                        )
+                    )
                 )
             })
             .dbMapping(
                 DbMapping.builder()
-                    .table("employee")
+                    .table("EMPLOYEE")
                     .primaryColumn("EID")
                     .dbColumnMappings(new DbColumnMapping[]{
                         new SimpleDbColumnMappingImpl(
@@ -71,6 +82,22 @@ public interface Employees {
                                 )
                             ),
                             "department"
+                        ),
+                        new IndirectDbColumnMappingImpl(
+                            "DEPARTMENT",
+                            "department",
+                            "EMPLOYEE_DEPARTMENT",
+                            ImmutableList.of(
+                                new ForeignColumnMapping(
+                                    "EID", "EMPLOYEE_EID"
+                                )
+                            ),
+                            ImmutableList.of(
+                                new ForeignColumnMapping(
+                                    "ID", "DEPARTMENTS_ID"
+                                )
+                            ),
+                            "departments"
                         )
                     })
                     .build()

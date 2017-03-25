@@ -5,6 +5,7 @@ import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.query.QueryExecutor;
+import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.Query;
 import elasta.orm.query.expression.builder.impl.QueryBuilderImpl;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
@@ -54,9 +55,10 @@ final public class QueryExecutorImpl implements QueryExecutor {
 
         return prepareAndExecute(
             qb, Params.builder()
-                .criteria(params.getCriteria())
                 .entity(params.getEntity())
                 .alias(params.getAlias())
+                .joinParams(params.getJoinParams())
+                .criteria(params.getCriteria())
                 .groupBy(params.getGroupBy())
                 .orderBy(params.getOrderBy())
                 .having(params.getHaving())
@@ -74,9 +76,10 @@ final public class QueryExecutorImpl implements QueryExecutor {
 
         return prepareAndExecute(
             qb, Params.builder()
-                .criteria(params.getCriteria())
                 .entity(params.getEntity())
                 .alias(params.getAlias())
+                .joinParams(params.getJoinParams())
+                .criteria(params.getCriteria())
                 .groupBy(params.getGroupBy())
                 .orderBy(params.getOrderBy())
                 .having(params.getHaving())
@@ -87,6 +90,16 @@ final public class QueryExecutorImpl implements QueryExecutor {
     private Query prepareAndExecute(QueryBuilderImpl qb, Params params) {
 
         qb.fromBuilder().root(params.getEntity(), params.getAlias());
+
+        params.getJoinParams().forEach(joinParam -> {
+            qb.fromBuilder().join(
+                PathExpression.parseAndCreate(
+                    joinParam.getPath()
+                ),
+                joinParam.getAlias(),
+                joinParam.getJoinType()
+            );
+        });
 
         final CriteriaBuilderJsonToFuncConverterMap converterMap = new CriteriaBuilderJsonToFuncConverterMap(jsonToFuncConverterMap, qb);
 
@@ -117,10 +130,11 @@ final public class QueryExecutorImpl implements QueryExecutor {
     @Builder
     private static final class Params {
         final String entity;
+        final String alias;
+        final List<JoinParam> joinParams;
         final JsonObject criteria;
         final List<OrderTpl> orderBy;
         final List<String> groupBy;
         final JsonObject having;
-        final String alias;
     }
 }

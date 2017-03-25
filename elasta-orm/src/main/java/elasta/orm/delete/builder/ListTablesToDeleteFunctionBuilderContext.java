@@ -15,4 +15,6 @@ public interface ListTablesToDeleteFunctionBuilderContext {
     void put(String entity, ListTablesToDeleteFunction listTablesToDeleteFunction);
 
     boolean isEmpty(String referencingEntity);
+
+    void makeImmutable();
 }

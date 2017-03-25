@@ -24,8 +24,8 @@ final public class TableToTableDependenciesMapBuilderImpl implements TableToTabl
     }
 
     public TableToTableDependenciesMap build() {
-        Set<String> tables = helper.getTables();
-        Map<String, List<DependencyInfo>> map = new HashMap<>();
+        List<String> tables = helper.getTables();
+        Map<String, Set<DependencyInfo>> map = new HashMap<>();
         tables.forEach(table -> {
             final DbMapping dbMapping = helper.getDbMappingByTable(table);
             Arrays.stream(dbMapping.getDbColumnMappings())
@@ -47,10 +47,10 @@ final public class TableToTableDependenciesMapBuilderImpl implements TableToTabl
         return new TableToTableDependenciesMapImpl(map);
     }
 
-    private void putInMap(Map<String, List<DependencyInfo>> map, final String referencingTable, DependencyInfo dependencyInfo) {
-        List<DependencyInfo> dependencyTables = map.get(referencingTable);
+    private void putInMap(Map<String, Set<DependencyInfo>> map, final String referencingTable, DependencyInfo dependencyInfo) {
+        Set<DependencyInfo> dependencyTables = map.get(referencingTable);
         if (dependencyTables == null) {
-            map.put(referencingTable, dependencyTables = new ArrayList<>());
+            map.put(referencingTable, dependencyTables = new LinkedHashSet<DependencyInfo>());
         }
         dependencyTables.add(dependencyInfo);
     }

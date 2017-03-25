@@ -6,6 +6,7 @@ import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,5 +47,7 @@ public interface EntityMappingHelper {
 
     DbMapping getDbMappingByTable(String table);
 
-    Set<String> getTables();
+    List<String> getTables();
+
+    List<Entity> getEntities();
 }

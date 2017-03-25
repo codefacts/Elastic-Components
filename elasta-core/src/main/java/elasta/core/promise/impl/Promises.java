@@ -76,36 +76,42 @@ final public class Promises {
     }
 
     public static <T> Promise<List<T>> when(final Collection<Promise<T>> promises) {
-        if (promises.size() == 0) {
-            return Promises.of(ImmutableList.of());
-        }
-        Defer<List<T>> defer = defer();
-        final SimpleCounter counter = new SimpleCounter(0);
-        MutableTpl3<Boolean, Throwable, Object> pStatus = MutableTpls.of(true, null, null);
-        promises.forEach(pm -> pm.cmp(pms -> {
-            pStatus.t1 &= pms.isSuccess();
-
-            if (pStatus.t2 == null) {
-                pStatus.t2 = pms.err();
-                pStatus.t3 = pms.lastValue();
+        try {
+            if (promises.size() == 0) {
+                return Promises.of(ImmutableList.of());
             }
+            Defer<List<T>> defer = defer();
+            final SimpleCounter counter = new SimpleCounter(0);
+            MutableTpl3<Boolean, Throwable, Object> pStatus = MutableTpls.of(true, null, null);
+            promises.forEach(pm -> pm.cmp(pms -> {
+                pStatus.t1 &= pms.isSuccess();
 
-            counter.counter++;
-            if (counter.counter == promises.size()) {
-                if (pStatus.t1) {
-                    Object[] vals = new Object[promises.size()];
-                    int index = 0;
-                    for (Promise<T> promise : promises) {
-                        vals[index] = promise.val();
-                        index = index + 1;
-                    }
-                    defer.resolve(new MyImmutableList<>(vals));
-                } else {
-                    defer.reject(pStatus.t2, pStatus.t3);
+                if (pStatus.t2 == null) {
+                    pStatus.t2 = pms.err();
+                    pStatus.t3 = pms.lastValue();
                 }
-            }
-        }));
-        return defer.promise();
+
+//                System.out.println(Thread.currentThread().toString());
+
+                counter.counter++;
+                if (counter.counter >= promises.size()) {
+                    if (pStatus.t1) {
+                        Object[] vals = new Object[promises.size()];
+                        int index = 0;
+                        for (Promise<T> promise : promises) {
+                            vals[index] = promise.val();
+                            index = index + 1;
+                        }
+                        defer.resolve(new MyImmutableList<>(vals));
+                    } else {
+                        defer.reject(pStatus.t2, pStatus.t3);
+                    }
+                }
+            }));
+            return defer.promise();
+        } catch (Exception ex) {
+            return Promises.error(ex);
+        }
     }
 
     public static <T> Promise<List<Promise<T>>> allComplete(final Collection<Promise<T>> promises) {

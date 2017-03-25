@@ -1,16 +1,23 @@
 package elasta.orm.delete.loader.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.delete.loader.DependencyDataLoader;import elasta.orm.entity.EntityMappingHelper;import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.SqlDB;
+import com.google.common.collect.ImmutableSet;
+import elasta.orm.delete.loader.DependencyDataLoader;
+import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.DbMapping;
+import elasta.orm.entity.core.ForeignColumnMapping;
+import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.SqlDB;
 import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
 import elasta.orm.delete.ex.DependencyDataLoaderException;
 import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by sohan on 3/5/2017.
@@ -32,7 +39,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
 
         String primaryColumn = helper.getDbMappingByTable(dependentTable).getPrimaryColumn();
 
-        List<String> columns = createDependencyColumns(Collections.singletonList(primaryColumn), dependentTableDependencies);
+        Set<String> columns = createDependencyColumns(helper.getDbMappingByTable(dependentTable));
 
         switch (dependencyInfo.getDbColumnMapping().getColumnType()) {
 //            case INDIRECT: {
@@ -78,7 +85,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
                     dependentTable,
                     directColumnMappings(dependencyInfo.getDbColumnMapping()),
                     new String[]{primaryColumn},
-                    columns.toArray(new String[columns.size()]),
+                    columns,
                     sqlDB
                 );
             }
@@ -86,8 +93,28 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
         throw new DependencyDataLoaderException("Invalid dependencyInfo.getDbColumnMapping().getColumnType() '" + dependencyInfo.getDbColumnMapping().getColumnType() + "'");
     }
 
-    public static List<String> createDependencyColumns(List<String> primaryColumns, List<DependencyInfo> dependentTableDependencies) {
-        return ImmutableList.<String>builder().addAll(primaryColumns).addAll(Arrays.asList(dependencyColumns(dependentTableDependencies))).build();
+    public static Set<String> createDependencyColumns(DbMapping dbMapping) {
+        return ImmutableSet.<String>builder()
+            .add(dbMapping.getPrimaryColumn())
+            .addAll(
+                Arrays.stream(dbMapping.getDbColumnMappings())
+                    .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.DIRECT || dbColumnMapping.getColumnType() == ColumnType.INDIRECT)
+                    .flatMap(dbColumnMapping -> {
+                        switch (dbColumnMapping.getColumnType()) {
+                            case DIRECT: {
+                                return ((DirectDbColumnMapping) dbColumnMapping).getForeignColumnMappingList().stream()
+                                    .map(ForeignColumnMapping::getSrcColumn);
+                            }
+                            case INDIRECT: {
+                                return ((IndirectDbColumnMapping) dbColumnMapping).getSrcForeignColumnMappingList().stream()
+                                    .map(ForeignColumnMapping::getSrcColumn);
+                            }
+                        }
+                        return Stream.empty();
+                    })
+                    .collect(Collectors.toList())
+            )
+            .build();
     }
 
     private ColumnToColumnMapping[] directColumnMappings(DbColumnMapping dbColumnMapping) {
@@ -112,7 +139,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
 
     private static String[] dependencyColumns(List<DependencyInfo> dependencyTables) {
 
-        ImmutableList.Builder<String> columnListBuilder = ImmutableList.builder();
+        ImmutableSet.Builder<String> columnListBuilder = ImmutableSet.builder();
 
         dependencyTables.forEach(dependencyInfo -> {
             switch (dependencyInfo.getDbColumnMapping().getColumnType()) {
@@ -136,8 +163,8 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
             }
         });
 
-        ImmutableList<String> list = columnListBuilder.build();
-        return list.toArray(new String[list.size()]);
+        ImmutableSet<String> columns = columnListBuilder.build();
+        return columns.toArray(new String[columns.size()]);
     }
 
     @Override

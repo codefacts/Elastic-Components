@@ -2,13 +2,15 @@ package elasta.orm.delete.loader.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.delete.loader.DependencyDataLoader;import elasta.orm.upsert.ColumnToColumnMapping;import elasta.orm.upsert.TableData;import elasta.sql.SqlDB;
+import elasta.orm.delete.loader.DependencyDataLoader;
+import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.orm.upsert.TableData;
+import elasta.sql.SqlDB;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -18,10 +20,10 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
     final String dependentTable;
     final ColumnToColumnMapping[] columnMappings;
     final String[] primaryColumns;
-    final String[] columns;
+    final Set<String> columns;
     final SqlDB sqlDB;
 
-    public DependencyDataLoaderImpl(String dependentTable, ColumnToColumnMapping[] columnMappings, String[] primaryColumns, String[] columns, SqlDB sqlDB) {
+    public DependencyDataLoaderImpl(String dependentTable, ColumnToColumnMapping[] columnMappings, String[] primaryColumns, Set<String> columns, SqlDB sqlDB) {
         Objects.requireNonNull(dependentTable);
         Objects.requireNonNull(columnMappings);
         Objects.requireNonNull(columns);
@@ -50,7 +52,7 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
         return sqlDB
             .query(
                 dependentTable,
-                ImmutableList.<String>builder().add(primaryColumns).add(columns).build(),
+                columns,
                 new JsonObject(mapBuilder.build())
             )
             .map(
@@ -66,7 +68,7 @@ final public class DependencyDataLoaderImpl implements DependencyDataLoader {
             "dependentTable='" + dependentTable + '\'' +
             ", columnMappings=" + Arrays.toString(columnMappings) +
             ", primaryColumns=" + Arrays.toString(primaryColumns) +
-            ", columns=" + Arrays.toString(columns) +
+            ", columns=" + columns +
             ", sqlDB=" + sqlDB +
             '}';
     }

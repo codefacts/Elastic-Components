@@ -5,10 +5,12 @@ import elasta.orm.delete.DeleteTableFunction;
 import elasta.orm.delete.DirectDependencyDeleteHandler;
 import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.delete.DeleteContext;
-import elasta.orm.delete.ex.DirectDependencyDeleteHandlerException;import elasta.sql.core.ColumnValuePair;
+import elasta.orm.delete.ex.DirectDependencyDeleteHandlerException;
+import elasta.sql.core.ColumnValuePair;
 import elasta.orm.upsert.ColumnToColumnMapping;
 import elasta.orm.upsert.TableData;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -32,7 +34,6 @@ final public class DirectDependencyDeleteHandlerImpl implements DirectDependency
     @Override
     public void delete(TableData parentTableData, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
         Collection<TableData> tableDatas = tableToTableDataMap.getAsCollection(dependentTable);
-        Objects.requireNonNull(tableDatas);
 
         final ColumnValuePair[] columnValuePairs = new ColumnValuePair[columnToColumnMappings.length];
 
@@ -44,12 +45,13 @@ final public class DirectDependencyDeleteHandlerImpl implements DirectDependency
             );
         }
 
-        final TableData tableData = tableDatas.stream()
+        tableDatas.stream()
             .filter(td -> {
                 for (ColumnValuePair columnValuePair : columnValuePairs) {
-                    boolean equals = td.getValues()
-                        .getValue(columnValuePair.getPrimaryColumn())
-                        .equals(columnValuePair.getValue());
+                    boolean equals = columnValuePair.getValue().equals(
+                        td.getValues()
+                            .getValue(columnValuePair.getPrimaryColumn())
+                    );
                     if (Utils.not(equals)) {
                         return false;
                     }
@@ -57,16 +59,15 @@ final public class DirectDependencyDeleteHandlerImpl implements DirectDependency
                 return true;
             })
             .findAny()
-            .orElseThrow(() -> new DirectDependencyDeleteHandlerException("No dependency data found for " + this.toString() + ""));
-
-        dependentTableDeleteTableFunction.delete(tableData, context, tableToTableDataMap);
+            .ifPresent(tableData -> dependentTableDeleteTableFunction.delete(tableData, context, tableToTableDataMap));
     }
 
     @Override
     public String toString() {
         return "DirectDependencyDeleteHandlerImpl{" +
             "dependentTable='" + dependentTable + '\'' +
-            ", columnToColumnMappings=" + columnToColumnMappings +
+            ", columnToColumnMappings=" + Arrays.toString(columnToColumnMappings) +
+            ", dependentTableDeleteTableFunction=" + dependentTableDeleteTableFunction +
             '}';
     }
 }
