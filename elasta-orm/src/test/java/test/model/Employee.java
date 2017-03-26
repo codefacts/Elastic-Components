@@ -20,18 +20,22 @@ public class Employee {
     private String ename;
     private double salary;
     private String deg;
-    @ManyToOne
-    @JoinColumn(name = "DEPARTMENT_ID", referencedColumnName = "ID")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "E_DEPARTMENT_ID", referencedColumnName = "ID")
     private Department department;
-    @ManyToMany
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "E_DEPARTMENT2_ID", referencedColumnName = "ID")
+    Department department2;
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Department> departments;
 
-    public Employee(int eid, String ename, double salary, String deg, Department department, List<Department> departments) {
+    public Employee(int eid, String ename, double salary, String deg, Department department, Department department2, List<Department> departments) {
         this.eid = eid;
         this.ename = ename;
         this.salary = salary;
         this.deg = deg;
         this.department = department;
+        this.department2 = department2;
         this.departments = departments;
     }
 

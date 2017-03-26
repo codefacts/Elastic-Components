@@ -58,8 +58,8 @@ final public class DirectDependencyDeleteHandlerImpl implements DirectDependency
                 }
                 return true;
             })
-            .findAny()
-            .ifPresent(tableData -> dependentTableDeleteTableFunction.delete(tableData, context, tableToTableDataMap));
+            .forEach(tableData -> dependentTableDeleteTableFunction.delete(tableData, context, tableToTableDataMap));
+        ;
     }
 
     @Override

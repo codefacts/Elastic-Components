@@ -1,6 +1,5 @@
 package test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.BaseOrm;
 import io.vertx.core.Vertx;
@@ -11,7 +10,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 /**
  * Created by sohan on 3/26/2017.
  */
-public interface Delete22 {
+public interface Delete33 {
     static void main(String[] asdfasd) {
         JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
             .setWorkerPoolSize(1)
@@ -23,17 +22,16 @@ public interface Delete22 {
             .jdbcClient(jdbcClient)
             .build());
 
-        JsonObject department = new JsonObject(
+        JsonObject employee = new JsonObject(
             ImmutableMap.of(
-                "id", 94504975049L,
-                "name", "MCE"
+                "eid", 5258
             )
         );
 
         baseOrm.delete(
             BaseOrm.DeleteParams.builder()
-                .entity("department")
-                .jsonObject(department)
+                .entity("employee")
+                .jsonObject(employee)
                 .build()
         ).then(jsonObject -> {
             System.out.println("ppp888888888888888888888888888888888888888888888888888888888888888888888");

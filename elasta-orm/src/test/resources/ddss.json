@@ -1,0 +1,80 @@
+{
+  "eid" : 1201,
+  "ename" : "Gopal",
+  "deg" : "Technical Manager",
+  "salary" : 40000.0,
+  "department" : {
+    "id" : 98798079087,
+    "name" : "ICT",
+    "employee" : {
+      "eid" : 5258,
+      "ename" : "Russel",
+      "salary" : 52000.0
+    },
+    "department" : {
+      "id" : 98457984,
+      "name" : "RGV",
+      "employee" : {
+        "ename" : "Russel",
+        "salary" : 52000.0
+      },
+      "department" : {
+        "id" : 94504975049,
+        "name" : "MCE",
+        "employee" : {
+          "ename" : "Russel",
+          "salary" : 52000.0
+        }
+      }
+    }
+  },
+  "department2" : {
+    "id" : 988286326887,
+    "name" : "BGGV",
+    "employee" : {
+      "eid" : 5258,
+      "ename" : "Russel"
+    },
+    "department" : {
+      "id" : 8283175518,
+      "name" : "MKLC",
+      "employee" : {
+        "eid" : 5258,
+        "ename" : "Russel"
+      },
+      "department" : {
+        "id" : 56165582,
+        "name" : "VVKM",
+        "employee" : {
+          "eid" : 2389,
+          "ename" : "KOMOL",
+          "salary" : 8000.0
+        }
+      }
+    }
+  },
+  "departments" : [ {
+    "id" : 98798079087,
+    "name" : "ICT",
+    "department" : {
+      "id" : 98457984,
+      "name" : "RGV",
+      "department" : {
+        "id" : 94504975049,
+        "name" : "MCE"
+      },
+      "employee" : {
+        "eid" : 5258,
+        "ename" : "Russel",
+        "departments" : [ {
+          "id" : 6538921,
+          "name" : "TTSK",
+          "department" : {
+            "id" : 267935328,
+            "name" : "VTVG"
+          }
+        } ]
+      }
+    }
+  } ]
+}

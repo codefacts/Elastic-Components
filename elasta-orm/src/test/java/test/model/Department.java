@@ -20,15 +20,19 @@ public class Department {
     long id;
     String name;
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "DEPARTMENT_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "D_DEPARTMENT_ID", referencedColumnName = "ID")
     Department department;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "D_EMPLOYEE_EID", referencedColumnName = "EID")
+    Employee employee;
 
     public Department() {
     }
 
-    public Department(long id, String name, Department department) {
+    public Department(long id, String name, Department department, Employee employee) {
         this.id = id;
         this.name = name;
         this.department = department;
+        this.employee = employee;
     }
 }

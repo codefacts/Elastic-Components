@@ -9,9 +9,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 /**
- * Created by sohan on 3/22/2017.
+ * Created by sohan on 3/26/2017.
  */
-public interface CreateDB {
+public interface CreateDB22 {
     public static void main(String[] args) {
         EntityManagerFactory emfactory = Persistence.
             createEntityManagerFactory("jpadb");
@@ -61,12 +61,10 @@ public interface CreateDB {
         Department department2 = Department.builder()
             .id(988286326887L)
             .name("BGGV")
-            .employee(employee)
             .department(
                 Department.builder()
                     .id(8283175518L)
                     .name("MKLC")
-                    .employee(employee)
                     .department(
                         Department.builder()
                             .id(56165582)
@@ -74,9 +72,9 @@ public interface CreateDB {
                             .employee(
                                 Employee.builder()
                                     .eid(2389)
-                                    .deg("DOC")
-                                    .ename("KOMOL")
-                                    .salary(8000)
+                                    .deg("ENG")
+                                    .ename("Russel")
+                                    .salary(52000)
                                     .build()
                             )
                             .build()

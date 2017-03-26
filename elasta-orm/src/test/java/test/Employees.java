@@ -46,6 +46,16 @@ public interface Employees {
                     )
                 ),
                 new Field(
+                    "department2", JavaType.OBJECT,
+                    Optional.of(
+                        new Relationship(
+                            Relationship.Type.MANY_TO_ONE,
+                            Relationship.Name.HAS_ONE,
+                            "department"
+                        )
+                    )
+                ),
+                new Field(
                     "departments", JavaType.ARRAY,
                     Optional.of(
                         new Relationship(
@@ -78,10 +88,20 @@ public interface Employees {
                             "department",
                             ImmutableList.of(
                                 new ForeignColumnMapping(
-                                    "DEPARTMENT_ID", "ID"
+                                    "E_DEPARTMENT_ID", "ID"
                                 )
                             ),
                             "department"
+                        ),
+                        new DirectDbColumnMappingImpl(
+                            "DEPARTMENT",
+                            "department",
+                            ImmutableList.of(
+                                new ForeignColumnMapping(
+                                    "E_DEPARTMENT2_ID", "ID"
+                                )
+                            ),
+                            "department2"
                         ),
                         new IndirectDbColumnMappingImpl(
                             "DEPARTMENT",
@@ -123,6 +143,16 @@ public interface Employees {
                             "department"
                         )
                     )
+                ),
+                new Field(
+                    "employee", JavaType.OBJECT,
+                    Optional.of(
+                        new Relationship(
+                            Relationship.Type.MANY_TO_ONE,
+                            Relationship.Name.HAS_ONE,
+                            "employee"
+                        )
+                    )
                 )
             },
             new DbMapping(
@@ -140,10 +170,20 @@ public interface Employees {
                         "department",
                         ImmutableList.of(
                             new ForeignColumnMapping(
-                                "DEPARTMENT_ID", "ID"
+                                "D_DEPARTMENT_ID", "ID"
                             )
                         ),
                         "department"
+                    ),
+                    new DirectDbColumnMappingImpl(
+                        "EMPLOYEE",
+                        "employee",
+                        ImmutableList.of(
+                            new ForeignColumnMapping(
+                                "D_EMPLOYEE_EID", "EID"
+                            )
+                        ),
+                        "employee"
                     )
                 }
             )

@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * Created by sohan on 3/22/2017.
  */
-public interface Main {
+public interface Read {
     Vertx vertx = Vertx.vertx();
 
     static void main(String[] asdfasd) {
@@ -43,14 +43,42 @@ public interface Main {
                     "r.salary",
                     "r.department.id",
                     "r.department.name",
+                    "r.department.employee.eid",
+                    "r.department.employee.ename",
+                    "r.department.employee.salary",
                     "r.department.department.id",
                     "r.department.department.name",
+                    "r.department.department.employee.ename",
+                    "r.department.department.employee.salary",
                     "r.department.department.department.id",
                     "r.department.department.department.name",
+                    "r.department.department.department.employee.ename",
+                    "r.department.department.department.employee.salary",
+                    "r.department2.id",
+                    "r.department2.name",
+                    "r.department2.employee.eid",
+                    "r.department2.employee.ename",
+                    "r.department2.department.id",
+                    "r.department2.department.name",
+                    "r.department2.department.employee.eid",
+                    "r.department2.department.employee.ename",
+                    "r.department2.department.department.id",
+                    "r.department2.department.department.name",
+                    "r.department2.department.department.employee.eid",
+                    "r.department2.department.department.employee.ename",
+                    "r.department2.department.department.employee.salary",
                     "d.id",
                     "d.name",
                     "d.department.id",
-                    "d.department.name"
+                    "d.department.name",
+                    "d.department.department.id",
+                    "d.department.department.name",
+                    "d.department.employee.eid",
+                    "d.department.employee.ename",
+                    "d.department.employee.departments.id",
+                    "d.department.employee.departments.name",
+                    "d.department.employee.departments.department.id",
+                    "d.department.employee.departments.department.name"
                 ))
                 .criteria(new JsonObject())
                 .orderBy(ImmutableList.of())

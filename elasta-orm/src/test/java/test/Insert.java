@@ -11,7 +11,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 /**
  * Created by sohan on 3/25/2017.
  */
-public interface Inserts {
+public interface Insert {
 
     static void main(String[] asdfasd) {
         JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
