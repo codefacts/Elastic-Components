@@ -38,15 +38,17 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
 
             final String field = fieldToColumnMapping.getField();
 
-            if (not(jsonObject.containsKey(field))) {
+            Object value = jsonObject.getValue(
+                field
+            );
+
+            if (value == null) {
                 continue;
             }
 
             map.put(
                 fieldToColumnMapping.getColumn(),
-                jsonObject.getValue(
-                    field
-                )
+                value
             );
         }
 

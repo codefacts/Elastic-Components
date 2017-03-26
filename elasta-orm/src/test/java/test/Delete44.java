@@ -1,6 +1,5 @@
 package test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.BaseOrm;
 import io.vertx.core.Vertx;
@@ -11,7 +10,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 /**
  * Created by sohan on 3/26/2017.
  */
-public interface Insert22 {
+public interface Delete44 {
     static void main(String[] asdfasd) {
         JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
             .setWorkerPoolSize(1)
@@ -31,10 +30,8 @@ public interface Insert22 {
             )
         );
 
-        System.out.println(employee.encodePrettily());
-
-        baseOrm.upsert(
-            BaseOrm.UpsertParams.builder()
+        baseOrm.delete(
+            BaseOrm.DeleteParams.builder()
                 .entity("employee")
                 .jsonObject(employee)
                 .build()

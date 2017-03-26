@@ -37,37 +37,44 @@ final public class ListTablesToDeleteFunctionImpl implements ListTablesToDeleteF
 
         for (DirectChildHandler directChildHandler : directChildHandlers) {
             final String field = directChildHandler.field();
-            if (Utils.not(entity.containsKey(field))) {
+            JsonObject jsonObject = entity.getJsonObject(field);
+            if (jsonObject == null) {
                 continue;
             }
-            directChildHandler.handle(entity.getJsonObject(field), context);
+            directChildHandler.handle(jsonObject, context);
         }
 
         for (IndirectChildHandler indirectChildHandler : indirectChildHandlers) {
             String field = indirectChildHandler.field();
-            if (Utils.not(entity.containsKey(field))) {
+
+            Object value = entity.getValue(
+                field
+            );
+
+            if (value == null) {
                 continue;
             }
 
             new JsonDependencyHandler(jsonObject -> indirectChildHandler.handle(entity, jsonObject, context))
                 .handle(
-                    entity.getValue(
-                        field
-                    )
+                    value
                 );
         }
 
         for (VirtualChildHandler virtualChildHandler : virtualChildHandlers) {
             final String field = virtualChildHandler.field();
-            if (Utils.not(entity.containsKey(field))) {
+
+            Object value = entity.getValue(
+                field
+            );
+
+            if (value == null) {
                 continue;
             }
 
             new JsonDependencyHandler(jsonObject -> virtualChildHandler.handle(entity, jsonObject, context))
                 .handle(
-                    entity.getValue(
-                        field
-                    )
+                    value
                 );
         }
     }
