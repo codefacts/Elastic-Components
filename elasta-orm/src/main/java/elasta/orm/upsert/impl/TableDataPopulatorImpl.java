@@ -30,6 +30,8 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
     @Override
     public TableData populate(JsonObject jsonObject) {
 
+        Objects.requireNonNull(jsonObject);
+
         HashMap<String, Object> map = new HashMap<>();
 
         for (FieldToColumnMapping fieldToColumnMapping : fieldToColumnMappings) {

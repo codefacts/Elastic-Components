@@ -4,11 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.upsert.ex.TableDataException;
-import elasta.orm.upsert.ex.TableDataException;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -19,6 +17,13 @@ final public class TableData {
     final String[] primaryColumns;
     final JsonObject values;
     final int hash;
+
+    private TableData(String table, String[] primaryColumns, Map<String, Object> values) {
+        this.table = table;
+        this.primaryColumns = primaryColumns;
+        this.values = new JsonObject(values);
+        this.hash = calHashCode();
+    }
 
     public TableData(String table, String[] primaryColumns, JsonObject values) {
         Objects.requireNonNull(table);
@@ -105,5 +110,20 @@ final public class TableData {
 
         result = 31 * result + listBuilder.build().hashCode();
         return result;
+    }
+
+    public TableData withValues(Map<String, Object> map) {
+        return new TableData(
+            table,
+            primaryColumns,
+            ImmutableMap.<String, Object>builder().putAll(this.values.getMap()).putAll(mapEntries(map)).build()
+        );
+    }
+
+    private Set<Map.Entry<String, Object>> mapEntries(Map<String, Object> map) {
+        Map<String, Object> valuesMap = values.getMap();
+        return map.entrySet().stream().filter(
+            entry -> Utils.not(valuesMap.containsKey(entry.getKey())) && entry.getValue() != null
+        ).collect(Collectors.toSet());
     }
 }

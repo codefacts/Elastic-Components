@@ -27,12 +27,18 @@ public class UpsertContextImpl implements UpsertContext {
 
     @Override
     public UpsertContext putOrMerge(String tableAndPrimaryKey, TableData tableData) {
+
         tableData.getValues().forEach(stringObjectEntry -> {
             Objects.requireNonNull(stringObjectEntry.getValue(), "Null value provided as value for key '" + stringObjectEntry.getKey() + "' dependentTable: '" + tableData.table + "'");
         });
+
         if (map.containsKey(tableAndPrimaryKey)) {
 
-            map.get(tableAndPrimaryKey).getValues().getMap().putAll(tableData.getValues().getMap());
+            TableData data = map.get(tableAndPrimaryKey);
+
+            map.put(tableAndPrimaryKey, data.withValues(
+                tableData.getValues().getMap()
+            ));
 
             return this;
         }

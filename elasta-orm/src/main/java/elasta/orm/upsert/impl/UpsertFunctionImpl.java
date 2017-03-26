@@ -96,7 +96,9 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
                 final String field = directDependency.getField();
 
-                if (not(jsonObject.containsKey(field))) {
+                JsonObject jsonObject = this.jsonObject.getJsonObject(field);
+
+                if (jsonObject == null) {
                     continue;
                 }
 
@@ -105,10 +107,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                         directDependency
                             .getDependencyHandler()
                             .requireUpsert(
-                                jsonObject
-                                    .getJsonObject(
-                                        field
-                                    ),
+                                jsonObject,
                                 upsertContext
                             )
                             .getValues()
@@ -128,14 +127,13 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             final String field = belongsTo.getField();
 
-            if (not(jsonObject.containsKey(field))) {
+            Object value1 = jsonObject.getValue(field);
+
+            if (value1 == null) {
                 return;
             }
 
-            final Object value = jsonObject
-                .getValue(
-                    field
-                );
+            final Object value = value1;
 
             if (value instanceof Map) {
 
@@ -184,14 +182,13 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             final String field = indirectDependency.getField();
 
-            if (not(jsonObject.containsKey(field))) {
+            Object value1 = jsonObject.getValue(field);
+
+            if (value1 == null) {
                 return ImmutableList.of();
             }
 
-            final Object value = jsonObject
-                .getValue(
-                    field
-                );
+            final Object value = value1;
 
             if (value instanceof Map) {
 

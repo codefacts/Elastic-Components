@@ -1,5 +1,6 @@
 package test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import test.model.Department;
 import test.model.Employee;
@@ -12,7 +13,7 @@ import javax.persistence.Persistence;
  * Created by sohan on 3/22/2017.
  */
 public interface CreateDB {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         EntityManagerFactory emfactory = Persistence.
             createEntityManagerFactory("jpadb");
         EntityManager entitymanager = emfactory.
@@ -93,7 +94,12 @@ public interface CreateDB {
         employee22.setDepartment(department);
         employee22.setDepartment2(department2);
         employee22.setDepartments(ImmutableList.of(department));
+
         entitymanager.persist(employee22);
+
+        System.out.println(
+            new ObjectMapper().writeValueAsString(employee22)
+        );
 
         entitymanager.getTransaction().commit();
 
