@@ -1,6 +1,4 @@
-package elasta.orm.dataflow;
-
-import io.vertx.core.json.JsonObject;
+package elasta.pipeline.jsonwalker;
 
 /**
  * Created by sohan on 3/27/2017.

@@ -1,11 +1,11 @@
-package elasta.orm.dataflow;
+package elasta.pipeline.jsonwalker;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.dataflow.ex.JsonPathException;
-import elasta.orm.dataflow.pathspecs.JsonArrayPathSpec;
-import elasta.orm.dataflow.pathspecs.JsonArrayPathSpecImpl;
-import elasta.orm.dataflow.pathspecs.JsonObjectPathSpecImpl;
-import elasta.orm.dataflow.pathspecs.PathSpec;
+import elasta.pipeline.jsonwalker.ex.JsonPathException;
+import elasta.pipeline.jsonwalker.pathspecs.JsonArrayPathSpec;
+import elasta.pipeline.jsonwalker.pathspecs.JsonArrayPathSpecImpl;
+import elasta.pipeline.jsonwalker.pathspecs.JsonObjectPathSpecImpl;
+import elasta.pipeline.jsonwalker.pathspecs.PathSpec;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -23,6 +23,14 @@ final public class JsonPathImpl implements JsonPath {
     public JsonPathImpl(List<PathSpec> pathSpecs) {
         Objects.requireNonNull(pathSpecs);
         this.pathSpecs = pathSpecs;
+    }
+
+    @Override
+    public JsonPath parent() {
+        if (isRoot()) {
+            throw new JsonPathException("No parent exists");
+        }
+        return subpath(0, size() - 1);
     }
 
     @Override
@@ -61,7 +69,7 @@ final public class JsonPathImpl implements JsonPath {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isRoot() {
         return pathSpecs.isEmpty();
     }
 
@@ -120,12 +128,14 @@ final public class JsonPathImpl implements JsonPath {
     }
 
     public static void main(String[] asfd) {
-        String s = new JsonPathImpl(ImmutableList.of(
-            JsonObjectPathSpecImpl.builder().field("employee").build(),
-            JsonArrayPathSpecImpl.builder().field("addressList").index(5).build(),
-            JsonObjectPathSpecImpl.builder().field("details").build()
-        )).toString();
-        System.out.println(s);
+//        String s = new JsonPathImpl(ImmutableList.of(
+//            JsonObjectPathSpecImpl.builder().field("employee").build(),
+//            JsonArrayPathSpecImpl.builder().field("addressList").index(5).build(),
+//            JsonObjectPathSpecImpl.builder().field("details").build()
+//        )).toString();
+//        System.out.println(s);
+
+        System.out.println(JsonPath.parse("field").parent());
     }
 
     private Optional<JsonObject> object(JsonObject jsonObject, List<PathSpec> pathSpecList) {

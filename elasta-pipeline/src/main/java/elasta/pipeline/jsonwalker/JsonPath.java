@@ -1,9 +1,9 @@
-package elasta.orm.dataflow;
+package elasta.pipeline.jsonwalker;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.dataflow.pathspecs.JsonArrayPathSpecImpl;
-import elasta.orm.dataflow.pathspecs.JsonObjectPathSpecImpl;
-import elasta.orm.dataflow.pathspecs.PathSpec;
+import elasta.pipeline.jsonwalker.pathspecs.JsonArrayPathSpecImpl;
+import elasta.pipeline.jsonwalker.pathspecs.JsonObjectPathSpecImpl;
+import elasta.pipeline.jsonwalker.pathspecs.PathSpec;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -16,15 +16,17 @@ import java.util.Optional;
  */
 public interface JsonPath {
 
+    JsonPath parent();
+
     Optional<JsonObject> getJsonObject(JsonObject jsonObject);
 
     Optional<JsonArray> getJsonArray(JsonObject jsonObject);
 
-    static JsonPath empty() {
+    static JsonPath root() {
         return new JsonPathImpl(ImmutableList.of());
     }
 
-    boolean isEmpty();
+    boolean isRoot();
 
     JsonPath concat(JsonObjectPathSpecImpl jsonObjectPathSpec);
 

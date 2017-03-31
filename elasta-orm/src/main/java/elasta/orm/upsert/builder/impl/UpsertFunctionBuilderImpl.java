@@ -5,14 +5,12 @@ import elasta.commons.Utils;
 import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.EntityMappingHelper;
-import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
-import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
-import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
-import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.upsert.ForeignColumnMapping;
 import elasta.orm.upsert.builder.FunctionMap;
 import elasta.orm.upsert.builder.UpsertFunctionBuilder;
 import elasta.orm.upsert.*;
+import elasta.orm.upsert.builder.ex.UpserFunctionBuilderException;
 import elasta.orm.upsert.impl.*;
 import io.vertx.core.json.JsonObject;
 
@@ -48,6 +46,14 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         public UpsertFunction build(String entity) {
             functionMap.putEmpty(entity);
 
+            UpsertFunction upsertFunction = buildUpsertFunction(entity);
+
+            functionMap.put(entity, upsertFunction);
+
+            return upsertFunction;
+        }
+
+        private UpsertFunction buildUpsertFunction(String entity) {
             DbMapping dbMapping = helper.getDbMapping(entity);
 
             List<FieldToColumnMapping> list = Arrays.asList(dbMapping.getDbColumnMappings()).stream()
@@ -65,51 +71,50 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
             ImmutableList.Builder<IndirectDependency> inDirectDependencyBuilder = ImmutableList.builder();
             ImmutableList.Builder<BelongsTo> belongsToBuilder = ImmutableList.builder();
 
-            Arrays.asList(dbMapping.getDbColumnMappings()).stream().filter(dbColumnMapping -> dbColumnMapping.getColumnType() != ColumnType.SIMPLE)
-                .forEach(dbColumnMapping -> {
+            UpsertUtils.getRelationMappingsForUpsert(dbMapping).forEach(dbColumnMapping -> {
 
-                    if (dbColumnMapping.getColumnType() == ColumnType.DIRECT) {
-
+                switch (dbColumnMapping.getColumnType()) {
+                    case DIRECT: {
                         directDependencyBuilder.add(
                             makeDirectMapping(
                                 (DirectDbColumnMapping) dbColumnMapping
                             )
                         );
-
-                    } else if (dbColumnMapping.getColumnType() == ColumnType.INDIRECT) {
-
+                        return;
+                    }
+                    case INDIRECT: {
                         inDirectDependencyBuilder.add(
                             makeIndirectDepedency(
                                 (IndirectDbColumnMapping) dbColumnMapping
                             )
                         );
-
-                    } else if (dbColumnMapping.getColumnType() == ColumnType.VIRTUAL) {
-
+                        return;
+                    }
+                    case VIRTUAL: {
                         belongsToBuilder.add(
                             makeBelongTo(
                                 (VirtualDbColumnMapping) dbColumnMapping
                             )
                         );
+                        return;
                     }
-
-                });
+                    default: {
+                        throw new UpserFunctionBuilderException("Invalid columnType '" + dbColumnMapping.getColumnType() + "' in '" + entity + "." + dbColumnMapping.getField() + "'");
+                    }
+                }
+            });
 
             final ImmutableList<DirectDependency> directDependencies = directDependencyBuilder.build();
             final ImmutableList<IndirectDependency> indirectDependencies = inDirectDependencyBuilder.build();
             final ImmutableList<BelongsTo> belongsTos = belongsToBuilder.build();
 
-            UpsertFunctionImpl upsertFunction = new UpsertFunctionImpl(
+            return new UpsertFunctionImpl(
                 entity,
                 tableDataPopulator,
                 directDependencies.toArray(new DirectDependency[directDependencies.size()]),
                 indirectDependencies.toArray(new IndirectDependency[indirectDependencies.size()]),
                 belongsTos.toArray(new BelongsTo[belongsTos.size()])
             );
-
-            functionMap.put(entity, upsertFunction);
-
-            return upsertFunction;
         }
 
         private DirectDependency makeDirectMapping(DirectDbColumnMapping mapping) {
@@ -170,7 +175,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
                 functionMap.put(referencingEntity, new UpsertFunctionBuilderImpl(helper).build(referencingEntity, functionMap));
             }
 
-            return new UpsertFunctionImpl2(referencingEntity, functionMap);
+            return new ProxyUpsertFunctionImpl(referencingEntity, functionMap);
         }
 
         private BelongsTo makeBelongTo(VirtualDbColumnMapping mapping) {
@@ -191,11 +196,11 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         }
     }
 
-    private static class UpsertFunctionImpl2 implements UpsertFunction {
+    private static class ProxyUpsertFunctionImpl implements UpsertFunction {
         final String referencingEntity;
         final FunctionMap<UpsertFunction> functionMap;
 
-        public UpsertFunctionImpl2(String referencingEntity, FunctionMap functionMap) {
+        public ProxyUpsertFunctionImpl(String referencingEntity, FunctionMap functionMap) {
             this.referencingEntity = referencingEntity;
             this.functionMap = functionMap;
         }

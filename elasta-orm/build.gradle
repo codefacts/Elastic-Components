@@ -13,6 +13,7 @@ repositories {
 dependencies {
     compile project(':commons')
     compile project(':elasta-core')
+    compile project(':elasta-pipeline')
     compile project(':elasta-module')
     compile project(':vertx-utils')
     compile project(':elasta-sql')
@@ -27,6 +28,4 @@ dependencies {
     testCompile group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.1.1'
     testCompile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '2.6.4'
     testCompile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
-
-    testCompileOnly "org.projectlombok:lombok:1.16.14"
 }

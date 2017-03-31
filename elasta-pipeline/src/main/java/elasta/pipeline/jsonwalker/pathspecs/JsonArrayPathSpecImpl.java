@@ -1,6 +1,6 @@
-package elasta.orm.dataflow.pathspecs;
+package elasta.pipeline.jsonwalker.pathspecs;
 
-import elasta.orm.dataflow.pathspecs.ex.PathSpecException;
+import elasta.pipeline.jsonwalker.pathspecs.ex.PathSpecException;
 import lombok.Builder;
 import lombok.Value;
 

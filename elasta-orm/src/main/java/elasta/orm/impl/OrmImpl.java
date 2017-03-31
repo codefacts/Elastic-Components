@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by sohan on 3/22/2017.
  */
-public class OrmImpl implements Orm {
+final public class OrmImpl implements Orm {
     @Override
     public <T> Promise<JsonObject> findOne(String entity, T id) {
         return null;

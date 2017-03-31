@@ -1,5 +1,6 @@
-package elasta.orm.dataflow;
+package elasta.pipeline.jsonwalker;
 
+import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
@@ -12,28 +13,22 @@ import java.util.Optional;
  */
 public interface JsonObjectTraverseFunction {
 
-    JsonObject traverse(Params params);
+    Promise<JsonObject> traverse(Params params);
 
     @Value
     @Builder
     final class Params {
         final JsonObject jsonObject;
         final JsonPath path;
-        final JsonObject parent;
         final JsonObject root;
 
-        public Params(JsonObject jsonObject, JsonPath path, JsonObject parent, JsonObject root) {
+        public Params(JsonObject jsonObject, JsonPath path, JsonObject root) {
             Objects.requireNonNull(jsonObject);
             Objects.requireNonNull(path);
             Objects.requireNonNull(root);
             this.jsonObject = jsonObject;
             this.path = path;
-            this.parent = (parent == null) ? null : parent;
             this.root = root;
-        }
-
-        Optional<JsonObject> getParent() {
-            return Optional.ofNullable(parent);
         }
     }
 

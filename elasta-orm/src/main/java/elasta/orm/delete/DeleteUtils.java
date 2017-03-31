@@ -1,7 +1,15 @@
 package elasta.orm.delete;
 
+import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.DbMapping;
+import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
 import elasta.orm.upsert.TableData;
 import elasta.sql.core.ColumnValuePair;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by sohan on 3/11/2017.
@@ -20,5 +28,10 @@ public interface DeleteUtils {
             );
         }
         return columnValuePairs;
+    }
+
+    static List<RelationMapping> getRelationMappingsForDelete(DbMapping dbMapping) {
+        return Arrays.stream(dbMapping.getDbColumnMappings())
+            .filter(dbColumnMapping -> dbColumnMapping instanceof RelationMapping).map(dbColumnMapping -> (RelationMapping) dbColumnMapping).collect(Collectors.toList());
     }
 }

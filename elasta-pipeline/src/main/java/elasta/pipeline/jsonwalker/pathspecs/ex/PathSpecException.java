@@ -1,4 +1,4 @@
-package elasta.orm.dataflow.pathspecs.ex;
+package elasta.pipeline.jsonwalker.pathspecs.ex;
 
 /**
  * Created by sohan on 3/27/2017.

@@ -1,9 +1,7 @@
-package elasta.orm.dataflow.pathspecs;
+package elasta.pipeline.jsonwalker.pathspecs;
 
 import lombok.Builder;
 import lombok.Value;
-
-import java.util.Objects;
 
 /**
  * Created by sohan on 3/26/2017.

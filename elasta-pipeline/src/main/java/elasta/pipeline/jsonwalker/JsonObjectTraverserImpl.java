@@ -1,27 +1,30 @@
-package elasta.orm.dataflow;
+package elasta.pipeline.jsonwalker;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
-import elasta.orm.dataflow.pathspecs.JsonArrayPathSpecImpl;
-import elasta.orm.dataflow.pathspecs.JsonObjectPathSpecImpl;
+import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Promise;
+import elasta.pipeline.jsonwalker.pathspecs.JsonArrayPathSpecImpl;
+import elasta.pipeline.jsonwalker.pathspecs.JsonObjectPathSpecImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.Value;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sohan on 3/26/2017.
  */
 final public class JsonObjectTraverserImpl implements JsonObjectTraverser {
     @Override
-    public JsonObject traverse(Params params) {
+    public Promise<JsonObject> traverse(Params params) {
 
         return new Traverser(
             params.getJsonObject(), params.getJsonObjectTraverseFunction(),
             params.getJsonObjectTraverseFilter()
         ).travers();
     }
-
 
     private final class Traverser {
         final JsonObject root;
@@ -37,143 +40,142 @@ final public class JsonObjectTraverserImpl implements JsonObjectTraverser {
             this.jsonObjectTraverseFilter = jsonObjectTraverseFilter;
         }
 
-        public JsonObject travers() {
+        public Promise<JsonObject> travers() {
 
-            return traverseRecursive(root, JsonPath.empty(), null);
+            return traverseRecursive(root, JsonPath.root());
         }
 
-        private JsonObject traverseRecursive(JsonObject jsonObject, JsonPath path, JsonObject parent) {
+        private Promise<JsonObject> traverseRecursive(JsonObject jsonObject, JsonPath path) {
 
             JsonObjectTraverseFunction.Params params = JsonObjectTraverseFunction.Params.builder()
                 .jsonObject(jsonObject)
                 .path(path)
-                .parent(parent)
                 .root(root)
                 .build();
 
             if (Utils.not(jsonObjectTraverseFilter.filter(params))) {
 
-                return jsonObject;
+                return Promises.of(jsonObject);
             }
 
-            final JsonObject object = jsonObjectTraverseFunction.traverse(
+            return jsonObjectTraverseFunction.traverse(
                 params
-            );
+            ).mapP(jsonObj -> {
 
-            Objects.requireNonNull(object);
+                Objects.requireNonNull(jsonObj);
 
-            Map<String, Object> map = new LinkedHashMap<>();
+                List<Promise<KeyVal>> promiseList = jsonObj.getMap().entrySet().stream().map(entry -> {
 
-            object.getMap().forEach((key, value) -> {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
 
-                if (value instanceof Map) {
+                    if (value instanceof Map) {
 
-                    JsonObject child = traverseRecursive(
-                        new JsonObject((Map<String, Object>) value),
-                        path.concat(new JsonObjectPathSpecImpl(key)),
-                        object
-                    );
+                        return traverseRecursive(
+                            new JsonObject((Map<String, Object>) value),
+                            path.concat(new JsonObjectPathSpecImpl(key))
+                        ).map(jo -> new KeyVal(key, jo));
 
-                    map.put(key, child);
+                    } else if (value instanceof JsonObject) {
 
-                } else if (value instanceof JsonObject) {
+                        return traverseRecursive(
+                            (JsonObject) value,
+                            path.concat(new JsonObjectPathSpecImpl(key))
+                        ).map(jo -> new KeyVal(key, jo));
 
-                    JsonObject child = traverseRecursive(
-                        (JsonObject) value,
-                        path.concat(new JsonObjectPathSpecImpl(key)),
-                        object
-                    );
+                    } else if (value instanceof List) {
 
-                    map.put(key, child);
+                        return traverseArray(
+                            key,
+                            ((List<Object>) value),
+                            path
+                        ).map(objectList -> new KeyVal(key, objectList));
 
-                } else if (value instanceof List) {
+                    } else if (value instanceof JsonArray) {
 
-                    List list = traverseArray(
-                        key,
-                        ((List) value),
-                        path,
-                        object
-                    );
+                        List<Object> list = ((JsonArray) value).getList();
 
-                    map.put(key, list);
+                        return traverseArray(
+                            key,
+                            list,
+                            path
+                        ).map(objectList -> new KeyVal(key, objectList));
 
-                } else if (value instanceof JsonArray) {
+                    } else {
+                        return Promises.of(
+                            new KeyVal(key, value)
+                        );
+                    }
 
-                    List list = traverseArray(
-                        key,
-                        ((JsonArray) value).getList(),
-                        path,
-                        object
-                    );
+                }).collect(Collectors.toList());
 
-                    map.put(key, list);
-
-                } else {
-                    map.put(key, value);
-                }
-
+                return Promises.when(
+                    promiseList
+                ).map(keyValList -> new JsonObject(
+                    keyValList.stream().collect(Collectors.toMap(KeyVal::getKey, KeyVal::getValue))
+                ));
             });
-
-            return new JsonObject(map);
         }
 
-        private List traverseArray(String key, List<Object> list, JsonPath path, JsonObject parent) {
+        private Promise<List<Object>> traverseArray(String key, List<Object> list, JsonPath path) {
 
-            final List<Object> childs = new ArrayList<>();
+            ImmutableList.Builder<Promise<?>> listBuilder = ImmutableList.builder();
 
             for (int index = 0; index < list.size(); index++) {
                 Object value = list.get(index);
 
                 if (value instanceof Map) {
 
-                    JsonObject child = traverseRecursive(
-                        new JsonObject((Map<String, Object>) value),
-                        path.concat(new JsonArrayPathSpecImpl(key, index)),
-                        parent
+                    listBuilder.add(
+                        traverseRecursive(
+                            new JsonObject((Map<String, Object>) value),
+                            path.concat(new JsonArrayPathSpecImpl(key, index))
+                        )
                     );
-
-                    childs.add(child);
 
                 } else if (value instanceof JsonObject) {
 
-                    JsonObject child = traverseRecursive(
-                        (JsonObject) value,
-                        path.concat(new JsonArrayPathSpecImpl(key, index)),
-                        parent
+                    listBuilder.add(
+                        traverseRecursive(
+                            (JsonObject) value,
+                            path.concat(new JsonArrayPathSpecImpl(key, index))
+                        )
                     );
-
-                    childs.add(child);
 
                 } else if (value instanceof List) {
 
-                    List returnedList = traverseArray(
-                        key,
-                        ((List<Object>) value),
-                        path.concat(new JsonArrayPathSpecImpl(key, index)),
-                        parent
+                    listBuilder.add(
+                        traverseArray(
+                            key,
+                            ((List<Object>) value),
+                            path.concat(new JsonArrayPathSpecImpl(key, index))
+                        )
                     );
-
-                    childs.add(returnedList);
 
                 } else if (value instanceof JsonArray) {
 
-                    List returnedList = traverseArray(
-                        key,
-                        ((JsonArray) value).getList(),
-                        path.concat(new JsonArrayPathSpecImpl(key, index)),
-                        parent
+                    listBuilder.add(
+                        traverseArray(
+                            key,
+                            ((JsonArray) value).getList(),
+                            path.concat(new JsonArrayPathSpecImpl(key, index))
+                        )
                     );
-
-                    childs.add(returnedList);
 
                 } else {
 
-                    childs.add(value);
+                    listBuilder.add(
+                        Promises.of(value)
+                    );
                 }
 
             }
 
-            return childs;
+            return Promises.when(cast(listBuilder.build()));
+        }
+
+        private <T> Collection<Promise<T>> cast(List promiseList) {
+            return promiseList;
         }
     }
 
@@ -187,13 +189,29 @@ final public class JsonObjectTraverserImpl implements JsonObjectTraverser {
                 )
                 .jsonObjectTraverseFilter(params -> {
                     String path = params.getPath().toString();
-                    return path.isEmpty() || path.startsWith("departments") || path.startsWith("departments[0]") || path.startsWith("departments[0].department");
+//                    return path.isEmpty() || path.startsWith("departments") || path.startsWith("departments[0]") || path.startsWith("departments[0].department");
+                    return true;
                 })
                 .jsonObjectTraverseFunction(params -> {
-                    System.out.println(params.getPath());
-                    return params.getJsonObject();
+                    System.out.println(params.getPath() + " => " + params.getJsonObject().encodePrettily());
+                    return Promises.of(
+                        params.getJsonObject()
+                    );
                 })
                 .build()
         );
+    }
+
+    @Value
+    private static final class KeyVal {
+        final String key;
+        final Object value;
+
+        public KeyVal(String key, Object value) {
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(value);
+            this.key = key;
+            this.value = value;
+        }
     }
 }

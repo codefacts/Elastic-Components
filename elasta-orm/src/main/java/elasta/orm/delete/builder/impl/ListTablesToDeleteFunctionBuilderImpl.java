@@ -4,11 +4,15 @@ import com.google.common.collect.ImmutableList;
 import elasta.orm.delete.*;
 import elasta.orm.delete.builder.ListTablesToDeleteFunctionBuilder;
 import elasta.orm.delete.builder.ListTablesToDeleteFunctionBuilderContext;
+import elasta.orm.delete.builder.ex.ListTablesToDeleteFunctionBuilderException;
 import elasta.orm.delete.impl.DirectChildHandlerImpl;
 import elasta.orm.delete.impl.IndirectChildHandlerImpl;
 import elasta.orm.delete.impl.ListTablesToDeleteFunctionImpl;
 import elasta.orm.delete.impl.VirtualChildHandlerImpl;
-import elasta.orm.entity.core.ColumnType;import elasta.orm.entity.core.DbMapping;import elasta.orm.entity.EntityMappingHelper;import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
+import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.DbMapping;
+import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.upsert.ColumnToColumnMapping;
 import elasta.orm.upsert.FieldToColumnMapping;
@@ -56,8 +60,7 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
 
         DbMapping dbMapping = helper.getDbMapping(entity);
 
-        Arrays.stream(dbMapping.getDbColumnMappings())
-            .filter(dbColumnMapping -> dbColumnMapping.getColumnType() != ColumnType.SIMPLE)
+        DeleteUtils.getRelationMappingsForDelete(dbMapping)
             .forEach(dbColumnMapping -> {
                 switch (dbColumnMapping.getColumnType()) {
                     case DIRECT: {
@@ -91,6 +94,9 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
                         );
                     }
                     break;
+                    default: {
+                        throw new ListTablesToDeleteFunctionBuilderException("Invalid columnType '" + dbColumnMapping + "' in '" + entity + "." + dbColumnMapping.getField() + "'");
+                    }
                 }
             });
 

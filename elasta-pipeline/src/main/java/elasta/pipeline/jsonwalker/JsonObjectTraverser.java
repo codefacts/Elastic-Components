@@ -1,5 +1,6 @@
-package elasta.orm.dataflow;
+package elasta.pipeline.jsonwalker;
 
+import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
@@ -10,7 +11,7 @@ import java.util.Objects;
  * Created by sohan on 3/26/2017.
  */
 public interface JsonObjectTraverser {
-    JsonObject traverse(Params params);
+    Promise<JsonObject> traverse(Params params);
 
     @Value
     @Builder
