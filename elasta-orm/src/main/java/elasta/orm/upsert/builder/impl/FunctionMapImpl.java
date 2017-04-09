@@ -1,6 +1,7 @@
-package elasta.orm.upsert.builder;
+package elasta.orm.upsert.builder.impl;
 
 import com.google.common.collect.ImmutableMap;
+import elasta.orm.upsert.builder.FunctionMap;
 import elasta.orm.upsert.ex.MissingUpsertFunctionException;
 
 import java.util.HashMap;

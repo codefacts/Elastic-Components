@@ -8,6 +8,7 @@ import elasta.orm.delete.loader.DependencyDataLoaderGraph;
 import elasta.orm.delete.loader.MultiTableDependenciesLoader;
 import elasta.orm.delete.loader.MultiTableDependenciesLoaderImpl;
 import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.event.builder.BuilderContext;
 import elasta.sql.SqlDB;
 
 import java.util.Objects;
@@ -67,7 +68,7 @@ final public class DeleteFunctionBuilderImpl implements DeleteFunctionBuilder {
         );
     }
 
-    private ListTablesToDeleteFunction listTablesToDeleteFunction(String entity, ListTablesToDeleteFunctionBuilderContext listTablesToDeleteFunctionBuilderContext) {
+    private ListTablesToDeleteFunction listTablesToDeleteFunction(String entity, BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext) {
         return listTablesToDeleteFunctionBuilder.build(
             entity,
             listTablesToDeleteFunctionBuilderContext

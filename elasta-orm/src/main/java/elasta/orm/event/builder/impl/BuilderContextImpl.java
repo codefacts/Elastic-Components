@@ -1,5 +1,6 @@
 package elasta.orm.event.builder.impl;
 
+import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.event.builder.BuilderContext;
 import elasta.orm.event.builder.ex.BuilderContextException;
@@ -14,7 +15,7 @@ import static elasta.commons.Utils.not;
  * Created by sohan on 3/28/2017.
  */
 final public class BuilderContextImpl<T> implements BuilderContext<T> {
-    final Map<String, Optional<T>> map;
+    Map<String, Optional<T>> map;
 
     public BuilderContextImpl(Map<String, Optional<T>> map) {
         Objects.requireNonNull(map);
@@ -49,6 +50,12 @@ final public class BuilderContextImpl<T> implements BuilderContext<T> {
     @Override
     public BuilderContext<T> put(String entity, T upsertEventDispatcher) {
         map.put(entity, Optional.of(upsertEventDispatcher));
+        return this;
+    }
+
+    @Override
+    public BuilderContext<T> makeImmutable() {
+        map = ImmutableMap.copyOf(map);
         return this;
     }
 }

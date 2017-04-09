@@ -1,6 +1,8 @@
 package elasta.orm.upsert.impl;
 
-import elasta.orm.upsert.*;import io.vertx.core.json.JsonObject;
+import com.google.common.collect.ImmutableMap;
+import elasta.orm.upsert.*;
+import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
 
@@ -18,9 +20,22 @@ final public class BelongToHandlerImpl implements BelongToHandler {
     @Override
     public TableData pushUpsert(JsonObject entity, JsonObject dependencyColumnValues, UpsertContext upsertContext) {
 
+        Objects.requireNonNull(entity);
+        Objects.requireNonNull(dependencyColumnValues);
+        Objects.requireNonNull(upsertContext);
+
         TableData tableData = upsertFunction.upsert(entity, upsertContext);
 
-        tableData.getValues().getMap().putAll(dependencyColumnValues.getMap());
+        tableData = new TableData(
+            tableData.getTable(),
+            tableData.getPrimaryColumns(),
+            new JsonObject(
+                ImmutableMap.<String, Object>builder()
+                    .putAll(tableData.getValues())
+                    .putAll(dependencyColumnValues.getMap())
+                    .build()
+            )
+        );
 
         upsertContext.putOrMerge(
             UpsertUtils.toTableAndPrimaryColumnsKey(

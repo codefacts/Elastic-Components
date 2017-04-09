@@ -1,6 +1,7 @@
 package elasta.orm.event;
 
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.event.builder.EventProcessorBuilder;
 import io.vertx.core.json.JsonObject;
 
 /**

@@ -2,7 +2,6 @@ package elasta.orm.upsert;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.core.promise.impl.Promises;
 import elasta.orm.entity.*;
 import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 import elasta.orm.entity.core.columnmapping.impl.DirectDbColumnMappingImpl;
@@ -10,22 +9,18 @@ import elasta.orm.entity.core.columnmapping.impl.IndirectDbColumnMappingImpl;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
-import elasta.orm.upsert.builder.FunctionMapImpl;
 import elasta.sql.SqlDB;
 import elasta.sql.impl.SqlDBImpl;
 import elasta.sql.impl.SqlBuilderUtilsImpl;
 import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.core.columnmapping.impl.SimpleDbColumnMappingImpl;
 import elasta.orm.entity.core.columnmapping.impl.VirtualDbColumnMappingImpl;
-import elasta.orm.upsert.builder.impl.UpsertFunctionBuilderImpl;
 import elasta.sql.impl.SqlExecutorImpl;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jango on 2017-01-21.
@@ -198,7 +193,7 @@ public interface UpsertTest {
 //
 //        vertx.setTimer(1, event -> {
 //            Promises.when(map.values().stream().map(tableData -> {
-//                return sqlDB.insertJo(tableData.getTable(), tableData.getValues()).then(aVoid -> System.out.println("complete: " + tableData));
+//                return sqlDB.insertJo(tableData.getReferencingTable(), tableData.getValues()).then(aVoid -> System.out.println("complete: " + tableData));
 //            }).collect(Collectors.toList())).then(voids -> {
 //                System.out.println("Insert complete");
 //            }).err(throwable -> throwable.printStackTrace())

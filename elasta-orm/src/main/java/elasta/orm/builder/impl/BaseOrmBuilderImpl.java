@@ -1,5 +1,6 @@
 package elasta.orm.builder.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.BaseOrm;
 import elasta.orm.builder.BaseOrmBuilder;
@@ -13,11 +14,15 @@ import elasta.orm.delete.loader.impl.DependencyDataLoaderGraphBuilderImpl;
 import elasta.orm.delete.loader.impl.TableToTableDependenciesMapBuilderImpl;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Entity;
+import elasta.orm.event.builder.BuilderContext;
+import elasta.orm.event.builder.impl.BuilderContextImpl;
+import elasta.orm.event.dbaction.DbInterceptors;
+import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.impl.BaseOrmImpl;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.upsert.UpsertFunction;
 import elasta.orm.upsert.builder.FunctionMap;
-import elasta.orm.upsert.builder.FunctionMapImpl;
+import elasta.orm.upsert.builder.impl.FunctionMapImpl;
 import elasta.orm.upsert.builder.UpsertFunctionBuilder;
 import elasta.orm.upsert.builder.impl.UpsertFunctionBuilderImpl;
 import elasta.sql.SqlDB;
@@ -32,14 +37,25 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
     final EntityMappingHelper helper;
     final SqlDB sqlDB;
     final QueryExecutor queryExecutor;
+    final DbInterceptors dbInterceptors;
 
     public BaseOrmBuilderImpl(EntityMappingHelper helper, SqlDB sqlDB, QueryExecutor queryExecutor) {
+        this(helper, sqlDB, queryExecutor, new DbInterceptorsImpl(
+            ImmutableList.of(),
+            ImmutableList.of(),
+            ImmutableList.of()
+        ));
+    }
+
+    public BaseOrmBuilderImpl(EntityMappingHelper helper, SqlDB sqlDB, QueryExecutor queryExecutor, DbInterceptors dbInterceptors) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);
         Objects.requireNonNull(queryExecutor);
+        Objects.requireNonNull(dbInterceptors);
         this.helper = helper;
         this.sqlDB = sqlDB;
         this.queryExecutor = queryExecutor;
+        this.dbInterceptors = dbInterceptors;
     }
 
     @Override
@@ -47,7 +63,8 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
         return new BaseOrmImpl(
             operationMap(entities),
             queryExecutor,
-            sqlDB
+            sqlDB,
+            dbInterceptors
         );
     }
 
@@ -84,24 +101,24 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
         final Map<String, Optional<DeleteTableFunction>> deleteTableFunctionMap;
         final Map<String, Optional<ListTablesToDeleteFunction>> listTablesToDeleteFunctionMap;
         final Map<String, Optional<UpsertFunction>> upsertFunctionMap;
-        final DeleteTableFunctionBuilderContext deleteTableFunctionBuilderContext;
-        final ListTablesToDeleteFunctionBuilderContext listTablesToDeleteFunctionBuilderContext;
-        final FunctionMap<UpsertFunction> upsertFunctionFunctionMap;
+        final BuilderContext<DeleteTableFunction> deleteTableFunctionBuilderContext;
+        final BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext;
+        final BuilderContext<UpsertFunction> upsertFunctionFunctionMap;
 
         public InternalEntityOperationBuilder() {
 
             this.deleteTableFunctionMap = new LinkedHashMap<>();
-            this.deleteTableFunctionBuilderContext = new DeleteTableFunctionBuilderContextImpl(
+            this.deleteTableFunctionBuilderContext = new BuilderContextImpl<>(
                 deleteTableFunctionMap
             );
 
             this.listTablesToDeleteFunctionMap = new LinkedHashMap<>();
-            this.listTablesToDeleteFunctionBuilderContext = new ListTablesToDeleteFunctionBuilderContextImpl(
+            this.listTablesToDeleteFunctionBuilderContext = new BuilderContextImpl<>(
                 listTablesToDeleteFunctionMap
             );
 
             this.upsertFunctionMap = new LinkedHashMap<>();
-            this.upsertFunctionFunctionMap = new FunctionMapImpl<>(
+            this.upsertFunctionFunctionMap = new BuilderContextImpl<>(
                 upsertFunctionMap
             );
 

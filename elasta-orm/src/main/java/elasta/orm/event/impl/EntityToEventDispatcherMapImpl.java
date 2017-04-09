@@ -1,5 +1,8 @@
-package elasta.orm.event;
+package elasta.orm.event.impl;
 
+import elasta.orm.event.EntityToEventDispatcherMap;
+import elasta.orm.event.EventDispatcher;
+import elasta.orm.event.OperationType;
 import elasta.orm.event.ex.EntityToEventDispatcherMapException;
 
 import java.util.Map;

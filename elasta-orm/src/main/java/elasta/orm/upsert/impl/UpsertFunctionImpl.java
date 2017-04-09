@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.upsert.*;
 import elasta.orm.upsert.ex.InvalidValueException;
-import elasta.orm.upsert.ex.InvalidValueException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -12,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static elasta.commons.Utils.not;
 
 /**
  * Created by Jango on 2017-01-09.
@@ -41,17 +38,18 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
     @Override
     public TableData upsert(JsonObject jsonObject, UpsertContext upsertContext) {
-
+        Objects.requireNonNull(jsonObject);
+        Objects.requireNonNull(upsertContext);
         return new Inserter(jsonObject, upsertContext).insert();
     }
 
     private class Inserter {
-        final JsonObject jsonObject;
-        final UpsertContext upsertContext;
+        final JsonObject entity;
+        final UpsertContext context;
 
-        private Inserter(JsonObject jsonObject, UpsertContext upsertContext) {
-            this.jsonObject = jsonObject;
-            this.upsertContext = upsertContext;
+        private Inserter(JsonObject entity, UpsertContext context) {
+            this.entity = entity;
+            this.context = context;
         }
 
         public TableData insert() {
@@ -60,13 +58,12 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             final JsonObject tableValues = tableData.getValues();
 
-            upsertContext
-                .putOrMerge(
-                    UpsertUtils.toTableAndPrimaryColumnsKey(
-                        tableData.getTable(), tableData.getPrimaryColumns(), tableValues
-                    ),
-                    tableData
-                );
+            context.putOrMerge(
+                UpsertUtils.toTableAndPrimaryColumnsKey(
+                    tableData.getTable(), tableData.getPrimaryColumns(), tableValues
+                ),
+                tableData
+            );
 
             for (IndirectDependency indirectDependency : indirectDependencies) {
 
@@ -84,7 +81,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
         }
 
         private TableData tableData() {
-            TableData tableData = tableDataPopulator.populate(jsonObject);
+            TableData tableData = tableDataPopulator.populate(entity);
 
             JsonObject tableValues = new JsonObject(
                 new HashMap<>(
@@ -96,7 +93,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
                 final String field = directDependency.getField();
 
-                JsonObject jsonObject = this.jsonObject.getJsonObject(field);
+                JsonObject jsonObject = this.entity.getJsonObject(field);
 
                 if (jsonObject == null) {
                     continue;
@@ -108,7 +105,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                             .getDependencyHandler()
                             .requireUpsert(
                                 jsonObject,
-                                upsertContext
+                                context
                             )
                             .getValues()
                     );
@@ -127,7 +124,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             final String field = belongsTo.getField();
 
-            Object value1 = jsonObject.getValue(field);
+            Object value1 = entity.getValue(field);
 
             if (value1 == null) {
                 return;
@@ -164,7 +161,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
         }
 
-        private TableData handleBelongToJsonObject(BelongsTo belongsTo, JsonObject tableValues, JsonObject value) {
+        private TableData handleBelongToJsonObject(BelongsTo belongsTo, JsonObject jsonObject, JsonObject value) {
 
             return belongsTo
                 .getBelongToHandler()
@@ -172,8 +169,8 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                     value,
                     belongsTo
                         .getDependencyColumnValuePopulator()
-                        .populate(tableValues),
-                    upsertContext
+                        .populate(jsonObject),
+                    context
                 );
         }
 
@@ -182,7 +179,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             final String field = indirectDependency.getField();
 
-            Object value1 = jsonObject.getValue(field);
+            Object value1 = entity.getValue(field);
 
             if (value1 == null) {
                 return ImmutableList.of();
@@ -238,12 +235,13 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
         private JsonObject handleIndirectJsonObject(
             IndirectDependency indirectDependency, TableData tableData, JsonObject jsonObject) {
+
             return indirectDependency
                 .getIndirectDependencyHandler()
                 .requireUpsert(
                     tableData,
                     jsonObject,
-                    upsertContext
+                    context
                 )
                 .getValues();
         }

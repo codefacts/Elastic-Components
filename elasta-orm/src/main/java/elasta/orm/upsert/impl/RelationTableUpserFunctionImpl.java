@@ -18,6 +18,10 @@ final public class RelationTableUpserFunctionImpl implements RelationTableUpserF
     @Override
     public TableData upsert(TableData srcTableData, TableData dstTableData, UpsertContext upsertContext) {
 
+        Objects.requireNonNull(srcTableData);
+        Objects.requireNonNull(dstTableData);
+        Objects.requireNonNull(upsertContext);
+
         final TableData tableData = relationTableDataPopulator.populate(srcTableData, dstTableData);
 
         upsertContext.putOrMerge(

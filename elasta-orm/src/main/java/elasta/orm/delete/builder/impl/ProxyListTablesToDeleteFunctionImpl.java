@@ -2,7 +2,7 @@ package elasta.orm.delete.builder.impl;
 
 import elasta.orm.delete.ListTablesToDeleteContext;
 import elasta.orm.delete.ListTablesToDeleteFunction;
-import elasta.orm.delete.builder.ListTablesToDeleteFunctionBuilderContext;
+import elasta.orm.event.builder.BuilderContext;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
@@ -12,9 +12,9 @@ import java.util.Objects;
  */
 final public class ProxyListTablesToDeleteFunctionImpl implements ListTablesToDeleteFunction {
     final String referencingEntity;
-    final ListTablesToDeleteFunctionBuilderContext context;
+    final BuilderContext<ListTablesToDeleteFunction> context;
 
-    public ProxyListTablesToDeleteFunctionImpl(String referencingEntity, ListTablesToDeleteFunctionBuilderContext context) {
+    public ProxyListTablesToDeleteFunctionImpl(String referencingEntity, BuilderContext<ListTablesToDeleteFunction> context) {
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(context);
         this.referencingEntity = referencingEntity;

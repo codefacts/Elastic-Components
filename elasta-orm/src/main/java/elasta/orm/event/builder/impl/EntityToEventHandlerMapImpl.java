@@ -1,7 +1,8 @@
-package elasta.orm.event.builder;
+package elasta.orm.event.builder.impl;
 
 import elasta.core.promise.impl.Promises;
 import elasta.orm.event.EventHandler;
+import elasta.orm.event.builder.EntityToEventHandlerMap;
 
 import java.util.Collections;
 import java.util.List;

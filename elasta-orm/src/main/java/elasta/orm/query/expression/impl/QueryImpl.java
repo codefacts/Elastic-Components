@@ -2,11 +2,9 @@ package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.commons.Utils;
 import elasta.core.promise.intfs.Promise;
 import elasta.criteria.Func;
 import elasta.criteria.funcs.ParamsBuilderImpl;
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.Relationship;
@@ -16,7 +14,6 @@ import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
 import elasta.orm.query.expression.builder.FieldExpressionHolderFunc;
 import elasta.orm.query.expression.builder.impl.PathExpressionAndAliasPair;
 import elasta.orm.query.expression.core.*;
-import elasta.orm.query.ex.PathExpressionException;
 import elasta.orm.query.ex.QueryParserException;
 import elasta.orm.query.read.ObjectReader;
 import elasta.orm.query.read.builder.ObjectReaderBuilderImpl;
@@ -89,12 +86,11 @@ final public class QueryImpl implements Query {
     }
 
     private class QQ {
-        private static final String ALIAS_STR = "a";
-        final ImmutableList.Builder<Object> params = ImmutableList.builder();
-        final ParamsBuilderImpl paramsBuilder = new ParamsBuilderImpl(params);
-        int aliasCount = 1;
-        int relationAliasCount = 1;
+        final ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
+        final ParamsBuilderImpl paramsBuilder = new ParamsBuilderImpl(paramsListBuilder);
         final Map<String, Map<String, PartAndJoinTpl>> partAndJoinTplMap = new LinkedHashMap<>();
+        final String ALIAS_STR = "a";
+        final AliasCounter aliasCounter = new AliasCounter(1);
 
         public String toSql(Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap) {
 
@@ -137,7 +133,17 @@ final public class QueryImpl implements Query {
 
         private Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap(Map<String, PathExpression> aliasToFullPathExpressionMap) {
 
-            final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = createFieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
+            final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = new FieldExpressionToAliasAndColumnMapTranslator(
+                rootEntity,
+                rootAlias,
+                selectFieldExpressionResolver,
+                expressionResolver,
+                fromPathExpressionAndAliasPairs,
+                helper,
+                partAndJoinTplMap,
+                aliasCounter
+
+            ).translate(aliasToFullPathExpressionMap);
 
             final Map<FieldExpression, FieldExpressionHolderFunc> funcMap = funcMap(fieldExpressionToAliasAndColumnMap);
 
@@ -159,137 +165,6 @@ final public class QueryImpl implements Query {
                     .put(fieldExpression, new FieldExpressionHolderFuncImpl2(aliasAndColumn.toSql()))
             );
             return funcMapBuilder.build();
-        }
-
-        private ImmutableMap<FieldExpression, AliasAndColumn> createFieldExpressionToAliasAndColumnMap(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
-
-            final ImmutableMap.Builder<String, String> aliasToEntityMapBuilder = ImmutableMap.builder();
-
-            aliasToEntityMapBuilder.put(rootAlias, rootEntity);
-
-            Map<String, Optional<JoinType>> aliasToJoinTypeMap = toAliasToJoinTypeMap(fromPathExpressionAndAliasPairs);
-
-            final Map<String, PartAndJoinTpl> rootMap = new LinkedHashMap<>();
-            partAndJoinTplMap.put(rootAlias, rootMap);
-
-            aliasToFullPathExpressionMap.forEach((alias, pathExpression) -> {
-
-                final List<String> parts = pathExpression.parts();
-                Map<String, PartAndJoinTpl> tplMap = rootMap;
-                String entity = rootEntity;
-                String entityAlias = rootAlias;
-                for (int i = 1, end = parts.size(); i < end; i++) {
-                    String childEntityField = parts.get(i);
-
-                    PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
-
-                    if (partAndJoinTpl == null) {
-
-                        String childEntity = getChildEntity(entity, childEntityField);
-
-                        final boolean isLast = (i == parts.size() - 1);
-
-                        final String childAlias = isLast ? alias : createAlias();
-
-                        tplMap.put(
-                            childEntityField,
-                            partAndJoinTpl = new PartAndJoinTpl(
-                                new JoinTpl(
-                                    entityAlias,
-                                    childAlias,
-                                    entity,
-                                    childEntityField,
-                                    childEntity,
-                                    isLast ? aliasToJoinTypeMap.getOrDefault(alias, Optional.empty()) : Optional.empty()
-                                )
-                            )
-                        );
-                    }
-
-                    entity = partAndJoinTpl.joinTpl.getChildEntity();
-                    entityAlias = partAndJoinTpl.joinTpl.getChildEntityAlias();
-                    tplMap = partAndJoinTpl.partAndJoinTplMap;
-                }
-
-                aliasToEntityMapBuilder.put(entityAlias, entity);
-                partAndJoinTplMap.put(entityAlias, new LinkedHashMap<>());
-            });
-
-            final ImmutableMap<String, String> aliasToEntityMap = aliasToEntityMapBuilder.build();
-
-            final ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder = ImmutableMap.builder();
-
-            selectFieldExpressionResolver.getFuncMap().keySet()
-                .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
-
-            expressionResolver.getFuncMap().keySet()
-                .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
-
-            return fieldExpToAliasedColumnMapBuilder.build();
-        }
-
-        private void applyFieldExp(
-            FieldExpression fieldExpression,
-            ImmutableMap<String, String> aliasToEntityMap,
-            ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder
-        ) {
-            final PathExpression pathExpression = fieldExpression.getParentPath();
-            final String alias = pathExpression.root();
-
-            if (not(aliasToEntityMap.containsKey(alias))) {
-                throw new QueryParserException("Field Expression '" + fieldExpression + "' starts with an invalid alias");
-            }
-
-            final List<String> parts = pathExpression.parts();
-
-            Map<String, PartAndJoinTpl> tplMap = partAndJoinTplMap.get(alias);
-            String entity = aliasToEntityMap.get(alias);
-            String entityAlias = alias;
-
-            for (int i = 1, end = parts.size(); i < end; i++) {
-                String childEntityField = parts.get(i);
-
-                PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
-
-                if (partAndJoinTpl == null) {
-
-                    String childEntity = getChildEntity(entity, childEntityField);
-
-                    final String childAlias = createAlias();
-
-                    tplMap.put(
-                        childEntityField,
-                        partAndJoinTpl = new PartAndJoinTpl(
-                            new JoinTpl(entityAlias, childAlias, entity, childEntityField, childEntity, Optional.empty())
-                        )
-                    );
-                }
-
-                entity = partAndJoinTpl.joinTpl.getChildEntity();
-                entityAlias = partAndJoinTpl.joinTpl.getChildEntityAlias();
-                tplMap = partAndJoinTpl.partAndJoinTplMap;
-            }
-
-            fieldExpToAliasedColumnMapBuilder.put(
-                fieldExpression,
-                new AliasAndColumn(
-                    entityAlias,
-                    getColumn(
-                        entity,
-                        fieldExpression.getField()
-                    )
-                )
-            );
-        }
-
-        private Map<String, Optional<JoinType>> toAliasToJoinTypeMap(List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs) {
-            final ImmutableMap.Builder<String, Optional<JoinType>> mapBuilder = ImmutableMap.builder();
-
-            fromPathExpressionAndAliasPairs.forEach(pair -> {
-                mapBuilder.put(pair.getAlias(), pair.getJoinType());
-            });
-
-            return mapBuilder.build();
         }
 
         private SelectClauseHandlerImpl select(List<Func> selectFuncs, ParamsBuilderImpl paramsBuilder) {
@@ -519,46 +394,9 @@ final public class QueryImpl implements Query {
             );
         }
 
-        private String getColumn(String entity, String field) {
-
-            final DbColumnMapping columnMapping = helper.getColumnMapping(entity, field);
-
-            if (columnMapping.getColumnType() != ColumnType.SIMPLE) {
-                throw new QueryParserException(entity + "." + field + " does not map to simple column type");
-            }
-
-            return ((SimpleDbColumnMapping) columnMapping).getColumn();
-        }
-
-        private String getChildEntity(String entity, String childEntityField) {
-
-            Field field = helper.getField(entity, childEntityField);
-
-            return field.getRelationship().orElseThrow(() -> new QueryParserException("No relationship found in " + entity + "." + childEntityField)).getEntity();
-        }
-
-        private void putParts(Map<String, String> entityToAliasMap, String[] parts, int startIndex, int endIndex) {
-            for (int i = startIndex; i < endIndex; i++) {
-                final String entity = parts[i];
-
-                if (not(helper.exists(entity))) {
-                    throw new QueryParserException("No entity found for name " + entity);
-                }
-
-                entityToAliasMap.put(
-                    entity,
-                    createAlias()
-                );
-            }
-        }
-
-        private String createAlias() {
-            return ALIAS_STR + String.valueOf(aliasCount++);
-        }
-
         public Promise<List<JsonObject>> execute() {
 
-            Map<String, PathExpression> aliasToFullPathExpressionMap = new CC(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
+            Map<String, PathExpression> aliasToFullPathExpressionMap = new PathExpTranslator(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
                 .getAliasToFullPathExpressionMap();
 
             Map<FieldExpression, AliasAndColumn> fieldExpressionAliasAndColumnMap = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
@@ -568,7 +406,7 @@ final public class QueryImpl implements Query {
                     fieldExpressionAliasAndColumnMap
                 ),
                 new JsonArray(
-                    params.build()
+                    paramsListBuilder.build()
                 )
             );
 
@@ -591,7 +429,7 @@ final public class QueryImpl implements Query {
 
         public Promise<List<JsonArray>> executeArray() {
 
-            Map<String, PathExpression> aliasToFullPathExpressionMap = new CC(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
+            Map<String, PathExpression> aliasToFullPathExpressionMap = new PathExpTranslator(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
                 .getAliasToFullPathExpressionMap();
 
             Map<FieldExpression, AliasAndColumn> fieldExpressionAliasAndColumnMap = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
@@ -601,7 +439,7 @@ final public class QueryImpl implements Query {
                     fieldExpressionAliasAndColumnMap
                 ),
                 new JsonArray(
-                    params.build()
+                    paramsListBuilder.build()
                 )
             );
 
@@ -615,87 +453,31 @@ final public class QueryImpl implements Query {
                 selectFieldExpressionResolver.getFuncMap().keySet()
             );
         }
+
+        private String createAlias() {
+            return ALIAS_STR + String.valueOf(aliasCounter.aliasCount++);
+        }
     }
 
-    private class CC {
-        final String rootAlias;
-        final String rootEntity;
-        final List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;
-        final Map<String, PathExpression> map;
+    final static class PartAndJoinTpl {
+        final JoinTpl joinTpl;
+        final Map<String, PartAndJoinTpl> partAndJoinTplMap = new HashMap<>();
 
-        public CC(String rootAlias, String rootEntity, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs) {
-            this.rootAlias = rootAlias;
-            this.rootEntity = rootEntity;
-            this.fromPathExpressionAndAliasPairs = fromPathExpressionAndAliasPairs;
-
-            this.map = fromPathExpressionAndAliasPairs.stream().collect(Collectors.toMap(
-                PathExpressionAndAliasPair::getAlias,
-                PathExpressionAndAliasPair::getPathExpression
-            ));
+        PartAndJoinTpl(JoinTpl joinTpl) {
+            Objects.requireNonNull(joinTpl);
+            this.joinTpl = joinTpl;
         }
+    }
 
+    static class AliasCounter {
+        int aliasCount;
 
-        public Map<String, PathExpression> getAliasToFullPathExpressionMap() {
-
-            final ImmutableMap.Builder<String, PathExpression> aliasToPathExpressionMapBuilder = ImmutableMap.builder();
-
-            fromPathExpressionAndAliasPairs.forEach(pathExpressionAndAliasPair -> {
-
-                final PathExpression fullPathExpression = createFullPathExpression(pathExpressionAndAliasPair.getPathExpression());
-
-                aliasToPathExpressionMapBuilder.put(pathExpressionAndAliasPair.getAlias(), fullPathExpression);
-            });
-
-            return aliasToPathExpressionMapBuilder.build();
-        }
-
-        private PathExpression createFullPathExpression(PathExpression pathExpression) {
-
-            final ImmutableList.Builder<PathExpression> pathExpListBuilder = ImmutableList.builder();
-
-            pathExpListBuilder.add(pathExpression);
-
-            for (; ; ) {
-
-                if (Utils.not(
-                    map.containsKey(pathExpression.root())
-                )) {
-
-                    if (not(pathExpression.root().equals(rootAlias))) {
-                        throw new PathExpressionException("Path '" + pathExpression + "' must start with root alias '" + rootAlias + "'");
-                    }
-                    break;
-                }
-
-                pathExpression = map.get(pathExpression.root());
-
-                pathExpListBuilder.add(pathExpression);
-            }
-
-            return fullPathExpression(pathExpListBuilder.build());
-        }
-
-        private PathExpression fullPathExpression(ImmutableList<PathExpression> pathExpressions) {
-
-            return PathExpression.create(rootAlias).concat(
-                pathExpressions
-                    .stream().map(pathExpression -> pathExpression.subPath(1, pathExpression.size()))
-                    .collect(Collectors.toList())
-            );
+        public AliasCounter(int aliasCount) {
+            this.aliasCount = aliasCount;
         }
     }
 
     public static void main(String[] asdf) {
 
-    }
-
-    private final static class PartAndJoinTpl {
-        final JoinTpl joinTpl;
-        final Map<String, PartAndJoinTpl> partAndJoinTplMap = new HashMap<>();
-
-        private PartAndJoinTpl(JoinTpl joinTpl) {
-            Objects.requireNonNull(joinTpl);
-            this.joinTpl = joinTpl;
-        }
     }
 }

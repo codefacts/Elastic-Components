@@ -16,8 +16,6 @@ import elasta.orm.entity.EntitiesValidator;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.core.*;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.impl.SimpleDbColumnMappingImpl;
 import elasta.orm.entity.impl.EntitiesPreprocessorImpl;
 import elasta.orm.entity.impl.EntitiesValidatorImpl;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
@@ -34,10 +32,8 @@ import io.vertx.ext.jdbc.JDBCClient;
 import lombok.Builder;
 import lombok.Value;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by sohan on 3/22/2017.

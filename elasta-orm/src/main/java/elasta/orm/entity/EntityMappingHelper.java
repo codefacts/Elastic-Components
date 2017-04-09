@@ -33,11 +33,13 @@ public interface EntityMappingHelper {
 
     Field getField(String entity, String field);
 
+    Field getFieldByColumn(String entity, String column);
+
     DbColumnMapping getColumnMapping(String entity, String field);
 
     String getPrimaryKey(String entity);
 
-    DbColumnMapping getPrimaryKeyColumnMapping(String entity);
+    SimpleDbColumnMapping getPrimaryKeyColumnMapping(String entity);
 
     String getPrimaryKeyColumnName(String entity);
 

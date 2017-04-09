@@ -3,7 +3,6 @@ package elasta.orm.delete.builder.impl;
 import com.google.common.collect.ImmutableList;
 import elasta.orm.delete.*;
 import elasta.orm.delete.builder.ListTablesToDeleteFunctionBuilder;
-import elasta.orm.delete.builder.ListTablesToDeleteFunctionBuilderContext;
 import elasta.orm.delete.builder.ex.ListTablesToDeleteFunctionBuilderException;
 import elasta.orm.delete.impl.DirectChildHandlerImpl;
 import elasta.orm.delete.impl.IndirectChildHandlerImpl;
@@ -14,6 +13,7 @@ import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.entity.core.ForeignColumnMapping;
+import elasta.orm.event.builder.BuilderContext;
 import elasta.orm.upsert.ColumnToColumnMapping;
 import elasta.orm.upsert.FieldToColumnMapping;
 import elasta.orm.upsert.TableDataPopulator;
@@ -36,12 +36,15 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
     }
 
     @Override
-    public ListTablesToDeleteFunction build(String entity, ListTablesToDeleteFunctionBuilderContext context) {
+    public ListTablesToDeleteFunction build(String entity, BuilderContext<ListTablesToDeleteFunction> context) {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(context);
 
         if (context.contains(entity)) {
             return context.get(entity);
+        }
+        if (context.isEmpty(entity)) {
+            return new ProxyListTablesToDeleteFunctionImpl(entity, context);
         }
 
         context.putEmpty(entity);
@@ -53,7 +56,7 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
         return listTablesToDeleteFunction;
     }
 
-    private ListTablesToDeleteFunction createListTablesToDeleteFunction(String entity, ListTablesToDeleteFunctionBuilderContext context) {
+    private ListTablesToDeleteFunction createListTablesToDeleteFunction(String entity, BuilderContext<ListTablesToDeleteFunction> context) {
         ImmutableList.Builder<DirectChildHandler> directListBuilder = ImmutableList.builder();
         ImmutableList.Builder<IndirectChildHandler> indirectListBuilder = ImmutableList.builder();
         ImmutableList.Builder<VirtualChildHandler> virtualListBuilder = ImmutableList.builder();
@@ -112,14 +115,8 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
         );
     }
 
-    private ListTablesToDeleteFunction listTablesToDeleteFunction(String referencingEntity, ListTablesToDeleteFunctionBuilderContext context) {
-        if (context.contains(referencingEntity)) {
-            return context.get(referencingEntity);
-        }
-        if (context.isEmpty(referencingEntity)) {
-            return new ProxyListTablesToDeleteFunctionImpl(referencingEntity, context);
-        }
-        return new ListTablesToDeleteFunctionBuilderImpl(helper).build(referencingEntity, context);
+    private ListTablesToDeleteFunction listTablesToDeleteFunction(String referencingEntity, BuilderContext<ListTablesToDeleteFunction> context) {
+        return build(referencingEntity, context);
     }
 
     private ColumnToColumnMapping[] virtualColumnMappings(List<ForeignColumnMapping> foreignColumnMappingList) {

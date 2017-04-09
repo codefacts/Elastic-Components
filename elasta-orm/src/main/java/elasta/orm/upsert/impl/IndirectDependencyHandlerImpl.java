@@ -1,6 +1,7 @@
 package elasta.orm.upsert.impl;
 
-import elasta.orm.upsert.*;import io.vertx.core.json.JsonObject;
+import elasta.orm.upsert.*;
+import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
 
@@ -20,6 +21,10 @@ final public class IndirectDependencyHandlerImpl implements IndirectDependencyHa
 
     @Override
     public TableData requireUpsert(TableData parentTableData, JsonObject entity, UpsertContext upsertContext) {
+
+        Objects.requireNonNull(parentTableData);
+        Objects.requireNonNull(entity);
+        Objects.requireNonNull(upsertContext);
 
         TableData childTableData = childUpsertFunction.upsert(entity, upsertContext);
 

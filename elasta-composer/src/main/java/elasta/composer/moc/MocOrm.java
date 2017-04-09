@@ -2,7 +2,7 @@ package elasta.composer.moc;
 
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.Orm;
+import elasta.orm.Orm;
 import elasta.sql.core.FieldInfo;
 import io.vertx.core.json.JsonObject;
 
@@ -13,62 +13,62 @@ import java.util.List;
  */
 public class MocOrm implements Orm {
     @Override
-    public <T> Promise<JsonObject> findOne(String model, T id) {
-        return Promises.empty();
+    public <T> Promise<JsonObject> findOne(String entity, T id) {
+        return null;
     }
 
     @Override
-    public <T> Promise<JsonObject> findOne(String model, T id, List<FieldInfo> selectFields) {
-        return Promises.empty();
+    public <T> Promise<JsonObject> findOne(String entity, T id, List<FieldInfo> selectFields) {
+        return null;
     }
 
     @Override
-    public <T> Promise<List<JsonObject>> findAll(String model, List<T> ids) {
-        return Promises.empty();
+    public <T> Promise<List<JsonObject>> findAll(String entity, List<T> ids) {
+        return null;
     }
 
     @Override
-    public <T> Promise<List<JsonObject>> findAll(String model, List<T> ids, List<FieldInfo> selectFields) {
-        return Promises.empty();
+    public <T> Promise<List<JsonObject>> findAll(String entity, List<T> ids, List<FieldInfo> selectFields) {
+        return null;
     }
 
     @Override
-    public Promise<JsonObject> insertOrUpdate(String model, JsonObject data) {
-        return Promises.empty();
+    public Promise<JsonObject> upsert(String entity, JsonObject data) {
+        return null;
     }
 
     @Override
-    public Promise<List<JsonObject>> insertOrUpdateAll(String model, List<JsonObject> jsonObjects) {
-        return Promises.empty();
+    public Promise<List<JsonObject>> upsertAll(String entity, List<JsonObject> jsonObjects) {
+        return null;
     }
 
     @Override
-    public <T> Promise<T> delete(String model, T id) {
-        return Promises.empty();
+    public <T> Promise<T> delete(String entity, T id) {
+        return null;
     }
 
     @Override
-    public <T> Promise<List<T>> deleteAll(String model, List<T> ids) {
-        return Promises.empty();
+    public <T> Promise<List<T>> deleteAll(String entity, List<T> ids) {
+        return null;
     }
 
     @Override
-    public Promise<Long> count(String model) {
-        return Promises.empty();
+    public Promise<Long> count(String entity) {
+        return null;
     }
 
     @Override
-    public Promise<Long> count(String model, JsonObject criteria) {
-        return Promises.empty();
+    public Promise<Long> count(String entity, JsonObject criteria) {
+        return null;
     }
 
     @Override
-    public Promise<List<JsonObject>> findAll(String model, JsonObject criteria) {
-        return Promises.empty();
+    public Promise<List<JsonObject>> findAll(String entity, JsonObject criteria) {
+        return null;
     }
 
     @Override
-    public Promise<List<JsonObject>> findAll(String model, JsonObject criteria, List<FieldInfo> selectFields) {
-        return Promises.empty();
+    public Promise<List<JsonObject>> findAll(String entity, JsonObject criteria, List<FieldInfo> selectFields) {
+        return null;
     }
 }

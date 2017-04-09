@@ -1,17 +1,18 @@
 package elasta.orm.impl;
 
+import com.google.common.collect.ImmutableList;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.BaseOrm;
 import elasta.orm.delete.DeleteFunction;
 import elasta.orm.delete.impl.DeleteContextImpl;
+import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.upsert.TableData;
 import elasta.orm.upsert.UpsertContextImpl;
 import elasta.orm.upsert.UpsertFunction;
 import elasta.sql.SqlDB;
-import elasta.sql.SqlExecutor;
 import elasta.sql.core.DeleteData;
 import elasta.sql.core.SqlCriteria;
 import elasta.sql.core.UpdateOperationType;
@@ -30,8 +31,10 @@ final public class BaseOrmImpl implements BaseOrm {
     final Map<String, EntityOperation> operationMap;
     final QueryExecutor queryExecutor;
     final SqlDB sqlDB;
+    final DbInterceptors dbInterceptors;
 
-    public BaseOrmImpl(Map<String, EntityOperation> operationMap, QueryExecutor queryExecutor, SqlDB sqlDB) {
+    public BaseOrmImpl(Map<String, EntityOperation> operationMap, QueryExecutor queryExecutor, SqlDB sqlDB, DbInterceptors dbInterceptors) {
+        this.dbInterceptors = dbInterceptors;
         Objects.requireNonNull(operationMap);
         Objects.requireNonNull(queryExecutor);
         Objects.requireNonNull(sqlDB);
@@ -53,27 +56,31 @@ final public class BaseOrmImpl implements BaseOrm {
         );
 
         List<Promise<UpdateTpl>> promiseList = map.values().stream()
-            .map(tableData -> {
+            .map(tableData -> dbInterceptors.interceptTableData(tableData)
+                .mapP(tableData1 -> {
 
-                final List<SqlCriteria> sqlCriterias = Arrays.stream(tableData.getPrimaryColumns())
-                    .map(column -> new SqlCriteria(column, tableData.getValues().getValue(column), Optional.empty()))
-                    .collect(Collectors.toList());
+                    final List<SqlCriteria> sqlCriterias = Arrays.stream(tableData.getPrimaryColumns())
+                        .map(column -> new SqlCriteria(column, tableData.getValues().getValue(column), Optional.empty()))
+                        .collect(Collectors.toList());
 
-                return sqlDB.exists(
-                    tableData.getTable(),
-                    tableData.getPrimaryColumns()[0],
-                    sqlCriterias
-                ).map(exists -> UpdateTpl.builder()
-                    .updateOperationType(exists ? UpdateOperationType.UPDATE : UpdateOperationType.INSERT)
-                    .table(tableData.getTable())
-                    .sqlCriterias(sqlCriterias)
-                    .data(tableData.getValues())
-                    .build());
-
-            }).collect(Collectors.toList());
+                    return sqlDB.exists(
+                        tableData.getTable(),
+                        tableData.getPrimaryColumns()[0],
+                        sqlCriterias
+                    ).map(exists -> UpdateTpl.builder()
+                        .updateOperationType(exists ? UpdateOperationType.UPDATE : UpdateOperationType.INSERT)
+                        .table(tableData.getTable())
+                        .sqlCriterias(sqlCriterias)
+                        .data(tableData.getValues())
+                        .build());
+                })).collect(Collectors.toList());
 
         return Promises.when(promiseList)
-            .thenP((sqlList) -> sqlDB.update(sqlList))
+            .mapP(updateTpls -> Promises.when(
+                updateTpls.stream().map(dbInterceptors::interceptUpdateTpl)
+                    .collect(Collectors.toList())
+            ))
+            .thenP(sqlDB::update)
             .map(updateTpls -> params.getJsonObject());
     }
 

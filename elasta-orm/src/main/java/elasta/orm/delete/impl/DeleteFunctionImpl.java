@@ -1,10 +1,8 @@
 package elasta.orm.delete.impl;
 
-import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.immutable.Tpls;
 import elasta.orm.delete.*;
-import elasta.orm.delete.builder.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.loader.MultiTableDependenciesLoader;
 import elasta.orm.upsert.TableData;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +10,6 @@ import io.vertx.core.json.JsonObject;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Created by sohan on 3/17/2017.

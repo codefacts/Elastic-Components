@@ -1,4 +1,4 @@
-package elasta.webutils.app;
+package elasta.webutils.app.exceptions;
 
 /**
  * Created by Jango on 11/18/2016.

@@ -1,5 +1,7 @@
 package elasta.orm.upsert.impl;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import elasta.orm.upsert.DependencyColumnValuePopulator;
 import elasta.orm.upsert.ForeignColumnMapping;
 import io.vertx.core.json.JsonObject;
@@ -19,19 +21,21 @@ final public class DependencyColumnValuePopulatorImpl implements DependencyColum
     }
 
     @Override
-    public JsonObject populate(JsonObject dependencyTableData) {
+    public JsonObject populate(JsonObject childTableData) {
 
-        final HashMap<String, Object> map = new HashMap<>();
+        Objects.requireNonNull(childTableData);
+
+        final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
 
         for (ForeignColumnMapping foreignColumnMapping : foreignColumnMappings) {
-            map.put(
+            mapBuilder.put(
                 foreignColumnMapping.getSrcColumn(),
-                dependencyTableData.getValue(
+                childTableData.getValue(
                     foreignColumnMapping.getDstColumn()
                 )
             );
         }
 
-        return new JsonObject(map);
+        return new JsonObject(mapBuilder.build());
     }
 }

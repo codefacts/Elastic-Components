@@ -11,4 +11,5 @@ import io.vertx.ext.web.RoutingContext;
  */
 public interface UriToEventTranslator<T> extends Fun2Unckd<RoutingContext, T, String> {
 
+    String apply(RoutingContext routingContext, T t) throws Throwable;
 }

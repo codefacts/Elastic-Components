@@ -1,9 +1,10 @@
 package elasta.webutils.app.impl;
 
+import elasta.webutils.app.JsonObjectRequestConverter;
 import elasta.webutils.app.QueryStringToJsonObjectConverter;
 import elasta.webutils.app.RequestCnsts;
 import elasta.webutils.app.RequestConverter;
-import elasta.webutils.app.RequestConvertersionException;
+import elasta.webutils.app.exceptions.RequestConvertersionException;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -16,7 +17,7 @@ import static elasta.commons.Utils.not;
 /**
  * Created by Jango on 11/7/2016.
  */
-public class RequestConverterImpl implements RequestConverter<JsonObject> {
+public class RequestConverterImpl implements JsonObjectRequestConverter {
     private final QueryStringToJsonObjectConverter queryStringToJsonObjectConverter;
 
     public RequestConverterImpl(QueryStringToJsonObjectConverter queryStringToJsonObjectConverter) {
@@ -31,7 +32,7 @@ public class RequestConverterImpl implements RequestConverter<JsonObject> {
                 throw new RequestConvertersionException("Content-Type is not present. Content-Type: '" + contentType + "'");
             }
 
-            if (!contentType.trim().startsWith("application/sql")) {
+            if (!contentType.trim().startsWith("application/json")) {
                 throw new RequestConvertersionException("Unsupported content-type. Content-Type: '" + contentType + "'");
             }
         }

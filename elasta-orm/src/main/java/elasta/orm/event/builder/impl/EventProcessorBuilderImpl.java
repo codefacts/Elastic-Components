@@ -2,11 +2,10 @@ package elasta.orm.event.builder.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import elasta.orm.delete.DeleteUtils;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.event.*;
 import elasta.orm.event.builder.*;
-import elasta.orm.event.impl.EventDispatcherImpl;
+import elasta.orm.event.impl.EntityToEventDispatcherMapImpl;
 import elasta.orm.event.impl.EventProcessorImpl;
 
 import java.util.*;
@@ -146,7 +145,7 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
 
     private void addDeleteEventHandler(String entity, EventHandler eventHandler) {
         List<EventHandler> eventHandlers = deleteEventHandlersMap.get(entity);
-        if (eventHandler == null) {
+        if (eventHandlers == null) {
             deleteEventHandlersMap.put(entity, eventHandlers = new ArrayList<>());
         }
         eventHandlers.add(eventHandler);
@@ -154,7 +153,7 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
 
     private void addUpsertEventHandler(String entity, EventHandler eventHandler) {
         List<EventHandler> eventHandlers = upsertEventHandlersMap.get(entity);
-        if (eventHandler == null) {
+        if (eventHandlers == null) {
             upsertEventHandlersMap.put(entity, eventHandlers = new ArrayList<>());
         }
         eventHandlers.add(eventHandler);

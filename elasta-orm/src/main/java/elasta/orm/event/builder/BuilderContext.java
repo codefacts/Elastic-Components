@@ -16,4 +16,6 @@ public interface BuilderContext<T> {
     T get(String key);
 
     BuilderContext<T> put(String entity, T upsertEventDispatcher);
+
+    BuilderContext<T> makeImmutable();
 }

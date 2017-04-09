@@ -1,10 +1,8 @@
 package elasta.orm.delete.builder.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import elasta.orm.delete.*;
 import elasta.orm.delete.builder.DeleteTableFunctionBuilder;
-import elasta.orm.delete.builder.DeleteTableFunctionBuilderContext;
 import elasta.orm.delete.impl.DeleteTableFunctionImpl;
 import elasta.orm.delete.impl.DirectDependencyDeleteHandlerImpl;
 import elasta.orm.delete.impl.IndirectDependencyDeleteHandlerImpl;
@@ -13,6 +11,7 @@ import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
+import elasta.orm.event.builder.BuilderContext;
 import elasta.orm.upsert.ColumnToColumnMapping;
 
 import java.util.Arrays;
@@ -32,12 +31,16 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
     }
 
     @Override
-    public DeleteTableFunction build(String table, DeleteTableFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
+    public DeleteTableFunction build(String table, BuilderContext<DeleteTableFunction> context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
         requireNonNulls(table, context, tableToTableDependenciesMap);
 
         if (context.contains(table)) {
             return context.get(table);
+        }
+
+        if (context.isEmpty(table)) {
+            return new ProxyDeleteTableFunction(table, context);
         }
 
         context.putEmpty(table);
@@ -49,13 +52,13 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
         return deleteTableFunction;
     }
 
-    private void requireNonNulls(String table, DeleteTableFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
+    private void requireNonNulls(String table, BuilderContext<DeleteTableFunction> context, TableToTableDependenciesMap tableToTableDependenciesMap) {
         Objects.requireNonNull(table);
         Objects.requireNonNull(context);
         Objects.requireNonNull(tableToTableDependenciesMap);
     }
 
-    private DeleteTableFunction buildDeleteFunction(String table, DeleteTableFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
+    private DeleteTableFunction buildDeleteFunction(String table, BuilderContext<DeleteTableFunction> context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
         ImmutableSet.Builder<IndirectDependencyDeleteHandler> indirectListBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<DirectDependencyDeleteHandler> directListBuilder = ImmutableSet.builder();
@@ -111,15 +114,7 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
         );
     }
 
-    private DeleteTableFunction createDeleteFunction(String dependentTable, DeleteTableFunctionBuilderContext context, TableToTableDependenciesMap tableToTableDependenciesMap) {
-
-        if (context.contains(dependentTable)) {
-            return context.get(dependentTable);
-        }
-
-        if (context.isEmpty(dependentTable)) {
-            return new ProxyDeleteTableFunction(dependentTable, context);
-        }
+    private DeleteTableFunction createDeleteFunction(String dependentTable, BuilderContext<DeleteTableFunction> context, TableToTableDependenciesMap tableToTableDependenciesMap) {
 
         return this.build(dependentTable, context, tableToTableDependenciesMap);
     }

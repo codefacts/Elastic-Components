@@ -1,7 +1,10 @@
 package elasta.orm.delete.builder;
 
 import elasta.orm.delete.DeleteFunction;
+import elasta.orm.delete.DeleteTableFunction;
+import elasta.orm.delete.ListTablesToDeleteFunction;
 import elasta.orm.delete.builder.impl.DeleteFunctionBuilderImpl;
+import elasta.orm.event.builder.BuilderContext;
 import lombok.Builder;
 import lombok.Value;
 
@@ -19,10 +22,10 @@ public interface DeleteFunctionBuilder {
     @Builder
     final class Params {
         final String entity;
-        final DeleteTableFunctionBuilderContext deleteTableFunctionBuilderContext;
-        final ListTablesToDeleteFunctionBuilderContext listTablesToDeleteFunctionBuilderContext;
+        final BuilderContext<DeleteTableFunction> deleteTableFunctionBuilderContext;
+        final BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext;
 
-        public Params(String entity, DeleteTableFunctionBuilderContext deleteTableFunctionBuilderContext, ListTablesToDeleteFunctionBuilderContext listTablesToDeleteFunctionBuilderContext) {
+        public Params(String entity, BuilderContext<DeleteTableFunction> deleteTableFunctionBuilderContext, BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(deleteTableFunctionBuilderContext);
             Objects.requireNonNull(listTablesToDeleteFunctionBuilderContext);
@@ -34,20 +37,20 @@ public interface DeleteFunctionBuilder {
 
     final class ParamsBuilder {
         private String entity;
-        private DeleteTableFunctionBuilderContext deleteTableFunctionBuilderContext;
-        private ListTablesToDeleteFunctionBuilderContext listTablesToDeleteFunctionBuilderContext;
+        private BuilderContext<DeleteTableFunction> deleteTableFunctionBuilderContext;
+        private BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext;
 
         public ParamsBuilder setEntity(String entity) {
             this.entity = entity;
             return this;
         }
 
-        public ParamsBuilder setDeleteTableFunctionBuilderContext(DeleteTableFunctionBuilderContext deleteTableFunctionBuilderContext) {
+        public ParamsBuilder setDeleteTableFunctionBuilderContext(BuilderContext<DeleteTableFunction> deleteTableFunctionBuilderContext) {
             this.deleteTableFunctionBuilderContext = deleteTableFunctionBuilderContext;
             return this;
         }
 
-        public ParamsBuilder setListTablesToDeleteFunctionBuilderContext(ListTablesToDeleteFunctionBuilderContext listTablesToDeleteFunctionBuilderContext) {
+        public ParamsBuilder setListTablesToDeleteFunctionBuilderContext(BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext) {
             this.listTablesToDeleteFunctionBuilderContext = listTablesToDeleteFunctionBuilderContext;
             return this;
         }

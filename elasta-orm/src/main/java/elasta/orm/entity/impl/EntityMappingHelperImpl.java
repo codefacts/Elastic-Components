@@ -14,6 +14,7 @@ import elasta.orm.entity.ex.EntityMappingHelperExcpetion;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Jango on 2017-01-21.
@@ -113,9 +114,18 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     }
 
     @Override
+    public Field getFieldByColumn(String entity, String column) {
+        return Stream.of(getDbMapping(entity).getDbColumnMappings())
+            .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
+            .map(dbColumnMapping -> (SimpleDbColumnMapping) dbColumnMapping)
+            .filter(simpleDbColumnMapping -> simpleDbColumnMapping.getColumn().equals(column))
+            .map(simpleDbColumnMapping -> getField(entity, simpleDbColumnMapping.getField()))
+            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No field found for column '" + column + "' in entity '" + entity + "'"));
+    }
+
+    @Override
     public DbColumnMapping getColumnMapping(String entity, String field) {
-        return Arrays.asList(getEntity(entity).getDbMapping().getDbColumnMappings())
-            .stream()
+        return Arrays.stream(getEntity(entity).getDbMapping().getDbColumnMappings())
             .filter(dbColumnMapping -> dbColumnMapping.getField().equals(field))
             .findAny().get();
     }
@@ -126,8 +136,8 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     }
 
     @Override
-    public DbColumnMapping getPrimaryKeyColumnMapping(String entity) {
-        return getColumnMapping(entity, getEntity(entity).getPrimaryKey());
+    public SimpleDbColumnMapping getPrimaryKeyColumnMapping(String entity) {
+        return (SimpleDbColumnMapping) getColumnMapping(entity, getEntity(entity).getPrimaryKey());
     }
 
     @Override

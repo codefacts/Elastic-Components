@@ -7,5 +7,5 @@ import io.vertx.core.json.JsonObject;
  */
 @FunctionalInterface
 public interface DependencyColumnValuePopulator {
-    JsonObject populate(JsonObject dependencyTableData);
+    JsonObject populate(JsonObject childTableData);
 }

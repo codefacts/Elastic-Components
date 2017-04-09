@@ -107,15 +107,7 @@ public class SimpleEventBusImpl implements SimpleEventBus {
 
     @Override
     public <R> Promise<R> fire(String event, Object t, Map<String, ?> extra) {
-        List<EventMatchInfo> handlers = handlersMap.get(event);
-
-        if (handlers == null) {
-
-            handlers = findHandlers(event);
-
-            handlersMap.put(event, handlers);
-
-        }
+        List<EventMatchInfo> handlers = handlersMap.computeIfAbsent(event, k -> findHandlers(event));
 
         return executeHandlers(handlers, event, t, extra);
     }

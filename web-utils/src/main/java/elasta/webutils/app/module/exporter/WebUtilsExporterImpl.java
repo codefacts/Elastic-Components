@@ -14,15 +14,17 @@ public class WebUtilsExporterImpl implements WebUtilsExporter {
 
         moduleSystem.export(RequestHandler.class, module -> module.export(new RequestHandlerImpl(
 
-            module.require(RequestConverter.class),
+            module.require(JsonObjectRequestConverter.class),
             module.require(UriToEventTranslator.class),
             module.require(ResponseGenerator.class),
             module.require(SimpleEventBus.class)
         )));
 
-        moduleSystem.export(RequestConverter.class, module -> module.export(new RequestConverterImpl(
-            module.require(QueryStringToJsonObjectConverter.class)
-        )));
+        moduleSystem.export(RequestConverter.class, module -> module.export(
+            new RequestConverterImpl(
+                module.require(QueryStringToJsonObjectConverter.class)
+            )
+        ));
 
         moduleSystem.export(QueryStringToJsonObjectConverter.class, module -> module.export(
             new QueryStringToJsonObjectConverterImpl()

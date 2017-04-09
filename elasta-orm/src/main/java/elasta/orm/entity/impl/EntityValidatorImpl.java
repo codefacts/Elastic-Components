@@ -179,7 +179,7 @@ final public class EntityValidatorImpl implements EntityValidator {
             TableDependency tableDependency = tableToTableDependencyMap.get(entity.getDbMapping().getTable());
             if (tableDependency == null) {
                 return Optional.empty();
-//                throw new EntityValidationException("No TableDependency found for table '" + entity.getDbMapping().getTable() + " that has a mapping '" + mapping + "'");
+//                throw new EntityValidationException("No TableDependency found for table '" + entity.getDbMapping().getReferencingTable() + " that has a mapping '" + mapping + "'");
             }
             Map<String, DependencyTpl> tableToDependencyInfoMap = tableDependency.getTableToDependencyInfoMap();
 

@@ -11,8 +11,8 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class ResponseGeneratorImpl implements ResponseGenerator<JsonObject> {
     @Override
-    public void reply(JsonObject t, RoutingContext context) {
+    public void reply(JsonObject jsonObject, RoutingContext context) {
         context.response().putHeader(HttpHeaders.CONTENT_TYPE, ContentTypes.APPLICATION_JSON);
-        context.response().end(t.encode());
+        context.response().end(jsonObject.encode());
     }
 }

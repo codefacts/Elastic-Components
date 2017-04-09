@@ -24,7 +24,7 @@ final public class ChildField {
         this.fieldType = fieldType;
     }
 
-    enum FieldType {
+    public enum FieldType {
         Object, Array
     }
 }
