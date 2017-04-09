@@ -16,7 +16,7 @@ import static elasta.commons.Utils.not;
 /**
  * Created by sohan on 4/9/2017.
  */
-class PathExpTranslator {
+final class PathExpTranslator {
     final String rootAlias;
     final String rootEntity;
     final List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;

@@ -1,7 +1,6 @@
 package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.Func;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.Field;
@@ -10,12 +9,10 @@ import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
 import elasta.orm.query.ex.QueryParserException;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
-import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
 import elasta.orm.query.expression.builder.FieldExpressionResolverImpl;
 import elasta.orm.query.expression.builder.impl.PathExpressionAndAliasPair;
 import elasta.orm.query.expression.core.AliasAndColumn;
 import elasta.orm.query.expression.core.JoinTpl;
-import elasta.sql.SqlExecutor;
 import elasta.sql.core.JoinType;
 
 import java.util.*;
@@ -32,22 +29,23 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
     final FieldExpressionResolverImpl expressionResolver;
     final List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;
     final EntityMappingHelper helper;
-    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap;
-    final String ALIAS_STR = "a";
+    final String ALIAS_STR;
     final QueryImpl.AliasCounter aliasCounter;
 
-    public FieldExpressionToAliasAndColumnMapTranslator(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap, QueryImpl.AliasCounter aliasCounter) {
+    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap = new LinkedHashMap<>();
+
+    public FieldExpressionToAliasAndColumnMapTranslator(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter) {
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
         this.expressionResolver = expressionResolver;
         this.fromPathExpressionAndAliasPairs = fromPathExpressionAndAliasPairs;
         this.helper = helper;
-        this.partAndJoinTplMap = partAndJoinTplMap;
+        this.ALIAS_STR = ALIAS_STR;
         this.aliasCounter = aliasCounter;
     }
 
-    public ImmutableMap<FieldExpression, AliasAndColumn> translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
+    public Tpl2 translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
 
         final ImmutableMap.Builder<String, String> aliasToEntityMapBuilder = ImmutableMap.builder();
 
@@ -111,7 +109,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         expressionResolver.getFuncMap().keySet()
             .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
 
-        return fieldExpToAliasedColumnMapBuilder.build();
+        return new Tpl2(fieldExpToAliasedColumnMapBuilder.build(), partAndJoinTplMap);
     }
 
     private Map<String, Optional<JoinType>> toAliasToJoinTypeMap(List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs) {
