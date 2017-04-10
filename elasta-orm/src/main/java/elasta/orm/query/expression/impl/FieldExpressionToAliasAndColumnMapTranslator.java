@@ -14,6 +14,8 @@ import elasta.orm.query.expression.builder.impl.PathExpressionAndAliasPair;
 import elasta.orm.query.expression.core.AliasAndColumn;
 import elasta.orm.query.expression.core.JoinTpl;
 import elasta.sql.core.JoinType;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.*;
 
@@ -58,45 +60,19 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
 
         aliasToFullPathExpressionMap.forEach((alias, pathExpression) -> {
 
-            final List<String> parts = pathExpression.parts();
-            Map<String, QueryImpl.PartAndJoinTpl> tplMap = rootMap;
-            String entity = rootEntity;
-            String entityAlias = rootAlias;
-            for (int i = 1, end = parts.size(); i < end; i++) {
-                String childEntityField = parts.get(i);
+            EntityAndAliasPair entityAndAliasPair = populatePartAndJoinTplMap(
+                PartAndJoinTplParams.builder()
+                    .pathExpression(pathExpression)
+                    .entity(rootEntity)
+                    .entityAlias(rootAlias)
+                    .tplMap(rootMap)
+                    .aliasProvider(isLast -> isLast ? alias : createAlias())
+                    .joinTypeProvider(isLast -> isLast ? aliasToJoinTypeMap.getOrDefault(alias, Optional.empty()) : Optional.empty())
+                    .build()
+            );
 
-                QueryImpl.PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
-
-                if (partAndJoinTpl == null) {
-
-                    String childEntity = getChildEntity(entity, childEntityField);
-
-                    final boolean isLast = (i == parts.size() - 1);
-
-                    final String childAlias = isLast ? alias : createAlias();
-
-                    tplMap.put(
-                        childEntityField,
-                        partAndJoinTpl = new QueryImpl.PartAndJoinTpl(
-                            new JoinTpl(
-                                entityAlias,
-                                childAlias,
-                                entity,
-                                childEntityField,
-                                childEntity,
-                                isLast ? aliasToJoinTypeMap.getOrDefault(alias, Optional.empty()) : Optional.empty()
-                            )
-                        )
-                    );
-                }
-
-                entity = partAndJoinTpl.joinTpl.getChildEntity();
-                entityAlias = partAndJoinTpl.joinTpl.getChildEntityAlias();
-                tplMap = partAndJoinTpl.partAndJoinTplMap;
-            }
-
-            aliasToEntityMapBuilder.put(entityAlias, entity);
-            partAndJoinTplMap.put(entityAlias, new LinkedHashMap<>());
+            aliasToEntityMapBuilder.put(entityAndAliasPair.entityAlias, entityAndAliasPair.entity);
+            partAndJoinTplMap.put(entityAndAliasPair.entityAlias, new LinkedHashMap<>());
         });
 
         final ImmutableMap<String, String> aliasToEntityMap = aliasToEntityMapBuilder.build();
@@ -110,6 +86,53 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
             .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
 
         return new Tpl2(fieldExpToAliasedColumnMapBuilder.build(), partAndJoinTplMap);
+    }
+
+    private EntityAndAliasPair populatePartAndJoinTplMap(PartAndJoinTplParams params) {
+
+        final PathExpression pathExpression = params.getPathExpression();
+        final AliasProvider aliasProvider = params.getAliasProvider();
+        final JoinTypeProvider joinTypeProvider = params.getJoinTypeProvider();
+        
+        String entity = params.getEntity();
+        String entityAlias = params.getEntityAlias();
+        Map<String, QueryImpl.PartAndJoinTpl> tplMap = params.getTplMap();
+
+        final List<String> parts = pathExpression.parts();
+        for (int i = 1, end = parts.size(); i < end; i++) {
+            String childEntityField = parts.get(i);
+
+            QueryImpl.PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
+
+            if (partAndJoinTpl == null) {
+
+                String childEntity = getChildEntity(entity, childEntityField);
+
+                final boolean isLast = (i == parts.size() - 1);
+
+                final String childAlias = aliasProvider.provide(isLast);
+
+                tplMap.put(
+                    childEntityField,
+                    partAndJoinTpl = new QueryImpl.PartAndJoinTpl(
+                        new JoinTpl(
+                            entityAlias,
+                            childAlias,
+                            entity,
+                            childEntityField,
+                            childEntity,
+                            joinTypeProvider.provide(isLast)
+                        )
+                    )
+                );
+            }
+
+            entity = partAndJoinTpl.joinTpl.getChildEntity();
+            entityAlias = partAndJoinTpl.joinTpl.getChildEntityAlias();
+            tplMap = partAndJoinTpl.partToJoinTplMap;
+        }
+
+        return new EntityAndAliasPair(entity, entityAlias);
     }
 
     private Map<String, Optional<JoinType>> toAliasToJoinTypeMap(List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs) {
@@ -134,42 +157,23 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
             throw new QueryParserException("Field Expression '" + fieldExpression + "' starts with an invalid alias");
         }
 
-        final List<String> parts = pathExpression.parts();
-
-        Map<String, QueryImpl.PartAndJoinTpl> tplMap = partAndJoinTplMap.get(alias);
-        String entity = aliasToEntityMap.get(alias);
-        String entityAlias = alias;
-
-        for (int i = 1, end = parts.size(); i < end; i++) {
-            String childEntityField = parts.get(i);
-
-            QueryImpl.PartAndJoinTpl partAndJoinTpl = tplMap.get(childEntityField);
-
-            if (partAndJoinTpl == null) {
-
-                String childEntity = getChildEntity(entity, childEntityField);
-
-                final String childAlias = createAlias();
-
-                tplMap.put(
-                    childEntityField,
-                    partAndJoinTpl = new QueryImpl.PartAndJoinTpl(
-                        new JoinTpl(entityAlias, childAlias, entity, childEntityField, childEntity, Optional.empty())
-                    )
-                );
-            }
-
-            entity = partAndJoinTpl.joinTpl.getChildEntity();
-            entityAlias = partAndJoinTpl.joinTpl.getChildEntityAlias();
-            tplMap = partAndJoinTpl.partAndJoinTplMap;
-        }
+        EntityAndAliasPair entityAndAliasPair = populatePartAndJoinTplMap(
+            PartAndJoinTplParams.builder()
+                .pathExpression(pathExpression)
+                .entity(aliasToEntityMap.get(alias))
+                .entityAlias(alias)
+                .tplMap(partAndJoinTplMap.get(alias))
+                .aliasProvider(isLast -> createAlias())
+                .joinTypeProvider(isLast -> Optional.empty())
+                .build()
+        );
 
         fieldExpToAliasedColumnMapBuilder.put(
             fieldExpression,
             new AliasAndColumn(
-                entityAlias,
+                entityAndAliasPair.entityAlias,
                 getColumn(
-                    entity,
+                    entityAndAliasPair.entity,
                     fieldExpression.getField()
                 )
             )
@@ -196,5 +200,35 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
 
     private String createAlias() {
         return ALIAS_STR + String.valueOf(aliasCounter.aliasCount++);
+    }
+
+    private interface AliasProvider {
+
+        String provide(boolean isLast);
+    }
+
+    private interface JoinTypeProvider {
+        Optional<JoinType> provide(boolean isLast);
+    }
+
+    private final class EntityAndAliasPair {
+        final String entity;
+        final String entityAlias;
+
+        public EntityAndAliasPair(String entity, String entityAlias) {
+            this.entity = entity;
+            this.entityAlias = entityAlias;
+        }
+    }
+
+    @Value
+    @Builder
+    final private class PartAndJoinTplParams {
+        PathExpression pathExpression;
+        String entity;
+        String entityAlias;
+        Map<String, QueryImpl.PartAndJoinTpl> tplMap;
+        AliasProvider aliasProvider;
+        JoinTypeProvider joinTypeProvider;
     }
 }

@@ -193,7 +193,7 @@ final public class QueryImpl implements Query {
 
     final static class PartAndJoinTpl {
         final JoinTpl joinTpl;
-        final Map<String, PartAndJoinTpl> partAndJoinTplMap = new HashMap<>();
+        final Map<String, PartAndJoinTpl> partToJoinTplMap = new LinkedHashMap<>();
 
         PartAndJoinTpl(JoinTpl joinTpl) {
             Objects.requireNonNull(joinTpl);

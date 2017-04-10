@@ -1,6 +1,5 @@
 package elasta.orm.query.expression.impl;
 
-import com.google.common.collect.ImmutableMap;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.core.AliasAndColumn;
 import lombok.Value;

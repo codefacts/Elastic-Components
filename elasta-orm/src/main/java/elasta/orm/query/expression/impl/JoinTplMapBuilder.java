@@ -31,7 +31,7 @@ final public class JoinTplMapBuilder {
 
     private void traverseRecursive(Map<String, QueryImpl.PartAndJoinTpl> partAndJoinTplMap, final ImmutableMap.Builder<String, JoinTpl> joinTplMapBuilder) {
         partAndJoinTplMap.forEach((field, partAndJoinTpl) -> {
-            traverseRecursive(partAndJoinTpl.partAndJoinTplMap, joinTplMapBuilder);
+            traverseRecursive(partAndJoinTpl.partToJoinTplMap, joinTplMapBuilder);
             joinTplMapBuilder.put(partAndJoinTpl.joinTpl.getChildEntityAlias(), partAndJoinTpl.joinTpl);
         });
     }
