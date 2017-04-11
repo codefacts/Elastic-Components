@@ -36,13 +36,13 @@ final public class SqlAndParamsBuilder {
     final ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
     final ParamsBuilderImpl paramsBuilder = new ParamsBuilderImpl(paramsListBuilder);
 
-    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap;
+    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap;
     final String ALIAS_STR;
     final QueryImpl.AliasCounter aliasCounter;
 
     final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap;
 
-    public SqlAndParamsBuilder(String rootEntity, String rootAlias, List<Func> selectFuncs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter, Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap) {
+    public SqlAndParamsBuilder(String rootEntity, String rootAlias, List<Func> selectFuncs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter, Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap) {
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFuncs = selectFuncs;
@@ -51,7 +51,7 @@ final public class SqlAndParamsBuilder {
         this.groupByExpressions = groupByExpressions;
         this.havingFuncs = havingFuncs;
         this.helper = helper;
-        this.partAndJoinTplMap = partAndJoinTplMap;
+        this.aliasToJoinTplMap = aliasToJoinTplMap;
         this.ALIAS_STR = ALIAS_STR;
         this.aliasCounter = aliasCounter;
         this.fieldExpressionToAliasAndColumnMap = fieldExpressionToAliasAndColumnMap;
@@ -74,7 +74,7 @@ final public class SqlAndParamsBuilder {
 
         builder.append("select ").append(sql);
 
-        sql = from(partAndJoinTplMap).toSql();
+        sql = from(aliasToJoinTplMap).toSql();
 
         builder.append(" from ").append(sql);
 

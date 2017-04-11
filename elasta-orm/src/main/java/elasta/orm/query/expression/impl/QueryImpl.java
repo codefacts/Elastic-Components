@@ -96,7 +96,7 @@ final public class QueryImpl implements Query {
                 groupByExpressions,
                 havingFuncs,
                 helper,
-                tpl2.getPartAndJoinTplMap(),
+                tpl2.getAliasToJoinTplMap(),
                 ALIAS_STR,
                 aliasCounter,
                 tpl2.getFieldExpToAliasedColumnMap()
@@ -135,7 +135,7 @@ final public class QueryImpl implements Query {
                 groupByExpressions,
                 havingFuncs,
                 helper,
-                tpl2.getPartAndJoinTplMap(),
+                tpl2.getAliasToJoinTplMap(),
                 ALIAS_STR,
                 aliasCounter,
                 tpl2.getFieldExpToAliasedColumnMap()

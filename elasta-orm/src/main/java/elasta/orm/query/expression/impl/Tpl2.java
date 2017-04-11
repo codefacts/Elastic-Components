@@ -12,10 +12,10 @@ import java.util.Map;
 @Value
 public class Tpl2 {
     final Map<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMap;
-    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap;
+    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap;
 
-    public Tpl2(Map<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMap, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap) {
+    public Tpl2(Map<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMap, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap) {
         this.fieldExpToAliasedColumnMap = fieldExpToAliasedColumnMap;
-        this.partAndJoinTplMap = partAndJoinTplMap;
+        this.aliasToJoinTplMap = aliasToJoinTplMap;
     }
 }

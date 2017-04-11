@@ -34,9 +34,9 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
     final String ALIAS_STR;
     final QueryImpl.AliasCounter aliasCounter;
 
-    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> partAndJoinTplMap = new LinkedHashMap<>();
+    final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap = new LinkedHashMap<>();
 
-    public FieldExpressionToAliasAndColumnMapTranslator(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter) {
+    FieldExpressionToAliasAndColumnMapTranslator(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter) {
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
@@ -47,7 +47,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         this.aliasCounter = aliasCounter;
     }
 
-    public Tpl2 translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
+    Tpl2 translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
 
         final ImmutableMap.Builder<String, String> aliasToEntityMapBuilder = ImmutableMap.builder();
 
@@ -56,13 +56,13 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         Map<String, Optional<JoinType>> aliasToJoinTypeMap = toAliasToJoinTypeMap(fromPathExpressionAndAliasPairs);
 
         final Map<String, QueryImpl.PartAndJoinTpl> rootMap = new LinkedHashMap<>();
-        partAndJoinTplMap.put(rootAlias, rootMap);
+        aliasToJoinTplMap.put(rootAlias, rootMap);
 
-        aliasToFullPathExpressionMap.forEach((alias, pathExpression) -> {
+        aliasToFullPathExpressionMap.forEach((alias, fullPathExpression) -> {
 
             EntityAndAliasPair entityAndAliasPair = populatePartAndJoinTplMap(
                 PartAndJoinTplParams.builder()
-                    .pathExpression(pathExpression)
+                    .pathExpression(fullPathExpression)
                     .entity(rootEntity)
                     .entityAlias(rootAlias)
                     .tplMap(rootMap)
@@ -72,7 +72,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
             );
 
             aliasToEntityMapBuilder.put(entityAndAliasPair.entityAlias, entityAndAliasPair.entity);
-            partAndJoinTplMap.put(entityAndAliasPair.entityAlias, new LinkedHashMap<>());
+            aliasToJoinTplMap.put(entityAndAliasPair.entityAlias, new LinkedHashMap<>());
         });
 
         final ImmutableMap<String, String> aliasToEntityMap = aliasToEntityMapBuilder.build();
@@ -85,7 +85,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         expressionResolver.getFuncMap().keySet()
             .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
 
-        return new Tpl2(fieldExpToAliasedColumnMapBuilder.build(), partAndJoinTplMap);
+        return new Tpl2(fieldExpToAliasedColumnMapBuilder.build(), aliasToJoinTplMap);
     }
 
     private EntityAndAliasPair populatePartAndJoinTplMap(PartAndJoinTplParams params) {
@@ -110,14 +110,14 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
 
                 final boolean isLast = (i == parts.size() - 1);
 
-                final String childAlias = aliasProvider.provide(isLast);
+                final String childEntityAlias = aliasProvider.provide(isLast);
 
                 tplMap.put(
                     childEntityField,
                     partAndJoinTpl = new QueryImpl.PartAndJoinTpl(
                         new JoinTpl(
                             entityAlias,
-                            childAlias,
+                            childEntityAlias,
                             entity,
                             childEntityField,
                             childEntity,
@@ -162,7 +162,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
                 .pathExpression(pathExpression)
                 .entity(aliasToEntityMap.get(alias))
                 .entityAlias(alias)
-                .tplMap(partAndJoinTplMap.get(alias))
+                .tplMap(aliasToJoinTplMap.get(alias))
                 .aliasProvider(isLast -> createAlias())
                 .joinTypeProvider(isLast -> Optional.empty())
                 .build()
@@ -215,7 +215,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         final String entity;
         final String entityAlias;
 
-        public EntityAndAliasPair(String entity, String entityAlias) {
+        EntityAndAliasPair(String entity, String entityAlias) {
             this.entity = entity;
             this.entityAlias = entityAlias;
         }

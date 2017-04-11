@@ -30,8 +30,8 @@ final public class JoinDataBuilder {
     final QueryImpl.AliasCounter aliasCounter;
     final EntityMappingHelper helper;
 
-    public JoinDataBuilder(String rootAlias, ImmutableMap<String, JoinTpl> aliasToJoinTplMap, String alias_str, QueryImpl.AliasCounter aliasCounter, EntityMappingHelper helper) {
-        ALIAS_STR = alias_str;
+    public JoinDataBuilder(String rootAlias, ImmutableMap<String, JoinTpl> aliasToJoinTplMap, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter, EntityMappingHelper helper) {
+        this.ALIAS_STR = ALIAS_STR;
         this.aliasCounter = aliasCounter;
         this.helper = helper;
         Objects.requireNonNull(rootAlias);
