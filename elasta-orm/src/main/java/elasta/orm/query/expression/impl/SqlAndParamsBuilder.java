@@ -14,6 +14,7 @@ import elasta.orm.query.expression.core.*;
 import elasta.sql.core.SqlAndParams;
 import io.vertx.core.json.JsonArray;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -37,12 +38,13 @@ final public class SqlAndParamsBuilder {
     final ParamsBuilderImpl paramsBuilder = new ParamsBuilderImpl(paramsListBuilder);
 
     final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap;
-    final String ALIAS_STR;
-    final QueryImpl.AliasCounter aliasCounter;
+    final AliasGenerator aliasGenerator;
 
     final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap;
 
-    public SqlAndParamsBuilder(String rootEntity, String rootAlias, List<Func> selectFuncs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter, Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap) {
+    final JoinTplToJoinDataConverter joinTplToJoinDataConverter;
+
+    public SqlAndParamsBuilder(String rootEntity, String rootAlias, List<Func> selectFuncs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap, AliasGenerator aliasGenerator, Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap) {
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFuncs = selectFuncs;
@@ -52,9 +54,13 @@ final public class SqlAndParamsBuilder {
         this.havingFuncs = havingFuncs;
         this.helper = helper;
         this.aliasToJoinTplMap = aliasToJoinTplMap;
-        this.ALIAS_STR = ALIAS_STR;
-        this.aliasCounter = aliasCounter;
+        this.aliasGenerator = aliasGenerator;
         this.fieldExpressionToAliasAndColumnMap = fieldExpressionToAliasAndColumnMap;
+
+        this.joinTplToJoinDataConverter = new JoinTplToJoinDataConverter(
+            helper,
+            aliasGenerator
+        );
     }
 
     public SqlAndParams build() {
@@ -183,15 +189,17 @@ final public class SqlAndParamsBuilder {
                 new JoinClauseHandlerImpl(
                     new TableAliasPair(helper.getTable(rootEntity), rootAlias),
                     generateJoinData(
-                        new JoinTplMapBuilder(joinTplsMap).build()
+                        new JoinTplMapBuilder(joinTplsMap, joinTplToJoinDataConverter).build()
                     )
                 )
             )
         );
     }
 
-    private List<JoinData> generateJoinData(ImmutableMap<String, JoinTpl> aliasToJoinTplMap) {
+    private Collection<JoinData> generateJoinData(Map<String, JoinData> aliasToJoinDataMap) {
 
-        return new JoinDataBuilder(rootAlias, aliasToJoinTplMap, ALIAS_STR, aliasCounter, helper).build();
+        return new JoinDataBuilder(
+            rootAlias, aliasToJoinDataMap
+        ).build();
     }
 }

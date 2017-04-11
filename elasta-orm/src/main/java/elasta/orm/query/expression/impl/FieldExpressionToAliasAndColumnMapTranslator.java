@@ -31,20 +31,18 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
     final FieldExpressionResolverImpl expressionResolver;
     final List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;
     final EntityMappingHelper helper;
-    final String ALIAS_STR;
-    final QueryImpl.AliasCounter aliasCounter;
+    final AliasGenerator aliasGenerator;
 
     final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap = new LinkedHashMap<>();
 
-    FieldExpressionToAliasAndColumnMapTranslator(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter) {
+    FieldExpressionToAliasAndColumnMapTranslator(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, AliasGenerator aliasGenerator) {
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
         this.expressionResolver = expressionResolver;
         this.fromPathExpressionAndAliasPairs = fromPathExpressionAndAliasPairs;
         this.helper = helper;
-        this.ALIAS_STR = ALIAS_STR;
-        this.aliasCounter = aliasCounter;
+        this.aliasGenerator = aliasGenerator;
     }
 
     Tpl2 translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
@@ -93,7 +91,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         final PathExpression pathExpression = params.getPathExpression();
         final AliasProvider aliasProvider = params.getAliasProvider();
         final JoinTypeProvider joinTypeProvider = params.getJoinTypeProvider();
-        
+
         String entity = params.getEntity();
         String entityAlias = params.getEntityAlias();
         Map<String, QueryImpl.PartAndJoinTpl> tplMap = params.getTplMap();
@@ -199,7 +197,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
     }
 
     private String createAlias() {
-        return ALIAS_STR + String.valueOf(aliasCounter.aliasCount++);
+        return aliasGenerator.generate();
     }
 
     private interface AliasProvider {
@@ -223,7 +221,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
 
     @Value
     @Builder
-    final private class PartAndJoinTplParams {
+    final private static class PartAndJoinTplParams {
         PathExpression pathExpression;
         String entity;
         String entityAlias;

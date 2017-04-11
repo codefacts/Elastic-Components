@@ -11,28 +11,34 @@ import java.util.Objects;
  */
 final public class JoinTplMapBuilder {
     final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> joinTplsMap;
+    final JoinTplToJoinDataConverter joinTplToJoinDataConverter;
 
-    public JoinTplMapBuilder(Map<String, Map<String, QueryImpl.PartAndJoinTpl>> joinTplsMap) {
+    JoinTplMapBuilder(Map<String, Map<String, QueryImpl.PartAndJoinTpl>> joinTplsMap, JoinTplToJoinDataConverter joinTplToJoinDataConverter) {
         Objects.requireNonNull(joinTplsMap);
+        Objects.requireNonNull(joinTplToJoinDataConverter);
         this.joinTplsMap = joinTplsMap;
+        this.joinTplToJoinDataConverter = joinTplToJoinDataConverter;
     }
 
-    public ImmutableMap<String, JoinTpl> build() {
+    public ImmutableMap<String, JoinData> build() {
 
-        final ImmutableMap.Builder<String, JoinTpl> joinTplMapBuilder = ImmutableMap.builder();
+        final ImmutableMap.Builder<String, JoinData> joinTplMapBuilder = ImmutableMap.builder();
 
-        joinTplsMap.forEach((alias, partAndJoinTplMap) -> {
-
-            traverseRecursive(partAndJoinTplMap, joinTplMapBuilder);
-        });
+        joinTplsMap.forEach((alias, partAndJoinTplMap) -> traverseRecursive(partAndJoinTplMap, joinTplMapBuilder));
 
         return joinTplMapBuilder.build();
     }
 
-    private void traverseRecursive(Map<String, QueryImpl.PartAndJoinTpl> partAndJoinTplMap, final ImmutableMap.Builder<String, JoinTpl> joinTplMapBuilder) {
+    private void traverseRecursive(Map<String, QueryImpl.PartAndJoinTpl> partAndJoinTplMap, final ImmutableMap.Builder<String, JoinData> joinTplMapBuilder) {
+
         partAndJoinTplMap.forEach((field, partAndJoinTpl) -> {
+
             traverseRecursive(partAndJoinTpl.partToJoinTplMap, joinTplMapBuilder);
-            joinTplMapBuilder.put(partAndJoinTpl.joinTpl.getChildEntityAlias(), partAndJoinTpl.joinTpl);
+
+            joinTplToJoinDataConverter.createJoinData(partAndJoinTpl.joinTpl).forEach(joinData -> {
+
+                joinTplMapBuilder.put(joinData.getAlias(), joinData);
+            });
         });
     }
 }

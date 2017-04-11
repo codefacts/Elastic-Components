@@ -77,8 +77,7 @@ final public class QueryImpl implements Query {
     }
 
     private class QQ {
-        final String ALIAS_STR = "a";
-        final AliasCounter aliasCounter = new AliasCounter(1);
+        final AliasGenerator aliasGenerator = new AliasGenerator("a");
 
         public Promise<List<JsonObject>> execute() {
 
@@ -97,8 +96,7 @@ final public class QueryImpl implements Query {
                 havingFuncs,
                 helper,
                 tpl2.getAliasToJoinTplMap(),
-                ALIAS_STR,
-                aliasCounter,
+                aliasGenerator,
                 tpl2.getFieldExpToAliasedColumnMap()
             ).build();
 
@@ -136,8 +134,7 @@ final public class QueryImpl implements Query {
                 havingFuncs,
                 helper,
                 tpl2.getAliasToJoinTplMap(),
-                ALIAS_STR,
-                aliasCounter,
+                aliasGenerator,
                 tpl2.getFieldExpToAliasedColumnMap()
             ).build();
 
@@ -154,8 +151,7 @@ final public class QueryImpl implements Query {
                 expressionResolver,
                 fromPathExpressionAndAliasPairs,
                 helper,
-                ALIAS_STR,
-                aliasCounter
+                aliasGenerator
 
             ).translate(aliasToFullPathExpressionMap);
 

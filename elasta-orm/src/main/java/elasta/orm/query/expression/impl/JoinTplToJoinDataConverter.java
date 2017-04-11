@@ -1,4 +1,4 @@
-package elasta.orm.query.expression.core;
+package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -10,58 +10,30 @@ import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
 import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
 import elasta.orm.query.ex.QueryParserException;
-import elasta.orm.query.expression.impl.JoinData;
-import elasta.orm.query.expression.impl.QueryImpl;
+import elasta.orm.query.expression.core.JoinTpl;
 import elasta.orm.upsert.ColumnToColumnMapping;
 import elasta.sql.core.JoinType;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Objects;
 
 import static elasta.commons.Utils.not;
 
 /**
- * Created by Jango on 17/02/19.
+ * Created by sohan on 4/11/2017.
  */
-final public class JoinDataBuilder {
-    final String rootAlias;
-    final ImmutableMap<String, JoinTpl> aliasToJoinTplMap;
-    final String ALIAS_STR;
-    final QueryImpl.AliasCounter aliasCounter;
+class JoinTplToJoinDataConverter {
     final EntityMappingHelper helper;
+    final AliasGenerator aliasGenerator;
 
-    public JoinDataBuilder(String rootAlias, ImmutableMap<String, JoinTpl> aliasToJoinTplMap, String ALIAS_STR, QueryImpl.AliasCounter aliasCounter, EntityMappingHelper helper) {
-        this.ALIAS_STR = ALIAS_STR;
-        this.aliasCounter = aliasCounter;
+    public JoinTplToJoinDataConverter(EntityMappingHelper helper, AliasGenerator aliasGenerator) {
+        Objects.requireNonNull(helper);
+        Objects.requireNonNull(aliasGenerator);
         this.helper = helper;
-        Objects.requireNonNull(rootAlias);
-        Objects.requireNonNull(aliasToJoinTplMap);
-        this.rootAlias = rootAlias;
-        this.aliasToJoinTplMap = aliasToJoinTplMap;
+        this.aliasGenerator = aliasGenerator;
     }
 
-    public List<JoinData> build() {
-
-        final LinkedHashMap<JoinTpl, List<JoinData>> context = new LinkedHashMap<>();
-
-        aliasToJoinTplMap.forEach((alias, joinTpl) -> {
-            addTo(joinTpl, context);
-        });
-
-        return context.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
-    }
-
-    private void addTo(JoinTpl joinTpl, LinkedHashMap<JoinTpl, List<JoinData>> context) {
-        if (context.containsKey(joinTpl)) {
-            return;
-        }
-        if (not(joinTpl.getParentEntityAlias().equals(rootAlias))) {
-            addTo(aliasToJoinTplMap.get(joinTpl.getParentEntityAlias()), context);
-        }
-        context.put(joinTpl, createJoinData(joinTpl));
-    }
-
-    private List<JoinData> createJoinData(JoinTpl joinTpl) {
+    List<JoinData> createJoinData(JoinTpl joinTpl) {
 
         Field field = helper.getField(joinTpl.getParentEntity(), joinTpl.getChildEntityField());
 
@@ -127,7 +99,7 @@ final public class JoinDataBuilder {
             );
         });
 
-        String relationTableAlias = createAlias();
+        String relationTableAlias = aliasGenerator.generate();
 
         joinDataListBuilder.add(
             new JoinData(
@@ -184,9 +156,5 @@ final public class JoinDataBuilder {
                 mappingListBuilder.build()
             )
         );
-    }
-
-    private String createAlias() {
-        return ALIAS_STR + String.valueOf(aliasCounter.aliasCount++);
     }
 }

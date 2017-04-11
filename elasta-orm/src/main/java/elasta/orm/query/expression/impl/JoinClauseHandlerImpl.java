@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import elasta.orm.query.expression.JoinClauseHandler;import elasta.orm.query.expression.core.TableAliasPair;import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.core.JoinType;
 import elasta.orm.query.expression.Cqr;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,9 +13,9 @@ import java.util.Objects;
  */
 final public class JoinClauseHandlerImpl implements JoinClauseHandler {
     final TableAliasPair rootTableAliasPair;
-    final List<JoinData> joinDatas;
+    final Collection<JoinData> joinDatas;
 
-    public JoinClauseHandlerImpl(TableAliasPair rootTableAliasPair, List<JoinData> joinDatas) {
+    public JoinClauseHandlerImpl(TableAliasPair rootTableAliasPair, Collection<JoinData> joinDatas) {
         Objects.requireNonNull(rootTableAliasPair);
         Objects.requireNonNull(joinDatas);
         this.rootTableAliasPair = rootTableAliasPair;
