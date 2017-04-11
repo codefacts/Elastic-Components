@@ -79,14 +79,16 @@ public interface Test {
 
         SqlExecutor sqlExecutor = sqlExecutor(params.jdbcClient);
 
+        SqlDB sqlDB = dbSql(sqlExecutor);
+
         return new BaseOrmBuilderImpl(
             helper,
-            dbSql(sqlExecutor),
+            sqlDB,
             new QueryExecutorImpl(
                 helper,
                 jsonToFuncConverterMap(),
                 new GenericJsonToFuncConverterImpl(),
-                sqlExecutor
+                sqlDB
             )
         ).build(params.entities);
     }

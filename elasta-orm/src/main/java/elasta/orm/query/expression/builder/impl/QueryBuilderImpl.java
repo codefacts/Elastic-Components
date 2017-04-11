@@ -5,7 +5,7 @@ import elasta.orm.query.expression.Query;
 import elasta.orm.query.expression.impl.QueryImpl;
 import elasta.orm.query.expression.builder.*;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
-import elasta.sql.SqlExecutor;
+import elasta.sql.SqlDB;
 
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -23,11 +23,11 @@ final public class QueryBuilderImpl implements QueryBuilder {
     final FieldExpressionResolverImpl selectFieldExpressionResolver;
     final FieldExpressionResolverImpl fieldExpressionResolver;
     final EntityMappingHelper entityMappingHelper;
-    final SqlExecutor sqlExecutor;
+    final SqlDB sqlDB;
 
-    public QueryBuilderImpl(EntityMappingHelper entityMappingHelper, SqlExecutor sqlExecutor) {
+    public QueryBuilderImpl(EntityMappingHelper entityMappingHelper, SqlDB sqlDB) {
         Objects.requireNonNull(entityMappingHelper);
-        Objects.requireNonNull(sqlExecutor);
+        Objects.requireNonNull(sqlDB);
         this.entityMappingHelper = entityMappingHelper;
         selectBuilder = new SelectBuilderImpl();
         fromBuilder = new FromBuilderImpl();
@@ -37,7 +37,7 @@ final public class QueryBuilderImpl implements QueryBuilder {
         havingBuilder = new HavingBuilderImpl();
         this.selectFieldExpressionResolver = new FieldExpressionResolverImpl(new LinkedHashMap<>());
         this.fieldExpressionResolver = new FieldExpressionResolverImpl(new LinkedHashMap<>());
-        this.sqlExecutor = sqlExecutor;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -106,7 +106,7 @@ final public class QueryBuilderImpl implements QueryBuilder {
             groupByBuilder.build(),
             havingBuilder.build(),
             entityMappingHelper,
-            sqlExecutor
+            sqlDB
         );
     }
 }

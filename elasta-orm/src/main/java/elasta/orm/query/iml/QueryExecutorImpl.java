@@ -9,6 +9,7 @@ import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.Query;
 import elasta.orm.query.expression.builder.impl.QueryBuilderImpl;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
+import elasta.sql.SqlDB;
 import elasta.sql.SqlExecutor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -25,17 +26,17 @@ final public class QueryExecutorImpl implements QueryExecutor {
     final EntityMappingHelper helper;
     final JsonToFuncConverterMap jsonToFuncConverterMap;
     final JsonToFuncConverter jsonToFuncConverter;
-    final SqlExecutor sqlExecutor;
+    final SqlDB sqlDB;
 
-    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter, SqlExecutor sqlExecutor) {
+    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter, SqlDB sqlDB) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(jsonToFuncConverterMap);
         Objects.requireNonNull(jsonToFuncConverter);
-        Objects.requireNonNull(sqlExecutor);
+        Objects.requireNonNull(sqlDB);
         this.helper = helper;
         this.jsonToFuncConverterMap = jsonToFuncConverterMap;
         this.jsonToFuncConverter = jsonToFuncConverter;
-        this.sqlExecutor = sqlExecutor;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -46,7 +47,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
     private Promise<List<JsonObject>> doQuery(QueryParams params) {
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
-            sqlExecutor
+            sqlDB
         );
 
         params.getSelections().forEach(field -> qb.selectBuilder().add(
@@ -70,7 +71,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
     public Promise<List<JsonArray>> queryArray(QueryArrayParams params) {
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
-            sqlExecutor
+            sqlDB
         );
 
 
