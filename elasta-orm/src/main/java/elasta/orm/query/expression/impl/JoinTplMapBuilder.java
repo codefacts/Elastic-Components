@@ -1,5 +1,6 @@
 package elasta.orm.query.expression.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.sql.core.JoinData;
 
@@ -20,25 +21,22 @@ final public class JoinTplMapBuilder {
         this.joinTplToJoinDataConverter = joinTplToJoinDataConverter;
     }
 
-    public ImmutableMap<String, JoinData> build() {
+    public ImmutableList<JoinData> build() {
 
-        final ImmutableMap.Builder<String, JoinData> joinTplMapBuilder = ImmutableMap.builder();
+        final ImmutableList.Builder<JoinData> joinDataListBuilder = ImmutableList.builder();
 
-        joinTplsMap.forEach((alias, partAndJoinTplMap) -> traverseRecursive(partAndJoinTplMap, joinTplMapBuilder));
+        joinTplsMap.forEach((alias, partAndJoinTplMap) -> traverseRecursive(partAndJoinTplMap, joinDataListBuilder));
 
-        return joinTplMapBuilder.build();
+        return joinDataListBuilder.build();
     }
 
-    private void traverseRecursive(Map<String, QueryImpl.PartAndJoinTpl> partAndJoinTplMap, final ImmutableMap.Builder<String, JoinData> joinTplMapBuilder) {
+    private void traverseRecursive(Map<String, QueryImpl.PartAndJoinTpl> partAndJoinTplMap, final ImmutableList.Builder<JoinData> joinDataListBuilder) {
 
         partAndJoinTplMap.forEach((field, partAndJoinTpl) -> {
 
-            traverseRecursive(partAndJoinTpl.partToJoinTplMap, joinTplMapBuilder);
+            traverseRecursive(partAndJoinTpl.partToJoinTplMap, joinDataListBuilder);
 
-            joinTplToJoinDataConverter.createJoinData(partAndJoinTpl.joinTpl).forEach(joinData -> {
-
-                joinTplMapBuilder.put(joinData.getAlias(), joinData);
-            });
+            joinTplToJoinDataConverter.createJoinData(partAndJoinTpl.joinTpl).forEach(joinDataListBuilder::add);
         });
     }
 }

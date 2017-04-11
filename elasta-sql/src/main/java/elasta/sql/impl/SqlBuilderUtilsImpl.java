@@ -179,7 +179,10 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
             ImmutableList.of(
                 new JoinClauseHandlerImpl(
                     sqlQuery.getTableAliasPair(),
-                    sqlQuery.getJoinDatas()
+                    generateJoinData(
+                        sqlQuery.getTableAliasPair().getAlias(),
+                        sqlQuery.getJoinDatas().stream().collect(Collectors.toMap(JoinData::getAlias, joinData -> joinData))
+                    )
                 )
             )
         ).toSql();
@@ -359,6 +362,13 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
 
     private String toSelectSql(Collection<String> columns) {
         return columns.stream().map(column -> column(column, "")).collect(Collectors.joining(", "));
+    }
+
+    private Collection<JoinData> generateJoinData(String rootAlias, Map<String, JoinData> aliasToJoinDataMap) {
+
+        return new JoinDataBuilder(
+            rootAlias, aliasToJoinDataMap
+        ).build();
     }
 
     public static void main(String[] asdf) {

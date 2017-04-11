@@ -8,6 +8,7 @@ import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
 import elasta.orm.query.expression.core.*;
 import elasta.sql.core.*;
+import elasta.sql.impl.JoinDataBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,9 +58,7 @@ final public class SqlQueryBuilder {
         return new SqlQuery(
             selectFuncs,
             new TableAliasPair(helper.getTable(rootEntity), rootAlias),
-            generateJoinData(
-                new JoinTplMapBuilder(aliasToJoinTplMap, joinTplToJoinDataConverter).build()
-            ),
+            new JoinTplMapBuilder(aliasToJoinTplMap, joinTplToJoinDataConverter).build(),
             whereFuncs,
             havingFuncs,
             orderBy(orderByPairs),
@@ -109,12 +108,5 @@ final public class SqlQueryBuilder {
         });
 
         return orderByDataListBuilder.build();
-    }
-
-    private Collection<JoinData> generateJoinData(Map<String, JoinData> aliasToJoinDataMap) {
-
-        return new JoinDataBuilder(
-            rootAlias, aliasToJoinDataMap
-        ).build();
     }
 }
