@@ -1,7 +1,7 @@
 package elasta.orm.query.expression.builder;
 
 import elasta.orm.query.expression.FieldExpression;
-import elasta.orm.query.expression.core.Order;
+import elasta.sql.core.Order;
 
 import java.util.List;
 

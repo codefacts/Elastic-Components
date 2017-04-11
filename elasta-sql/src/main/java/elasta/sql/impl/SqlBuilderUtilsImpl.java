@@ -1,6 +1,8 @@
 package elasta.sql.impl;
 
 import com.google.common.collect.ImmutableList;
+import elasta.criteria.Func;
+import elasta.criteria.funcs.ParamsBuilderImpl;
 import elasta.sql.SqlBuilderDialect;
 import elasta.sql.SqlBuilderUtils;
 import elasta.sql.core.*;
@@ -8,11 +10,10 @@ import elasta.sql.ex.SqlBuilderUtilsException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static elasta.commons.Utils.not;
 
 /**
  * Created by Jango on 10/12/2016.
@@ -162,6 +163,82 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         return toDeleteSql(deleteData);
     }
 
+    @Override
+    public SqlAndParams toSql(SqlQuery sqlQuery) {
+
+        ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
+        ParamsBuilderImpl paramsBuilder = new ParamsBuilderImpl(paramsListBuilder);
+
+        final StringBuilder builder = new StringBuilder();
+
+        String sql = select(sqlQuery.getSelectFuncs(), paramsBuilder).toSql();
+
+        builder.append("select ").append(sql);
+
+        sql = new FromClauseHandlerImpl(
+            ImmutableList.of(
+                new JoinClauseHandlerImpl(
+                    sqlQuery.getTableAliasPair(),
+                    sqlQuery.getJoinDatas()
+                )
+            )
+        ).toSql();
+
+        builder.append(" from ").append(sql);
+
+        sql = where(sqlQuery.getWhereFuncs(), paramsBuilder).toSql();
+
+        if (not(sql.trim().isEmpty())) {
+            builder.append(" where ").append(sql);
+        }
+
+        sql = having(sqlQuery.getHavingFuncs(), paramsBuilder).toSql();
+
+        if (not(sql.trim().isEmpty())) {
+            builder.append(" having " + sql);
+        }
+
+        sql = new OrderByHandlerImpl(sqlQuery.getOrderByDatas()).toSql();
+
+        if (not(sql.trim().isEmpty())) {
+            builder.append(" order by ").append(sql);
+        }
+
+        sql = new GroupByHandlerImpl(sqlQuery.getColumnAliasPairs()).toSql();
+
+        if (not(sql.trim().isEmpty())) {
+            builder.append(" group by " + sql);
+        }
+
+        return new SqlAndParams(
+            builder.toString(),
+            new JsonArray(
+                paramsListBuilder.build()
+            )
+        );
+    }
+
+    private SelectClauseHandlerImpl select(List<Func> selectFuncs, ParamsBuilderImpl paramsBuilder) {
+        return new SelectClauseHandlerImpl(
+            selectFuncs,
+            paramsBuilder
+        );
+    }
+
+    private WhereClauseHandlerImpl where(List<Func> whereFuncs, ParamsBuilderImpl paramsBuilder) {
+        return new WhereClauseHandlerImpl(
+            whereFuncs,
+            paramsBuilder
+        );
+    }
+
+    private HavingClauseHandlerImpl having(List<Func> havingFuncs, ParamsBuilderImpl paramsBuilder) {
+        return new HavingClauseHandlerImpl(
+            havingFuncs,
+            paramsBuilder
+        );
+    }
+
     private SqlAndParams createUpdateSql(UpdateTpl updateTpl) {
         ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
 
@@ -282,5 +359,9 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
 
     private String toSelectSql(Collection<String> columns) {
         return columns.stream().map(column -> column(column, "")).collect(Collectors.joining(", "));
+    }
+
+    public static void main(String[] asdf) {
+        System.out.println();
     }
 }

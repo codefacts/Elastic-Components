@@ -1,9 +1,9 @@
 package elasta.orm.upsert.impl;
 
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
 import elasta.orm.upsert.RelationTableDataPopulator;
 import elasta.orm.upsert.TableData;
-import elasta.orm.upsert.ColumnToColumnMapping;import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.Objects;

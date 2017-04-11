@@ -4,7 +4,7 @@ import elasta.orm.delete.DeleteContext;
 import elasta.orm.delete.IndirectDependencyDeleteHandler;
 import elasta.sql.core.ColumnValuePair;
 import elasta.sql.core.DeleteData;
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
 import elasta.orm.upsert.TableData;
 
 import java.util.Objects;

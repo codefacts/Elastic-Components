@@ -12,6 +12,7 @@ import elasta.orm.upsert.builder.UpsertFunctionBuilder;
 import elasta.orm.upsert.*;
 import elasta.orm.upsert.builder.ex.UpserFunctionBuilderException;
 import elasta.orm.upsert.impl.*;
+import elasta.sql.core.ColumnToColumnMapping;
 import io.vertx.core.json.JsonObject;
 
 import java.util.*;

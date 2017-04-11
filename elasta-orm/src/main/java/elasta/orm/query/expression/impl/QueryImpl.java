@@ -12,9 +12,9 @@ import elasta.orm.query.expression.builder.impl.PathExpressionAndAliasPair;
 import elasta.orm.query.expression.core.*;
 import elasta.orm.query.read.ObjectReader;
 import elasta.orm.query.read.builder.ObjectReaderBuilderImpl;
-import elasta.sql.SqlExecutor;
+import elasta.sql.SqlDB;
 import elasta.orm.query.expression.builder.FieldExpressionResolverImpl;
-import elasta.sql.core.SqlAndParams;
+import elasta.sql.core.SqlQuery;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -37,9 +37,9 @@ final public class QueryImpl implements Query {
     final List<FieldExpression> groupByExpressions;
     final List<Func> havingFuncs;
     final EntityMappingHelper helper;
-    final SqlExecutor sqlExecutor;
+    final SqlDB sqlDB;
 
-    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, SqlExecutor sqlExecutor) {
+    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, SqlDB sqlDB) {
         Objects.requireNonNull(rootEntity);
         Objects.requireNonNull(rootAlias);
         Objects.requireNonNull(selectFieldExpressionResolver);
@@ -51,7 +51,7 @@ final public class QueryImpl implements Query {
         Objects.requireNonNull(groupByExpressions);
         Objects.requireNonNull(havingFuncs);
         Objects.requireNonNull(helper);
-        Objects.requireNonNull(sqlExecutor);
+        Objects.requireNonNull(sqlDB);
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
@@ -63,7 +63,7 @@ final public class QueryImpl implements Query {
         this.groupByExpressions = groupByExpressions;
         this.havingFuncs = havingFuncs;
         this.helper = helper;
-        this.sqlExecutor = sqlExecutor;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -86,7 +86,7 @@ final public class QueryImpl implements Query {
 
             Tpl2 tpl2 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
 
-            SqlAndParams sqlAndParams = new SqlAndParamsBuilder(
+            SqlQuery sqlQuery = new SqlQueryBuilder(
                 rootEntity,
                 rootAlias,
                 selectFuncs,
@@ -107,7 +107,7 @@ final public class QueryImpl implements Query {
                 helper
             ).build();
 
-            return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams())
+            return sqlDB.query(sqlQuery)
                 .map(ResultSet::getResults)
                 .map(
                     jsonArrays -> jsonArrays.stream()
@@ -124,7 +124,7 @@ final public class QueryImpl implements Query {
 
             Tpl2 tpl2 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
 
-            SqlAndParams sqlAndParams = new SqlAndParamsBuilder(
+            SqlQuery sqlQuery = new SqlQueryBuilder(
                 rootEntity,
                 rootAlias,
                 selectFuncs,
@@ -138,7 +138,7 @@ final public class QueryImpl implements Query {
                 tpl2.getFieldExpToAliasedColumnMap()
             ).build();
 
-            return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams())
+            return sqlDB.query(sqlQuery)
                 .map(ResultSet::getResults);
         }
 

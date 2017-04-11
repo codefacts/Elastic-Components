@@ -1,4 +1,4 @@
-package elasta.orm.query.expression.core;
+package elasta.sql.core;
 
 import java.util.Objects;
 

@@ -110,6 +110,14 @@ public class SqlDBImpl implements SqlDB {
             );
     }
 
+    @Override
+    public Promise<ResultSet> query(SqlQuery sqlQuery) {
+
+        SqlAndParams sqlAndParams = sqlBuilderUtils.toSql(sqlQuery);
+
+        return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams());
+    }
+
     public static void main(String[] arg) {
         System.out.println("ok");
     }

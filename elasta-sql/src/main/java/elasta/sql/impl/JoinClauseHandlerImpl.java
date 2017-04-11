@@ -1,11 +1,12 @@
-package elasta.orm.query.expression.impl;
+package elasta.sql.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.query.expression.JoinClauseHandler;import elasta.orm.query.expression.core.TableAliasPair;import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.core.JoinType;
-import elasta.orm.query.expression.Cqr;
+import elasta.sql.Cqr;
+import elasta.sql.core.TableAliasPair;import elasta.sql.core.ColumnToColumnMapping;
+import elasta.sql.core.JoinData;
+import elasta.sql.core.JoinType;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**

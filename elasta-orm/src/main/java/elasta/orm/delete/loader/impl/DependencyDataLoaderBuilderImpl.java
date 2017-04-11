@@ -8,7 +8,7 @@ import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
 import elasta.sql.SqlDB;
 import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
 import elasta.orm.delete.ex.DependencyDataLoaderException;

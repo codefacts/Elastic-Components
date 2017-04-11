@@ -1,7 +1,6 @@
 package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.Relationship;
@@ -11,7 +10,8 @@ import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
 import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
 import elasta.orm.query.ex.QueryParserException;
 import elasta.orm.query.expression.core.JoinTpl;
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
+import elasta.sql.core.JoinData;
 import elasta.sql.core.JoinType;
 
 import java.util.List;

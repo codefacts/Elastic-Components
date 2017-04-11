@@ -5,9 +5,8 @@ import elasta.orm.delete.DeleteTableFunction;
 import elasta.orm.delete.DirectDependencyDeleteHandler;
 import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.delete.DeleteContext;
-import elasta.orm.delete.ex.DirectDependencyDeleteHandlerException;
 import elasta.sql.core.ColumnValuePair;
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
 import elasta.orm.upsert.TableData;
 
 import java.util.Arrays;

@@ -1,8 +1,7 @@
-package elasta.orm.query.expression.impl;
+package elasta.sql.impl;
 
-import elasta.orm.query.expression.Cqr;
-import elasta.orm.query.expression.core.OrderByData;
-import elasta.orm.query.expression.OrderByHandler;
+import elasta.sql.Cqr;
+import elasta.sql.core.OrderByData;
 
 import java.util.List;
 import java.util.Objects;

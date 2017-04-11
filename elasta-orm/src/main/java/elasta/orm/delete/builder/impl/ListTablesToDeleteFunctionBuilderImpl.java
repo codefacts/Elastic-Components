@@ -14,7 +14,7 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.event.builder.BuilderContext;
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
 import elasta.orm.upsert.FieldToColumnMapping;
 import elasta.orm.upsert.TableDataPopulator;
 import elasta.orm.upsert.impl.TableDataPopulatorImpl;

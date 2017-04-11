@@ -12,7 +12,7 @@ import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 import elasta.orm.event.builder.BuilderContext;
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
 
 import java.util.Arrays;
 import java.util.List;

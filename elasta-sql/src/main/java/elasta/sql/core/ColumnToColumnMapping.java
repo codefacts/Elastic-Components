@@ -1,4 +1,4 @@
-package elasta.orm.upsert;
+package elasta.sql.core;
 
 import java.util.Objects;
 

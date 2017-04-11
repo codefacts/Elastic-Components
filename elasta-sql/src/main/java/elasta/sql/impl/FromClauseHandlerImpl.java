@@ -1,7 +1,4 @@
-package elasta.orm.query.expression.impl;
-
-import elasta.orm.query.expression.FromClauseHandler;
-import elasta.orm.query.expression.JoinClauseHandler;
+package elasta.sql.impl;
 
 import java.util.List;
 import java.util.Objects;

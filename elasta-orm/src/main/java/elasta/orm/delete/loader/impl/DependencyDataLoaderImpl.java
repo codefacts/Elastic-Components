@@ -1,11 +1,9 @@
 package elasta.orm.delete.loader.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.delete.loader.DependencyDataLoader;
-import elasta.orm.upsert.ColumnToColumnMapping;
+import elasta.sql.core.ColumnToColumnMapping;
 import elasta.orm.upsert.TableData;
 import elasta.sql.SqlDB;
 import io.vertx.core.json.JsonObject;

@@ -1,7 +1,7 @@
 package elasta.orm.query;
 
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.query.expression.core.Order;
+import elasta.sql.core.Order;
 import elasta.sql.core.JoinType;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

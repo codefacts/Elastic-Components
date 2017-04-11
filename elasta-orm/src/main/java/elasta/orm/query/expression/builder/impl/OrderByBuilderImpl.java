@@ -2,7 +2,7 @@ package elasta.orm.query.expression.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.orm.query.expression.FieldExpression;
-import elasta.orm.query.expression.core.Order;
+import elasta.sql.core.Order;
 import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
 import elasta.orm.query.expression.builder.OrderByBuilder;
 

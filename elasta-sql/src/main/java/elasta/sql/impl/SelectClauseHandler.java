@@ -1,4 +1,4 @@
-package elasta.orm.query.expression;
+package elasta.sql.impl;
 
 /**
  * Created by Jango on 17/02/08.

@@ -1,7 +1,7 @@
 package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.query.expression.core.JoinTpl;
+import elasta.sql.core.JoinData;
 
 import java.util.Map;
 import java.util.Objects;

@@ -1,22 +1,21 @@
-package elasta.orm.query.expression.impl;
+package elasta.sql.impl;
 
 import elasta.criteria.Func;
 import elasta.criteria.ParamsBuilder;
-import elasta.orm.query.expression.SelectClauseHandler;
+import elasta.sql.Cqr;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Created by Jango on 17/02/08.
+ * Created by Jango on 17/02/09.
  */
-final public class SelectClauseHandlerImpl implements SelectClauseHandler {
-    static final String COMMA = ", ";
+final public class HavingClauseHandlerImpl implements HavingClauseHandler {
     final List<Func> funcs;
     final ParamsBuilder paramsBuilder;
 
-    public SelectClauseHandlerImpl(List<Func> funcs, ParamsBuilder paramsBuilder) {
+    public HavingClauseHandlerImpl(List<Func> funcs, ParamsBuilder paramsBuilder) {
         Objects.requireNonNull(funcs);
         Objects.requireNonNull(paramsBuilder);
         this.funcs = funcs;
@@ -26,7 +25,6 @@ final public class SelectClauseHandlerImpl implements SelectClauseHandler {
     @Override
     public String toSql() {
         return funcs.stream()
-            .map(func -> func.get(paramsBuilder))
-            .collect(Collectors.joining(COMMA));
+            .map(func -> func.get(paramsBuilder)).collect(Collectors.joining(Cqr.COMMA));
     }
 }

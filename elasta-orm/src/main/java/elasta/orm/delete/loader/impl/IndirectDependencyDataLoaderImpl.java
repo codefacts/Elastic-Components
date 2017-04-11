@@ -3,7 +3,7 @@ package elasta.orm.delete.loader.impl;
 import com.google.common.collect.ImmutableList;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.delete.loader.DependencyDataLoader;
-import elasta.orm.upsert.ColumnToColumnMapping;import elasta.sql.SqlDB;
+import elasta.sql.core.ColumnToColumnMapping;import elasta.sql.SqlDB;
 import elasta.sql.core.*;
 import elasta.orm.upsert.TableData;
 

@@ -32,4 +32,6 @@ public interface SqlBuilderUtils {
     SqlAndParams existSql(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias);
 
     SqlAndParams deleteSql(DeleteData deleteData);
+
+    SqlAndParams toSql(SqlQuery sqlQuery);
 }
