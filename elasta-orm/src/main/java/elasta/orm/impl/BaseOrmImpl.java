@@ -1,6 +1,5 @@
 package elasta.orm.impl;
 
-import com.google.common.collect.ImmutableList;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.BaseOrm;
@@ -9,6 +8,9 @@ import elasta.orm.delete.impl.DeleteContextImpl;
 import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
+import elasta.orm.relation.delete.DeleteChildRelationsFunction;
+import elasta.orm.relation.delete.impl.DeleteChildRelationsContextImpl;
+import elasta.sql.core.DeleteRelationData;
 import elasta.orm.upsert.TableData;
 import elasta.orm.upsert.UpsertContextImpl;
 import elasta.orm.upsert.UpsertFunction;
@@ -113,16 +115,35 @@ final public class BaseOrmImpl implements BaseOrm {
         return queryExecutor.queryArray(params);
     }
 
+    @Override
+    public Promise<JsonObject> deleteChildRelations(DeleteChildRelationsParams params) {
+        EntityOperation operation = getOperation(params.getEntity());
+
+        Set<DeleteRelationData> deleteRelationDataSet = new LinkedHashSet<>();
+
+        operation.getDeleteChildRelationsFunction()
+            .deleteChildRelations(
+                params.getJsonObject(), new DeleteChildRelationsContextImpl(deleteRelationDataSet)
+            )
+        ;
+
+        return sqlDB.update(deleteRelationDataSet)
+            .map(aVoid -> params.getJsonObject());
+    }
+
     @Value
     public static final class EntityOperation {
         final UpsertFunction upsertFunction;
         final DeleteFunction deleteFunction;
+        final DeleteChildRelationsFunction deleteChildRelationsFunction;
 
-        public EntityOperation(UpsertFunction upsertFunction, DeleteFunction deleteFunction) {
+        public EntityOperation(UpsertFunction upsertFunction, DeleteFunction deleteFunction, DeleteChildRelationsFunction deleteChildRelationsFunction) {
             Objects.requireNonNull(upsertFunction);
             Objects.requireNonNull(deleteFunction);
+            Objects.requireNonNull(deleteChildRelationsFunction);
             this.upsertFunction = upsertFunction;
             this.deleteFunction = deleteFunction;
+            this.deleteChildRelationsFunction = deleteChildRelationsFunction;
         }
     }
 }

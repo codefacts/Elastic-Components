@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Jango on 10/12/2016.
@@ -34,4 +35,6 @@ public interface SqlBuilderUtils {
     SqlAndParams deleteSql(DeleteData deleteData);
 
     SqlAndParams toSql(SqlQuery sqlQuery);
+
+    SqlListAndParamsList toSql(Set<DeleteRelationData> deleteRelationDataSet);
 }

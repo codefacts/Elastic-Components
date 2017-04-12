@@ -221,6 +221,64 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         );
     }
 
+    @Override
+    public SqlListAndParamsList toSql(Set<DeleteRelationData> deleteRelationDataSet) {
+        ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
+
+        deleteRelationDataSet.forEach(deleteRelationData -> {
+            SqlAndParams sqlAndParams = toSqlAndParams(deleteRelationData);
+            sqlListBuilder.add(sqlAndParams.getSql());
+            paramsListBuilder.add(sqlAndParams.getParams());
+        });
+
+        return new SqlListAndParamsList(
+            sqlListBuilder.build(),
+            paramsListBuilder.build()
+        );
+    }
+
+    private SqlAndParams toSqlAndParams(DeleteRelationData deleteRelationData) {
+        switch (deleteRelationData.getOperationType()) {
+            case UPDATE: {
+
+                ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
+
+                String set = deleteRelationData.getReferencingColumns().stream()
+                    .map(column -> {
+                        return column(column, "") + " = null";
+                    })
+                    .collect(Collectors.joining(", "));
+
+                return new SqlAndParams(
+                    "UPDATE " + table(deleteRelationData.getReferencingTable(), "") + " SET " + set + " WHERE " + where(deleteRelationData.getPrimaryColumnValuePairs(), paramsBuilder),
+                    new JsonArray(
+                        paramsBuilder.build()
+                    )
+                );
+            }
+            case DELETE: {
+
+                ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
+
+                return new SqlAndParams(
+                    "DELETE FROM " + table(deleteRelationData.getReferencingTable(), "") + " WHERE " + where(deleteRelationData.getPrimaryColumnValuePairs(), paramsBuilder),
+                    new JsonArray(
+                        paramsBuilder.build()
+                    )
+                );
+            }
+        }
+        throw new SqlBuilderUtilsException("Invalid deleteRelationData.operationType '" + deleteRelationData.getOperationType() + "'");
+    }
+
+    private String where(List<ColumnValuePair> primaryColumnValuePairs, ImmutableList.Builder<Object> paramsBuilder) {
+        return primaryColumnValuePairs.stream()
+            .peek(columnValuePair -> paramsBuilder.add(columnValuePair.getValue()))
+            .map(columnValuePair -> column(columnValuePair.getPrimaryColumn(), "") + " = ?")
+            .collect(Collectors.joining(" AND "));
+    }
+
     private SelectClauseHandlerImpl select(List<Func> selectFuncs, ParamsBuilderImpl paramsBuilder) {
         return new SelectClauseHandlerImpl(
             selectFuncs,

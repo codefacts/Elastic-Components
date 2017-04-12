@@ -27,13 +27,17 @@ public interface BaseOrm {
         QueryExecutor.QueryArrayParams params
     );
 
+    Promise<JsonObject> deleteChildRelations(
+        DeleteChildRelationsParams params
+    );
+
     @Value
     @Builder
     final class UpsertParams {
         final String entity;
         final JsonObject jsonObject;
 
-        public UpsertParams(String entity, JsonObject jsonObject) {
+        UpsertParams(String entity, JsonObject jsonObject) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(jsonObject);
             this.entity = entity;
@@ -47,7 +51,21 @@ public interface BaseOrm {
         final String entity;
         final JsonObject jsonObject;
 
-        public DeleteParams(String entity, JsonObject jsonObject) {
+        DeleteParams(String entity, JsonObject jsonObject) {
+            Objects.requireNonNull(entity);
+            Objects.requireNonNull(jsonObject);
+            this.entity = entity;
+            this.jsonObject = jsonObject;
+        }
+    }
+
+    @Value
+    @Builder
+    final class DeleteChildRelationsParams {
+        final String entity;
+        final JsonObject jsonObject;
+
+        DeleteChildRelationsParams(String entity, JsonObject jsonObject) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(jsonObject);
             this.entity = entity;

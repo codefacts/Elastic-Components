@@ -7,6 +7,7 @@ import io.vertx.ext.sql.ResultSet;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Jango on 9/25/2016.
@@ -37,4 +38,6 @@ public interface SqlDB {
     Promise<Boolean> exists(String table, String primaryKey, Collection<SqlCriteria> collect);
 
     Promise<ResultSet> query(SqlQuery sqlQuery);
+
+    Promise<Void> update(Set<DeleteRelationData> deleteRelationDataSet);
 }

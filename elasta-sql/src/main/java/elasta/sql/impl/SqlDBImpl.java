@@ -13,6 +13,7 @@ import io.vertx.ext.sql.ResultSet;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Created by Jango on 9/25/2016.
@@ -116,6 +117,12 @@ public class SqlDBImpl implements SqlDB {
         SqlAndParams sqlAndParams = sqlBuilderUtils.toSql(sqlQuery);
 
         return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams());
+    }
+
+    @Override
+    public Promise<Void> update(Set<DeleteRelationData> deleteRelationDataSet) {
+        SqlListAndParamsList sqlListAndParamsList = sqlBuilderUtils.toSql(deleteRelationDataSet);
+        return sqlExecutor.update(sqlListAndParamsList.getSqlList(), sqlListAndParamsList.getParamsList());
     }
 
     public static void main(String[] arg) {
