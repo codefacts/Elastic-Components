@@ -1,24 +1,24 @@
 package elasta.orm.impl;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.BaseOrm;
 import elasta.orm.delete.DeleteFunction;
 import elasta.orm.delete.impl.DeleteContextImpl;
+import elasta.orm.entity.EntityUtils;
 import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
 import elasta.orm.relation.delete.impl.DeleteChildRelationsContextImpl;
-import elasta.sql.core.DeleteRelationData;
+import elasta.sql.core.*;
 import elasta.orm.upsert.TableData;
 import elasta.orm.upsert.UpsertContextImpl;
 import elasta.orm.upsert.UpsertFunction;
 import elasta.sql.SqlDB;
-import elasta.sql.core.DeleteData;
-import elasta.sql.core.SqlCriteria;
-import elasta.sql.core.UpdateOperationType;
-import elasta.sql.core.UpdateTpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  * Created by sohan on 3/19/2017.
  */
 final public class BaseOrmImpl implements BaseOrm {
+    static final JsonObject EMPTY_JSON_OBJECT = new JsonObject(ImmutableMap.of());
     final Map<String, EntityOperation> operationMap;
     final QueryExecutor queryExecutor;
     final SqlDB sqlDB;
@@ -58,30 +59,30 @@ final public class BaseOrmImpl implements BaseOrm {
         );
 
         List<Promise<UpdateTpl>> promiseList = map.values().stream()
-            .map(tableData -> dbInterceptors.interceptTableData(tableData)
-                .mapP(tableData1 -> {
+            .map(tableData -> {
 
-                    final List<SqlCriteria> sqlCriterias = Arrays.stream(tableData.getPrimaryColumns())
-                        .map(column -> new SqlCriteria(column, tableData.getValues().getValue(column), Optional.empty()))
-                        .collect(Collectors.toList());
+                final List<SqlCriteria> sqlCriterias = Arrays.stream(tableData.getPrimaryColumns())
+                    .map(column -> new SqlCriteria(column, tableData.getValues().getValue(column), Optional.empty()))
+                    .collect(Collectors.toList());
 
-                    return sqlDB.exists(
+                return sqlDB
+                    .exists(
                         tableData.getTable(),
                         tableData.getPrimaryColumns()[0],
                         sqlCriterias
-                    ).map(exists -> UpdateTpl.builder()
+                    )
+                    .map(exists -> UpdateTpl.builder()
                         .updateOperationType(exists ? UpdateOperationType.UPDATE : UpdateOperationType.INSERT)
                         .table(tableData.getTable())
                         .sqlCriterias(sqlCriterias)
                         .data(tableData.getValues())
-                        .build());
-                })).collect(Collectors.toList());
+                        .build())
+                    .mapP(dbInterceptors::interceptUpdateTpl)
+                    ;
+
+            }).collect(Collectors.toList());
 
         return Promises.when(promiseList)
-            .mapP(updateTpls -> Promises.when(
-                updateTpls.stream().map(dbInterceptors::interceptUpdateTpl)
-                    .collect(Collectors.toList())
-            ))
             .thenP(sqlDB::update)
             .map(updateTpls -> params.getJsonObject());
     }
@@ -94,15 +95,25 @@ final public class BaseOrmImpl implements BaseOrm {
                 params.getJsonObject(), new DeleteContextImpl(
                     deleteDatas
                 )
-            ).thenP(jsonObject -> sqlDB.delete(deleteDatas));
-    }
+            )
+            .mapP(jsonObject -> {
 
-    private EntityOperation getOperation(String entity) {
-        EntityOperation entityOperation = operationMap.get(entity);
-        if (entityOperation == null) {
-            throw new OrmException("No Entity Operation found in the operationMap for entity '" + entity + "'");
-        }
-        return entityOperation;
+                List<Promise<UpdateTpl>> promiseList = deleteDatas.stream()
+                    .map(
+                        deleteData -> UpdateTpl.builder()
+                            .updateOperationType(UpdateOperationType.DELETE)
+                            .table(deleteData.getTable())
+                            .data(EMPTY_JSON_OBJECT)
+                            .sqlCriterias(sqlCriterias(Arrays.asList(deleteData.getColumnValuePairs())))
+                            .build()
+                    )
+                    .map(dbInterceptors::interceptUpdateTpl)
+                    .collect(Collectors.toList());
+
+                return Promises.when(promiseList);
+            })
+            .thenP(sqlDB::update)
+            .map(updateTplList -> params.getJsonObject());
     }
 
     @Override
@@ -127,8 +138,52 @@ final public class BaseOrmImpl implements BaseOrm {
             )
         ;
 
-        return sqlDB.update(deleteRelationDataSet)
-            .map(aVoid -> params.getJsonObject());
+        List<Promise<UpdateTpl>> promiseList = deleteRelationDataSet.stream()
+            .map(
+                deleteRelationData -> new UpdateTpl(
+                    UpdateOperationType.valueOf(deleteRelationData.getOperationType().name()),
+                    deleteRelationData.getReferencingTable(),
+                    new JsonObject(
+                        deleteRelationData.getReferencingColumns().stream()
+                            .collect(Collectors.toMap(
+                                column -> column,
+                                column -> null
+                            ))
+                    ),
+                    sqlCriterias(deleteRelationData.getPrimaryColumnValuePairs())
+                )
+            )
+            .map(dbInterceptors::interceptUpdateTpl)
+            .collect(Collectors.toList());
+
+        return Promises.when(promiseList)
+            .mapP(sqlDB::update)
+            .map(aVoid -> params.getJsonObject())
+            ;
+    }
+
+    private Collection<SqlCriteria> sqlCriterias(List<ColumnValuePair> columnValuePairs) {
+        ImmutableList.Builder<SqlCriteria> sqlCriteriaListBuilder = ImmutableList.builder();
+
+        columnValuePairs.stream()
+            .map(
+                columnValuePair -> new SqlCriteria(
+                    columnValuePair.getPrimaryColumn(),
+                    columnValuePair.getValue(),
+                    Optional.empty()
+                )
+            )
+            .forEach(sqlCriteriaListBuilder::add);
+
+        return sqlCriteriaListBuilder.build();
+    }
+
+    private EntityOperation getOperation(String entity) {
+        EntityOperation entityOperation = operationMap.get(entity);
+        if (entityOperation == null) {
+            throw new OrmException("No Entity Operation found in the operationMap for entity '" + entity + "'");
+        }
+        return entityOperation;
     }
 
     @Value
@@ -145,5 +200,9 @@ final public class BaseOrmImpl implements BaseOrm {
             this.deleteFunction = deleteFunction;
             this.deleteChildRelationsFunction = deleteChildRelationsFunction;
         }
+    }
+
+    public static void main(String[] asdf) {
+
     }
 }

@@ -4,13 +4,13 @@ import elasta.core.promise.intfs.Promise;
 import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.Query;
 import elasta.orm.query.expression.builder.impl.QueryBuilderImpl;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import elasta.sql.SqlDB;
-import elasta.sql.SqlExecutor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
@@ -27,16 +27,19 @@ final public class QueryExecutorImpl implements QueryExecutor {
     final JsonToFuncConverterMap jsonToFuncConverterMap;
     final JsonToFuncConverter jsonToFuncConverter;
     final SqlDB sqlDB;
+    final DbInterceptors dbInterceptors;
 
-    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter, SqlDB sqlDB) {
+    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter, SqlDB sqlDB, DbInterceptors dbInterceptors) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(jsonToFuncConverterMap);
         Objects.requireNonNull(jsonToFuncConverter);
         Objects.requireNonNull(sqlDB);
+        Objects.requireNonNull(dbInterceptors);
         this.helper = helper;
         this.jsonToFuncConverterMap = jsonToFuncConverterMap;
         this.jsonToFuncConverter = jsonToFuncConverter;
         this.sqlDB = sqlDB;
+        this.dbInterceptors = dbInterceptors;
     }
 
     @Override
@@ -45,9 +48,11 @@ final public class QueryExecutorImpl implements QueryExecutor {
     }
 
     private Promise<List<JsonObject>> doQuery(QueryParams params) {
+        
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
-            sqlDB
+            sqlDB,
+            dbInterceptors
         );
 
         params.getSelections().forEach(field -> qb.selectBuilder().add(
@@ -69,9 +74,11 @@ final public class QueryExecutorImpl implements QueryExecutor {
 
     @Override
     public Promise<List<JsonArray>> queryArray(QueryArrayParams params) {
+
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
-            sqlDB
+            sqlDB,
+            dbInterceptors
         );
 
 

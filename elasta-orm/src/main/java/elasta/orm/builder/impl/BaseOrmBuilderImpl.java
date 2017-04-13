@@ -22,17 +22,6 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
     final QueryExecutor queryExecutor;
     final DbInterceptors dbInterceptors;
 
-    public BaseOrmBuilderImpl(EntityMappingHelper helper, SqlDB sqlDB, QueryExecutor queryExecutor) {
-        this(
-            helper, sqlDB, queryExecutor,
-            new DbInterceptorsImpl(
-                ImmutableList.of(),
-                ImmutableList.of(),
-                ImmutableList.of()
-            )
-        );
-    }
-
     public BaseOrmBuilderImpl(EntityMappingHelper helper, SqlDB sqlDB, QueryExecutor queryExecutor, DbInterceptors dbInterceptors) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);

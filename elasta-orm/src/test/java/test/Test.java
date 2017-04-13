@@ -1,5 +1,6 @@
 package test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.criteria.funcs.ops.impl.ComparisionOpsImpl;
 import elasta.criteria.funcs.ops.impl.LogicalOpsImpl;
@@ -20,6 +21,8 @@ import elasta.orm.entity.impl.EntitiesPreprocessorImpl;
 import elasta.orm.entity.impl.EntitiesValidatorImpl;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
 import elasta.orm.entity.impl.EntityValidatorImpl;
+import elasta.orm.event.dbaction.DbInterceptors;
+import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.query.iml.QueryExecutorImpl;
 import elasta.sql.SqlDB;
 import elasta.sql.SqlExecutor;
@@ -72,7 +75,11 @@ public interface Test {
 
         params = new Params(
             process(params.entities),
-            params.jdbcClient
+            params.jdbcClient,
+            params.getDbInterceptors() != null ? params.getDbInterceptors() : new DbInterceptorsImpl(
+                ImmutableList.of(),
+                ImmutableList.of()
+            )
         );
 
         EntityMappingHelper helper = helper(params.entities);
@@ -88,8 +95,10 @@ public interface Test {
                 helper,
                 jsonToFuncConverterMap(),
                 new GenericJsonToFuncConverterImpl(),
-                sqlDB
-            )
+                sqlDB,
+                params.getDbInterceptors()
+            ),
+            params.getDbInterceptors()
         ).build(params.entities);
     }
 
@@ -133,8 +142,9 @@ public interface Test {
 
     @Value
     @Builder
-    static class Params {
+    class Params {
         final Collection<Entity> entities;
         final JDBCClient jdbcClient;
+        final DbInterceptors dbInterceptors;
     }
 }

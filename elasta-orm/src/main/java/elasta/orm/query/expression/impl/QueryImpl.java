@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
 import elasta.criteria.Func;
 import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.query.expression.*;
 import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
 import elasta.orm.query.expression.builder.FieldExpressionHolderFunc;
@@ -38,8 +39,9 @@ final public class QueryImpl implements Query {
     final List<Func> havingFuncs;
     final EntityMappingHelper helper;
     final SqlDB sqlDB;
+    final DbInterceptors dbInterceptors;
 
-    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, SqlDB sqlDB) {
+    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, SqlDB sqlDB, DbInterceptors dbInterceptors) {
         Objects.requireNonNull(rootEntity);
         Objects.requireNonNull(rootAlias);
         Objects.requireNonNull(selectFieldExpressionResolver);
@@ -52,6 +54,7 @@ final public class QueryImpl implements Query {
         Objects.requireNonNull(havingFuncs);
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);
+        Objects.requireNonNull(dbInterceptors);
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
@@ -64,6 +67,7 @@ final public class QueryImpl implements Query {
         this.havingFuncs = havingFuncs;
         this.helper = helper;
         this.sqlDB = sqlDB;
+        this.dbInterceptors = dbInterceptors;
     }
 
     @Override
@@ -107,7 +111,8 @@ final public class QueryImpl implements Query {
                 helper
             ).build();
 
-            return sqlDB.query(sqlQuery)
+            return dbInterceptors.interceptSqlQuery(sqlQuery)
+                .mapP(sqlDB::query)
                 .map(ResultSet::getResults)
                 .map(
                     jsonArrays -> jsonArrays.stream()
@@ -138,7 +143,8 @@ final public class QueryImpl implements Query {
                 tpl2.getFieldExpToAliasedColumnMap()
             ).build();
 
-            return sqlDB.query(sqlQuery)
+            return dbInterceptors.interceptSqlQuery(sqlQuery)
+                .mapP(sqlDB::query)
                 .map(ResultSet::getResults);
         }
 

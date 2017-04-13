@@ -3,6 +3,7 @@ package elasta.orm.event.dbaction;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.upsert.TableData;
 import elasta.sql.core.DeleteData;
+import elasta.sql.core.SqlQuery;
 import elasta.sql.core.UpdateTpl;
 
 /**
@@ -10,9 +11,7 @@ import elasta.sql.core.UpdateTpl;
  */
 public interface DbInterceptors {
 
-    Promise<DeleteData> interceptDeleteData(DeleteData deleteData);
-
-    Promise<TableData> interceptTableData(TableData tableData);
-
     Promise<UpdateTpl> interceptUpdateTpl(UpdateTpl updateTpl);
+
+    Promise<SqlQuery> interceptSqlQuery(SqlQuery sqlQuery);
 }
