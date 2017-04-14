@@ -31,6 +31,8 @@ final public class EntityToEventDispatcherMapImpl implements EntityToEventDispat
                 return handlerTpl.getUpsertEventDispatcher();
             case DELETE:
                 return handlerTpl.getDeleteEventDispatcher();
+            case DELETE_RELATION:
+                return handlerTpl.getDeleteRelationEventDispatcher();
         }
         throw new EntityToEventDispatcherMapException("Invalid operation type '" + operationType + "'");
     }
@@ -38,10 +40,15 @@ final public class EntityToEventDispatcherMapImpl implements EntityToEventDispat
     public static class EventHandlerTpl {
         final EventDispatcher deleteEventDispatcher;
         final EventDispatcher upsertEventDispatcher;
+        final EventDispatcher deleteRelationEventDispatcher;
 
-        public EventHandlerTpl(EventDispatcher deleteEventDispatcher, EventDispatcher upsertEventDispatcher) {
+        public EventHandlerTpl(EventDispatcher deleteEventDispatcher, EventDispatcher upsertEventDispatcher, EventDispatcher deleteRelationEventDispatcher) {
+            Objects.requireNonNull(deleteEventDispatcher);
+            Objects.requireNonNull(upsertEventDispatcher);
+            Objects.requireNonNull(deleteRelationEventDispatcher);
             this.deleteEventDispatcher = deleteEventDispatcher;
             this.upsertEventDispatcher = upsertEventDispatcher;
+            this.deleteRelationEventDispatcher = deleteRelationEventDispatcher;
         }
 
         public Optional<EventDispatcher> getDeleteEventDispatcher() {
@@ -50,6 +57,10 @@ final public class EntityToEventDispatcherMapImpl implements EntityToEventDispat
 
         public Optional<EventDispatcher> getUpsertEventDispatcher() {
             return Optional.ofNullable(upsertEventDispatcher);
+        }
+
+        public Optional<EventDispatcher> getDeleteRelationEventDispatcher() {
+            return Optional.ofNullable(deleteRelationEventDispatcher);
         }
     }
 }

@@ -1,7 +1,9 @@
 package test;
 
 import com.google.common.collect.ImmutableList;
+import elasta.core.promise.impl.Promises;
 import elasta.orm.BaseOrm;
+import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.query.QueryExecutor;
 import elasta.sql.core.JoinType;
 import io.vertx.core.Vertx;
@@ -22,6 +24,13 @@ public interface Read {
         BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
             .entities(Employees.entities())
             .jdbcClient(jdbcClient)
+            .dbInterceptors(new DbInterceptorsImpl(
+                ImmutableList.of(),
+                ImmutableList.of(sqlQuery -> {
+                    System.out.println(sqlQuery);
+                    return Promises.of(sqlQuery);
+                })
+            ))
             .build());
 
         baseOrm.query(

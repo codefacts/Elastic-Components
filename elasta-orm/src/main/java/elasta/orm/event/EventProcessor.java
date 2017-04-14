@@ -13,6 +13,8 @@ public interface EventProcessor {
 
     Promise<JsonObject> processUpsert(String entityName, JsonObject entity);
 
+    Promise<JsonObject> processDeleteRelation(String entityName, JsonObject entity);
+
     static void main(String[] asdf) {
 
     }

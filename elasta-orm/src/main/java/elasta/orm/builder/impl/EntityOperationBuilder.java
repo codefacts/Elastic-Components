@@ -20,7 +20,7 @@ import elasta.orm.event.builder.impl.BuilderContextImpl;
 import elasta.orm.impl.BaseOrmImpl;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
 import elasta.orm.relation.delete.builder.DeleteChildRelationsFunctionBuilder;
-import elasta.orm.relation.delete.builder.DeleteChildRelationsFunctionBuilderImpl;
+import elasta.orm.relation.delete.builder.impl.DeleteChildRelationsFunctionBuilderImpl;
 import elasta.orm.upsert.UpsertFunction;
 import elasta.orm.upsert.builder.UpsertFunctionBuilder;
 import elasta.orm.upsert.builder.impl.UpsertFunctionBuilderImpl;

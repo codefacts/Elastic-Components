@@ -49,4 +49,18 @@ final public class EventProcessorImpl implements EventProcessor {
                 )
             ).orElse(Promises.of(entity));
     }
+
+    @Override
+    public Promise<JsonObject> processDeleteRelation(String entityName, JsonObject entity) {
+        return entityToEventDispatcherMap.getEventDispatcher(entityName, OperationType.DELETE_RELATION)
+            .map(
+                eventDispatcher -> eventDispatcher.dispatch(
+                    EventDispatcher.Params.builder()
+                        .entity(entity)
+                        .path(JsonPath.root())
+                        .root(entity)
+                        .build()
+                )
+            ).orElse(Promises.of(entity));
+    }
 }

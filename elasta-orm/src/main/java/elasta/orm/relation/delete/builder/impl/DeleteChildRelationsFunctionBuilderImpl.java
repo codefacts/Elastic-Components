@@ -1,17 +1,17 @@
-package elasta.orm.relation.delete.builder;
+package elasta.orm.relation.delete.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.orm.entity.EntityMappingHelper;
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.event.builder.BuilderContext;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
+import elasta.orm.relation.delete.DeleteRelationUtils;
 import elasta.orm.relation.delete.RelationFieldHandler;
+import elasta.orm.relation.delete.builder.DeleteChildRelationsFunctionBuilder;
 import elasta.orm.relation.delete.builder.ex.DeleteChildRelationsFunctionBuilderException;
 import elasta.orm.relation.delete.impl.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,8 +50,7 @@ final public class DeleteChildRelationsFunctionBuilderImpl implements DeleteChil
 
         DbMapping dbMapping = helper.getDbMapping(entity);
 
-        Arrays.stream(dbMapping.getDbColumnMappings())
-            .filter(dbColumnMapping -> dbColumnMapping.getColumnType() != ColumnType.SIMPLE)
+        DeleteRelationUtils.listChildMappings(dbMapping)
             .map(dbColumnMapping -> relationFieldHandler(entity, dbColumnMapping, context))
             .forEach(listBuilder::add);
 

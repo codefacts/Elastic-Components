@@ -19,6 +19,10 @@ public interface EventProcessorBuilder {
 
     OnUpsertHandlersBuilder onUpsert(String entity);
 
+    EventProcessorBuilder onDeleteRelation(String entity, EventHandler eventHandler);
+
+    OnDeleteRelationHandlersBuilder onDeleteRelation(String entity);
+
     EventProcessorBuilder on(String entity, OperationType operationType, EventHandler eventHandler);
 
     EventProcessor build();
@@ -35,5 +39,12 @@ public interface EventProcessorBuilder {
         OnUpsertHandlersBuilder add(EventHandler eventHandler);
 
         OnUpsertHandlersBuilder addAll(Collection<EventHandler> eventHandlers);
+    }
+
+    interface OnDeleteRelationHandlersBuilder {
+
+        OnDeleteRelationHandlersBuilder add(EventHandler eventHandler);
+
+        OnDeleteRelationHandlersBuilder addAll(Collection<EventHandler> eventHandlers);
     }
 }

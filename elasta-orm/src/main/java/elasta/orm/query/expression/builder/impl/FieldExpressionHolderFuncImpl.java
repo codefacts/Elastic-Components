@@ -25,4 +25,11 @@ final public class FieldExpressionHolderFuncImpl implements FieldExpressionHolde
     public String get(ParamsBuilder paramsBuilder) {
         return fieldExpressionResolver.resolve(fieldExpression, paramsBuilder);
     }
+
+    @Override
+    public String toString() {
+        return "FieldExpressionHolderFuncImpl{" +
+            fieldExpression +
+            '}';
+    }
 }

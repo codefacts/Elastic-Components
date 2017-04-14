@@ -17,18 +17,21 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
     final EntityMappingHelper helper;
     final Map<String, List<EventHandler>> deleteEventHandlersMap;
     final Map<String, List<EventHandler>> upsertEventHandlersMap;
+    final Map<String, List<EventHandler>> deleteRelationEventHandlersMap;
 
     public EventProcessorBuilderImpl(EntityMappingHelper helper) {
-        this(helper, new LinkedHashMap<>(), new LinkedHashMap<>());
+        this(helper, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
     }
 
-    public EventProcessorBuilderImpl(EntityMappingHelper helper, Map<String, List<EventHandler>> deleteEventHandlersMap, Map<String, List<EventHandler>> upsertEventHandlersMap) {
+    public EventProcessorBuilderImpl(EntityMappingHelper helper, Map<String, List<EventHandler>> deleteEventHandlersMap, Map<String, List<EventHandler>> upsertEventHandlersMap, Map<String, List<EventHandler>> deleteRelationEventHandlersMap) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(deleteEventHandlersMap);
         Objects.requireNonNull(upsertEventHandlersMap);
+        Objects.requireNonNull(deleteRelationEventHandlersMap);
         this.helper = helper;
         this.deleteEventHandlersMap = deleteEventHandlersMap;
         this.upsertEventHandlersMap = upsertEventHandlersMap;
+        this.deleteRelationEventHandlersMap = deleteRelationEventHandlersMap;
     }
 
     @Override
@@ -78,6 +81,29 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
     }
 
     @Override
+    public EventProcessorBuilder onDeleteRelation(String entity, EventHandler eventHandler) {
+        addDeleteRelationEventHandler(entity, eventHandler);
+        return this;
+    }
+
+    @Override
+    public OnDeleteRelationHandlersBuilder onDeleteRelation(String entity) {
+        return new OnDeleteRelationHandlersBuilder() {
+            @Override
+            public OnDeleteRelationHandlersBuilder add(EventHandler eventHandler) {
+                addDeleteRelationEventHandler(entity, eventHandler);
+                return this;
+            }
+
+            @Override
+            public OnDeleteRelationHandlersBuilder addAll(Collection<EventHandler> eventHandlers) {
+                eventHandlers.forEach(eventHandler -> addDeleteRelationEventHandler(entity, eventHandler));
+                return this;
+            }
+        };
+    }
+
+    @Override
     public EventProcessorBuilder on(String entity, OperationType operationType, EventHandler eventHandler) {
         switch (operationType) {
             case DELETE: {
@@ -88,8 +114,20 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
                 addUpsertEventHandler(entity, eventHandler);
             }
             break;
+            case DELETE_RELATION: {
+                addDeleteRelationEventHandler(entity, eventHandler);
+            }
+            break;
         }
         return this;
+    }
+
+    private void addDeleteRelationEventHandler(String entity, EventHandler eventHandler) {
+        List<EventHandler> eventHandlers = deleteRelationEventHandlersMap.get(entity);
+        if (eventHandlers == null) {
+            deleteRelationEventHandlersMap.put(entity, eventHandlers = new ArrayList<>());
+        }
+        eventHandlers.add(eventHandler);
     }
 
     @Override
@@ -102,10 +140,15 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
     private EntityToEventDispatcherMap entityToEventDispatcherMap() {
         ImmutableMap.Builder<String, EntityToEventDispatcherMapImpl.EventHandlerTpl> mapBuilder = ImmutableMap.builder();
 
-        ImmutableSet<String> keySet = ImmutableSet.<String>builder().addAll(deleteEventHandlersMap.keySet()).addAll(upsertEventHandlersMap.keySet()).build();
+        ImmutableSet<String> keySet = ImmutableSet.<String>builder()
+            .addAll(deleteEventHandlersMap.keySet())
+            .addAll(upsertEventHandlersMap.keySet())
+            .addAll(deleteRelationEventHandlersMap.keySet())
+            .build();
 
         BuilderContextImpl<EventDispatcher> builderContextDelete = new BuilderContextImpl<>(new LinkedHashMap<>());
         BuilderContextImpl<EventDispatcher> builderContextUpsert = new BuilderContextImpl<>(new LinkedHashMap<>());
+        BuilderContextImpl<EventDispatcher> builderContextDeleteRelation = new BuilderContextImpl<>(new LinkedHashMap<>());
 
         EventDispatcherBuilderImpl deleteEventDispatcherBuilder = new EventDispatcherBuilderImpl(
             new EntityToEventHandlerMapImpl(
@@ -121,6 +164,13 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
             new ListChildsForUpsertEventHandlerFunctionImpl(helper)
         );
 
+        EventDispatcherBuilderImpl deleteRelationEventDispatcherBuilder = new EventDispatcherBuilderImpl(
+            new EntityToEventHandlerMapImpl(
+                deleteRelationEventHandlersMap
+            ),
+            new ListChildsForDeleteRelationEventHandlerFunctionImpl(helper)
+        );
+
         keySet.forEach(entity -> {
 
             mapBuilder.put(
@@ -133,6 +183,10 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
                     upsertEventDispatcherBuilder.build(
                         entity,
                         builderContextUpsert
+                    ),
+                    deleteRelationEventDispatcherBuilder.build(
+                        entity,
+                        builderContextDeleteRelation
                     )
                 )
             );
@@ -157,5 +211,9 @@ final public class EventProcessorBuilderImpl implements EventProcessorBuilder {
             upsertEventHandlersMap.put(entity, eventHandlers = new ArrayList<>());
         }
         eventHandlers.add(eventHandler);
+    }
+
+    public static void main(String[] asdf) {
+
     }
 }

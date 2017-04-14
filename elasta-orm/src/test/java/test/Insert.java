@@ -2,7 +2,9 @@ package test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.core.promise.impl.Promises;
 import elasta.orm.BaseOrm;
+import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
@@ -22,6 +24,14 @@ public interface Insert {
         BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
             .entities(Employees.entities())
             .jdbcClient(jdbcClient)
+            .dbInterceptors(new DbInterceptorsImpl(
+                ImmutableList.of(updateTpl -> {
+
+                    System.out.println("====>>>> " + updateTpl);
+                    return Promises.of(updateTpl);
+                }),
+                ImmutableList.of()
+            ))
             .build());
 
         final JsonObject employee = new JsonObject(

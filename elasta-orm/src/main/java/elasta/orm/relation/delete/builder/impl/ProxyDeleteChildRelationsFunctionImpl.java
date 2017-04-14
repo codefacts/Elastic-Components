@@ -1,4 +1,4 @@
-package elasta.orm.relation.delete.builder;
+package elasta.orm.relation.delete.builder.impl;
 
 import elasta.orm.event.builder.BuilderContext;
 import elasta.orm.relation.delete.DeleteChildRelationsContext;

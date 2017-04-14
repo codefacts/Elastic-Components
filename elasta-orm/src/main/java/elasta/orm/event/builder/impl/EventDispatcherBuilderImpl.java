@@ -55,7 +55,7 @@ final public class EventDispatcherBuilderImpl implements EventDispatcherBuilder 
     }
 
     private List<ChildObjectEventHandler> childObjectEventHandlers(String entity, BuilderContext<EventDispatcher> context) {
-        
+
         ImmutableList.Builder<ChildObjectEventHandler> listBuilder = ImmutableList.builder();
 
         listChildsForEventHandlerFunction.listChildFields(entity).stream()
