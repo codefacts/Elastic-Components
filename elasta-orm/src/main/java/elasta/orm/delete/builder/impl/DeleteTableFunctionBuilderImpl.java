@@ -7,10 +7,10 @@ import elasta.orm.delete.impl.DeleteTableFunctionImpl;
 import elasta.orm.delete.impl.DirectDependencyDeleteHandlerImpl;
 import elasta.orm.delete.impl.IndirectDependencyDeleteHandlerImpl;
 import elasta.orm.entity.EntityMappingHelper;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.IndirectRelationMapping;
 import elasta.orm.entity.core.ForeignColumnMapping;
-import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
 import elasta.orm.event.builder.BuilderContext;
 import elasta.sql.core.ColumnToColumnMapping;
 
@@ -65,10 +65,10 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
 
         tableToTableDependenciesMap.get(table)
             .forEach(dependencyInfo -> {
-                DbColumnMapping dbColumnMapping = dependencyInfo.getDbColumnMapping();
+                RelationMapping dbColumnMapping = dependencyInfo.getRelationMapping();
                 switch (dbColumnMapping.getColumnType()) {
                     case DIRECT: {
-                        DirectDbColumnMapping mapping = (DirectDbColumnMapping) dbColumnMapping;
+                        DirectRelationMapping mapping = (DirectRelationMapping) dbColumnMapping;
                         directListBuilder.add(
                             new DirectDependencyDeleteHandlerImpl(
                                 dependencyInfo.getDependentTable(),
@@ -79,7 +79,7 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
                     }
                     break;
                     case INDIRECT: {
-                        IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dbColumnMapping;
+                        IndirectRelationMapping mapping = (IndirectRelationMapping) dbColumnMapping;
                         indirectListBuilder.add(
                             new IndirectDependencyDeleteHandlerImpl(
                                 mapping.getRelationTable(),
@@ -91,10 +91,10 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
                 }
             });
 
-        Arrays.stream(helper.getDbMappingByTable(table).getDbColumnMappings()).forEach(dbColumnMapping -> {
+        Arrays.stream(helper.getDbMappingByTable(table).getRelationMappings()).forEach(dbColumnMapping -> {
             switch (dbColumnMapping.getColumnType()) {
                 case INDIRECT: {
-                    IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dbColumnMapping;
+                    IndirectRelationMapping mapping = (IndirectRelationMapping) dbColumnMapping;
                     indirectListBuilder.add(
                         new IndirectDependencyDeleteHandlerImpl(
                             mapping.getRelationTable(),
@@ -119,7 +119,7 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
         return this.build(dependentTable, context, tableToTableDependenciesMap);
     }
 
-    private ColumnToColumnMapping[] columnToColumnMappingsDirect(DirectDbColumnMapping mapping) {
+    private ColumnToColumnMapping[] columnToColumnMappingsDirect(DirectRelationMapping mapping) {
 
         List<ForeignColumnMapping> foreignColumnMappingList = mapping.getForeignColumnMappingList();
 

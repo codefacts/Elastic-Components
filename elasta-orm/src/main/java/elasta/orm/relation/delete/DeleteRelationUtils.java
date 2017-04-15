@@ -1,8 +1,6 @@
 package elasta.orm.relation.delete;
 
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 import elasta.orm.entity.core.columnmapping.RelationMapping;
 
 import java.util.Arrays;
@@ -13,8 +11,8 @@ import java.util.stream.Stream;
  */
 public interface DeleteRelationUtils {
     static Stream<RelationMapping> listChildMappings(DbMapping dbMapping) {
-        return Arrays.stream(dbMapping.getDbColumnMappings())
-            .filter(dbColumnMapping -> dbColumnMapping.getColumnType() != ColumnType.SIMPLE)
+        return Arrays.stream(dbMapping.getColumnMappings())
+            .filter(dbColumnMapping -> dbColumnMapping instanceof RelationMapping)
             .map(dbColumnMapping -> (RelationMapping) dbColumnMapping)
             ;
     }

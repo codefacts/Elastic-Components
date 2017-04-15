@@ -1,14 +1,12 @@
 package elasta.orm.upsert;
 
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
 import elasta.orm.entity.core.columnmapping.RelationMapping;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Jango on 2017-01-09.
@@ -18,13 +16,13 @@ public interface UpsertUtils {
 
         return table +
             "[" +
-            Arrays.asList(primaryColumns).stream()
+            Arrays.stream(primaryColumns)
                 .map(column -> column + ":" + values.getValue(column))
                 .collect(Collectors.joining(",")) +
             "]";
     }
 
-    static List<RelationMapping> getRelationMappingsForUpsert(DbMapping dbMapping) {
-        return Arrays.stream(dbMapping.getDbColumnMappings()).filter(dbColumnMapping -> dbColumnMapping instanceof RelationMapping).map(dbColumnMapping -> (RelationMapping) dbColumnMapping).collect(Collectors.toList());
+    static Stream<RelationMapping> getRelationMappingsForUpsert(DbMapping dbMapping) {
+        return Arrays.stream(dbMapping.getColumnMappings()).filter(dbColumnMapping -> dbColumnMapping instanceof RelationMapping).map(dbColumnMapping -> (RelationMapping) dbColumnMapping);
     }
 }

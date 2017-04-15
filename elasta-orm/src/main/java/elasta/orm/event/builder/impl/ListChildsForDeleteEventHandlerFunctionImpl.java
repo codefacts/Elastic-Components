@@ -24,7 +24,6 @@ final public class ListChildsForDeleteEventHandlerFunctionImpl implements ListCh
     @Override
     public List<ChildField> listChildFields(String entity) {
         return DeleteUtils.getRelationMappingsForDelete(helper.getEntity(entity).getDbMapping())
-            .stream()
             .map(
                 relationMapping -> new ChildField(
                     relationMapping.getField(),

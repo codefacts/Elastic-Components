@@ -1,6 +1,6 @@
 package elasta.orm.delete.loader.impl;
 
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
 import lombok.Value;
 
 import java.util.Objects;
@@ -11,12 +11,12 @@ import java.util.Objects;
 @Value
 final public class DependencyInfo {
     final String dependentTable;
-    final DbColumnMapping dbColumnMapping;
+    final RelationMapping relationMapping;
 
-    public DependencyInfo(String dependentTable, DbColumnMapping dbColumnMapping) {
+    public DependencyInfo(String dependentTable, RelationMapping relationMapping) {
         Objects.requireNonNull(dependentTable);
-        Objects.requireNonNull(dbColumnMapping);
+        Objects.requireNonNull(relationMapping);
         this.dependentTable = dependentTable;
-        this.dbColumnMapping = dbColumnMapping;
+        this.relationMapping = relationMapping;
     }
 }

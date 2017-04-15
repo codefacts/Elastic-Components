@@ -7,8 +7,7 @@ import elasta.orm.delete.loader.DependencyDataLoader;
 import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
 import elasta.orm.delete.loader.DependencyDataLoaderGraph;
 import elasta.orm.delete.loader.DependencyDataLoaderGraphBuilder;
-import elasta.orm.entity.core.ColumnType;
-import elasta.orm.upsert.UpsertTest;
+import elasta.orm.entity.core.RelationType;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -33,7 +32,7 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
             ImmutableList.Builder<DependencyDataLoader> listBuilder = ImmutableList.builder();
 
             tableDependencies.stream()
-                .filter(dependencyInfo -> dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.DIRECT)
+                .filter(dependencyInfo -> dependencyInfo.getRelationMapping().getColumnType() == RelationType.DIRECT)
                 .forEach(dependencyInfo -> {
 
 //                if (not(tableToTableDependenciesMap.containsKey(dependencyInfo.getDependentTable()))) {
@@ -61,22 +60,5 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
     }
 
     public static void main(String[] asfd) {
-        TableToTableDependenciesMapBuilderImpl mapBuilder = new TableToTableDependenciesMapBuilderImpl(
-            UpsertTest.helper()
-        );
-        DependencyDataLoaderGraphBuilderImpl graphBuilder = new DependencyDataLoaderGraphBuilderImpl(
-            new DependencyDataLoaderBuilderImpl(
-                UpsertTest.helper(),
-                UpsertTest.dbSql("orm")
-            )
-        );
-
-        TableToTableDependenciesMap map = mapBuilder.build();
-
-        System.out.println(map);
-
-        DependencyDataLoaderGraph graph = graphBuilder.build(map);
-
-        System.out.println(graph);
     }
 }

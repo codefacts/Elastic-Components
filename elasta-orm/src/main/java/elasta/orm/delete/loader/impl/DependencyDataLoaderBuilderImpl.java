@@ -4,16 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import elasta.orm.delete.loader.DependencyDataLoader;
 import elasta.orm.entity.EntityMappingHelper;
-import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.RelationType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.ForeignColumnMapping;
-import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.IndirectRelationMapping;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
 import elasta.sql.core.ColumnToColumnMapping;
 import elasta.sql.SqlDB;
 import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
 import elasta.orm.delete.ex.DependencyDataLoaderException;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,9 +41,9 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
 
         Set<String> columns = createDependencyColumns(helper.getDbMappingByTable(dependentTable));
 
-        switch (dependencyInfo.getDbColumnMapping().getColumnType()) {
+        switch (dependencyInfo.getRelationMapping().getColumnType()) {
 //            case INDIRECT: {
-//                IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+//                IndirectRelationMapping mapping = (IndirectRelationMapping) dependencyInfo.getRelationMapping();
 //
 //                ImmutableList.Builder<ColumnToColumnMapping> srcListBuilder = ImmutableList.builder();
 //                ImmutableList.Builder<ColumnToColumnMapping> dstListBuilder = ImmutableList.builder();
@@ -83,30 +83,30 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
             case DIRECT: {
                 return new DependencyDataLoaderImpl(
                     dependentTable,
-                    directColumnMappings(dependencyInfo.getDbColumnMapping()),
+                    directColumnMappings(dependencyInfo.getRelationMapping()),
                     new String[]{primaryColumn},
                     columns,
                     sqlDB
                 );
             }
         }
-        throw new DependencyDataLoaderException("Invalid dependencyInfo.getDbColumnMapping().getColumnType() '" + dependencyInfo.getDbColumnMapping().getColumnType() + "'");
+        throw new DependencyDataLoaderException("Invalid dependencyInfo.getRelationMapping().getColumnType() '" + dependencyInfo.getRelationMapping().getColumnType() + "'");
     }
 
     public static Set<String> createDependencyColumns(DbMapping dbMapping) {
         return ImmutableSet.<String>builder()
             .add(dbMapping.getPrimaryColumn())
             .addAll(
-                Arrays.stream(dbMapping.getDbColumnMappings())
-                    .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.DIRECT || dbColumnMapping.getColumnType() == ColumnType.INDIRECT)
+                Arrays.stream(dbMapping.getRelationMappings())
+                    .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == RelationType.DIRECT || dbColumnMapping.getColumnType() == RelationType.INDIRECT)
                     .flatMap(dbColumnMapping -> {
                         switch (dbColumnMapping.getColumnType()) {
                             case DIRECT: {
-                                return ((DirectDbColumnMapping) dbColumnMapping).getForeignColumnMappingList().stream()
+                                return ((DirectRelationMapping) dbColumnMapping).getForeignColumnMappingList().stream()
                                     .map(ForeignColumnMapping::getSrcColumn);
                             }
                             case INDIRECT: {
-                                return ((IndirectDbColumnMapping) dbColumnMapping).getSrcForeignColumnMappingList().stream()
+                                return ((IndirectRelationMapping) dbColumnMapping).getSrcForeignColumnMappingList().stream()
                                     .map(ForeignColumnMapping::getSrcColumn);
                             }
                         }
@@ -117,11 +117,11 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
             .build();
     }
 
-    private ColumnToColumnMapping[] directColumnMappings(DbColumnMapping dbColumnMapping) {
-        switch (dbColumnMapping.getColumnType()) {
+    private ColumnToColumnMapping[] directColumnMappings(RelationMapping relationMapping) {
+        switch (relationMapping.getColumnType()) {
             case DIRECT: {
                 ImmutableList.Builder<ColumnToColumnMapping> listBuilder = ImmutableList.builder();
-                DirectDbColumnMapping mapping = (DirectDbColumnMapping) dbColumnMapping;
+                DirectRelationMapping mapping = (DirectRelationMapping) relationMapping;
                 mapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
                     listBuilder.add(
                         new ColumnToColumnMapping(
@@ -134,7 +134,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
                 return list.toArray(new ColumnToColumnMapping[list.size()]);
             }
         }
-        throw new DependencyDataLoaderException("Invalid db column mapping '" + dbColumnMapping + "'");
+        throw new DependencyDataLoaderException("Invalid db column mapping '" + relationMapping + "'");
     }
 
     private static String[] dependencyColumns(List<DependencyInfo> dependencyTables) {
@@ -142,9 +142,9 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
         ImmutableSet.Builder<String> columnListBuilder = ImmutableSet.builder();
 
         dependencyTables.forEach(dependencyInfo -> {
-            switch (dependencyInfo.getDbColumnMapping().getColumnType()) {
+            switch (dependencyInfo.getRelationMapping().getColumnType()) {
                 case INDIRECT: {
-                    IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+                    IndirectRelationMapping mapping = (IndirectRelationMapping) dependencyInfo.getRelationMapping();
                     mapping.getDstForeignColumnMappingList().forEach(foreignColumnMapping -> {
                         columnListBuilder.add(
                             foreignColumnMapping.getSrcColumn()
@@ -153,7 +153,7 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
                 }
                 break;
                 case DIRECT:
-                    DirectDbColumnMapping mapping = (DirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+                    DirectRelationMapping mapping = (DirectRelationMapping) dependencyInfo.getRelationMapping();
                     mapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
                         columnListBuilder.add(
                             foreignColumnMapping.getDstColumn()

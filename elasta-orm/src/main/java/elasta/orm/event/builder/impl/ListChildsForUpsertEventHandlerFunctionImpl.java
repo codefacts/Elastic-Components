@@ -25,7 +25,6 @@ final public class ListChildsForUpsertEventHandlerFunctionImpl implements ListCh
     @Override
     public List<ChildField> listChildFields(String entity) {
         return UpsertUtils.getRelationMappingsForUpsert(helper.getDbMapping(entity))
-            .stream()
             .map(relationMapping -> new ChildField(
                 relationMapping.getField(),
                 relationMapping.getReferencingEntity(),

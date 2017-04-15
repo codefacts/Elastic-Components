@@ -1,14 +1,13 @@
 package elasta.orm.entity;
 
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
+import elasta.orm.entity.core.columnmapping.ColumnMapping;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Jango on 2017-01-08.
@@ -23,23 +22,25 @@ public interface EntityMappingHelper {
 
     DbMapping getDbMapping(String entity);
 
-    DbColumnMapping[] getColumnMappings(String entity);
+    ColumnMapping[] getColumnMappings(String entity);
 
     Map<String, Field> getFieldNameToFieldMap(String entity);
 
-    Map<String, SimpleDbColumnMapping> getColumnNameToColumnMappingMap(String entity);
+    Map<String, ColumnMapping> getColumnNameToColumnMappingMap(String entity);
 
-    Map<String, DbColumnMapping> getFieldToColumnMappingMap(String entity);
+    Map<String, ColumnMapping> getFieldToColumnMappingMap(String entity);
 
     Field getField(String entity, String field);
 
     Field getFieldByColumn(String entity, String column);
 
-    DbColumnMapping getColumnMapping(String entity, String field);
+    ColumnMapping getColumnMapping(String entity, String field);
+
+    RelationMapping getRelationMapping(String entity, String field);
 
     String getPrimaryKey(String entity);
 
-    SimpleDbColumnMapping getPrimaryKeyColumnMapping(String entity);
+    ColumnMapping getPrimaryKeyColumnMapping(String entity);
 
     String getPrimaryKeyColumnName(String entity);
 

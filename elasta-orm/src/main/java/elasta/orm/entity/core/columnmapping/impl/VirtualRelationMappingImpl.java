@@ -1,8 +1,8 @@
 package elasta.orm.entity.core.columnmapping.impl;
 
-import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.RelationType;
+import elasta.orm.entity.core.columnmapping.VirtualRelationMapping;
 import elasta.orm.entity.core.ForeignColumnMapping;
-import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
 import lombok.Value;
 
 import java.util.List;
@@ -12,14 +12,14 @@ import java.util.Objects;
  * Created by Jango on 2017-01-12.
  */
 @Value
-final public class DirectDbColumnMappingImpl implements DirectDbColumnMapping {
+final public class VirtualRelationMappingImpl implements VirtualRelationMapping {
     final String referencingTable;
     final String referencingEntity;
     final List<ForeignColumnMapping> foreignColumnMappingList;
     final String field;
-    final ColumnType columnType;
+    final RelationType columnType;
 
-    public DirectDbColumnMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
+    public VirtualRelationMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
@@ -28,7 +28,7 @@ final public class DirectDbColumnMappingImpl implements DirectDbColumnMapping {
         this.referencingEntity = referencingEntity;
         this.foreignColumnMappingList = foreignColumnMappingList;
         this.field = field;
-        this.columnType = ColumnType.DIRECT;
+        this.columnType = RelationType.VIRTUAL;
     }
 
     @Override
@@ -36,6 +36,7 @@ final public class DirectDbColumnMappingImpl implements DirectDbColumnMapping {
         return referencingTable;
     }
 
+    @Override
     public String getReferencingEntity() {
         return referencingEntity;
     }
@@ -51,7 +52,7 @@ final public class DirectDbColumnMappingImpl implements DirectDbColumnMapping {
     }
 
     @Override
-    public ColumnType getColumnType() {
+    public RelationType getColumnType() {
         return columnType;
     }
 }

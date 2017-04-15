@@ -1,18 +1,15 @@
 package elasta.orm.entity.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.entity.DependencyInfo;
 import elasta.orm.entity.DependencyTpl;
 import elasta.orm.entity.EntitiesPreprocessor;
 import elasta.orm.entity.TableDependency;
-import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.RelationType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
-import elasta.orm.entity.core.ForeignColumnMapping;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.IndirectRelationMapping;
 import elasta.orm.entity.core.columnmapping.RelationMapping;
-import elasta.orm.entity.core.columnmapping.impl.IndirectDbColumnMappingImpl;
+import elasta.orm.entity.core.columnmapping.impl.IndirectRelationMappingImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,7 +45,7 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
 
         private Entity processEntity(Entity entity) {
 
-            List<DbColumnMapping> mappingList = Arrays.stream(entity.getDbMapping().getDbColumnMappings())
+            List<RelationMapping> mappingList = Arrays.stream(entity.getDbMapping().getRelationMappings())
                 .map(dbColumnMapping -> processColumnMapping(entity, dbColumnMapping))
                 .collect(Collectors.toList());
 
@@ -59,23 +56,24 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
                 new DbMapping(
                     entity.getDbMapping().getTable(),
                     entity.getDbMapping().getPrimaryColumn(),
-                    mappingList.toArray(new DbColumnMapping[mappingList.size()])
+                    entity.getDbMapping().getColumnMappings(),
+                    mappingList.toArray(new RelationMapping[mappingList.size()])
                 )
             );
         }
 
-        private DbColumnMapping processColumnMapping(Entity entity, DbColumnMapping dbColumnMapping) {
+        private RelationMapping processColumnMapping(Entity entity, RelationMapping dbColumnMapping) {
             switch (dbColumnMapping.getColumnType()) {
                 case INDIRECT:
-                    IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dbColumnMapping;
+                    IndirectRelationMapping mapping = (IndirectRelationMapping) dbColumnMapping;
                     Optional<DependencyTpl> dependencyTplOptional = checkCommonRelationalValidity(entity.getDbMapping().getTable(), mapping);
 
                     return dependencyTplOptional
                         .flatMap(dependencyTpl -> dependencyTpl.getFieldToDependencyInfoMap().values().stream()
                             .filter(dependencyInfo -> {
-                                if (dependencyInfo.getDbColumnMapping().getColumnType() == ColumnType.INDIRECT) {
+                                if (dependencyInfo.getRelationMapping().getColumnType() == RelationType.INDIRECT) {
 
-                                    IndirectDbColumnMapping depMapping = (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping();
+                                    IndirectRelationMapping depMapping = (IndirectRelationMapping) dependencyInfo.getRelationMapping();
 
                                     if (mapping.getRelationTable().equals(depMapping.getRelationTable())) {
                                         return true;
@@ -86,20 +84,20 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
                             .findAny()
                             .map(
                                 dependencyInfo -> setValuesIfNecessary(
-                                    (IndirectDbColumnMapping) dbColumnMapping,
-                                    (IndirectDbColumnMapping) dependencyInfo.getDbColumnMapping()
+                                    (IndirectRelationMapping) dbColumnMapping,
+                                    (IndirectRelationMapping) dependencyInfo.getRelationMapping()
                                 ))).orElse(dbColumnMapping);
 
             }
             return dbColumnMapping;
         }
 
-        private DbColumnMapping setValuesIfNecessary(IndirectDbColumnMapping mapping, IndirectDbColumnMapping mappingOther) {
+        private RelationMapping setValuesIfNecessary(IndirectRelationMapping mapping, IndirectRelationMapping mappingOther) {
             if (mapping.getSrcForeignColumnMappingList().size() > 0 && mapping.getDstForeignColumnMappingList().size() > 0) {
                 return mapping;
             }
 
-            return new IndirectDbColumnMappingImpl(
+            return new IndirectRelationMappingImpl(
                 mapping.getReferencingTable(),
                 mapping.getReferencingEntity(),
                 mapping.getRelationTable(),

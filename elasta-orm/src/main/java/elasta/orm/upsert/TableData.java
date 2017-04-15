@@ -112,7 +112,7 @@ final public class TableData {
         return result;
     }
 
-    public TableData withValues(Map<String, Object> map) {
+    public TableData addValues(Map<String, Object> map) {
         return new TableData(
             table,
             primaryColumns,
@@ -120,10 +120,32 @@ final public class TableData {
         );
     }
 
-    private Set<Map.Entry<String, Object>> mapEntries(Map<String, Object> map) {
+    private Map<String, Object> mapEntries(Map<String, Object> map) {
+        final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
         Map<String, Object> valuesMap = values.getMap();
-        return map.entrySet().stream().filter(
-            entry -> Utils.not(valuesMap.containsKey(entry.getKey())) && entry.getValue() != null
-        ).collect(Collectors.toSet());
+        map.entrySet().stream()
+            .filter(entry -> {
+
+                    String key = entry.getKey();
+
+                    Objects.requireNonNull(key);
+
+                    if (valuesMap.containsKey(key)) {
+                        Object prevValue = valuesMap.get(key);
+
+                        boolean isEquals = (prevValue == entry.getValue())
+                            || (prevValue != null && prevValue.equals(entry.getValue()));
+
+                        if (Utils.not(isEquals)) {
+                            throw new TableDataException("PrevValue '" + prevValue + "' and newValue '" + entry.getValue() + "' must be equals for key '" + key + "'");
+                        }
+                    }
+
+                    return true;
+                }
+            )
+            .forEach(entry -> mapBuilder.put(entry.getKey(), entry.getValue()));
+
+        return mapBuilder.build();
     }
 }

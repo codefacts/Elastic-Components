@@ -1,13 +1,11 @@
 package elasta.orm.entity;
 
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.columnmapping.*;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -49,10 +47,10 @@ public interface EntityUtils {
         return mapBuilder.build();
     }
 
-    static Map<String, DbColumnMapping> toFieldToDbColumnMappingMap(DbColumnMapping[] dbColumnMappings) {
-        ImmutableMap.Builder<String, DbColumnMapping> mapBuilder = ImmutableMap.builder();
+    static Map<String, ColumnMapping> toFieldToColumnMappingMap(ColumnMapping[] dbColumnMappings) {
+        ImmutableMap.Builder<String, ColumnMapping> mapBuilder = ImmutableMap.builder();
 
-        for (DbColumnMapping dbColumnMapping : dbColumnMappings) {
+        for (ColumnMapping dbColumnMapping : dbColumnMappings) {
             mapBuilder.put(
                 dbColumnMapping.getField(),
                 dbColumnMapping
@@ -62,121 +60,28 @@ public interface EntityUtils {
         return mapBuilder.build();
     }
 
-    static Map<String, SimpleDbColumnMapping> toSimpleDbColumnNameToSimpleDbColumnMapingMap(DbColumnMapping[] dbColumnMappings) {
-        ImmutableMap.Builder<String, SimpleDbColumnMapping> mapBuilder = ImmutableMap.builder();
-        for (DbColumnMapping dbColumnMapping : dbColumnMappings) {
-            if (dbColumnMapping.getColumnType() != ColumnType.SIMPLE) {
-                continue;
-            }
-            SimpleDbColumnMapping mapping = (SimpleDbColumnMapping) dbColumnMapping;
+    static Map<String, RelationMapping> toFieldToRelationMappingMap(RelationMapping[] relationMappings) {
+        ImmutableMap.Builder<String, RelationMapping> mapBuilder = ImmutableMap.builder();
+
+        for (RelationMapping relationMapping : relationMappings) {
             mapBuilder.put(
-                mapping.getColumn(),
-                mapping
+                relationMapping.getField(),
+                relationMapping
             );
         }
+
         return mapBuilder.build();
     }
 
-    class TableToTableDependenyMapBuilder {
-
-        final Map<String, TableDependency> dependencyMap = new HashMap<>();
-        final Map<String, Entity> entityNameToEntityMap = new HashMap<>();
-        final Map<String, Map<String, Field>> entityToFieldNameToFieldIndexMap = new HashMap<>();
-
-        public TableMapAndDependencyMappingInfo build(Collection<Entity> entities) {
-            entities.forEach(entity -> {
-
-                entityNameToEntityMap.put(entity.getName(), entity);
-
-                final DbColumnMapping[] dbColumnMappings = entity.getDbMapping().getDbColumnMappings();
-
-                for (int columnIndex = 0; columnIndex < dbColumnMappings.length; columnIndex++) {
-
-                    final DbColumnMapping dbColumnMapping = dbColumnMappings[columnIndex];
-
-                    if (dbColumnMapping.getColumnType() == ColumnType.SIMPLE) {
-                        continue;
-                    }
-
-                    switch (dbColumnMapping.getColumnType()) {
-                        case DIRECT: {
-                            DirectDbColumnMapping mapping = (DirectDbColumnMapping) dbColumnMapping;
-                            putInTable(
-                                mapping.getReferencingTable(),
-                                entity,
-                                new DependencyInfo(
-                                    getField(entity, mapping.getField()),
-                                    mapping
-                                )
-                            );
-                        }
-                        break;
-                        case INDIRECT: {
-                            IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dbColumnMapping;
-                            putInTable(
-                                mapping.getReferencingTable(),
-                                entity,
-                                new DependencyInfo(
-                                    getField(entity, mapping.getField()),
-                                    mapping
-                                )
-                            );
-                        }
-                        break;
-                        case VIRTUAL: {
-                            VirtualDbColumnMapping mapping = (VirtualDbColumnMapping) dbColumnMapping;
-                            putInTable(
-                                mapping.getReferencingTable(),
-                                entity,
-                                new DependencyInfo(
-                                    getField(entity, mapping.getField()),
-                                    mapping
-                                )
-                            );
-                        }
-                        break;
-                    }
-                }
-            });
-
-            return new TableMapAndDependencyMappingInfo(
-                dependencyMap,
-                entityNameToEntityMap
+    static Map<String, ColumnMapping> toColumnNameToColumnMapingMap(ColumnMapping[] columnMappings) {
+        ImmutableMap.Builder<String, ColumnMapping> mapBuilder = ImmutableMap.builder();
+        for (ColumnMapping columnMapping : columnMappings) {
+            mapBuilder.put(
+                columnMapping.getColumn(),
+                columnMapping
             );
         }
-
-        private void putInTable(String referencingTable, Entity entity, DependencyInfo dependencyInfo) {
-            TableDependency tableDependency = dependencyMap.get(referencingTable);
-            if (tableDependency == null) {
-                dependencyMap.put(
-                    referencingTable,
-                    tableDependency = new TableDependency(
-                        new HashMap<>()
-                    )
-                );
-            }
-            tableDependency.add(
-                entity,
-                dependencyInfo
-            );
-        }
-
-        private Field getField(Entity entity, String fieldName) {
-            String entityName = entity.getName();
-            Map<String, Field> indexMap = entityToFieldNameToFieldIndexMap.get(entityName);
-            if (indexMap == null) {
-                entityToFieldNameToFieldIndexMap.put(
-                    entityName,
-                    indexMap = new HashMap<>()
-                );
-
-                final Field[] fields = entity.getFields();
-                for (Field field : fields) {
-                    indexMap.put(field.getName(), field);
-                }
-            }
-            return indexMap.get(fieldName);
-        }
+        return mapBuilder.build();
     }
 
     class TableMapAndDependencyMappingInfo {

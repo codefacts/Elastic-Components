@@ -2,15 +2,13 @@ package elasta.orm.upsert.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.orm.delete.impl.JsonDependencyHandler;
 import elasta.orm.upsert.*;
 import elasta.orm.upsert.ex.InvalidValueException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Created by Jango on 2017-01-09.
@@ -52,16 +50,18 @@ final public class UpsertFunctionImpl implements UpsertFunction {
             this.context = context;
         }
 
-        public TableData insert() {
+        TableData insert() {
 
             final TableData tableData = tableData();
 
             final JsonObject tableValues = tableData.getValues();
 
+            String tableAndPrimaryColumnsKey = UpsertUtils.toTableAndPrimaryColumnsKey(
+                tableData.getTable(), tableData.getPrimaryColumns(), tableValues
+            );
+
             context.putOrMerge(
-                UpsertUtils.toTableAndPrimaryColumnsKey(
-                    tableData.getTable(), tableData.getPrimaryColumns(), tableValues
-                ),
+                tableAndPrimaryColumnsKey,
                 tableData
             );
 
@@ -77,14 +77,15 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                 handleBelongTo(belongsTo, tableValues);
             }
 
-            return tableData;
+            return context.get(tableAndPrimaryColumnsKey);
         }
 
         private TableData tableData() {
+
             TableData tableData = tableDataPopulator.populate(entity);
 
             JsonObject tableValues = new JsonObject(
-                new HashMap<>(
+                new LinkedHashMap<>(
                     tableData.getValues().getMap()
                 )
             );
@@ -124,46 +125,18 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
             final String field = belongsTo.getField();
 
-            Object value1 = entity.getValue(field);
+            final Object value = entity.getValue(field);
 
-            if (value1 == null) {
+            if (value == null) {
                 return;
             }
 
-            final Object value = value1;
-
-            if (value instanceof Map) {
-
-                handleBelongToJsonObject(belongsTo, tableValues, new JsonObject(castToMap(value)));
-
-            } else if (value instanceof JsonObject) {
-
-                handleBelongToJsonObject(belongsTo, tableValues, (JsonObject) value);
-
-            } else if (value instanceof List) {
-
-                handleBelongToJsonObjectList(belongsTo, tableValues, new JsonArray((List) value));
-
-            } else if (value instanceof JsonArray) {
-
-                handleBelongToJsonObjectList(belongsTo, tableValues, (JsonArray) value);
-
-            } else {
-                throw new InvalidValueException("Value should be object or array. Key: '" + field + "', Value: " + value);
-            }
+            new JsonDependencyHandler(jsonObject -> handleBelongToJsonObject(belongsTo, tableValues, jsonObject)).handle(value);
         }
 
-        private void handleBelongToJsonObjectList(BelongsTo belongsTo, JsonObject tableValues, JsonArray jsonArray) {
+        private void handleBelongToJsonObject(BelongsTo belongsTo, JsonObject jsonObject, JsonObject value) {
 
-            for (int i = 0; i < jsonArray.size(); i++) {
-                handleBelongToJsonObject(belongsTo, tableValues, jsonArray.getJsonObject(i));
-            }
-
-        }
-
-        private TableData handleBelongToJsonObject(BelongsTo belongsTo, JsonObject jsonObject, JsonObject value) {
-
-            return belongsTo
+            belongsTo
                 .getBelongToHandler()
                 .pushUpsert(
                     value,
@@ -174,63 +147,18 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                 );
         }
 
-        private List<JsonObject> handleIndirectDependency(
+        private void handleIndirectDependency(
             IndirectDependency indirectDependency, TableData tableData) {
 
             final String field = indirectDependency.getField();
 
-            Object value1 = entity.getValue(field);
+            final Object value = entity.getValue(field);
 
-            if (value1 == null) {
-                return ImmutableList.of();
+            if (value == null) {
+                return;
             }
 
-            final Object value = value1;
-
-            if (value instanceof Map) {
-
-                return ImmutableList.of(
-                    handleIndirectJsonObject(indirectDependency, tableData, new JsonObject(castToMap(value)))
-                );
-
-            } else if (value instanceof JsonObject) {
-
-                return ImmutableList.of(
-                    handleIndirectJsonObject(indirectDependency, tableData, (JsonObject) value)
-                );
-
-            } else if (value instanceof List) {
-
-                return handleIndirectJsonObjectList(indirectDependency, tableData, new JsonArray((List) value));
-
-            } else if (value instanceof JsonArray) {
-
-                return handleIndirectJsonObjectList(indirectDependency, tableData, (JsonArray) value);
-
-            } else {
-                throw new InvalidValueException("Value should be object or array. Key: '" + field + "', Value: " + value);
-            }
-        }
-
-        private Map<String, Object> castToMap(Object value) {
-            return (Map<String, Object>) value;
-        }
-
-        private List<JsonObject> handleIndirectJsonObjectList(IndirectDependency indirectDependency, TableData tableData, JsonArray jsonArray) {
-
-            ImmutableList.Builder<JsonObject> listBuilder = ImmutableList.builder();
-
-            for (int i = 0; i < jsonArray.size(); i++) {
-                listBuilder.add(
-                    handleIndirectJsonObject(
-                        indirectDependency,
-                        tableData,
-                        jsonArray.getJsonObject(i)
-                    )
-                );
-            }
-
-            return listBuilder.build();
+            new JsonDependencyHandler(jsonObject -> handleIndirectJsonObject(indirectDependency, tableData, jsonObject)).handle(value);
         }
 
         private JsonObject handleIndirectJsonObject(

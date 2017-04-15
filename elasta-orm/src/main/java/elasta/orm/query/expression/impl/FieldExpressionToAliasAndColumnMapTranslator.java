@@ -2,10 +2,8 @@ package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.entity.EntityMappingHelper;
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.Field;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.ColumnMapping;
 import elasta.orm.query.ex.QueryParserException;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
@@ -180,13 +178,9 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
 
     private String getColumn(String entity, String field) {
 
-        final DbColumnMapping columnMapping = helper.getColumnMapping(entity, field);
+        final ColumnMapping columnMapping = helper.getColumnMapping(entity, field);
 
-        if (columnMapping.getColumnType() != ColumnType.SIMPLE) {
-            throw new QueryParserException(entity + "." + field + " does not map to simple column type");
-        }
-
-        return ((SimpleDbColumnMapping) columnMapping).getColumn();
+        return (columnMapping).getColumn();
     }
 
     private String getChildEntity(String entity, String childEntityField) {

@@ -4,9 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.entity.*;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.SimpleDbColumnMapping;
-import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
+import elasta.orm.entity.core.columnmapping.ColumnMapping;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
@@ -73,61 +72,64 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     }
 
     @Override
-    public DbColumnMapping[] getColumnMappings(String entity) {
-        return getEntity(entity).getDbMapping().getDbColumnMappings();
+    public ColumnMapping[] getColumnMappings(String entity) {
+        return getEntity(entity).getDbMapping().getColumnMappings();
     }
 
     @Override
     public Map<String, Field> getFieldNameToFieldMap(String entity) {
         ImmutableMap.Builder<String, Field> fieldNametoFieldMap = ImmutableMap.builder();
-        Arrays.asList(getEntity(entity).getFields()).stream()
+        Arrays.stream(getEntity(entity).getFields())
             .forEach(field -> fieldNametoFieldMap.put(field.getName(), field));
 
         return fieldNametoFieldMap.build();
     }
 
     @Override
-    public Map<String, SimpleDbColumnMapping> getColumnNameToColumnMappingMap(String entity) {
-        ImmutableMap.Builder<String, SimpleDbColumnMapping> map = ImmutableMap.builder();
-        Arrays.asList(getEntity(entity).getDbMapping().getDbColumnMappings())
-            .stream()
-            .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
-            .map(Utils::<SimpleDbColumnMapping>cast)
+    public Map<String, ColumnMapping> getColumnNameToColumnMappingMap(String entity) {
+        ImmutableMap.Builder<String, ColumnMapping> map = ImmutableMap.builder();
+        Arrays.stream(getEntity(entity).getDbMapping().getColumnMappings())
+            .map(Utils::<ColumnMapping>cast)
             .forEach(dbColumnMapping -> map.put(dbColumnMapping.getColumn(), dbColumnMapping));
         return map.build();
     }
 
     @Override
-    public Map<String, DbColumnMapping> getFieldToColumnMappingMap(String entity) {
-        ImmutableMap.Builder<String, DbColumnMapping> map = ImmutableMap.builder();
-        Arrays.asList(getEntity(entity).getDbMapping().getDbColumnMappings())
+    public Map<String, ColumnMapping> getFieldToColumnMappingMap(String entity) {
+        ImmutableMap.Builder<String, ColumnMapping> map = ImmutableMap.builder();
+        Arrays.asList(getEntity(entity).getDbMapping().getColumnMappings())
             .forEach(dbColumnMapping -> map.put(dbColumnMapping.getField(), dbColumnMapping));
         return map.build();
     }
 
     @Override
     public Field getField(String entity, String field) {
-        return Arrays.asList(getEntity(entity).getFields())
-            .stream()
+        return Arrays.stream(getEntity(entity).getFields())
             .filter(ff -> ff.getName().equals(field))
             .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("Field '" + field + "' does not exists in '" + entity + "'"));
     }
 
     @Override
     public Field getFieldByColumn(String entity, String column) {
-        return Stream.of(getDbMapping(entity).getDbColumnMappings())
-            .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
-            .map(dbColumnMapping -> (SimpleDbColumnMapping) dbColumnMapping)
+        return Stream.of(getDbMapping(entity).getColumnMappings())
+            .map(dbColumnMapping -> (ColumnMapping) dbColumnMapping)
             .filter(simpleDbColumnMapping -> simpleDbColumnMapping.getColumn().equals(column))
             .map(simpleDbColumnMapping -> getField(entity, simpleDbColumnMapping.getField()))
             .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No field found for column '" + column + "' in entity '" + entity + "'"));
     }
 
     @Override
-    public DbColumnMapping getColumnMapping(String entity, String field) {
-        return Arrays.stream(getEntity(entity).getDbMapping().getDbColumnMappings())
+    public ColumnMapping getColumnMapping(String entity, String field) {
+        return Arrays.stream(getEntity(entity).getDbMapping().getColumnMappings())
             .filter(dbColumnMapping -> dbColumnMapping.getField().equals(field))
-            .findAny().get();
+            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No ColumnMapping found for field '" + entity + "." + field + "'"));
+    }
+
+    @Override
+    public RelationMapping getRelationMapping(String entity, String field) {
+        return Arrays.stream(getEntity(entity).getDbMapping().getRelationMappings())
+            .filter(dbColumnMapping -> dbColumnMapping.getField().equals(field))
+            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No ColumnMapping found for field '" + entity + "." + field + "'"));
     }
 
     @Override
@@ -136,13 +138,13 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     }
 
     @Override
-    public SimpleDbColumnMapping getPrimaryKeyColumnMapping(String entity) {
-        return (SimpleDbColumnMapping) getColumnMapping(entity, getEntity(entity).getPrimaryKey());
+    public ColumnMapping getPrimaryKeyColumnMapping(String entity) {
+        return getColumnMapping(entity, getEntity(entity).getPrimaryKey());
     }
 
     @Override
     public String getPrimaryKeyColumnName(String entity) {
-        return Utils.<SimpleDbColumnMapping>cast(getPrimaryKeyColumnMapping(entity)).getColumn();
+        return Utils.<ColumnMapping>cast(getPrimaryKeyColumnMapping(entity)).getColumn();
     }
 
     @Override

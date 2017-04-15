@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.Relationship;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.DirectDbColumnMapping;
-import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
-import elasta.orm.entity.core.columnmapping.VirtualDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.query.ex.QueryParserException;
 import elasta.orm.query.expression.core.JoinTpl;
 import elasta.sql.core.ColumnToColumnMapping;
@@ -43,24 +40,24 @@ class JoinTplToJoinDataConverter {
             throw new QueryParserException("No child '" + joinTpl.getChildEntity() + "' found in " + joinTpl.getParentEntity() + "." + joinTpl.getChildEntityField());
         }
 
-        DbColumnMapping columnMapping = helper.getColumnMapping(joinTpl.getParentEntity(), joinTpl.getChildEntityField());
+        RelationMapping columnMapping = helper.getRelationMapping(joinTpl.getParentEntity(), joinTpl.getChildEntityField());
 
         switch (columnMapping.getColumnType()) {
 
             case DIRECT:
-                return directColumnMapping((DirectDbColumnMapping) columnMapping, joinTpl);
+                return directColumnMapping((DirectRelationMapping) columnMapping, joinTpl);
 
             case INDIRECT:
-                return indirectColumnMapping((IndirectDbColumnMapping) columnMapping, joinTpl);
+                return indirectColumnMapping((IndirectRelationMapping) columnMapping, joinTpl);
 
             case VIRTUAL:
-                return virtualColumnMapping((VirtualDbColumnMapping) columnMapping, joinTpl);
+                return virtualColumnMapping((VirtualRelationMapping) columnMapping, joinTpl);
         }
 
         throw new QueryParserException("Invalid or no relationship between parent '" + joinTpl.getParentEntity() + "' and child '" + joinTpl.getChildEntity() + "'");
     }
 
-    private List<JoinData> virtualColumnMapping(VirtualDbColumnMapping columnMapping, JoinTpl joinTpl) {
+    private List<JoinData> virtualColumnMapping(VirtualRelationMapping columnMapping, JoinTpl joinTpl) {
 
         ImmutableList.Builder<ColumnToColumnMapping> listBuilder = ImmutableList.builder();
 
@@ -84,7 +81,7 @@ class JoinTplToJoinDataConverter {
         );
     }
 
-    private List<JoinData> indirectColumnMapping(IndirectDbColumnMapping columnMapping, JoinTpl joinTpl) {
+    private List<JoinData> indirectColumnMapping(IndirectRelationMapping columnMapping, JoinTpl joinTpl) {
 
         ImmutableList.Builder<JoinData> joinDataListBuilder = ImmutableList.builder();
 
@@ -135,10 +132,10 @@ class JoinTplToJoinDataConverter {
         return joinDataListBuilder.build();
     }
 
-    private List<JoinData> directColumnMapping(DirectDbColumnMapping directDbColumnMapping, JoinTpl joinTpl) {
+    private List<JoinData> directColumnMapping(DirectRelationMapping directRelationMapping, JoinTpl joinTpl) {
         ImmutableList.Builder<ColumnToColumnMapping> mappingListBuilder = ImmutableList.builder();
 
-        directDbColumnMapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
+        directRelationMapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
             mappingListBuilder.add(
                 new ColumnToColumnMapping(
                     foreignColumnMapping.getSrcColumn(),

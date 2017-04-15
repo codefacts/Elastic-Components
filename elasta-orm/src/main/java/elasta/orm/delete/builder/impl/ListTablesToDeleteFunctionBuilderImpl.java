@@ -8,7 +8,6 @@ import elasta.orm.delete.impl.DirectChildHandlerImpl;
 import elasta.orm.delete.impl.IndirectChildHandlerImpl;
 import elasta.orm.delete.impl.ListTablesToDeleteFunctionImpl;
 import elasta.orm.delete.impl.VirtualChildHandlerImpl;
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.columnmapping.*;
@@ -67,7 +66,7 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
             .forEach(dbColumnMapping -> {
                 switch (dbColumnMapping.getColumnType()) {
                     case DIRECT: {
-                        DirectDbColumnMapping mapping = (DirectDbColumnMapping) dbColumnMapping;
+                        DirectRelationMapping mapping = (DirectRelationMapping) dbColumnMapping;
                         directListBuilder.add(
                             new DirectChildHandlerImpl(
                                 mapping.getField(),
@@ -77,7 +76,7 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
                     }
                     break;
                     case INDIRECT: {
-                        IndirectDbColumnMapping mapping = (IndirectDbColumnMapping) dbColumnMapping;
+                        IndirectRelationMapping mapping = (IndirectRelationMapping) dbColumnMapping;
                         indirectListBuilder.add(
                             new IndirectChildHandlerImpl(
                                 mapping.getField(),
@@ -87,7 +86,7 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
                     }
                     break;
                     case VIRTUAL: {
-                        VirtualDbColumnMapping mapping = (VirtualDbColumnMapping) dbColumnMapping;
+                        VirtualRelationMapping mapping = (VirtualRelationMapping) dbColumnMapping;
                         virtualListBuilder.add(
                             new VirtualChildHandlerImpl(
                                 mapping.getField(),
@@ -132,11 +131,10 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
 
     private TableDataPopulator tableDataPopulator(DbMapping dbMapping) {
 
-        List<FieldToColumnMapping> columnMappings = Arrays.stream(dbMapping.getDbColumnMappings())
-            .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
+        List<FieldToColumnMapping> columnMappings = Arrays.stream(dbMapping.getColumnMappings())
             .map(dbColumnMapping -> new FieldToColumnMapping(
                 dbColumnMapping.getField(),
-                ((SimpleDbColumnMapping) dbColumnMapping).getColumn()
+                dbColumnMapping.getColumn()
             ))
             .collect(Collectors.toList());
 

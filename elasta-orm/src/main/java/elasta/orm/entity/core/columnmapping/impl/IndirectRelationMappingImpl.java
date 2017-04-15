@@ -1,8 +1,8 @@
 package elasta.orm.entity.core.columnmapping.impl;
 
-import elasta.orm.entity.core.ColumnType;
+import elasta.orm.entity.core.RelationType;
 import elasta.orm.entity.core.ForeignColumnMapping;
-import elasta.orm.entity.core.columnmapping.IndirectDbColumnMapping;
+import elasta.orm.entity.core.columnmapping.IndirectRelationMapping;
 import lombok.Value;
 
 import java.util.List;
@@ -12,16 +12,16 @@ import java.util.Objects;
  * Created by Jango on 2017-01-12.
  */
 @Value
-final public class IndirectDbColumnMappingImpl implements IndirectDbColumnMapping {
+final public class IndirectRelationMappingImpl implements IndirectRelationMapping {
     final String referencingTable;
     final String referencingEntity;
     final String relationTable;
     final List<ForeignColumnMapping> srcForeignColumnMappingList;
     final List<ForeignColumnMapping> dstForeignColumnMappingList;
     final String field;
-    final ColumnType columnType;
+    final RelationType columnType;
 
-    public IndirectDbColumnMappingImpl(String referencingTable, String referencingEntity, String relationTable, List<ForeignColumnMapping> srcForeignColumnMappingList, List<ForeignColumnMapping> dstForeignColumnMappingList, String field) {
+    public IndirectRelationMappingImpl(String referencingTable, String referencingEntity, String relationTable, List<ForeignColumnMapping> srcForeignColumnMappingList, List<ForeignColumnMapping> dstForeignColumnMappingList, String field) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(relationTable);
@@ -34,7 +34,7 @@ final public class IndirectDbColumnMappingImpl implements IndirectDbColumnMappin
         this.srcForeignColumnMappingList = srcForeignColumnMappingList;
         this.dstForeignColumnMappingList = dstForeignColumnMappingList;
         this.field = field;
-        this.columnType = ColumnType.INDIRECT;
+        this.columnType = RelationType.INDIRECT;
     }
 
     @Override
@@ -67,7 +67,7 @@ final public class IndirectDbColumnMappingImpl implements IndirectDbColumnMappin
     }
 
     @Override
-    public ColumnType getColumnType() {
+    public RelationType getColumnType() {
         return columnType;
     }
 }

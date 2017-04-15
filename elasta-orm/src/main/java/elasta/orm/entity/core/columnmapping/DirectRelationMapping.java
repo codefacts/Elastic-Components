@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Jango on 2017-01-12.
  */
-public interface VirtualDbColumnMapping extends RelationMapping {
+public interface DirectRelationMapping extends RelationMapping {
 
     String getReferencingTable();
 

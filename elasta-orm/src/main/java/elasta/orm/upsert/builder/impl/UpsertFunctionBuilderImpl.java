@@ -2,7 +2,6 @@ package elasta.orm.upsert.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
-import elasta.orm.entity.core.ColumnType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.columnmapping.*;
@@ -37,7 +36,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
     private final class QQ {
         final BuilderContext<UpsertFunction> context;
 
-        public QQ(BuilderContext<UpsertFunction> context) {
+        QQ(BuilderContext<UpsertFunction> context) {
             Objects.requireNonNull(context);
             this.context = context;
         }
@@ -65,9 +64,8 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         private UpsertFunction buildUpsertFunction(String entity) {
             DbMapping dbMapping = helper.getDbMapping(entity);
 
-            List<FieldToColumnMapping> list = Arrays.stream(dbMapping.getDbColumnMappings())
-                .filter(dbColumnMapping -> dbColumnMapping.getColumnType() == ColumnType.SIMPLE)
-                .map(dbColumnMapping -> new FieldToColumnMapping(dbColumnMapping.getField(), Utils.<SimpleDbColumnMapping>cast(dbColumnMapping).getColumn()))
+            List<FieldToColumnMapping> list = Arrays.stream(dbMapping.getColumnMappings())
+                .map(dbColumnMapping -> new FieldToColumnMapping(dbColumnMapping.getField(), Utils.<ColumnMapping>cast(dbColumnMapping).getColumn()))
                 .collect(Collectors.toList());
 
             TableDataPopulatorImpl tableDataPopulator = new TableDataPopulatorImpl(
@@ -86,7 +84,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
                     case DIRECT: {
                         directDependencyBuilder.add(
                             makeDirectMapping(
-                                (DirectDbColumnMapping) dbColumnMapping
+                                (DirectRelationMapping) dbColumnMapping
                             )
                         );
                         return;
@@ -94,7 +92,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
                     case INDIRECT: {
                         inDirectDependencyBuilder.add(
                             makeIndirectDepedency(
-                                (IndirectDbColumnMapping) dbColumnMapping
+                                (IndirectRelationMapping) dbColumnMapping
                             )
                         );
                         return;
@@ -102,7 +100,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
                     case VIRTUAL: {
                         belongsToBuilder.add(
                             makeBelongTo(
-                                (VirtualDbColumnMapping) dbColumnMapping
+                                (VirtualRelationMapping) dbColumnMapping
                             )
                         );
                         return;
@@ -126,7 +124,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
             );
         }
 
-        private DirectDependency makeDirectMapping(DirectDbColumnMapping mapping) {
+        private DirectDependency makeDirectMapping(DirectRelationMapping mapping) {
 
             List<ForeignColumnMapping> foreignColumnMappings = mapping.getForeignColumnMappingList().stream()
                 .map(foreignColumnMapping -> new ForeignColumnMapping(
@@ -145,27 +143,27 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
             );
         }
 
-        private IndirectDependency makeIndirectDepedency(IndirectDbColumnMapping indirectDbColumnMapping) {
+        private IndirectDependency makeIndirectDepedency(IndirectRelationMapping indirectRelationMapping) {
 
-            List<ColumnToColumnMapping> srcMappings = indirectDbColumnMapping.getSrcForeignColumnMappingList().stream()
+            List<ColumnToColumnMapping> srcMappings = indirectRelationMapping.getSrcForeignColumnMappingList().stream()
                 .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn(), foreignColumnMapping.getDstColumn()))
                 .collect(Collectors.toList());
 
-            List<ColumnToColumnMapping> dstMappings = indirectDbColumnMapping.getDstForeignColumnMappingList().stream()
+            List<ColumnToColumnMapping> dstMappings = indirectRelationMapping.getDstForeignColumnMappingList().stream()
                 .map(foreignColumnMapping -> new ColumnToColumnMapping(foreignColumnMapping.getSrcColumn(), foreignColumnMapping.getDstColumn()))
                 .collect(Collectors.toList());
 
             return new IndirectDependency(
-                indirectDbColumnMapping.getField(),
+                indirectRelationMapping.getField(),
                 new IndirectDependencyHandlerImpl(
                     new RelationTableUpserFunctionImpl(
                         new RelationTableDataPopulatorImpl(
-                            indirectDbColumnMapping.getRelationTable(),
+                            indirectRelationMapping.getRelationTable(),
                             srcMappings.toArray(new ColumnToColumnMapping[srcMappings.size()]),
                             dstMappings.toArray(new ColumnToColumnMapping[dstMappings.size()])
                         )
                     ),
-                    createUpsertFunction(indirectDbColumnMapping.getReferencingEntity())
+                    createUpsertFunction(indirectRelationMapping.getReferencingEntity())
                 )
             );
         }
@@ -174,7 +172,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
             return build(referencingEntity);
         }
 
-        private BelongsTo makeBelongTo(VirtualDbColumnMapping mapping) {
+        private BelongsTo makeBelongTo(VirtualRelationMapping mapping) {
 
             List<ForeignColumnMapping> foreignColumnMappings = mapping.getForeignColumnMappingList().stream()
                 .map(foreignColumnMapping -> new ForeignColumnMapping(foreignColumnMapping.getSrcColumn(), foreignColumnMapping.getDstColumn()))
@@ -196,7 +194,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         final String referencingEntity;
         final BuilderContext<UpsertFunction> functionMap;
 
-        public ProxyUpsertFunctionImpl(String referencingEntity, BuilderContext<UpsertFunction> context) {
+        ProxyUpsertFunctionImpl(String referencingEntity, BuilderContext<UpsertFunction> context) {
             this.referencingEntity = referencingEntity;
             this.functionMap = context;
         }

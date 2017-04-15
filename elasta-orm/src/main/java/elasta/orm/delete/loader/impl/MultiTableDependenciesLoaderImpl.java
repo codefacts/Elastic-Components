@@ -1,8 +1,11 @@
-package elasta.orm.delete.loader;
+package elasta.orm.delete.loader.impl;
 
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.delete.TableToTableDataMap;
+import elasta.orm.delete.loader.DependencyDataLoader;
+import elasta.orm.delete.loader.DependencyDataLoaderGraph;
+import elasta.orm.delete.loader.MultiTableDependenciesLoader;
 import elasta.orm.delete.loader.impl.TableDependenciesLoaderByDataMap;
 import elasta.orm.delete.loader.impl.TableDependenciesLoaderContextImpl;
 import elasta.orm.upsert.TableData;

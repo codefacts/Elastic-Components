@@ -3,11 +3,11 @@ package test;
 import com.google.common.collect.ImmutableList;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.JavaType;
-import elasta.orm.entity.core.columnmapping.DbColumnMapping;
-import elasta.orm.entity.core.columnmapping.impl.DirectDbColumnMappingImpl;
-import elasta.orm.entity.core.columnmapping.impl.IndirectDbColumnMappingImpl;
-import elasta.orm.entity.core.columnmapping.impl.SimpleDbColumnMappingImpl;
-import elasta.sql.core.*;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
+import elasta.orm.entity.core.columnmapping.ColumnMapping;
+import elasta.orm.entity.core.columnmapping.impl.DirectRelationMappingImpl;
+import elasta.orm.entity.core.columnmapping.impl.IndirectRelationMappingImpl;
+import elasta.orm.entity.core.columnmapping.impl.ColumnMappingImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -70,20 +70,22 @@ public interface Employees {
                 DbMapping.builder()
                     .table("EMPLOYEE")
                     .primaryColumn("EID")
-                    .dbColumnMappings(new DbColumnMapping[]{
-                        new SimpleDbColumnMappingImpl(
+                    .columnMappings(new ColumnMapping[]{
+                        new ColumnMappingImpl(
                             "eid", "EID".toUpperCase(), DbType.NUMBER
                         ),
-                        new SimpleDbColumnMappingImpl(
+                        new ColumnMappingImpl(
                             "ename", "ename".toUpperCase(), DbType.VARCHAR
                         ),
-                        new SimpleDbColumnMappingImpl(
+                        new ColumnMappingImpl(
                             "salary", "salary".toUpperCase(), DbType.NUMBER
                         ),
-                        new SimpleDbColumnMappingImpl(
+                        new ColumnMappingImpl(
                             "deg", "deg".toUpperCase(), DbType.VARCHAR
-                        ),
-                        new DirectDbColumnMappingImpl(
+                        )
+                    })
+                    .relationMappings(new RelationMapping[]{
+                        new DirectRelationMappingImpl(
                             "DEPARTMENT",
                             "department",
                             ImmutableList.of(
@@ -93,7 +95,7 @@ public interface Employees {
                             ),
                             "department"
                         ),
-                        new DirectDbColumnMappingImpl(
+                        new DirectRelationMappingImpl(
                             "DEPARTMENT",
                             "department",
                             ImmutableList.of(
@@ -103,7 +105,7 @@ public interface Employees {
                             ),
                             "department2"
                         ),
-                        new IndirectDbColumnMappingImpl(
+                        new IndirectRelationMappingImpl(
                             "DEPARTMENT",
                             "department",
                             "EMPLOYEE_DEPARTMENT",
@@ -158,14 +160,16 @@ public interface Employees {
             new DbMapping(
                 "DEPARTMENT",
                 "ID",
-                new DbColumnMapping[]{
-                    new SimpleDbColumnMappingImpl(
+                new ColumnMapping[]{
+                    new ColumnMappingImpl(
                         "id", "ID", DbType.NUMBER
                     ),
-                    new SimpleDbColumnMappingImpl(
+                    new ColumnMappingImpl(
                         "name", "NAME", DbType.VARCHAR
-                    ),
-                    new DirectDbColumnMappingImpl(
+                    )
+                },
+                new RelationMapping[]{
+                    new DirectRelationMappingImpl(
                         "DEPARTMENT",
                         "department",
                         ImmutableList.of(
@@ -175,7 +179,7 @@ public interface Employees {
                         ),
                         "department"
                     ),
-                    new DirectDbColumnMappingImpl(
+                    new DirectRelationMappingImpl(
                         "EMPLOYEE",
                         "employee",
                         ImmutableList.of(
