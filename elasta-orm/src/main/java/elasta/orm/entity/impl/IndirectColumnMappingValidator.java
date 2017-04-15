@@ -43,60 +43,29 @@ final class IndirectColumnMappingValidator {
 
     public void validate() {
 
-        boolean isFieldTypeOk = field.getJavaType() == JavaType.OBJECT || field.getJavaType() == JavaType.ARRAY;
-        if (Utils.not(isFieldTypeOk)) {
-            throw new EntityValidationException("Field '" + field.getName() + "' has an invalid type '" + field.getJavaType() + "' for dbColumnMappingType '"
-                + mapping.getColumnType() + "'");
-        }
+        checkFieldType();
 
-        if (Utils.not(
-            tableToTableDependencyMap.containsKey(entity.getDbMapping().getTable())
-        )) {
+        Relationship relationship = field.getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
+
+        internalEntityValidator.checkFieldTypeAndName(relationship, field);
+
+        if (Utils.not(tableToTableDependencyMap.containsKey(entity.getDbMapping().getTable()))) {
 
             final Entity referencingEntity = entityNameToEntityMap.get(mapping.getReferencingEntity());
-            if (referencingEntity == null) {
-                throw new EntityValidationException(
-                    "No entity found for referenceEntity '" + mapping.getReferencingEntity() + "' in mapping '" + mapping + "' in relationship '" + entity.getName() + "' <-> '" + mapping.getReferencingEntity() + "'"
-                );
-            }
-            if (Utils.not(
-                mapping.getReferencingEntity().equals(
-                    referencingEntity.getName()
-                ) && mapping.getReferencingTable().equals(
-                    referencingEntity.getDbMapping().getTable()
-                )
-            )) {
-                throw new EntityValidationException("Referencing Entity '" + mapping.getReferencingEntity() + "' or Table '" + mapping.getReferencingTable() + "' does not match with actual Referencing Entity '" + referencingEntity.getName() + "' or Table '" + referencingEntity.getDbMapping().getTable() + "'");
-            }
 
-            checkAllSrcColumnsExistsInDbColumnMappings(entity.getDbMapping(), mapping.getSrcForeignColumnMappingList());
-            checkAllSrcColumnsExistsInDbColumnMappings(referencingEntity.getDbMapping(), mapping.getDstForeignColumnMappingList());
+            checkRelationshipToReferencingEntity(referencingEntity);
+
+            checkAllSrcColumnsExistsInCombinedColumns(entity.getName(), mapping.getSrcForeignColumnMappingList());
+            checkAllSrcColumnsExistsInCombinedColumns(referencingEntity.getName(), mapping.getDstForeignColumnMappingList());
 
             return;
         }
 
-        Relationship relationship = field.getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
-        internalEntityValidator.checkFieldTypeAndName(relationship, field);
+        Optional<DependencyTpl> dependencyTplOptional = internalEntityValidator.checkRelationalValidity(mapping);
 
-        Optional<DependencyTpl> dependencyTplOptional = internalEntityValidator.checkCommonRelationalValidity(mapping);
-
-        Optional<DependencyInfo> info = dependencyTplOptional.flatMap(dependencyTpl -> {
-
-            return dependencyTpl.getFieldToDependencyInfoMap().values().stream()
-                .filter(dependencyInfo -> {
-                    if (dependencyInfo.getRelationMapping().getColumnType() == RelationType.INDIRECT) {
-
-                        IndirectRelationMapping depMapping = (IndirectRelationMapping) dependencyInfo.getRelationMapping();
-
-                        if (mapping.getRelationTable().equals(depMapping.getRelationTable())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
-                .findAny();
-
-        });
+        Optional<DependencyInfo> info = dependencyTplOptional.flatMap(dependencyTpl -> dependencyTpl.getFieldToDependencyInfoMap().values().stream()
+            .filter(this::findDependencyInfoInOppositeSide)
+            .findAny());
 
         if (info.isPresent()) {
 
@@ -110,11 +79,11 @@ final class IndirectColumnMappingValidator {
             );
 
         } else {
-            checkAllSrcColumnsExistsInDbColumnMappings(
-                entity.getDbMapping(), mapping.getSrcForeignColumnMappingList()
+            checkAllSrcColumnsExistsInCombinedColumns(
+                entity.getName(), mapping.getSrcForeignColumnMappingList()
             );
-            checkAllSrcColumnsExistsInDbColumnMappings(
-                entityNameToEntityMap.get(mapping.getReferencingEntity()).getDbMapping(), mapping.getDstForeignColumnMappingList()
+            checkAllSrcColumnsExistsInCombinedColumns(
+                entityNameToEntityMap.get(mapping.getReferencingEntity()).getName(), mapping.getDstForeignColumnMappingList()
             );
         }
 
@@ -137,6 +106,45 @@ final class IndirectColumnMappingValidator {
             }
         });
 
+    }
+
+    private boolean findDependencyInfoInOppositeSide(DependencyInfo dependencyInfo) {
+        if (dependencyInfo.getRelationMapping().getColumnType() == RelationType.INDIRECT) {
+
+            IndirectRelationMapping depMapping = (IndirectRelationMapping) dependencyInfo.getRelationMapping();
+
+            if (mapping.getRelationTable().equals(depMapping.getRelationTable())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void checkRelationshipToReferencingEntity(Entity referencingEntity) {
+
+        if (referencingEntity == null) {
+            throw new EntityValidationException(
+                "No entity found for referenceEntity '" + mapping.getReferencingEntity() + "' in mapping '" + mapping + "' in relationship '" + entity.getName() + "' <-> '" + mapping.getReferencingEntity() + "'"
+            );
+        }
+        if (Utils.not(
+            mapping.getReferencingEntity().equals(
+                referencingEntity.getName()
+            ) && mapping.getReferencingTable().equals(
+                referencingEntity.getDbMapping().getTable()
+            )
+        )) {
+            throw new EntityValidationException("Referencing Entity '" + mapping.getReferencingEntity() + "' or Table '" + mapping.getReferencingTable() + "' does not match with actual Referencing Entity '" + referencingEntity.getName() + "' or Table '" + referencingEntity.getDbMapping().getTable() + "'");
+        }
+    }
+
+    private void checkFieldType() {
+
+        boolean isFieldTypeOk = field.getJavaType() == JavaType.OBJECT || field.getJavaType() == JavaType.ARRAY;
+        if (Utils.not(isFieldTypeOk)) {
+            throw new EntityValidationException("Field '" + field.getName() + "' has an invalid type '" + field.getJavaType() + "' for dbColumnMappingType '"
+                + mapping.getColumnType() + "'");
+        }
     }
 
     private void checkMappingValidity(IndirectRelationMapping mapping, IndirectRelationMapping depMapping, DependencyTpl dependencyTpl, DependencyInfo dependencyInfo) {
@@ -181,25 +189,26 @@ final class IndirectColumnMappingValidator {
             );
         }
 
-        checkAllSrcColumnsExistsInDbColumnMappings(
-            entity.getDbMapping(),
+        checkAllSrcColumnsExistsInCombinedColumns(
+            entity.getName(),
             srcForeignColumnMappingList.size() > 0 ? srcForeignColumnMappingList : dstForeignColumnMappingList1
         );
 
-        checkAllSrcColumnsExistsInDbColumnMappings(
-            dependencyTpl.getEntity().getDbMapping(),
+        checkAllSrcColumnsExistsInCombinedColumns(
+            dependencyTpl.getEntity().getName(),
             dstForeignColumnMappingList.size() > 0 ? dstForeignColumnMappingList : srcForeignColumnMappingList1
         );
     }
 
-    private void checkAllSrcColumnsExistsInDbColumnMappings(DbMapping dbMapping, List<ForeignColumnMapping> foreignColumnMappings) {
-        Map<String, ColumnMapping> map = EntityUtils.toColumnNameToColumnMapingMap(dbMapping.getColumnMappings());
+    private void checkAllSrcColumnsExistsInCombinedColumns(String entity, List<ForeignColumnMapping> foreignColumnMappings) {
+
         foreignColumnMappings.forEach(foreignColumnMapping -> {
-            if (
-                Utils.not(map.containsKey(foreignColumnMapping.getSrcColumn()))
-                ) {
+
+            boolean existsInCombinedColumns = internalEntityValidator.columnExistsInCombinedColumns(entity, foreignColumnMapping.getSrcColumn());
+
+            if (Utils.not(existsInCombinedColumns)) {
                 throw new EntityValidationException(
-                    "Mapping column '" + foreignColumnMapping.getSrcColumn() + "' does not exists in table column list in table '" + dbMapping.getTable() + "'"
+                    "Mapping column '" + foreignColumnMapping.getSrcColumn() + "' does not exists in table column list in table '" + entityNameToEntityMap.get(entity).getDbMapping().getTable() + "'"
                 );
             }
         });

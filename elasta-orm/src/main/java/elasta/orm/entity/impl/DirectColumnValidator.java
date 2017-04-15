@@ -1,6 +1,7 @@
 package elasta.orm.entity.impl;
 
 import elasta.commons.Utils;
+import elasta.orm.entity.DependencyInfo;
 import elasta.orm.entity.DependencyTpl;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
@@ -31,80 +32,85 @@ final class DirectColumnValidator {
     }
 
     public void validate() {
-        boolean isFieldTypeOk = field.getJavaType() == JavaType.OBJECT;
-        if (Utils.not(isFieldTypeOk)) {
-            throw new EntityValidationException("Field '" + field.getName() + "' has an invalid type '" + field.getJavaType() + "' for dbColumnMappingType '"
-                + mapping.getColumnType() + "'");
-        }
+
+        checkFieldType();
 
         Relationship relationship = field.getRelationship()
             .orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + entity.getDbMapping().getTable() + "'"));
 
         internalEntityValidator.checkFieldTypeAndName(relationship, field);
 
+        checkRelationshipType(relationship);
+
+        Optional<DependencyTpl> dependencyTplOptional = internalEntityValidator.checkRelationalValidity(mapping);
+
+        dependencyTplOptional.flatMap(dependencyTpl -> dependencyTpl.getFieldToDependencyInfoMap().values().stream()
+            .filter(this::findDependencyInfoInOppositeSide)
+            .findAny()).ifPresent(dependencyInfo -> {
+
+            DependencyTpl dependencyTpl = dependencyTplOptional.get();
+
+            Relationship relationshipOther = dependencyInfo.getField().getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + dependencyTpl.getEntity().getDbMapping().getTable() + "'"));
+
+            checkRelationshipTypeAndJavaType(dependencyInfo, dependencyTpl, relationship, relationshipOther);
+        });
+    }
+
+    private void checkRelationshipTypeAndJavaType(DependencyInfo dependencyInfo, DependencyTpl dependencyTpl, Relationship relationship, Relationship relationshipOther) {
+
+        if (dependencyInfo.getField().getJavaType() == JavaType.OBJECT) {
+            if (Utils.not(
+                relationshipOther.getType() == Relationship.Type.ONE_TO_ONE
+                    && relationship.getType() == Relationship.Type.ONE_TO_ONE
+            )) {
+
+                throw new EntityValidationException(
+                    "invalid relationship type '" + relationship.getType() + "' in relation '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "." + dependencyInfo.getField().getName() + "'"
+                );
+            }
+        }
+
+        if (dependencyInfo.getField().getJavaType() == JavaType.ARRAY) {
+            if (Utils.not(
+                relationshipOther.getType() == Relationship.Type.ONE_TO_MANY
+                    && relationship.getType() == Relationship.Type.MANY_TO_ONE
+            )) {
+                throw new EntityValidationException(
+                    "invalid relationship type '" + relationship.getType() + "' in relation '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "." + dependencyInfo.getField().getName() + "'"
+                );
+            }
+        }
+    }
+
+    private boolean findDependencyInfoInOppositeSide(DependencyInfo dependencyInfo) {
+
+        if (dependencyInfo.getRelationMapping().getColumnType() == RelationType.VIRTUAL) {
+
+            VirtualRelationMapping depMapping = (VirtualRelationMapping) dependencyInfo.getRelationMapping();
+
+            return internalEntityValidator.isEqualDirectAndVirtual(
+                mapping.getForeignColumnMappingList(), depMapping.getForeignColumnMappingList()
+            );
+        }
+        return false;
+    }
+
+    private void checkRelationshipType(Relationship relationship) {
+
         if (Utils.not(relationship.getType() == Relationship.Type.ONE_TO_ONE || relationship.getType() == Relationship.Type.MANY_TO_ONE)) {
             throw new EntityValidationException(
                 "Relationship type '" + relationship.getType() + "' is invalid for mapping type '" + mapping.getColumnType() + "'"
             );
         }
+    }
 
-        Optional<DependencyTpl> dependencyTplOptional = internalEntityValidator.checkCommonRelationalValidity(mapping);
+    private void checkFieldType() {
 
-//                checkAllColumnExistInBothTables(
-//                    entity.getDbMapping(),
-//                    dependencyTpl.getEntity().getDbMapping(),
-//                    mapping.getForeignColumnMappingList()
-//                );
+        boolean isFieldTypeOk = field.getJavaType() == JavaType.OBJECT;
 
-        dependencyTplOptional.flatMap(dependencyTpl -> {
-
-            return dependencyTpl.getFieldToDependencyInfoMap().values().stream()
-                .filter(dependencyInfo -> {
-                    if (dependencyInfo.getRelationMapping().getColumnType() == RelationType.VIRTUAL) {
-                        VirtualRelationMapping depMapping = (VirtualRelationMapping) dependencyInfo.getRelationMapping();
-                        if (mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size()) {
-                            throw new EntityValidationException(
-                                "mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size() in relationship '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "'"
-                            );
-                        }
-                        if (internalEntityValidator.isEqualDirectAndVirtual(
-                            mapping.getForeignColumnMappingList(), depMapping.getForeignColumnMappingList()
-                        )) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
-                .findAny();
-
-        }).ifPresent(info -> {
-
-            DependencyTpl dependencyTpl = dependencyTplOptional.get();
-
-            Relationship relationshipOther = info.getField().getRelationship().orElseThrow(() -> new EntityValidationException("No relationship present for mapping '" + mapping + "' in table '" + dependencyTpl.getEntity().getDbMapping().getTable() + "'"));
-
-            if (info.getField().getJavaType() == JavaType.OBJECT) {
-                if (Utils.not(
-                    relationshipOther.getType() == Relationship.Type.ONE_TO_ONE
-                        && relationship.getType() == Relationship.Type.ONE_TO_ONE
-                )) {
-
-                    throw new EntityValidationException(
-                        "invalid relationship type '" + relationship.getType() + "' in relation '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "." + info.getField().getName() + "'"
-                    );
-                }
-            }
-
-            if (info.getField().getJavaType() == JavaType.ARRAY) {
-                if (Utils.not(
-                    relationshipOther.getType() == Relationship.Type.ONE_TO_MANY
-                        && relationship.getType() == Relationship.Type.MANY_TO_ONE
-                )) {
-                    throw new EntityValidationException(
-                        "invalid relationship type '" + relationship.getType() + "' in relation '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "." + info.getField().getName() + "'"
-                    );
-                }
-            }
-        });
+        if (Utils.not(isFieldTypeOk)) {
+            throw new EntityValidationException("Field '" + field.getName() + "' has an invalid type '" + field.getJavaType() + "' for dbColumnMappingType '"
+                + mapping.getColumnType() + "'");
+        }
     }
 }

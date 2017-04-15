@@ -8,11 +8,9 @@ import elasta.orm.entity.TableDependency;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.entity.ex.EntityValidationException;
+import elasta.orm.entity.ex.InternalEntityValidatorException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Created by sohan on 4/14/2017.
@@ -22,8 +20,9 @@ final class InternalEntityValidator {
     final Map<String, Field> fieldNameToFieldMap;
     final Map<String, ColumnMapping> fieldToColumnMappingMap;
     final Map<String, RelationMapping> fieldToRelationMappingMap;
-    private final Map<String, TableDependency> tableToTableDependencyMap;
-    private final Map<String, Entity> entityNameToEntityMap;
+    final Map<String, TableDependency> tableToTableDependencyMap;
+    final Map<String, Entity> entityNameToEntityMap;
+    final EntityToCombinedColumnsMap entityToCombinedColumnsMap;
 
     public InternalEntityValidator(EntityValidator.Params params) {
         Objects.requireNonNull(params);
@@ -36,6 +35,9 @@ final class InternalEntityValidator {
         );
         fieldToRelationMappingMap = EntityUtils.toFieldToRelationMappingMap(
             entity.getDbMapping().getRelationMappings()
+        );
+        entityToCombinedColumnsMap = new EntityToCombinedColumnsMap(
+            entityNameToEntityMap
         );
     }
 
@@ -98,58 +100,59 @@ final class InternalEntityValidator {
         }
     }
 
-    void checkAllColumnExistInBothTables(DbMapping srcDbMapping, DbMapping dstDbMapping, List<ForeignColumnMapping> foreignColumnMappingList) {
-        Map<String, ColumnMapping> srcColumnMappingMap = EntityUtils.toColumnNameToColumnMapingMap(srcDbMapping.getColumnMappings());
-        Map<String, ColumnMapping> dstColumnMappingMap = EntityUtils.toColumnNameToColumnMapingMap(dstDbMapping.getColumnMappings());
-
-        foreignColumnMappingList.forEach(foreignColumnMapping -> {
-            if (Utils.not(
-                srcColumnMappingMap.containsKey(foreignColumnMapping.getSrcColumn())
-            )) {
-                throw new EntityValidationException(
-                    "srcColumn '" + foreignColumnMapping.getSrcColumn() + "' is not present in the column list in table '" + srcDbMapping.getTable() + "'"
-                );
-            }
-
-            if (Utils.not(
-                dstColumnMappingMap.containsKey(foreignColumnMapping.getDstColumn())
-            )) {
-                throw new EntityValidationException(
-                    "srcColumn '" + foreignColumnMapping.getSrcColumn() + "' is not present in the column list in table '" + dstDbMapping.getTable() + "'"
-                );
-            }
-        });
+    boolean columnExistsInCombinedColumns(String entity, String column) {
+        return entityToCombinedColumnsMap.exists(entity, column);
     }
 
-    Optional<DependencyTpl> checkCommonRelationalValidity(RelationMapping mapping) {
+    private Entity getEntityByName(String entityName) {
+        Entity entity = entityNameToEntityMap.get(entityName);
+        if (entity == null) {
+            throw new InternalEntityValidatorException("No entity found for entity name '" + entityName + "'");
+        }
+        return entity;
+    }
+
+    Optional<DependencyTpl> checkRelationalValidity(RelationMapping mapping) {
+
         Optional<DependencyTpl> dependencyTplOptional = getDependencyTpl(entity, mapping);
 
         return dependencyTplOptional.map(dependencyTpl -> {
+
             boolean mappingEntityInfoIsCorrect = mapping.getReferencingTable().equals(dependencyTpl.getEntity().getDbMapping().getTable())
                 && mapping.getReferencingEntity().equals(dependencyTpl.getEntity().getName());
 
             if (Utils.not(mappingEntityInfoIsCorrect)) {
                 throw new EntityValidationException("Referencing Entity '" + mapping.getReferencingEntity() + "' or Table '" + mapping.getReferencingTable() + "' does not match with actual Referencing Entity '" + dependencyTpl.getEntity().getName() + "' or Table '" + dependencyTpl.getEntity().getDbMapping().getTable() + "'");
             }
+
             return dependencyTpl;
         });
     }
 
-    boolean isEqualDirectAndVirtual(List<ForeignColumnMapping> foreignColumnMappingList, List<ForeignColumnMapping> foreignColumnMappingList1) {
-        for (int i = 0; i < foreignColumnMappingList.size(); i++) {
-            ForeignColumnMapping mapping1 = foreignColumnMappingList.get(i);
-            ForeignColumnMapping mapping2 = foreignColumnMappingList1.get(i);
-            if (
-                Utils.not(
-                    mapping1.getSrcColumn().equals(
-                        mapping2.getSrcColumn()
-                    )
-                        &&
-                        mapping1.getDstColumn().equals(
-                            mapping2.getDstColumn()
-                        )
+    boolean isEqualDirectAndVirtual(List<ForeignColumnMapping> directForeignColumnMappingList, List<ForeignColumnMapping> virtualForeignColumnMappingList) {
+
+        if (directForeignColumnMappingList == virtualForeignColumnMappingList) {
+            return true;
+        }
+
+        if (directForeignColumnMappingList.size() != virtualForeignColumnMappingList.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < directForeignColumnMappingList.size(); i++) {
+            ForeignColumnMapping mapping1 = directForeignColumnMappingList.get(i);
+            ForeignColumnMapping mapping2 = virtualForeignColumnMappingList.get(i);
+
+            boolean equals = mapping1
+                .getSrcColumn().equals(
+                    mapping2.getSrcColumn()
                 )
-                ) {
+                &&
+                mapping1.getDstColumn().equals(
+                    mapping2.getDstColumn()
+                );
+
+            if (Utils.not(equals)) {
                 return false;
             }
         }

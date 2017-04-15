@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.columnmapping.*;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.Collection;
 import java.util.Map;
@@ -84,6 +86,8 @@ public interface EntityUtils {
         return mapBuilder.build();
     }
 
+    @Value
+    @Builder
     class TableMapAndDependencyMappingInfo {
         final Map<String, TableDependency> tableToTableDependencyMap;
         final Map<String, Entity> entityNameToEntityMap;
@@ -91,16 +95,8 @@ public interface EntityUtils {
         public TableMapAndDependencyMappingInfo(Map<String, TableDependency> tableToTableDependencyMap, Map<String, Entity> entityNameToEntityMap) {
             Objects.requireNonNull(tableToTableDependencyMap);
             Objects.requireNonNull(entityNameToEntityMap);
-            this.tableToTableDependencyMap = tableToTableDependencyMap;
-            this.entityNameToEntityMap = entityNameToEntityMap;
-        }
-
-        public Map<String, TableDependency> getTableToTableDependencyMap() {
-            return tableToTableDependencyMap;
-        }
-
-        public Map<String, Entity> getEntityNameToEntityMap() {
-            return entityNameToEntityMap;
+            this.tableToTableDependencyMap = ImmutableMap.copyOf(tableToTableDependencyMap);
+            this.entityNameToEntityMap = ImmutableMap.copyOf(entityNameToEntityMap);
         }
     }
 }
