@@ -139,6 +139,7 @@ final public class TableData {
                         if (Utils.not(isEquals)) {
                             throw new TableDataException("PrevValue '" + prevValue + "' and newValue '" + entry.getValue() + "' must be equals for key '" + key + "'");
                         }
+                        return false;
                     }
 
                     return true;
