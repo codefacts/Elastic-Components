@@ -28,7 +28,7 @@ public interface DeleteUtils {
     }
 
     static Stream<RelationMapping> getRelationMappingsForDelete(DbMapping dbMapping) {
-        return Arrays.stream(dbMapping.getColumnMappings())
-            .filter(dbColumnMapping -> dbColumnMapping instanceof RelationMapping).map(dbColumnMapping -> (RelationMapping) dbColumnMapping);
+        return Arrays.stream(dbMapping.getRelationMappings())
+            .map(relationMapping -> relationMapping);
     }
 }

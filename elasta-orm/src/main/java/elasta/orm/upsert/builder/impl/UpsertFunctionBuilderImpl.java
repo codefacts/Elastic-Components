@@ -75,7 +75,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
             );
 
             ImmutableList.Builder<DirectDependency> directDependencyBuilder = ImmutableList.builder();
-            ImmutableList.Builder<IndirectDependency> inDirectDependencyBuilder = ImmutableList.builder();
+            ImmutableList.Builder<IndirectDependency> indirectDependencyBuilder = ImmutableList.builder();
             ImmutableList.Builder<BelongsTo> belongsToBuilder = ImmutableList.builder();
 
             UpsertUtils.getRelationMappingsForUpsert(dbMapping).forEach(dbColumnMapping -> {
@@ -90,7 +90,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
                         return;
                     }
                     case INDIRECT: {
-                        inDirectDependencyBuilder.add(
+                        indirectDependencyBuilder.add(
                             makeIndirectDepedency(
                                 (IndirectRelationMapping) dbColumnMapping
                             )
@@ -112,7 +112,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
             });
 
             final ImmutableList<DirectDependency> directDependencies = directDependencyBuilder.build();
-            final ImmutableList<IndirectDependency> indirectDependencies = inDirectDependencyBuilder.build();
+            final ImmutableList<IndirectDependency> indirectDependencies = indirectDependencyBuilder.build();
             final ImmutableList<BelongsTo> belongsTos = belongsToBuilder.build();
 
             return new UpsertFunctionImpl(

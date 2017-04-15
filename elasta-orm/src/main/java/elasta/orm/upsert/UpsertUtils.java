@@ -23,6 +23,7 @@ public interface UpsertUtils {
     }
 
     static Stream<RelationMapping> getRelationMappingsForUpsert(DbMapping dbMapping) {
-        return Arrays.stream(dbMapping.getColumnMappings()).filter(dbColumnMapping -> dbColumnMapping instanceof RelationMapping).map(dbColumnMapping -> (RelationMapping) dbColumnMapping);
+        return Arrays.stream(dbMapping.getRelationMappings())
+            .map(relationMapping -> relationMapping);
     }
 }

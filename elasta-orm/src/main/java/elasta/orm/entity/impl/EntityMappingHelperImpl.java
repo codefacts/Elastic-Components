@@ -112,7 +112,7 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     @Override
     public Field getFieldByColumn(String entity, String column) {
         return Stream.of(getDbMapping(entity).getColumnMappings())
-            .map(dbColumnMapping -> (ColumnMapping) dbColumnMapping)
+            .map(dbColumnMapping -> dbColumnMapping)
             .filter(simpleDbColumnMapping -> simpleDbColumnMapping.getColumn().equals(column))
             .map(simpleDbColumnMapping -> getField(entity, simpleDbColumnMapping.getField()))
             .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No field found for column '" + column + "' in entity '" + entity + "'"));
