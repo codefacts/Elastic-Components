@@ -1,6 +1,8 @@
 package elasta.sql.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import elasta.commons.Utils;
 import elasta.criteria.Func;
 import elasta.criteria.funcs.ParamsBuilderImpl;
 import elasta.sql.SqlBuilderDialect;
@@ -40,10 +42,17 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         StringBuilder keysBuilder = new StringBuilder();
         StringBuilder qBuilder = new StringBuilder();
 
-        jsonObject.getMap().forEach((column, o) -> {
+        jsonObject.getMap().forEach((column, value) -> {
+
             keysBuilder.append(column(column, "")).append(COMMA);
+
+            if (value == null) {
+                qBuilder.append(nul1()).append(COMMA);
+                return;
+            }
+
             qBuilder.append("?").append(COMMA);
-            paramsBuilder.add(o);
+            paramsBuilder.add(value);
         });
 
         if (jsonObject.size() > 0) {
@@ -133,17 +142,31 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     private SqlAndParams toDeleteSql(DeleteData deleteData) {
-        ImmutableList.Builder<Object> lsitBuilder = ImmutableList.builder();
+        ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();
 
-        String where = Arrays.stream(deleteData.getColumnValuePairs())
-            .peek(columnValuePair -> lsitBuilder.add(columnValuePair.getValue()))
-            .map(columnValuePair -> column(columnValuePair.getPrimaryColumn(), "") + " = ?")
-            .collect(Collectors.joining(" AND "));
+        String where = toWhereSql(deleteData.getColumnValuePairs(), listBuilder);
 
         return new SqlAndParams(
             "DELETE FROM " + table(deleteData.getTable(), "") + " WHERE " + (where.isEmpty() ? "1" : where),
-            new JsonArray(lsitBuilder.build())
+            new JsonArray(listBuilder.build())
         );
+    }
+
+    private String toWhereSql(ColumnValuePair[] columnValuePairs, ImmutableList.Builder<Object> listBuilder) {
+        return Arrays.stream(columnValuePairs)
+            .map(columnValuePair -> {
+
+                if (columnValuePair.getValue() == null) {
+
+                    return column(columnValuePair.getPrimaryColumn(), "") + " is " + nul1();
+                }
+
+                listBuilder.add(columnValuePair.getValue());
+
+                return column(columnValuePair.getPrimaryColumn(), "") + " = ?";
+
+            })
+            .collect(Collectors.joining(" AND "));
     }
 
     @Override
@@ -221,64 +244,6 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         );
     }
 
-    @Override
-    public SqlListAndParamsList toSql(Set<DeleteRelationData> deleteRelationDataSet) {
-        ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
-        ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
-
-        deleteRelationDataSet.forEach(deleteRelationData -> {
-            SqlAndParams sqlAndParams = toSqlAndParams(deleteRelationData);
-            sqlListBuilder.add(sqlAndParams.getSql());
-            paramsListBuilder.add(sqlAndParams.getParams());
-        });
-
-        return new SqlListAndParamsList(
-            sqlListBuilder.build(),
-            paramsListBuilder.build()
-        );
-    }
-
-    private SqlAndParams toSqlAndParams(DeleteRelationData deleteRelationData) {
-        switch (deleteRelationData.getOperationType()) {
-            case UPDATE: {
-
-                ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
-
-                String set = deleteRelationData.getReferencingColumns().stream()
-                    .map(column -> {
-                        return column(column, "") + " = null";
-                    })
-                    .collect(Collectors.joining(", "));
-
-                return new SqlAndParams(
-                    "UPDATE " + table(deleteRelationData.getReferencingTable(), "") + " SET " + set + " WHERE " + where(deleteRelationData.getPrimaryColumnValuePairs(), paramsBuilder),
-                    new JsonArray(
-                        paramsBuilder.build()
-                    )
-                );
-            }
-            case DELETE: {
-
-                ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
-
-                return new SqlAndParams(
-                    "DELETE FROM " + table(deleteRelationData.getReferencingTable(), "") + " WHERE " + where(deleteRelationData.getPrimaryColumnValuePairs(), paramsBuilder),
-                    new JsonArray(
-                        paramsBuilder.build()
-                    )
-                );
-            }
-        }
-        throw new SqlBuilderUtilsException("Invalid deleteRelationData.operationType '" + deleteRelationData.getOperationType() + "'");
-    }
-
-    private String where(List<ColumnValuePair> primaryColumnValuePairs, ImmutableList.Builder<Object> paramsBuilder) {
-        return primaryColumnValuePairs.stream()
-            .peek(columnValuePair -> paramsBuilder.add(columnValuePair.getValue()))
-            .map(columnValuePair -> column(columnValuePair.getPrimaryColumn(), "") + " = ?")
-            .collect(Collectors.joining(" AND "));
-    }
-
     private SelectClauseHandlerImpl select(List<Func> selectFuncs, ParamsBuilderImpl paramsBuilder) {
         return new SelectClauseHandlerImpl(
             selectFuncs,
@@ -303,16 +268,9 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     private SqlAndParams createUpdateSql(UpdateTpl updateTpl) {
         ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
 
-        String set = updateTpl.getData()
-            .stream()
-            .peek(e -> paramsListBuilder.add(e.getValue()))
-            .map(e -> column(e.getKey(), "") + " = ?")
-            .collect(Collectors.joining(", "));
+        String set = toSetSql(updateTpl.getData(), paramsListBuilder);
 
-        String where = updateTpl.getSqlCriterias().stream()
-            .peek(sqlCriteria -> paramsListBuilder.add(sqlCriteria.getValue()))
-            .map(sqlCriteria -> column(sqlCriteria.getColumn(), "") + " = ?")
-            .collect(Collectors.joining(" AND "));
+        String where = toWhere(updateTpl.getSqlCriterias(), paramsListBuilder);
 
         return new SqlAndParams(
             "UPDATE " + table(updateTpl.getTable(), "") + " SET " + set + (where.isEmpty() ? "" : " WHERE " + where),
@@ -322,44 +280,37 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         );
     }
 
+    private String toSetSql(JsonObject data, ImmutableList.Builder<Object> paramsListBuilder) {
+
+        return data.stream()
+            .map(e -> {
+
+                if (e.getValue() == null) {
+                    return column(e.getKey(), "") + " = " + nul1();
+                }
+
+                paramsListBuilder.add(e.getValue());
+
+                return column(e.getKey(), "") + " = ?";
+
+            })
+            .collect(Collectors.joining(", "));
+    }
+
     private SqlAndParams createInsertSql(UpdateTpl updateTpl) {
 
-        StringBuilder columnsBuilder = new StringBuilder();
-        StringBuilder valuesBuilder = new StringBuilder();
-
-        ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
-
-        final String COMMA = ", ";
-
-        updateTpl.getData().forEach(e -> {
-            columnsBuilder.append(column(e.getKey(), "")).append(COMMA);
-            valuesBuilder.append("?").append(COMMA);
-            paramsListBuilder.add(
-                e.getValue()
-            );
-        });
-
-        if (updateTpl.getData().size() > 0) {
-            columnsBuilder.delete(columnsBuilder.length() - COMMA.length(), columnsBuilder.length());
-            valuesBuilder.delete(valuesBuilder.length() - COMMA.length(), valuesBuilder.length());
+        if (Utils.not(updateTpl.getSqlCriterias().isEmpty())) {
+            throw new SqlBuilderUtilsException("UpdateTpl with operationType 'INSERT' must have an empty SqlCriteria List");
         }
 
-        return new SqlAndParams(
-            "INSERT INTO " + table(updateTpl.getTable(), "") + " (" + columnsBuilder.toString() + ") VALUES (" + valuesBuilder.toString() + ")",
-            new JsonArray(
-                paramsListBuilder.build()
-            )
-        );
+        return insertSql(updateTpl.getTable(), updateTpl.getData());
     }
 
     private SqlAndParams createDeleteSql(UpdateTpl updateTpl) {
 
         ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
 
-        String where = updateTpl.getSqlCriterias().stream()
-            .peek(sqlCriteria -> paramsListBuilder.add(sqlCriteria.getValue()))
-            .map(sqlCriteria -> column(sqlCriteria.getColumn(), "") + " = ?")
-            .collect(Collectors.joining(" AND "));
+        String where = toWhere(updateTpl.getSqlCriterias(), paramsListBuilder);
 
         return new SqlAndParams(
             "DELETE FROM " + table(updateTpl.getTable(), "") + (where.isEmpty() ? " WHERE 1" : " WHERE " + where),
@@ -370,8 +321,17 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     private String toWhere(Collection<SqlCriteria> sqlCriterias, ImmutableList.Builder<Object> builder) {
-        return sqlCriterias.stream().peek(sqlCriteria -> builder.add(sqlCriteria.getValue()))
-            .map(sqlCriteria -> column(sqlCriteria.getColumn(), sqlCriteria.getAlias().orElse("")) + " = ?")
+        return sqlCriterias.stream()
+            .map(sqlCriteria -> {
+
+                if (sqlCriteria.getValue() == null) {
+                    return column(sqlCriteria.getColumn(), sqlCriteria.getAlias().orElse("")) + " is " + nul1();
+                }
+
+                builder.add(sqlCriteria.getValue());
+
+                return column(sqlCriteria.getColumn(), sqlCriteria.getAlias().orElse("")) + " = ?";
+            })
             .collect(Collectors.joining(" AND "));
     }
 
@@ -406,8 +366,19 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     private String toWhereSql(JsonObject whereCriteria, ImmutableList.Builder<Object> paramsBuilder) {
-        return whereCriteria.stream().peek(e -> paramsBuilder.add(e.getValue()))
-            .map(e -> column(e.getKey(), "") + " = ?").collect(Collectors.joining(" AND "));
+        return whereCriteria.stream()
+            .map(e -> {
+
+                if (e.getValue() == null) {
+                    return column(e.getKey(), "") + " is " + nul1();
+                }
+
+                paramsBuilder.add(e.getValue());
+
+                return column(e.getKey(), "") + " = ?";
+
+            })
+            .collect(Collectors.joining(" AND "));
     }
 
     private String table(String table, String alias) {
@@ -416,6 +387,10 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
 
     private String column(String column, String alias) {
         return sqlBuilderDialect.column(column, alias);
+    }
+
+    private String nul1() {
+        return sqlBuilderDialect.nullValue();
     }
 
     private String toSelectSql(Collection<String> columns) {
@@ -430,6 +405,24 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     public static void main(String[] asdf) {
-        System.out.println();
+        SqlBuilderUtilsImpl sqlBuilderUtils = new SqlBuilderUtilsImpl();
+
+        SqlAndParams sqlAndParams = sqlBuilderUtils.insertSql("table", new JsonObject(new HashMap<>(
+                ImmutableMap.of(
+                    "name", "sohan",
+                    "age", 58,
+                    "status", true
+                )
+            )).putNull("address").putNull("details")
+        );
+
+        System.out.println(sqlAndParams);
+
+        SqlListAndParamsList sqlListAndParamsList = sqlBuilderUtils.deleteSql(ImmutableList.of(
+            new DeleteData("STUDENT", new ColumnValuePair[]{
+                new ColumnValuePair("name", "soan")
+            })
+        ));
+
     }
 }

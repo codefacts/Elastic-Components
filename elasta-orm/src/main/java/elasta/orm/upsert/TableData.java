@@ -1,7 +1,6 @@
 package elasta.orm.upsert;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.upsert.ex.TableDataException;
 import io.vertx.core.json.JsonObject;
@@ -21,7 +20,7 @@ final public class TableData {
     private TableData(String table, String[] primaryColumns, Map<String, Object> values) {
         this.table = table;
         this.primaryColumns = primaryColumns;
-        this.values = new JsonObject(values);
+        this.values = new JsonObject(Collections.unmodifiableMap(values));
         this.hash = calHashCode();
     }
 
@@ -33,18 +32,20 @@ final public class TableData {
             throw new TableDataException("No primary column is given for table '" + table + "'");
         }
         values = new JsonObject(
-            ImmutableMap.copyOf(
-                values.getMap().entrySet().stream().filter(stringObjectEntry -> stringObjectEntry.getValue() != null).collect(Collectors.toList())
+            Collections.unmodifiableMap(
+                values.getMap().entrySet().stream()
+                    .filter(entry -> entry.getKey() != null)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
             )
         );
-        checkPrimaryColumnValuesGivenForEachColumn(primaryColumns, values);
+        checkValueExistsForEachColumn(primaryColumns, values);
         this.table = table;
         this.primaryColumns = primaryColumns;
         this.values = values;
         this.hash = calHashCode();
     }
 
-    private void checkPrimaryColumnValuesGivenForEachColumn(String[] primaryColumns, JsonObject values) {
+    private void checkValueExistsForEachColumn(String[] primaryColumns, JsonObject values) {
         for (String primaryColumn : primaryColumns) {
             if (values.getValue(primaryColumn) == null) {
                 throw new TableDataException("No value is given for primary column '" + table + "." + primaryColumn + "'");
@@ -113,22 +114,31 @@ final public class TableData {
     }
 
     public TableData addValues(Map<String, Object> map) {
+
+        LinkedHashMap<String, Object> hashMap = new LinkedHashMap<>();
+
+        hashMap.putAll(values.getMap());
+
+        hashMap.putAll(mapEntries(map));
+
         return new TableData(
             table,
             primaryColumns,
-            ImmutableMap.<String, Object>builder().putAll(this.values.getMap()).putAll(mapEntries(map)).build()
+            hashMap
         );
     }
 
     private Map<String, Object> mapEntries(Map<String, Object> map) {
-        final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
-        Map<String, Object> valuesMap = values.getMap();
+        final Map<String, Object> newMap = new LinkedHashMap<>();
+        final Map<String, Object> valuesMap = values.getMap();
         map.entrySet().stream()
             .filter(entry -> {
 
                     String key = entry.getKey();
 
-                    Objects.requireNonNull(key);
+                    if (key == null) {
+                        return false;
+                    }
 
                     if (valuesMap.containsKey(key)) {
                         Object prevValue = valuesMap.get(key);
@@ -145,8 +155,8 @@ final public class TableData {
                     return true;
                 }
             )
-            .forEach(entry -> mapBuilder.put(entry.getKey(), entry.getValue()));
+            .forEach(entry -> newMap.put(entry.getKey(), entry.getValue()));
 
-        return mapBuilder.build();
+        return newMap;
     }
 }

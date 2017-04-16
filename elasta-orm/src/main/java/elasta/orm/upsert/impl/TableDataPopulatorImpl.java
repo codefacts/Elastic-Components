@@ -1,11 +1,14 @@
 package elasta.orm.upsert.impl;
 
+import elasta.commons.Utils;
 import elasta.orm.upsert.FieldToColumnMapping;
 import elasta.orm.upsert.TableData;
 import elasta.orm.upsert.TableDataPopulator;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static elasta.commons.Utils.not;
@@ -32,23 +35,21 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
 
         Objects.requireNonNull(jsonObject);
 
-        HashMap<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = new LinkedHashMap<>();
 
         for (FieldToColumnMapping fieldToColumnMapping : fieldToColumnMappings) {
 
             final String field = fieldToColumnMapping.getField();
 
-            Object value = jsonObject.getValue(
-                field
-            );
-
-            if (value == null) {
+            if (Utils.not(jsonObject.containsKey(field))) {
                 continue;
             }
 
             map.put(
                 fieldToColumnMapping.getColumn(),
-                value
+                jsonObject.getValue(
+                    field
+                )
             );
         }
 

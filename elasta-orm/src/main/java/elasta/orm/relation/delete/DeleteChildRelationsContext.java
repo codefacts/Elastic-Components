@@ -1,6 +1,6 @@
 package elasta.orm.relation.delete;
 
-import elasta.sql.core.DeleteRelationData;
+import elasta.orm.relation.delete.impl.DeleteRelationData;
 
 /**
  * Created by sohan on 4/8/2017.

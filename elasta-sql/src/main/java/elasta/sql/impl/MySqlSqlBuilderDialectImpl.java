@@ -15,6 +15,11 @@ final public class MySqlSqlBuilderDialectImpl implements SqlBuilderDialect {
         return "`" + table + "`" + (alias.isEmpty() ? "" : " " + alias);
     }
 
+    @Override
+    public String nullValue() {
+        return "null";
+    }
+
     public String column(String column, String alias) {
         Objects.requireNonNull(column);
         Objects.requireNonNull(alias);

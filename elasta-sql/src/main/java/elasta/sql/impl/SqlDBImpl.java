@@ -42,26 +42,26 @@ public class SqlDBImpl implements SqlDB {
     }
 
     @Override
-    public Promise<Void> insertJo(String table, Collection<JsonObject> sqlList) {
+    public Promise<Void> insertJo(String table, Collection<JsonObject> jsonObjects) {
         ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
         ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
 
-        sqlList.stream().map(val -> sqlBuilderUtils.insertSql(table, val))
-            .forEach(insertSql -> {
-                sqlListBuilder.add(insertSql.getSql());
-                paramsListBuilder.add(insertSql.getParams());
+        jsonObjects.stream().map(jsonObject -> sqlBuilderUtils.insertSql(table, jsonObject))
+            .forEach(sqlAndParams -> {
+                sqlListBuilder.add(sqlAndParams.getSql());
+                paramsListBuilder.add(sqlAndParams.getParams());
             });
 
         return sqlExecutor.update(sqlListBuilder.build(), paramsListBuilder.build());
     }
 
     @Override
-    public Promise<Void> update(Collection<UpdateTpl> sqlList) {
+    public Promise<Void> update(Collection<UpdateTpl> updateTpls) {
 
         ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
         ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
 
-        sqlList.stream()
+        updateTpls.stream()
             .map(sqlBuilderUtils::updateSql)
             .forEach(sqlAndParams -> {
                 sqlListBuilder.add(sqlAndParams.getSql());
@@ -117,12 +117,6 @@ public class SqlDBImpl implements SqlDB {
         SqlAndParams sqlAndParams = sqlBuilderUtils.toSql(sqlQuery);
 
         return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams());
-    }
-
-    @Override
-    public Promise<Void> update(Set<DeleteRelationData> deleteRelationDataSet) {
-        SqlListAndParamsList sqlListAndParamsList = sqlBuilderUtils.toSql(deleteRelationDataSet);
-        return sqlExecutor.update(sqlListAndParamsList.getSqlList(), sqlListAndParamsList.getParamsList());
     }
 
     public static void main(String[] arg) {

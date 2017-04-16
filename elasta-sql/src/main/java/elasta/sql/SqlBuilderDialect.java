@@ -8,4 +8,6 @@ public interface SqlBuilderDialect {
     String column(String column, String alias);
 
     String table(String table, String alias);
+
+    String nullValue();
 }

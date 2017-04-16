@@ -38,6 +38,4 @@ public interface SqlDB {
     Promise<Boolean> exists(String table, String primaryKey, Collection<SqlCriteria> collect);
 
     Promise<ResultSet> query(SqlQuery sqlQuery);
-
-    Promise<Void> update(Set<DeleteRelationData> deleteRelationDataSet);
 }

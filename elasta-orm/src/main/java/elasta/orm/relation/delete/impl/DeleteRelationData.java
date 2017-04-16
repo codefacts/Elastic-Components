@@ -1,4 +1,4 @@
-package elasta.sql.core;
+package elasta.orm.relation.delete.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.sql.core.ColumnValuePair;

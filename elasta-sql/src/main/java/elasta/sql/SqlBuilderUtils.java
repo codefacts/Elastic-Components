@@ -5,7 +5,6 @@ import elasta.sql.impl.SqlListAndParamsList;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,6 +34,5 @@ public interface SqlBuilderUtils {
     SqlAndParams deleteSql(DeleteData deleteData);
 
     SqlAndParams toSql(SqlQuery sqlQuery);
-
-    SqlListAndParamsList toSql(Set<DeleteRelationData> deleteRelationDataSet);
+    
 }

@@ -1,4 +1,7 @@
-package elasta.orm.upsert;
+package elasta.orm.upsert.impl;
+
+import elasta.orm.upsert.TableData;
+import elasta.orm.upsert.UpsertContext;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,7 +10,7 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-21.
  */
-public class UpsertContextImpl implements UpsertContext {
+final public class UpsertContextImpl implements UpsertContext {
     final Map<String, TableData> map;
 
     public UpsertContextImpl() {
@@ -28,7 +31,7 @@ public class UpsertContextImpl implements UpsertContext {
     @Override
     public UpsertContext putOrMerge(String tableAndPrimaryKey, TableData tableData) {
 
-        tableData.getValues().forEach(entry -> Objects.requireNonNull(entry.getValue(), "Null value provided as value for key '" + entry.getKey() + "' dependentTable: '" + tableData.table + "'"));
+        tableData.getValues().forEach(entry -> Objects.requireNonNull(entry.getValue(), "Null value provided as value for key '" + entry.getKey() + "' dependentTable: '" + tableData.getTable() + "'"));
 
         if (map.containsKey(tableAndPrimaryKey)) {
 
