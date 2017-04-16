@@ -1,6 +1,7 @@
 package elasta.orm.upsert;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.upsert.ex.TableDataException;
 import io.vertx.core.json.JsonObject;
@@ -20,7 +21,7 @@ final public class TableData {
     private TableData(String table, String[] primaryColumns, Map<String, Object> values) {
         this.table = table;
         this.primaryColumns = primaryColumns;
-        this.values = new JsonObject(Collections.unmodifiableMap(values));
+        this.values = new JsonObject(values);
         this.hash = calHashCode();
     }
 
@@ -32,10 +33,8 @@ final public class TableData {
             throw new TableDataException("No primary column is given for table '" + table + "'");
         }
         values = new JsonObject(
-            Collections.unmodifiableMap(
-                values.getMap().entrySet().stream()
-                    .filter(entry -> entry.getKey() != null)
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            ImmutableMap.copyOf(
+                values.getMap().entrySet().stream().filter(entry -> entry.getValue() != null).collect(Collectors.toList())
             )
         );
         checkValueExistsForEachColumn(primaryColumns, values);
@@ -114,31 +113,22 @@ final public class TableData {
     }
 
     public TableData addValues(Map<String, Object> map) {
-
-        LinkedHashMap<String, Object> hashMap = new LinkedHashMap<>();
-
-        hashMap.putAll(values.getMap());
-
-        hashMap.putAll(mapEntries(map));
-
         return new TableData(
             table,
             primaryColumns,
-            hashMap
+            ImmutableMap.<String, Object>builder().putAll(this.values.getMap()).putAll(mapEntries(map)).build()
         );
     }
 
     private Map<String, Object> mapEntries(Map<String, Object> map) {
-        final Map<String, Object> newMap = new LinkedHashMap<>();
-        final Map<String, Object> valuesMap = values.getMap();
+        final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
+        Map<String, Object> valuesMap = values.getMap();
         map.entrySet().stream()
             .filter(entry -> {
 
                     String key = entry.getKey();
 
-                    if (key == null) {
-                        return false;
-                    }
+                    Objects.requireNonNull(key);
 
                     if (valuesMap.containsKey(key)) {
                         Object prevValue = valuesMap.get(key);
@@ -155,8 +145,8 @@ final public class TableData {
                     return true;
                 }
             )
-            .forEach(entry -> newMap.put(entry.getKey(), entry.getValue()));
+            .forEach(entry -> mapBuilder.put(entry.getKey(), entry.getValue()));
 
-        return newMap;
+        return mapBuilder.build();
     }
 }

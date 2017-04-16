@@ -1,6 +1,5 @@
 package elasta.orm.upsert.impl;
 
-import elasta.commons.Utils;
 import elasta.orm.upsert.FieldToColumnMapping;
 import elasta.orm.upsert.TableData;
 import elasta.orm.upsert.TableDataPopulator;
@@ -41,15 +40,17 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
 
             final String field = fieldToColumnMapping.getField();
 
-            if (Utils.not(jsonObject.containsKey(field))) {
+            Object value = jsonObject.getValue(
+                field
+            );
+
+            if (value == null) {
                 continue;
             }
 
             map.put(
                 fieldToColumnMapping.getColumn(),
-                jsonObject.getValue(
-                    field
-                )
+                value
             );
         }
 
