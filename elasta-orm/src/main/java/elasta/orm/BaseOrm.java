@@ -19,16 +19,16 @@ public interface BaseOrm {
 
     Promise<JsonObject> delete(DeleteParams params);
 
+    Promise<JsonObject> deleteChildRelations(
+        DeleteChildRelationsParams params
+    );
+
     Promise<List<JsonObject>> query(
         QueryExecutor.QueryParams params
     );
 
     Promise<List<JsonArray>> queryArray(
         QueryExecutor.QueryArrayParams params
-    );
-
-    Promise<JsonObject> deleteChildRelations(
-        DeleteChildRelationsParams params
     );
 
     @Value

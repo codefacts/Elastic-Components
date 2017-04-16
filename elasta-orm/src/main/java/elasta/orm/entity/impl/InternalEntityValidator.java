@@ -160,6 +160,12 @@ final class InternalEntityValidator {
     }
 
     boolean isEqualBothSide(List<ForeignColumnMapping> srcForeignColumnMappingList, List<ForeignColumnMapping> dstForeignColumnMappingList) {
+        if (srcForeignColumnMappingList == dstForeignColumnMappingList) {
+            return true;
+        }
+        if (srcForeignColumnMappingList.size() != dstForeignColumnMappingList.size()) {
+            return false;
+        }
         for (int i = 0; i < srcForeignColumnMappingList.size(); i++) {
             ForeignColumnMapping srcMapping = srcForeignColumnMappingList.get(i);
             ForeignColumnMapping dstMapping = dstForeignColumnMappingList.get(i);
@@ -175,9 +181,9 @@ final class InternalEntityValidator {
 
     private boolean isEqualBoth(ForeignColumnMapping srcMapping, ForeignColumnMapping dstMapping) {
         return srcMapping.getSrcColumn().equals(
-            dstMapping.getDstColumn()
-        ) && srcMapping.getDstColumn().equals(
             dstMapping.getSrcColumn()
+        ) && srcMapping.getDstColumn().equals(
+            dstMapping.getDstColumn()
         );
     }
 
