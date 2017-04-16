@@ -73,7 +73,7 @@ final public class BaseOrmImpl implements BaseOrm {
                     .map(exists -> UpdateTpl.builder()
                         .updateOperationType(exists ? UpdateOperationType.UPDATE : UpdateOperationType.INSERT)
                         .table(tableData.getTable())
-                        .sqlCriterias(sqlCriterias)
+                        .sqlCriterias(exists ? sqlCriterias : ImmutableList.of())
                         .data(tableData.getValues())
                         .build())
                     .mapP(dbInterceptors::interceptUpdateTpl)
