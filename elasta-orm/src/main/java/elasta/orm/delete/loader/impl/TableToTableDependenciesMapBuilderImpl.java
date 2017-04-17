@@ -23,31 +23,24 @@ final public class TableToTableDependenciesMapBuilderImpl implements TableToTabl
     public TableToTableDependenciesMap build() {
         List<String> tables = helper.getTables();
         Map<String, Set<DependencyInfo>> map = new HashMap<>();
-        tables.forEach(table -> {
-            final DbMapping dbMapping = helper.getDbMappingByTable(table);
-            Arrays.stream(dbMapping.getRelationMappings())
-                .forEach(dbColumnMapping -> {
-                    switch (dbColumnMapping.getColumnType()) {
-                        case INDIRECT: {
-                            IndirectRelationMapping mapping = (IndirectRelationMapping) dbColumnMapping;
-                            putInMap(map, mapping.getReferencingTable(), new DependencyInfo(table, dbColumnMapping));
-                        }
-                        break;
-                        case DIRECT: {
-                            DirectRelationMapping mapping = (DirectRelationMapping) dbColumnMapping;
-                            putInMap(map, mapping.getReferencingTable(), new DependencyInfo(table, dbColumnMapping));
-                        }
-                        break;
-                    }
-                });
-        });
+        tables.forEach(table -> createDependencyInfos(table, map));
         return new TableToTableDependenciesMapImpl(map);
+    }
+
+    private void createDependencyInfos(String table, Map<String, Set<DependencyInfo>> map) {
+        final DbMapping dbMapping = helper.getDbMappingByTable(table);
+        Arrays.stream(dbMapping.getRelationMappings())
+            .forEach(
+                relationMapping -> putInMap(
+                    map, relationMapping.getReferencingTable(), new DependencyInfo(table, relationMapping)
+                )
+            );
     }
 
     private void putInMap(Map<String, Set<DependencyInfo>> map, final String referencingTable, DependencyInfo dependencyInfo) {
         Set<DependencyInfo> dependencyTables = map.get(referencingTable);
         if (dependencyTables == null) {
-            map.put(referencingTable, dependencyTables = new LinkedHashSet<DependencyInfo>());
+            map.put(referencingTable, dependencyTables = new LinkedHashSet<>());
         }
         dependencyTables.add(dependencyInfo);
     }

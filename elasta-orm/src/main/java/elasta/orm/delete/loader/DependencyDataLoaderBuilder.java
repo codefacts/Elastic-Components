@@ -9,5 +9,5 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface DependencyDataLoaderBuilder {
-    DependencyDataLoader build(DependencyInfo dependencyInfo, List<DependencyInfo> dependentTableDependencies);
+    DependencyDataLoader build(DependencyInfo dependencyInfo);
 }

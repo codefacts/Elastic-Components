@@ -50,7 +50,7 @@ final public class DeleteChildRelationsFunctionBuilderImpl implements DeleteChil
 
         DbMapping dbMapping = helper.getDbMapping(entity);
 
-        DeleteRelationUtils.listChildMappings(dbMapping)
+        DeleteRelationUtils.getRelationMappingsForRelationDelete(dbMapping)
             .map(dbColumnMapping -> relationFieldHandler(entity, dbColumnMapping, context))
             .forEach(listBuilder::add);
 

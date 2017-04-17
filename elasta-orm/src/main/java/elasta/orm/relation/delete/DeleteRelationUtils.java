@@ -10,9 +10,7 @@ import java.util.stream.Stream;
  * Created by sohan on 4/14/2017.
  */
 public interface DeleteRelationUtils {
-    static Stream<RelationMapping> listChildMappings(DbMapping dbMapping) {
-        return Arrays.stream(dbMapping.getRelationMappings())
-            .map(relationMapping -> relationMapping)
-            ;
+    static Stream<RelationMapping> getRelationMappingsForRelationDelete(DbMapping dbMapping) {
+        return Arrays.stream(dbMapping.getRelationMappings());
     }
 }

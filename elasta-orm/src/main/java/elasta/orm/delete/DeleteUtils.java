@@ -1,11 +1,13 @@
 package elasta.orm.delete;
 
+import elasta.orm.delete.loader.impl.DependencyInfo;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.columnmapping.RelationMapping;
 import elasta.orm.upsert.TableData;
 import elasta.sql.core.ColumnValuePair;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -28,7 +30,10 @@ public interface DeleteUtils {
     }
 
     static Stream<RelationMapping> getRelationMappingsForDelete(DbMapping dbMapping) {
-        return Arrays.stream(dbMapping.getRelationMappings())
-            .map(relationMapping -> relationMapping);
+        return Arrays.stream(dbMapping.getRelationMappings());
+    }
+
+    static Stream<DependencyInfo> getTableDependenciesToDelete(List<DependencyInfo> dependencyInfos) {
+        return dependencyInfos.stream();
     }
 }

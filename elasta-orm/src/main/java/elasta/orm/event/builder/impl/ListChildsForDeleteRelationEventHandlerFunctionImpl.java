@@ -5,7 +5,6 @@ import elasta.orm.entity.core.JavaType;
 import elasta.orm.event.builder.ChildField;
 import elasta.orm.event.builder.ListChildsForEventHandlerFunction;
 import elasta.orm.relation.delete.DeleteRelationUtils;
-import elasta.orm.upsert.UpsertUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +23,7 @@ public class ListChildsForDeleteRelationEventHandlerFunctionImpl implements List
 
     @Override
     public List<ChildField> listChildFields(String entity) {
-        return DeleteRelationUtils.listChildMappings(helper.getDbMapping(entity))
+        return DeleteRelationUtils.getRelationMappingsForRelationDelete(helper.getDbMapping(entity))
             .map(relationMapping -> new ChildField(
                 relationMapping.getField(),
                 relationMapping.getReferencingEntity(),

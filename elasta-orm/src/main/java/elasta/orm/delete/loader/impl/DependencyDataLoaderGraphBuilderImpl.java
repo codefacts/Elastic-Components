@@ -2,6 +2,7 @@ package elasta.orm.delete.loader.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.orm.delete.DeleteUtils;
 import elasta.orm.delete.TableToTableDependenciesMap;
 import elasta.orm.delete.loader.DependencyDataLoader;
 import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
@@ -10,6 +11,7 @@ import elasta.orm.delete.loader.DependencyDataLoaderGraphBuilder;
 import elasta.orm.entity.core.RelationType;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,27 +31,27 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
 
         tableToTableDependenciesMap.forEach((table, tableDependencies) -> {
 
-            ImmutableList.Builder<DependencyDataLoader> listBuilder = ImmutableList.builder();
-
-            tableDependencies.stream()
-                .filter(dependencyInfo -> dependencyInfo.getRelationMapping().getColumnType() == RelationType.DIRECT)
-                .forEach(dependencyInfo -> {
-
-//                if (not(tableToTableDependenciesMap.containsKey(dependencyInfo.getDependentTable()))) {
-//                    return;
-//                }
-
-                    listBuilder.add(
-                        dependencyDataLoaderBuilder.build(dependencyInfo, tableToTableDependenciesMap.get(dependencyInfo.getDependentTable()))
-                    );
-                });
-
-            tableToDependencyDataLoadersMapBuilder.put(table, listBuilder.build());
+            tableToDependencyDataLoadersMapBuilder.put(table, dependencyDataLoaders(tableDependencies));
         });
 
         return new DependencyDataLoaderGraphImpl(
             tableToDependencyDataLoadersMapBuilder.build()
         );
+    }
+
+    private List<DependencyDataLoader> dependencyDataLoaders(List<DependencyInfo> tableDependencies) {
+
+        ImmutableList.Builder<DependencyDataLoader> dependencyDataLoaderListBuilder = ImmutableList.builder();
+
+        DeleteUtils.getTableDependenciesToDelete(tableDependencies)
+            .filter(dependencyInfo -> dependencyInfo.getRelationMapping().getColumnType() == RelationType.DIRECT)
+            .forEach(
+                dependencyInfo -> dependencyDataLoaderListBuilder.add(
+                    dependencyDataLoaderBuilder.build(dependencyInfo)
+                )
+            );
+
+        return dependencyDataLoaderListBuilder.build();
     }
 
     @Override

@@ -33,59 +33,19 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
         this.sqlDB = sqlDB;
     }
 
-    private DependencyDataLoader buildDependencyLoader(DependencyInfo dependencyInfo, List<DependencyInfo> dependentTableDependencies) {
+    private DependencyDataLoader buildDependencyLoader(DependencyInfo dependencyInfo) {
 
         final String dependentTable = dependencyInfo.getDependentTable();
 
-        String primaryColumn = helper.getDbMappingByTable(dependentTable).getPrimaryColumn();
-
-        Set<String> columns = createDependencyColumns(helper.getDbMappingByTable(dependentTable));
-
         switch (dependencyInfo.getRelationMapping().getColumnType()) {
-//            case INDIRECT: {
-//                IndirectRelationMapping mapping = (IndirectRelationMapping) dependencyInfo.getRelationMapping();
-//
-//                ImmutableList.Builder<ColumnToColumnMapping> srcListBuilder = ImmutableList.builder();
-//                ImmutableList.Builder<ColumnToColumnMapping> dstListBuilder = ImmutableList.builder();
-//
-//                for (int i = 0; i < mapping.getSrcForeignColumnMappingList().size(); i++) {
-//
-//                    final ForeignColumnMapping srcColumnMapping = mapping.getSrcForeignColumnMappingList().get(i);
-//                    final ForeignColumnMapping dstColumnMapping = mapping.getDstForeignColumnMappingList().get(i);
-//
-//                    srcListBuilder.add(
-//                        new ColumnToColumnMapping(
-//                            srcColumnMapping.getSrcColumn().getName(),
-//                            srcColumnMapping.getDstColumn().getName()
-//                        )
-//                    );
-//                    dstListBuilder.add(
-//                        new ColumnToColumnMapping(
-//                            dstColumnMapping.getSrcColumn().getName(),
-//                            dstColumnMapping.getDstColumn().getName()
-//                        )
-//                    );
-//                }
-//
-//                ImmutableList<ColumnToColumnMapping> srcList = srcListBuilder.build();
-//                ImmutableList<ColumnToColumnMapping> dstList = srcListBuilder.build();
-//
-//                return new IndirectDependencyDataLoaderImpl(
-//                    dependentTable,
-//                    mapping.getRelationTable(),
-//                    srcList.toArray(new ColumnToColumnMapping[srcList.size()]),
-//                    dstList.toArray(new ColumnToColumnMapping[dstList.size()]),
-//                    new String[]{primaryColumn},
-//                    columns.toArray(new String[columns.size()]),
-//                    sqlDB
-//                );
-//            }
             case DIRECT: {
                 return new DependencyDataLoaderImpl(
                     dependentTable,
                     directColumnMappings(dependencyInfo.getRelationMapping()),
-                    new String[]{primaryColumn},
-                    columns,
+                    new String[]{
+                        helper.getDbMappingByTable(dependentTable).getPrimaryColumn()
+                    },
+                    createDependencyColumns(helper.getDbMappingByTable(dependentTable)),
                     sqlDB
                 );
             }
@@ -137,39 +97,9 @@ final public class DependencyDataLoaderBuilderImpl implements DependencyDataLoad
         throw new DependencyDataLoaderException("Invalid db column mapping '" + relationMapping + "'");
     }
 
-    private static String[] dependencyColumns(List<DependencyInfo> dependencyTables) {
-
-        ImmutableSet.Builder<String> columnListBuilder = ImmutableSet.builder();
-
-        dependencyTables.forEach(dependencyInfo -> {
-            switch (dependencyInfo.getRelationMapping().getColumnType()) {
-                case INDIRECT: {
-                    IndirectRelationMapping mapping = (IndirectRelationMapping) dependencyInfo.getRelationMapping();
-                    mapping.getDstForeignColumnMappingList().forEach(foreignColumnMapping -> {
-                        columnListBuilder.add(
-                            foreignColumnMapping.getSrcColumn()
-                        );
-                    });
-                }
-                break;
-                case DIRECT:
-                    DirectRelationMapping mapping = (DirectRelationMapping) dependencyInfo.getRelationMapping();
-                    mapping.getForeignColumnMappingList().forEach(foreignColumnMapping -> {
-                        columnListBuilder.add(
-                            foreignColumnMapping.getDstColumn()
-                        );
-                    });
-                    break;
-            }
-        });
-
-        ImmutableSet<String> columns = columnListBuilder.build();
-        return columns.toArray(new String[columns.size()]);
-    }
-
     @Override
-    public DependencyDataLoader build(DependencyInfo dependencyInfo, List<DependencyInfo> dependentTableDependencies) {
-        return buildDependencyLoader(dependencyInfo, dependentTableDependencies);
+    public DependencyDataLoader build(DependencyInfo dependencyInfo) {
+        return buildDependencyLoader(dependencyInfo);
     }
 
     @Override

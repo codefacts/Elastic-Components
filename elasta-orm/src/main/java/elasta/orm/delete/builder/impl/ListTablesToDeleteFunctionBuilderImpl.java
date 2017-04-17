@@ -66,33 +66,20 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
             .forEach(dbColumnMapping -> {
                 switch (dbColumnMapping.getColumnType()) {
                     case DIRECT: {
-                        DirectRelationMapping mapping = (DirectRelationMapping) dbColumnMapping;
                         directListBuilder.add(
-                            new DirectChildHandlerImpl(
-                                mapping.getField(),
-                                listTablesToDeleteFunction(mapping.getReferencingEntity(), context)
-                            )
+                            directChildHandler((DirectRelationMapping) dbColumnMapping, context)
                         );
                     }
                     break;
                     case INDIRECT: {
-                        IndirectRelationMapping mapping = (IndirectRelationMapping) dbColumnMapping;
                         indirectListBuilder.add(
-                            new IndirectChildHandlerImpl(
-                                mapping.getField(),
-                                listTablesToDeleteFunction(mapping.getReferencingEntity(), context)
-                            )
+                            indirectChildHandler((IndirectRelationMapping) dbColumnMapping, context)
                         );
                     }
                     break;
                     case VIRTUAL: {
-                        VirtualRelationMapping mapping = (VirtualRelationMapping) dbColumnMapping;
                         virtualListBuilder.add(
-                            new VirtualChildHandlerImpl(
-                                mapping.getField(),
-                                virtualColumnMappings(mapping.getForeignColumnMappingList()),
-                                listTablesToDeleteFunction(mapping.getReferencingEntity(), context)
-                            )
+                            virtualChildHandler((VirtualRelationMapping) dbColumnMapping, context)
                         );
                     }
                     break;
@@ -111,6 +98,28 @@ final public class ListTablesToDeleteFunctionBuilderImpl implements ListTablesTo
             directList.toArray(new DirectChildHandler[directList.size()]),
             indirectList.toArray(new IndirectChildHandler[indirectList.size()]),
             virtualList.toArray(new VirtualChildHandler[virtualList.size()])
+        );
+    }
+
+    private DirectChildHandler directChildHandler(DirectRelationMapping mapping, BuilderContext<ListTablesToDeleteFunction> context) {
+        return new DirectChildHandlerImpl(
+            mapping.getField(),
+            listTablesToDeleteFunction(mapping.getReferencingEntity(), context)
+        );
+    }
+
+    private IndirectChildHandler indirectChildHandler(IndirectRelationMapping mapping, BuilderContext<ListTablesToDeleteFunction> context) {
+        return new IndirectChildHandlerImpl(
+            mapping.getField(),
+            listTablesToDeleteFunction(mapping.getReferencingEntity(), context)
+        );
+    }
+
+    private VirtualChildHandler virtualChildHandler(VirtualRelationMapping mapping, BuilderContext<ListTablesToDeleteFunction> context) {
+        return new VirtualChildHandlerImpl(
+            mapping.getField(),
+            virtualColumnMappings(mapping.getForeignColumnMappingList()),
+            listTablesToDeleteFunction(mapping.getReferencingEntity(), context)
         );
     }
 
