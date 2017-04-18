@@ -14,4 +14,7 @@ public interface DirectRelationMapping extends RelationMapping {
     String getReferencingEntity();
 
     List<ForeignColumnMapping> getForeignColumnMappingList();
+
+    @Override
+    DirectRelationMappingOptions getOptions();
 }

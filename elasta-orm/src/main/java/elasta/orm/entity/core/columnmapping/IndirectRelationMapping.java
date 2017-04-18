@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Jango on 2017-01-12.
  */
-public interface IndirectRelationMapping extends RelationMapping{
+public interface IndirectRelationMapping extends RelationMapping {
 
     String getReferencingTable();
 
@@ -19,4 +19,6 @@ public interface IndirectRelationMapping extends RelationMapping{
 
     List<ForeignColumnMapping> getDstForeignColumnMappingList();
 
+    @Override
+    DirectRelationMappingOptions getOptions();
 }

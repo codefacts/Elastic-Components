@@ -103,7 +103,8 @@ final public class EntitiesPreprocessorImpl implements EntitiesPreprocessor {
                 mapping.getRelationTable(),
                 mapping.getSrcForeignColumnMappingList().size() > 0 ? mapping.getSrcForeignColumnMappingList() : mappingOther.getDstForeignColumnMappingList(),
                 mapping.getDstForeignColumnMappingList().size() > 0 ? mapping.getDstForeignColumnMappingList() : mappingOther.getSrcForeignColumnMappingList(),
-                mapping.getField()
+                mapping.getField(),
+                mapping.getOptions()
             );
         }
 

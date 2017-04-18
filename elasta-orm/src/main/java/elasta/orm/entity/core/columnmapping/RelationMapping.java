@@ -14,4 +14,7 @@ public interface RelationMapping {
     String getReferencingTable();
 
     String getReferencingEntity();
+
+    RelationMappingOptions getOptions();
+
 }

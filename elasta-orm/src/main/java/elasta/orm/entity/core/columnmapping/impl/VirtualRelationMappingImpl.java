@@ -1,6 +1,7 @@
 package elasta.orm.entity.core.columnmapping.impl;
 
 import elasta.orm.entity.core.RelationType;
+import elasta.orm.entity.core.columnmapping.RelationMappingOptions;
 import elasta.orm.entity.core.columnmapping.VirtualRelationMapping;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import lombok.Value;
@@ -18,17 +19,20 @@ final public class VirtualRelationMappingImpl implements VirtualRelationMapping 
     final List<ForeignColumnMapping> foreignColumnMappingList;
     final String field;
     final RelationType columnType;
+    final RelationMappingOptions options;
 
-    public VirtualRelationMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
+    public VirtualRelationMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field, RelationMappingOptions options) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
         Objects.requireNonNull(field);
+        Objects.requireNonNull(options);
         this.referencingTable = referencingTable;
         this.referencingEntity = referencingEntity;
         this.foreignColumnMappingList = foreignColumnMappingList;
         this.field = field;
         this.columnType = RelationType.VIRTUAL;
+        this.options = options;
     }
 
     @Override
@@ -39,6 +43,11 @@ final public class VirtualRelationMappingImpl implements VirtualRelationMapping 
     @Override
     public String getReferencingEntity() {
         return referencingEntity;
+    }
+
+    @Override
+    public RelationMappingOptions getOptions() {
+        return options;
     }
 
     @Override

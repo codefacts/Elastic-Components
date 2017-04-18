@@ -43,7 +43,7 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
 
         ImmutableList.Builder<DependencyDataLoader> dependencyDataLoaderListBuilder = ImmutableList.builder();
 
-        DeleteUtils.getTableDependenciesToDelete(tableDependencies)
+        DeleteUtils.getTableDependenciesForDelete(tableDependencies)
             .filter(dependencyInfo -> dependencyInfo.getRelationMapping().getColumnType() == RelationType.DIRECT)
             .forEach(
                 dependencyInfo -> dependencyDataLoaderListBuilder.add(

@@ -5,7 +5,10 @@ import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.JavaType;
 import elasta.orm.entity.core.columnmapping.RelationMapping;
 import elasta.orm.entity.core.columnmapping.ColumnMapping;
+import elasta.orm.entity.core.columnmapping.RelationMappingOptions;
 import elasta.orm.entity.core.columnmapping.impl.DirectRelationMappingImpl;
+import elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions;
+import elasta.orm.entity.core.columnmapping.impl.DirectRelationMappingOptionsImpl;
 import elasta.orm.entity.core.columnmapping.impl.IndirectRelationMappingImpl;
 import elasta.orm.entity.core.columnmapping.impl.ColumnMappingImpl;
 
@@ -93,7 +96,12 @@ public interface Employees {
                                     "E_DEPARTMENT_ID", "ID"
                                 )
                             ),
-                            "department"
+                            "department",
+                            new DirectRelationMappingOptionsImpl(
+                                RelationMappingOptions.CascadeUpsert.YES,
+                                RelationMappingOptions.CascadeDelete.YES,
+                                DirectRelationMappingOptions.LoadAndDeleteParent.YES
+                            )
                         ),
                         new DirectRelationMappingImpl(
                             "DEPARTMENT",
@@ -103,7 +111,12 @@ public interface Employees {
                                     "E_DEPARTMENT2_ID", "ID"
                                 )
                             ),
-                            "department2"
+                            "department2",
+                            new DirectRelationMappingOptionsImpl(
+                                RelationMappingOptions.CascadeUpsert.YES,
+                                RelationMappingOptions.CascadeDelete.YES,
+                                DirectRelationMappingOptions.LoadAndDeleteParent.YES
+                            )
                         ),
                         new IndirectRelationMappingImpl(
                             "DEPARTMENT",
@@ -119,7 +132,12 @@ public interface Employees {
                                     "ID", "DEPARTMENTS_ID"
                                 )
                             ),
-                            "departments"
+                            "departments",
+                            new DirectRelationMappingOptionsImpl(
+                                RelationMappingOptions.CascadeUpsert.YES,
+                                RelationMappingOptions.CascadeDelete.YES,
+                                DirectRelationMappingOptions.LoadAndDeleteParent.YES
+                            )
                         )
                     })
                     .build()
@@ -177,7 +195,12 @@ public interface Employees {
                                 "D_DEPARTMENT_ID", "ID"
                             )
                         ),
-                        "department"
+                        "department",
+                        new DirectRelationMappingOptionsImpl(
+                            RelationMappingOptions.CascadeUpsert.YES,
+                            RelationMappingOptions.CascadeDelete.YES,
+                            DirectRelationMappingOptions.LoadAndDeleteParent.YES
+                        )
                     ),
                     new DirectRelationMappingImpl(
                         "EMPLOYEE",
@@ -187,7 +210,12 @@ public interface Employees {
                                 "D_EMPLOYEE_EID", "EID"
                             )
                         ),
-                        "employee"
+                        "employee",
+                        new DirectRelationMappingOptionsImpl(
+                            RelationMappingOptions.CascadeUpsert.YES,
+                            RelationMappingOptions.CascadeDelete.YES,
+                            DirectRelationMappingOptions.LoadAndDeleteParent.YES
+                        )
                     )
                 }
             )

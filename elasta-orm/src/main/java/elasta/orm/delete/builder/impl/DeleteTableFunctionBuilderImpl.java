@@ -64,7 +64,7 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
         ImmutableSet.Builder<IndirectDependencyDeleteHandler> indirectListBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<DirectDependencyDeleteHandler> directListBuilder = ImmutableSet.builder();
 
-        DeleteUtils.getTableDependenciesToDelete(tableToTableDependenciesMap.get(table))
+        DeleteUtils.getTableDependenciesForDelete(tableToTableDependenciesMap.get(table))
             .forEach(dependencyInfo -> {
                 RelationMapping relationMapping = dependencyInfo.getRelationMapping();
                 switch (relationMapping.getColumnType()) {

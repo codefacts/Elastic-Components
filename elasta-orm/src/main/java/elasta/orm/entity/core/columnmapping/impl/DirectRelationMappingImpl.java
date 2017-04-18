@@ -3,6 +3,7 @@ package elasta.orm.entity.core.columnmapping.impl;
 import elasta.orm.entity.core.RelationType;
 import elasta.orm.entity.core.ForeignColumnMapping;
 import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
+import elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions;
 import lombok.Value;
 
 import java.util.List;
@@ -18,17 +19,20 @@ final public class DirectRelationMappingImpl implements DirectRelationMapping {
     final List<ForeignColumnMapping> foreignColumnMappingList;
     final String field;
     final RelationType columnType;
+    final DirectRelationMappingOptions options;
 
-    public DirectRelationMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field) {
+    public DirectRelationMappingImpl(String referencingTable, String referencingEntity, List<ForeignColumnMapping> foreignColumnMappingList, String field, DirectRelationMappingOptions options) {
         Objects.requireNonNull(referencingTable);
         Objects.requireNonNull(referencingEntity);
         Objects.requireNonNull(foreignColumnMappingList);
         Objects.requireNonNull(field);
+        Objects.requireNonNull(options);
         this.referencingTable = referencingTable;
         this.referencingEntity = referencingEntity;
         this.foreignColumnMappingList = foreignColumnMappingList;
         this.field = field;
         this.columnType = RelationType.DIRECT;
+        this.options = options;
     }
 
     @Override
@@ -38,6 +42,11 @@ final public class DirectRelationMappingImpl implements DirectRelationMapping {
 
     public String getReferencingEntity() {
         return referencingEntity;
+    }
+
+    @Override
+    public DirectRelationMappingOptions getOptions() {
+        return options;
     }
 
     @Override
@@ -54,4 +63,5 @@ final public class DirectRelationMappingImpl implements DirectRelationMapping {
     public RelationType getColumnType() {
         return columnType;
     }
+
 }
