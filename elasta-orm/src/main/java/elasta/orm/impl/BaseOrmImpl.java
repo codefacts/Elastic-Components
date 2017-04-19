@@ -10,6 +10,7 @@ import elasta.orm.delete.impl.ColumnValuePair;
 import elasta.orm.delete.impl.DeleteContextImpl;
 import elasta.orm.delete.impl.DeleteData;
 import elasta.orm.event.dbaction.DbInterceptors;
+import elasta.orm.ex.BaseOrmException;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
@@ -50,7 +51,45 @@ final public class BaseOrmImpl implements BaseOrm {
 
     @Override
     public Promise<JsonObject> upsert(UpsertParams params) {
+        return doUpsert(params)
+            .thenP(sqlDB::update)
+            .map(updateTpls -> params.getJsonObject());
+    }
 
+    @Override
+    public Promise<JsonObject> delete(DeleteParams params) {
+        return doDelete(params)
+            .thenP(sqlDB::update)
+            .map(updateTplList -> params.getJsonObject());
+    }
+
+    @Override
+    public Promise<List<JsonObject>> query(QueryExecutor.QueryParams params) {
+        return queryExecutor.query(params);
+    }
+
+    @Override
+    public Promise<List<JsonArray>> queryArray(QueryExecutor.QueryArrayParams params) {
+        return queryExecutor.queryArray(params);
+    }
+
+    @Override
+    public Promise<JsonObject> deleteChildRelations(DeleteChildRelationsParams params) {
+        return doDeleteChildRelations(params)
+            .mapP(sqlDB::update)
+            .map(aVoid -> params.getJsonObject())
+            ;
+    }
+
+    @Override
+    public Promise<Void> execute(Collection<ExecuteParams> paramss) {
+
+        return doExecute(paramss)
+            .map(sqlDB::update)
+            .map(voidPromise -> null);
+    }
+
+    private Promise<List<UpdateTpl>> doUpsert(UpsertParams params) {
         LinkedHashMap<String, TableData> map = new LinkedHashMap<>();
 
         getOperation(params.getEntity()).upsertFunction.upsert(
@@ -84,13 +123,10 @@ final public class BaseOrmImpl implements BaseOrm {
 
             }).collect(Collectors.toList());
 
-        return Promises.when(promiseList)
-            .thenP(sqlDB::update)
-            .map(updateTpls -> params.getJsonObject());
+        return Promises.when(promiseList);
     }
 
-    @Override
-    public Promise<JsonObject> delete(DeleteParams params) {
+    private Promise<List<UpdateTpl>> doDelete(DeleteParams params) {
         LinkedHashSet<DeleteData> deleteDatas = new LinkedHashSet<>();
         return getOperation(params.getEntity()).deleteFunction
             .delete(
@@ -123,34 +159,10 @@ final public class BaseOrmImpl implements BaseOrm {
                     .collect(Collectors.toList());
 
                 return Promises.when(promiseList);
-            })
-            .thenP(sqlDB::update)
-            .map(updateTplList -> params.getJsonObject());
+            });
     }
 
-    private JsonObject toJsonObject(DeleteData.ColumnAndOptionalValuePair[] updateValues) {
-        JsonObject jsonObject = new JsonObject();
-        for (DeleteData.ColumnAndOptionalValuePair updateValue : updateValues) {
-
-            Object value = updateValue.getValue().isPresent() ? updateValue.getValue().get() : null;
-
-            jsonObject.put(updateValue.getColumn(), value);
-        }
-        return jsonObject;
-    }
-
-    @Override
-    public Promise<List<JsonObject>> query(QueryExecutor.QueryParams params) {
-        return queryExecutor.query(params);
-    }
-
-    @Override
-    public Promise<List<JsonArray>> queryArray(QueryExecutor.QueryArrayParams params) {
-        return queryExecutor.queryArray(params);
-    }
-
-    @Override
-    public Promise<JsonObject> deleteChildRelations(DeleteChildRelationsParams params) {
+    private Promise<List<UpdateTpl>> doDeleteChildRelations(DeleteChildRelationsParams params) {
         EntityOperation operation = getOperation(params.getEntity());
 
         Set<DeleteRelationData> deleteRelationDataSet = new LinkedHashSet<>();
@@ -179,10 +191,46 @@ final public class BaseOrmImpl implements BaseOrm {
             .map(dbInterceptors::interceptUpdateTpl)
             .collect(Collectors.toList());
 
+        return Promises.when(promiseList);
+    }
+
+    private Promise<List<UpdateTpl>> doExecute(Collection<ExecuteParams> paramss) {
+        List<Promise<List<UpdateTpl>>> promiseList = paramss.stream()
+            .map(params -> {
+                switch (params.getOperationType()) {
+                    case UPSERT: {
+                        return doUpsert(
+                            new UpsertParams(params.getEntity(), params.getJsonObject())
+                        );
+                    }
+                    case DELETE: {
+                        return doDelete(
+                            new DeleteParams(params.getEntity(), params.getJsonObject())
+                        );
+                    }
+                    case DELETE_CHILD_RELATIONS: {
+                        return doDeleteChildRelations(
+                            new DeleteChildRelationsParams(params.getEntity(), params.getJsonObject())
+                        );
+                    }
+                }
+                throw new BaseOrmException("Invalid OperationType '" + params.getOperationType() + "' in ExecuteParams");
+            })
+            .collect(Collectors.toList());
+
         return Promises.when(promiseList)
-            .mapP(sqlDB::update)
-            .map(aVoid -> params.getJsonObject())
-            ;
+            .map(lists -> lists.stream().flatMap(Collection::stream).collect(Collectors.toList()));
+    }
+
+    private JsonObject toJsonObject(DeleteData.ColumnAndOptionalValuePair[] updateValues) {
+        JsonObject jsonObject = new JsonObject();
+        for (DeleteData.ColumnAndOptionalValuePair updateValue : updateValues) {
+
+            Object value = updateValue.getValue().isPresent() ? updateValue.getValue().get() : null;
+
+            jsonObject.put(updateValue.getColumn(), value);
+        }
+        return jsonObject;
     }
 
     private Collection<SqlCriteria> toSqlCriterias(List<ColumnValuePair> columnValuePairs) {

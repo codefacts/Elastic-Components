@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,6 +24,8 @@ public interface BaseOrm {
         DeleteChildRelationsParams params
     );
 
+    Promise<Void> execute(Collection<ExecuteParams> paramss);
+
     Promise<List<JsonObject>> query(
         QueryExecutor.QueryParams params
     );
@@ -37,7 +40,7 @@ public interface BaseOrm {
         final String entity;
         final JsonObject jsonObject;
 
-        UpsertParams(String entity, JsonObject jsonObject) {
+        public UpsertParams(String entity, JsonObject jsonObject) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(jsonObject);
             this.entity = entity;
@@ -51,7 +54,7 @@ public interface BaseOrm {
         final String entity;
         final JsonObject jsonObject;
 
-        DeleteParams(String entity, JsonObject jsonObject) {
+        public DeleteParams(String entity, JsonObject jsonObject) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(jsonObject);
             this.entity = entity;
@@ -65,11 +68,32 @@ public interface BaseOrm {
         final String entity;
         final JsonObject jsonObject;
 
-        DeleteChildRelationsParams(String entity, JsonObject jsonObject) {
+        public DeleteChildRelationsParams(String entity, JsonObject jsonObject) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(jsonObject);
             this.entity = entity;
             this.jsonObject = jsonObject;
         }
+    }
+
+    @Value
+    @Builder
+    final class ExecuteParams {
+        final OperationType operationType;
+        final String entity;
+        final JsonObject jsonObject;
+
+        public ExecuteParams(OperationType operationType, String entity, JsonObject jsonObject) {
+            Objects.requireNonNull(operationType);
+            Objects.requireNonNull(entity);
+            Objects.requireNonNull(jsonObject);
+            this.operationType = operationType;
+            this.entity = entity;
+            this.jsonObject = jsonObject;
+        }
+    }
+
+    enum OperationType {
+        UPSERT, DELETE, DELETE_CHILD_RELATIONS
     }
 }
