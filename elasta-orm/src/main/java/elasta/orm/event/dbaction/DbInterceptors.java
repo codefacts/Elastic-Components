@@ -1,8 +1,6 @@
 package elasta.orm.event.dbaction;
 
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.upsert.TableData;
-import elasta.sql.core.DeleteData;
 import elasta.sql.core.SqlQuery;
 import elasta.sql.core.UpdateTpl;
 

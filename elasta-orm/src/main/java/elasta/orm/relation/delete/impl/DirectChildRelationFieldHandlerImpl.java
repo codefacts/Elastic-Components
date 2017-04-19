@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import elasta.orm.relation.delete.DeleteChildRelationsContext;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
 import elasta.orm.relation.delete.RelationFieldHandler;
-import elasta.sql.core.ColumnValuePair;
+import elasta.orm.delete.impl.ColumnValuePair;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;

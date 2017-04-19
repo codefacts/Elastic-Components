@@ -1,7 +1,6 @@
 package elasta.orm.delete.impl;
 
 import elasta.orm.delete.DeleteContext;
-import elasta.sql.core.DeleteData;
 
 import java.util.Objects;
 import java.util.Set;

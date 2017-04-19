@@ -29,7 +29,7 @@ final public class TableToTableDataMapImpl implements TableToTableDataMap {
         Map<TableData, TableData> tableDataMap = tableToTableDataMap.get(dependentTable);
         if (tableDataMap == null) {
             return ImmutableMap.of();
-//            throw new TableDataMapException("No TableData exists for table '" + dependentTable + "'");
+//            throw new TableDataMapException("No TableData exists for table '" + parentTable + "'");
         }
         return tableDataMap;
     }

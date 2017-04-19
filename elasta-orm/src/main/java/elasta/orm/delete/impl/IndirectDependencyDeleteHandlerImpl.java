@@ -2,8 +2,6 @@ package elasta.orm.delete.impl;
 
 import elasta.orm.delete.DeleteContext;
 import elasta.orm.delete.IndirectDependencyDeleteHandler;
-import elasta.sql.core.ColumnValuePair;
-import elasta.sql.core.DeleteData;
 import elasta.sql.core.ColumnToColumnMapping;
 import elasta.orm.upsert.TableData;
 

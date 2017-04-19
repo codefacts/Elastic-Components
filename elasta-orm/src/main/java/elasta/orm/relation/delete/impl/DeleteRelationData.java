@@ -1,7 +1,7 @@
 package elasta.orm.relation.delete.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.sql.core.ColumnValuePair;
+import elasta.orm.delete.impl.ColumnValuePair;
 import lombok.Builder;
 import lombok.Value;
 

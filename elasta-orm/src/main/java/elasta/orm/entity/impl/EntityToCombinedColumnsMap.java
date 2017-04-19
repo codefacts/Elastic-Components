@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sohan on 4/15/2017.
  */
-class EntityToCombinedColumnsMap {
+final class EntityToCombinedColumnsMap {
     final Map<String, Entity> entityNameToEntityMap;
     final Map<String, Set<String>> entityToCombinedColumnsMap;
 

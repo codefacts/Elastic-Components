@@ -5,7 +5,6 @@ import elasta.sql.impl.SqlListAndParamsList;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * Created by Jango on 10/12/2016.
@@ -27,11 +26,7 @@ public interface SqlBuilderUtils {
 
     SqlAndParams deleteSql(String table, JsonObject where);
 
-    SqlListAndParamsList deleteSql(Collection<DeleteData> deleteDataList);
-
     SqlAndParams existSql(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias);
-
-    SqlAndParams deleteSql(DeleteData deleteData);
 
     SqlAndParams toSql(SqlQuery sqlQuery);
     

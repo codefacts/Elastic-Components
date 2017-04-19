@@ -1,6 +1,6 @@
 package elasta.orm.delete;
 
-import elasta.sql.core.DeleteData;
+import elasta.orm.delete.impl.DeleteData;
 
 /**
  * Created by Jango on 2017-01-25.

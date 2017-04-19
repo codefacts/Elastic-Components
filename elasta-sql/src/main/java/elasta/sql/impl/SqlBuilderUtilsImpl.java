@@ -123,53 +123,6 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     @Override
-    public SqlListAndParamsList deleteSql(Collection<DeleteData> deleteDataList) {
-
-        ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
-        ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
-
-        deleteDataList.forEach(deleteData -> {
-
-            SqlAndParams sqlAndParams = toDeleteSql(deleteData);
-            sqlListBuilder.add(sqlAndParams.getSql());
-            paramsListBuilder.add(sqlAndParams.getParams());
-        });
-
-        return SqlListAndParamsList.builder()
-            .sqlList(sqlListBuilder.build())
-            .paramsList(paramsListBuilder.build())
-            .build();
-    }
-
-    private SqlAndParams toDeleteSql(DeleteData deleteData) {
-        ImmutableList.Builder<Object> listBuilder = ImmutableList.builder();
-
-        String where = toWhereSql(deleteData.getColumnValuePairs(), listBuilder);
-
-        return new SqlAndParams(
-            "DELETE FROM " + table(deleteData.getTable(), "") + " WHERE " + (where.isEmpty() ? "1" : where),
-            new JsonArray(listBuilder.build())
-        );
-    }
-
-    private String toWhereSql(ColumnValuePair[] columnValuePairs, ImmutableList.Builder<Object> listBuilder) {
-        return Arrays.stream(columnValuePairs)
-            .map(columnValuePair -> {
-
-                if (columnValuePair.getValue() == null) {
-
-                    return column(columnValuePair.getPrimaryColumn(), "") + " is " + nul1();
-                }
-
-                listBuilder.add(columnValuePair.getValue());
-
-                return column(columnValuePair.getPrimaryColumn(), "") + " = ?";
-
-            })
-            .collect(Collectors.joining(" AND "));
-    }
-
-    @Override
     public SqlAndParams existSql(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias) {
         ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
         String where = toWhere(sqlCriterias, paramsBuilder);
@@ -179,11 +132,6 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
                 paramsBuilder.build()
             )
         );
-    }
-
-    @Override
-    public SqlAndParams deleteSql(DeleteData deleteData) {
-        return toDeleteSql(deleteData);
     }
 
     @Override
@@ -417,12 +365,6 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         );
 
         System.out.println(sqlAndParams);
-
-        SqlListAndParamsList sqlListAndParamsList = sqlBuilderUtils.deleteSql(ImmutableList.of(
-            new DeleteData("STUDENT", new ColumnValuePair[]{
-                new ColumnValuePair("name", "soan")
-            })
-        ));
 
     }
 }

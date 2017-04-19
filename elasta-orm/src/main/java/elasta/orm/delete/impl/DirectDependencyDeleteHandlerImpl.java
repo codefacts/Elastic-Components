@@ -5,7 +5,6 @@ import elasta.orm.delete.DeleteTableFunction;
 import elasta.orm.delete.DirectDependencyDeleteHandler;
 import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.delete.DeleteContext;
-import elasta.sql.core.ColumnValuePair;
 import elasta.sql.core.ColumnToColumnMapping;
 import elasta.orm.upsert.TableData;
 
@@ -64,7 +63,7 @@ final public class DirectDependencyDeleteHandlerImpl implements DirectDependency
     @Override
     public String toString() {
         return "DirectDependencyDeleteHandlerImpl{" +
-            "dependentTable='" + dependentTable + '\'' +
+            "parentTable='" + dependentTable + '\'' +
             ", columnToColumnMappings=" + Arrays.toString(columnToColumnMappings) +
             ", dependentTableDeleteTableFunction=" + dependentTableDeleteTableFunction +
             '}';

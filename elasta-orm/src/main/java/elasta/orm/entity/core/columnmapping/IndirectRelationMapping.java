@@ -20,5 +20,5 @@ public interface IndirectRelationMapping extends RelationMapping {
     List<ForeignColumnMapping> getDstForeignColumnMappingList();
 
     @Override
-    DirectRelationMappingOptions getOptions();
+    RelationMappingOptions getOptions();
 }

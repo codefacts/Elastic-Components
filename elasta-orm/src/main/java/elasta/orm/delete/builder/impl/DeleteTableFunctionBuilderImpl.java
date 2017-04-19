@@ -1,11 +1,10 @@
 package elasta.orm.delete.builder.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import elasta.orm.delete.*;
 import elasta.orm.delete.builder.DeleteTableFunctionBuilder;
-import elasta.orm.delete.impl.DeleteTableFunctionImpl;
-import elasta.orm.delete.impl.DirectDependencyDeleteHandlerImpl;
-import elasta.orm.delete.impl.IndirectDependencyDeleteHandlerImpl;
+import elasta.orm.delete.impl.*;
 import elasta.orm.delete.loader.impl.DependencyInfo;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.columnmapping.IndirectRelationMapping;
@@ -63,15 +62,28 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
 
         ImmutableSet.Builder<IndirectDependencyDeleteHandler> indirectListBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<DirectDependencyDeleteHandler> directListBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<DirectRelationDeleteHandler> relationDeleteHandlersBuilder = ImmutableSet.builder();
 
-        DeleteUtils.getTableDependenciesForDelete(tableToTableDependenciesMap.get(table))
+        DeleteUtils.getTableDependenciesForLoadAndDelete(tableToTableDependenciesMap.get(table))
             .forEach(dependencyInfo -> {
                 RelationMapping relationMapping = dependencyInfo.getRelationMapping();
                 switch (relationMapping.getColumnType()) {
                     case DIRECT: {
-                        directListBuilder.add(
-                            directDependencyDeleteHandler((DirectRelationMapping) relationMapping, dependencyInfo, context, tableToTableDependenciesMap)
-                        );
+                        DirectRelationMapping mapping = (DirectRelationMapping) relationMapping;
+                        switch (mapping.getOptions().getLoadAndDeleteParent()) {
+                            case LOAD_AND_DELETE: {
+                                directListBuilder.add(
+                                    directDependencyDeleteHandler(mapping, dependencyInfo, context, tableToTableDependenciesMap)
+                                );
+                            }
+                            break;
+                            case SET_TO_NULL: {
+                                relationDeleteHandlersBuilder.add(
+                                    relationDeleteHandler(dependencyInfo.getDependentTable(), mapping.getForeignColumnMappingList())
+                                );
+                            }
+                            break;
+                        }
                     }
                     break;
                     case INDIRECT: {
@@ -97,12 +109,36 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
             }
         });
 
+        Set<DirectRelationDeleteHandler> relationDeleteHandlers = relationDeleteHandlersBuilder.build();
         Set<DirectDependencyDeleteHandler> directDependencyDeleteHandlers = directListBuilder.build();
         Set<IndirectDependencyDeleteHandler> indirectDependencyDeleteHandlers = indirectListBuilder.build();
 
         return new DeleteTableFunctionImpl(
+            relationDeleteHandlers.toArray(new DirectRelationDeleteHandler[relationDeleteHandlers.size()]),
             directDependencyDeleteHandlers.toArray(new DirectDependencyDeleteHandler[directDependencyDeleteHandlers.size()]),
             indirectDependencyDeleteHandlers.toArray(new IndirectDependencyDeleteHandler[indirectDependencyDeleteHandlers.size()])
+        );
+    }
+
+    private DirectRelationDeleteHandler relationDeleteHandler(String dependentTable, List<ForeignColumnMapping> foreignColumnMappingList) {
+
+        DeleteData.ColumnAndOptionalValuePair[] columnAndOptionalValuePairs = new DeleteData.ColumnAndOptionalValuePair[foreignColumnMappingList.size()];
+        ImmutableList.Builder<String> childTableColumnsBuilder = ImmutableList.builder();
+
+        for (int i = 0; i < foreignColumnMappingList.size(); i++) {
+            ForeignColumnMapping foreignColumnMapping = foreignColumnMappingList.get(i);
+
+            columnAndOptionalValuePairs[i] = new DeleteData.ColumnAndOptionalValuePair(
+                foreignColumnMapping.getSrcColumn()
+            );
+
+            childTableColumnsBuilder.add(foreignColumnMapping.getDstColumn());
+        }
+
+        return new DirectRelationDeleteHandlerImpl(
+            dependentTable,
+            columnAndOptionalValuePairs,
+            childTableColumnsBuilder.build()
         );
     }
 

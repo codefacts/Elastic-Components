@@ -6,7 +6,9 @@ import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.BaseOrm;
 import elasta.orm.delete.DeleteFunction;
+import elasta.orm.delete.impl.ColumnValuePair;
 import elasta.orm.delete.impl.DeleteContextImpl;
+import elasta.orm.delete.impl.DeleteData;
 import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
@@ -18,6 +20,7 @@ import elasta.orm.upsert.TableData;
 import elasta.orm.upsert.impl.UpsertContextImpl;
 import elasta.orm.upsert.UpsertFunction;
 import elasta.sql.SqlDB;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
@@ -99,12 +102,22 @@ final public class BaseOrmImpl implements BaseOrm {
 
                 List<Promise<UpdateTpl>> promiseList = deleteDatas.stream()
                     .map(
-                        deleteData -> UpdateTpl.builder()
-                            .updateOperationType(UpdateOperationType.DELETE)
-                            .table(deleteData.getTable())
-                            .data(EMPTY_JSON_OBJECT)
-                            .sqlCriterias(sqlCriterias(Arrays.asList(deleteData.getColumnValuePairs())))
-                            .build()
+                        deleteData ->
+                            deleteData.getOperationType() == DeleteData.OperationType.UPDATE
+                                ?
+                                UpdateTpl.builder()
+                                    .updateOperationType(UpdateOperationType.UPDATE)
+                                    .table(deleteData.getTable())
+                                    .data(toJsonObject(deleteData.getUpdateValues()))
+                                    .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
+                                    .build()
+                                :
+                                UpdateTpl.builder()
+                                    .updateOperationType(UpdateOperationType.DELETE)
+                                    .table(deleteData.getTable())
+                                    .data(EMPTY_JSON_OBJECT)
+                                    .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
+                                    .build()
                     )
                     .map(dbInterceptors::interceptUpdateTpl)
                     .collect(Collectors.toList());
@@ -113,6 +126,17 @@ final public class BaseOrmImpl implements BaseOrm {
             })
             .thenP(sqlDB::update)
             .map(updateTplList -> params.getJsonObject());
+    }
+
+    private JsonObject toJsonObject(DeleteData.ColumnAndOptionalValuePair[] updateValues) {
+        JsonObject jsonObject = new JsonObject();
+        for (DeleteData.ColumnAndOptionalValuePair updateValue : updateValues) {
+
+            Object value = updateValue.getValue().isPresent() ? updateValue.getValue().get() : null;
+
+            jsonObject.put(updateValue.getColumn(), value);
+        }
+        return jsonObject;
     }
 
     @Override
@@ -149,7 +173,7 @@ final public class BaseOrmImpl implements BaseOrm {
                                 column -> null
                             ))
                     ),
-                    sqlCriterias(deleteRelationData.getPrimaryColumnValuePairs())
+                    toSqlCriterias(deleteRelationData.getPrimaryColumnValuePairs())
                 )
             )
             .map(dbInterceptors::interceptUpdateTpl)
@@ -161,7 +185,7 @@ final public class BaseOrmImpl implements BaseOrm {
             ;
     }
 
-    private Collection<SqlCriteria> sqlCriterias(List<ColumnValuePair> columnValuePairs) {
+    private Collection<SqlCriteria> toSqlCriterias(List<ColumnValuePair> columnValuePairs) {
         ImmutableList.Builder<SqlCriteria> sqlCriteriaListBuilder = ImmutableList.builder();
 
         columnValuePairs.stream()

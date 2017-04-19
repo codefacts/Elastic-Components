@@ -19,6 +19,6 @@ public interface DirectRelationMappingOptions extends RelationMappingOptions {
     LoadAndDeleteParent getLoadAndDeleteParent();
 
     enum LoadAndDeleteParent {
-        YES, NO
+        LOAD_AND_DELETE, SET_TO_NULL, NO_OPERATION
     }
 }

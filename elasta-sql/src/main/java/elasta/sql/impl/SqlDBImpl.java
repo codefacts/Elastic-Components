@@ -11,9 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Created by Jango on 9/25/2016.
@@ -75,18 +73,6 @@ public class SqlDBImpl implements SqlDB {
     public Promise<Void> delete(String table, JsonObject where) {
         SqlAndParams sqlAndParams = sqlBuilderUtils.deleteSql(table, where);
         return sqlExecutor.update(sqlAndParams.getSql(), sqlAndParams.getParams());
-    }
-
-    @Override
-    public Promise<Void> delete(DeleteData deleteData) {
-        SqlAndParams sqlAndParams = sqlBuilderUtils.deleteSql(deleteData);
-        return sqlExecutor.update(sqlAndParams.getSql(), sqlAndParams.getParams());
-    }
-
-    @Override
-    public Promise<Void> delete(Collection<DeleteData> deleteDatas) {
-        SqlListAndParamsList sqlListAndParamsList = sqlBuilderUtils.deleteSql(deleteDatas);
-        return sqlExecutor.update(sqlListAndParamsList.getSqlList(), sqlListAndParamsList.getParamsList());
     }
 
     @Override

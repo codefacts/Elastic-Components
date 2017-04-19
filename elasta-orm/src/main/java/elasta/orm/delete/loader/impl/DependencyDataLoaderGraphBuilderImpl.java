@@ -9,6 +9,9 @@ import elasta.orm.delete.loader.DependencyDataLoaderBuilder;
 import elasta.orm.delete.loader.DependencyDataLoaderGraph;
 import elasta.orm.delete.loader.DependencyDataLoaderGraphBuilder;
 import elasta.orm.entity.core.RelationType;
+import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
+import elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions;
+import elasta.orm.entity.core.columnmapping.RelationMapping;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,8 +46,14 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
 
         ImmutableList.Builder<DependencyDataLoader> dependencyDataLoaderListBuilder = ImmutableList.builder();
 
-        DeleteUtils.getTableDependenciesForDelete(tableDependencies)
-            .filter(dependencyInfo -> dependencyInfo.getRelationMapping().getColumnType() == RelationType.DIRECT)
+        DeleteUtils.getTableDependenciesForLoadAndDelete(tableDependencies)
+            .filter(dependencyInfo -> {
+                if (dependencyInfo.getRelationMapping().getColumnType() == RelationType.DIRECT) {
+                    DirectRelationMapping mapping = (DirectRelationMapping) dependencyInfo.getRelationMapping();
+                    return mapping.getOptions().getLoadAndDeleteParent() == DirectRelationMappingOptions.LoadAndDeleteParent.LOAD_AND_DELETE;
+                }
+                return false;
+            })
             .forEach(
                 dependencyInfo -> dependencyDataLoaderListBuilder.add(
                     dependencyDataLoaderBuilder.build(dependencyInfo)

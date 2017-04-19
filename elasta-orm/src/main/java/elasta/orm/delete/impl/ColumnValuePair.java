@@ -1,4 +1,4 @@
-package elasta.sql.core;
+package elasta.orm.delete.impl;
 
 import java.util.Objects;
 

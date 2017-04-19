@@ -3,12 +3,11 @@ package elasta.orm.delete;
 import elasta.orm.delete.loader.impl.DependencyInfo;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
-import elasta.orm.entity.core.columnmapping.IndirectRelationMapping;
 import elasta.orm.entity.core.columnmapping.RelationMapping;
 import elasta.orm.entity.core.columnmapping.RelationMappingOptions;
 import elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions;
 import elasta.orm.upsert.TableData;
-import elasta.sql.core.ColumnValuePair;
+import elasta.orm.delete.impl.ColumnValuePair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,18 +37,14 @@ public interface DeleteUtils {
             .filter(relationMapping -> relationMapping.getOptions().getCascadeDelete() == RelationMappingOptions.CascadeDelete.YES);
     }
 
-    static Stream<DependencyInfo> getTableDependenciesForDelete(List<DependencyInfo> dependencyInfos) {
+    static Stream<DependencyInfo> getTableDependenciesForLoadAndDelete(List<DependencyInfo> dependencyInfos) {
         return dependencyInfos.stream()
             .filter(dependencyInfo -> {
                 RelationMapping relationMapping = dependencyInfo.getRelationMapping();
                 switch (relationMapping.getColumnType()) {
                     case DIRECT: {
                         DirectRelationMapping mapping = (DirectRelationMapping) relationMapping;
-                        return mapping.getOptions().getLoadAndDeleteParent() == DirectRelationMappingOptions.LoadAndDeleteParent.YES;
-                    }
-                    case INDIRECT: {
-                        IndirectRelationMapping mapping = (IndirectRelationMapping) relationMapping;
-                        return mapping.getOptions().getLoadAndDeleteParent() == DirectRelationMappingOptions.LoadAndDeleteParent.YES;
+                        return mapping.getOptions().getLoadAndDeleteParent() != DirectRelationMappingOptions.LoadAndDeleteParent.NO_OPERATION;
                     }
                 }
                 return false;
