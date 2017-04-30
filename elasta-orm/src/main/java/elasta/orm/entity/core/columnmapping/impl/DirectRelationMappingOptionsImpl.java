@@ -1,9 +1,6 @@
 package elasta.orm.entity.core.columnmapping.impl;
 
-import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
 import elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions;
-import elasta.orm.entity.core.columnmapping.RelationMappingOptions;
-import lombok.Value;
 
 import java.util.Objects;
 
@@ -13,14 +10,16 @@ import java.util.Objects;
 final public class DirectRelationMappingOptionsImpl implements DirectRelationMappingOptions {
     final CascadeUpsert cascadeUpsert;
     final CascadeDelete cascadeDelete;
+    final boolean mandatory;
     final elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions.LoadAndDeleteParent loadAndDeleteParent;
 
-    public DirectRelationMappingOptionsImpl(CascadeUpsert cascadeUpsert, CascadeDelete cascadeDelete, elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions.LoadAndDeleteParent loadAndDeleteParent) {
+    public DirectRelationMappingOptionsImpl(CascadeUpsert cascadeUpsert, CascadeDelete cascadeDelete, boolean mandatory, LoadAndDeleteParent loadAndDeleteParent) {
         Objects.requireNonNull(cascadeUpsert);
         Objects.requireNonNull(cascadeDelete);
         Objects.requireNonNull(loadAndDeleteParent);
         this.cascadeUpsert = cascadeUpsert;
         this.cascadeDelete = cascadeDelete;
+        this.mandatory = mandatory;
         this.loadAndDeleteParent = loadAndDeleteParent;
     }
 
@@ -32,6 +31,11 @@ final public class DirectRelationMappingOptionsImpl implements DirectRelationMap
     @Override
     public CascadeDelete getCascadeDelete() {
         return cascadeDelete;
+    }
+
+    @Override
+    public boolean isMandatory() {
+        return mandatory;
     }
 
     @Override

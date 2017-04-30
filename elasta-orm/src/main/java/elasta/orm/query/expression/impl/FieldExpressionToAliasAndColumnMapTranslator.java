@@ -146,7 +146,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         ImmutableMap<String, String> aliasToEntityMap,
         ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder
     ) {
-        final PathExpression pathExpression = fieldExpression.getParentPath();
+        final PathExpression pathExpression = fieldExpression.getParent();
         final String alias = pathExpression.root();
 
         if (not(aliasToEntityMap.containsKey(alias))) {

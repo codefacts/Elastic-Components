@@ -2,6 +2,7 @@ package elasta.orm.query.expression.builder.impl;
 
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.event.dbaction.DbInterceptors;
+import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.Query;
 import elasta.orm.query.expression.impl.QueryImpl;
 import elasta.orm.query.expression.builder.*;
@@ -46,23 +47,29 @@ final public class QueryBuilderImpl implements QueryBuilder {
 
     @Override
     public FieldExpressionHolderFunc select(String fieldExpression) {
-
-        FieldExpressionImpl expression = new FieldExpressionImpl(fieldExpression);
-
-        return new FieldExpressionHolderFuncImpl(
-            expression,
-            selectFieldExpressionResolver.addKey(expression)
-        );
+        return select(new FieldExpressionImpl(fieldExpression));
     }
 
     @Override
     public FieldExpressionHolderFunc field(String fieldExpression) {
+        return field(new FieldExpressionImpl(fieldExpression));
+    }
 
-        FieldExpressionImpl expression = new FieldExpressionImpl(fieldExpression);
+    @Override
+    public FieldExpressionHolderFunc select(FieldExpression fieldExpression) {
 
         return new FieldExpressionHolderFuncImpl(
-            expression,
-            fieldExpressionResolver.addKey(expression)
+            fieldExpression,
+            selectFieldExpressionResolver.addKey(fieldExpression)
+        );
+    }
+
+    @Override
+    public FieldExpressionHolderFunc field(FieldExpression fieldExpression) {
+
+        return new FieldExpressionHolderFuncImpl(
+            fieldExpression,
+            fieldExpressionResolver.addKey(fieldExpression)
         );
     }
 

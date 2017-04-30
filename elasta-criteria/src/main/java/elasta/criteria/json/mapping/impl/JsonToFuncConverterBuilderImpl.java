@@ -96,20 +96,20 @@ final public class JsonToFuncConverterBuilderImpl implements JsonToFuncConverter
         }
 
         if (value instanceof JsonObject) {
-            JsonObject object = (JsonObject) value;
 
-            String op = object.getString(Mp.op);
-            return converterMap.get(op).convert(object, converterMap);
+            return convert((JsonObject) value, converterMap);
         }
 
         if (value instanceof Map) {
 
-            JsonObject object = new JsonObject((Map<String, Object>) value);
-
-            String op = object.getString(Mp.op);
-            return converterMap.get(op).convert(object, converterMap);
+            return convert(new JsonObject((Map<String, Object>) value), converterMap);
         }
 
         return valueHolderOperationBuilder.build(value);
+    }
+
+    private Func convert(JsonObject jsonObject, JsonToFuncConverterMap converterMap) {
+        String op = jsonObject.getString(Mp.op);
+        return converterMap.get(op).convert(jsonObject, converterMap);
     }
 }

@@ -25,7 +25,7 @@ final public class FieldExpressionImpl implements FieldExpression {
     }
 
     @Override
-    public PathExpression getParentPath() {
+    public PathExpression getParent() {
         return pathExpression.getParent().get();
     }
 
@@ -37,6 +37,11 @@ final public class FieldExpressionImpl implements FieldExpression {
     @Override
     public PathExpression toPathExpression() {
         return pathExpression;
+    }
+
+    @Override
+    public int size() {
+        return pathExpression.size();
     }
 
     @Override

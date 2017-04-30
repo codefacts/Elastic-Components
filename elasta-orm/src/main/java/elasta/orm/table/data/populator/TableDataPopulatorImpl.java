@@ -43,7 +43,7 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
 //
 //            final String field = fieldToColumnMapping.getField();
 //
-//            Object value = entity.getValue(
+//            Object value = entity.getJsonObject(
 //                field
 //            );
 //

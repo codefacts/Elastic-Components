@@ -5,12 +5,15 @@ import elasta.core.promise.impl.Promises;
 import elasta.orm.BaseOrm;
 import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.query.QueryExecutor;
+import elasta.orm.query.expression.PathExpression;
+import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import elasta.sql.core.JoinType;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by sohan on 3/22/2017.
@@ -38,11 +41,9 @@ public interface Read {
                 .entity("employee").alias("r")
                 .joinParams(ImmutableList.of(
                     QueryExecutor.JoinParam.builder()
-                        .path("r.departments")
+                        .path(PathExpression.create("r.departments"))
                         .alias("d")
-                        .joinType(Optional.of(
-                            JoinType.INNER_JOIN
-                        ))
+                        .joinType(JoinType.INNER_JOIN)
                         .build()
                 ))
                 .selections(ImmutableList.of(
@@ -88,7 +89,7 @@ public interface Read {
                     "d.department.employee.departments.name",
                     "d.department.employee.departments.department.id",
                     "d.department.employee.departments.department.name"
-                ))
+                ).stream().map(s -> new FieldExpressionImpl(s)).collect(Collectors.toList()))
                 .criteria(new JsonObject())
                 .orderBy(ImmutableList.of())
                 .groupBy(ImmutableList.of())

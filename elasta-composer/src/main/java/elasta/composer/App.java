@@ -9,7 +9,6 @@ import elasta.core.eventbus.impl.SimpleEventBusImpl;
 import elasta.module.ModuleSystem;
 import elasta.Orm;
 import elasta.OrmExporter;
-import elasta.sql.core.FieldInfoBuilder;
 import elasta.webutils.app.utils.PerRequestToEventResolver;
 import elasta.webutils.app.RequestHandler;
 import elasta.webutils.app.module.exporter.WebUtilsExporter;

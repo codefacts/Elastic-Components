@@ -5,9 +5,11 @@ package elasta.orm.query.expression;
  */
 public interface FieldExpression {
 
-    PathExpression getParentPath();
+    PathExpression getParent();
 
     String getField();
 
     PathExpression toPathExpression();
+
+    int size();
 }

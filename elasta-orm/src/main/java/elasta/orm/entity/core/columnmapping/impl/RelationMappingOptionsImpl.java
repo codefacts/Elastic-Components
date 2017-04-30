@@ -12,12 +12,14 @@ import java.util.Objects;
 final public class RelationMappingOptionsImpl implements RelationMappingOptions {
     final CascadeUpsert cascadeUpsert;
     final CascadeDelete cascadeDelete;
+    final boolean mandatory;
 
-    public RelationMappingOptionsImpl(CascadeUpsert cascadeUpsert, CascadeDelete cascadeDelete) {
+    public RelationMappingOptionsImpl(CascadeUpsert cascadeUpsert, CascadeDelete cascadeDelete, boolean mandatory) {
         Objects.requireNonNull(cascadeUpsert);
         Objects.requireNonNull(cascadeDelete);
         this.cascadeUpsert = cascadeUpsert;
         this.cascadeDelete = cascadeDelete;
+        this.mandatory = mandatory;
     }
 
     @Override
@@ -28,5 +30,10 @@ final public class RelationMappingOptionsImpl implements RelationMappingOptions 
     @Override
     public CascadeDelete getCascadeDelete() {
         return cascadeDelete;
+    }
+
+    @Override
+    public boolean isMandatory() {
+        return mandatory;
     }
 }

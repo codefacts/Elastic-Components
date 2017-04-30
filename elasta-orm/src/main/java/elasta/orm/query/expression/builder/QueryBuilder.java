@@ -1,5 +1,6 @@
 package elasta.orm.query.expression.builder;
 
+import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.Query;
 
 /**
@@ -9,7 +10,11 @@ public interface QueryBuilder {
 
     FieldExpressionHolderFunc select(String fieldExpression);
 
-    FieldExpressionHolderFunc field(String expressionString);
+    FieldExpressionHolderFunc field(String fieldExpression);
+
+    FieldExpressionHolderFunc select(FieldExpression fieldExpression);
+
+    FieldExpressionHolderFunc field(FieldExpression fieldExpression);
 
     SelectBuilder selectBuilder();
 

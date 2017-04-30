@@ -252,7 +252,7 @@ final public class BaseOrmImpl implements BaseOrm {
     private EntityOperation getOperation(String entity) {
         EntityOperation entityOperation = operationMap.get(entity);
         if (entityOperation == null) {
-            throw new OrmException("No Entity Operation found in the operationMap for entity '" + entity + "'");
+            throw new OrmException("No Entity Operation found in the operationMap for rootEntity '" + entity + "'");
         }
         return entityOperation;
     }

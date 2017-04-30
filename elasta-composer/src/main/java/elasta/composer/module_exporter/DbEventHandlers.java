@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import elasta.composer.ComposerUtils;
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.Orm;
-import elasta.sql.core.FieldInfo;
-import elasta.sql.core.FieldInfoBuilder;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;

@@ -1,6 +1,8 @@
 package elasta.orm.query;
 
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.query.expression.FieldExpression;
+import elasta.orm.query.expression.PathExpression;
 import elasta.sql.core.Order;
 import elasta.sql.core.JoinType;
 import io.vertx.core.json.JsonArray;
@@ -8,9 +10,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Created by sohan on 3/19/2017.
@@ -34,10 +34,10 @@ public interface QueryExecutor {
         final JsonObject criteria;
         final List<JsonObject> selections;
         final List<OrderTpl> orderBy;
-        final List<String> groupBy;
+        final List<FieldExpression> groupBy;
         final JsonObject having;
 
-        public QueryArrayParams(String entity, String alias, List<JoinParam> joinParams, JsonObject criteria, List<JsonObject> selections, List<OrderTpl> orderBy, List<String> groupBy, JsonObject having) {
+        public QueryArrayParams(String entity, String alias, List<JoinParam> joinParams, JsonObject criteria, List<JsonObject> selections, List<OrderTpl> orderBy, List<FieldExpression> groupBy, JsonObject having) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
             Objects.requireNonNull(joinParams);
@@ -62,14 +62,14 @@ public interface QueryExecutor {
     final class QueryParams {
         final String entity;
         final String alias;
-        final List<JoinParam> joinParams;
+        final Collection<JoinParam> joinParams;
         final JsonObject criteria;
-        final List<String> selections;
-        final List<OrderTpl> orderBy;
-        final List<String> groupBy;
+        final Collection<FieldExpression> selections;
+        final Collection<OrderTpl> orderBy;
+        final Collection<FieldExpression> groupBy;
         final JsonObject having;
 
-        public QueryParams(String entity, String alias, List<JoinParam> joinParams, JsonObject criteria, List<String> selections, List<OrderTpl> orderBy, List<String> groupBy, JsonObject having) {
+        public QueryParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<FieldExpression> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
             Objects.requireNonNull(joinParams);
@@ -94,10 +94,10 @@ public interface QueryExecutor {
      */
     @Value
     final class OrderTpl {
-        final String field;
+        final FieldExpression field;
         final Order order;
 
-        public OrderTpl(String field, Order order) {
+        public OrderTpl(FieldExpression field, Order order) {
             Objects.requireNonNull(field);
             Objects.requireNonNull(order);
             this.field = field;
@@ -108,8 +108,24 @@ public interface QueryExecutor {
     @Value
     @Builder
     final class JoinParam {
-        final String path;
+        final PathExpression path;
         final String alias;
-        Optional<JoinType> joinType;
+        final JoinType joinType;
+
+        public JoinParam(PathExpression path, String alias) {
+            this(path, alias, null);
+        }
+
+        public JoinParam(PathExpression path, String alias, JoinType joinType) {
+            Objects.requireNonNull(path);
+            Objects.requireNonNull(alias);
+            this.path = path;
+            this.alias = alias;
+            this.joinType = joinType == null ? null : joinType;
+        }
+
+        public Optional<JoinType> getJoinType() {
+            return Optional.ofNullable(joinType);
+        }
     }
 }

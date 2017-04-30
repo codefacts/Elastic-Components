@@ -10,6 +10,8 @@ import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.ex.EntityMappingHelperExcpetion;
+import elasta.orm.query.expression.FieldExpression;
+import elasta.orm.query.expression.PathExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -133,6 +135,16 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     }
 
     @Override
+    public String getReferencingEntity(String entity, FieldExpression fieldExpression) {
+        List<String> parts = fieldExpression.toPathExpression().parts();
+        for (int i = 1; i < parts.size(); i++) {
+            String part = parts.get(i);
+            entity = getRelationMapping(entity, part).getReferencingEntity();
+        }
+        return entity;
+    }
+
+    @Override
     public String getPrimaryKey(String entity) {
         return getEntity(entity).getPrimaryKey();
     }
@@ -174,5 +186,23 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
         return ImmutableList.copyOf(
             entityMap.values()
         );
+    }
+
+    @Override
+    public boolean isMandatory(String entity, PathExpression pathExpression) {
+        List<String> parts = pathExpression.parts();
+
+        for (int i = 1; i < parts.size(); i++) {
+            String field = parts.get(i);
+            RelationMapping mapping = getRelationMapping(entity, field);
+
+            if (Utils.not(mapping.getOptions().isMandatory())) {
+                return false;
+            }
+
+            entity = mapping.getReferencingEntity();
+        }
+
+        return true;
     }
 }

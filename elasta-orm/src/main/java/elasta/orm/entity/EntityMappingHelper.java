@@ -5,6 +5,8 @@ import elasta.orm.entity.core.columnmapping.ColumnMapping;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
+import elasta.orm.query.expression.FieldExpression;
+import elasta.orm.query.expression.PathExpression;
 
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,8 @@ public interface EntityMappingHelper {
 
     RelationMapping getRelationMapping(String entity, String field);
 
+    String getReferencingEntity(String entity, FieldExpression fieldExpression);
+
     String getPrimaryKey(String entity);
 
     ColumnMapping getPrimaryKeyColumnMapping(String entity);
@@ -53,4 +57,6 @@ public interface EntityMappingHelper {
     List<String> getTables();
 
     List<Entity> getEntities();
+
+    boolean isMandatory(String entity, PathExpression parent);
 }

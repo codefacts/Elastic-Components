@@ -1,10 +1,17 @@
 package elasta.orm.impl;
 
+import com.google.common.collect.ImmutableList;
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.BaseOrm;
 import elasta.orm.Orm;
-import elasta.sql.core.FieldInfo;
+import elasta.orm.OrmUtils;
+import elasta.orm.query.QueryExecutor;
+import elasta.orm.query.expression.FieldExpression;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,12 +19,22 @@ import java.util.List;
  */
 final public class OrmImpl implements Orm {
     @Override
+    public Promise<Long> count(String entity) {
+        return null;
+    }
+
+    @Override
+    public Promise<Long> count(String entity, String alias, JsonObject criteria) {
+        return null;
+    }
+
+    @Override
     public <T> Promise<JsonObject> findOne(String entity, T id) {
         return null;
     }
 
     @Override
-    public <T> Promise<JsonObject> findOne(String entity, T id, List<FieldInfo> selectFields) {
+    public <T> Promise<JsonObject> findOne(String entity, String alias, T id, List<FieldExpression> selections) {
         return null;
     }
 
@@ -27,7 +44,37 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public <T> Promise<List<JsonObject>> findAll(String entity, List<T> ids, List<FieldInfo> selectFields) {
+    public <T> Promise<List<JsonObject>> findAll(String entity, String alias, List<T> ids, List<FieldExpression> selections) {
+        return null;
+    }
+
+    @Override
+    public Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria) {
+        return null;
+    }
+
+    @Override
+    public Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, List<FieldExpression> selections) {
+        return null;
+    }
+
+    @Override
+    public Promise<List<JsonObject>> findAll(QueryExecutor.QueryParams params) {
+        return null;
+    }
+
+    @Override
+    public Promise<List<JsonObject>> findAll() {
+        return null;
+    }
+
+    @Override
+    public Promise<List<JsonArray>> queryArray(QueryExecutor.QueryArrayParams params) {
+        return null;
+    }
+
+    @Override
+    public <T> Promise<T> querySingle(QueryExecutor.QueryArrayParams params) {
         return null;
     }
 
@@ -52,22 +99,22 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public Promise<Long> count(String entity) {
+    public Promise<List<JsonObject>> deleteChildRelations(String entity, JsonObject jsonObject) {
         return null;
     }
 
     @Override
-    public Promise<Long> count(String entity, JsonObject criteria) {
+    public Promise<List<JsonObject>> deleteAllChildRelations(String entity, List<JsonObject> jsonObjects) {
         return null;
     }
 
     @Override
-    public Promise<List<JsonObject>> findAll(String entity, JsonObject criteria) {
+    public Promise<Void> execute(BaseOrm.ExecuteParams params) {
         return null;
     }
 
     @Override
-    public Promise<List<JsonObject>> findAll(String entity, JsonObject criteria, List<FieldInfo> selectFields) {
+    public Promise<Void> executeAll(Collection<BaseOrm.ExecuteParams> paramss) {
         return null;
     }
 }

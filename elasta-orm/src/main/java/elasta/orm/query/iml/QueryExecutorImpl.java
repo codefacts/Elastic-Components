@@ -6,6 +6,7 @@ import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.query.QueryExecutor;
+import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.Query;
 import elasta.orm.query.expression.builder.impl.QueryBuilderImpl;
@@ -16,6 +17,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,7 +50,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
     }
 
     private Promise<List<JsonObject>> doQuery(QueryParams params) {
-        
+
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
             sqlDB,
@@ -101,9 +103,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
 
         params.getJoinParams().forEach(joinParam -> {
             qb.fromBuilder().join(
-                PathExpression.parseAndCreate(
-                    joinParam.getPath()
-                ),
+                joinParam.getPath(),
                 joinParam.getAlias(),
                 joinParam.getJoinType()
             );
@@ -115,17 +115,11 @@ final public class QueryExecutorImpl implements QueryExecutor {
             jsonToFuncConverter.convert(params.getCriteria(), converterMap)
         );
 
-        params.getOrderBy().forEach(orderTpl -> {
-            qb.orderByBuilder().add(
-                new FieldExpressionImpl(orderTpl.getField()), orderTpl.getOrder()
-            );
-        });
+        params.getOrderBy().forEach(orderTpl -> qb.orderByBuilder().add(
+            orderTpl.getField(), orderTpl.getOrder()
+        ));
 
-        params.getGroupBy().forEach(field -> {
-            qb.groupByBuilder().add(
-                new FieldExpressionImpl(field)
-            );
-        });
+        params.getGroupBy().forEach(field -> qb.groupByBuilder().add(field));
 
         qb.havingBuilder().add(
             jsonToFuncConverter.convert(params.getHaving(), converterMap)
@@ -139,10 +133,10 @@ final public class QueryExecutorImpl implements QueryExecutor {
     private static final class Params {
         final String entity;
         final String alias;
-        final List<JoinParam> joinParams;
+        final Collection<JoinParam> joinParams;
         final JsonObject criteria;
-        final List<OrderTpl> orderBy;
-        final List<String> groupBy;
+        final Collection<OrderTpl> orderBy;
+        final Collection<FieldExpression> groupBy;
         final JsonObject having;
     }
 }

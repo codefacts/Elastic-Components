@@ -9,6 +9,8 @@ public interface RelationMappingOptions {
 
     CascadeDelete getCascadeDelete();
 
+    boolean isMandatory();
+
     enum CascadeUpsert {
         YES, NO
     }
