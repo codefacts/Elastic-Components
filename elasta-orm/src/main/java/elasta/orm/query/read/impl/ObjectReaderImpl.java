@@ -31,9 +31,7 @@ final public class ObjectReaderImpl implements ObjectReader {
 
         HashMap<String, Object> map = new LinkedHashMap<>();
 
-        fieldAndIndexPairs.forEach(fieldAndIndexPair -> {
-            map.put(fieldAndIndexPair.getField(), data.getValue(fieldAndIndexPair.getIndex()));
-        });
+        fieldAndIndexPairs.forEach(fieldAndIndexPair -> map.put(fieldAndIndexPair.getField(), data.getValue(fieldAndIndexPair.getIndex())));
 
         directRelations.forEach(directRelation -> {
             map.put(directRelation.getField(), directRelation.getDirectRelationReader().read(data, dataList));

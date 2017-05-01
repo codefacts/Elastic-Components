@@ -43,7 +43,7 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
         this.aliasGenerator = aliasGenerator;
     }
 
-    Tpl2 translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
+    Tpl3 translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
 
         final ImmutableMap.Builder<String, String> aliasToEntityMapBuilder = ImmutableMap.builder();
 
@@ -73,15 +73,17 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
 
         final ImmutableMap<String, String> aliasToEntityMap = aliasToEntityMapBuilder.build();
 
-        final ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder = ImmutableMap.builder();
+        final ImmutableMap.Builder<FieldExpression, AliasAndColumn> selectFieldExpToAliasedColumnMapBuilder = ImmutableMap.builder();
 
         selectFieldExpressionResolver.getFuncMap().keySet()
-            .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
+            .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, selectFieldExpToAliasedColumnMapBuilder));
+
+        final ImmutableMap.Builder<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMapBuilder = ImmutableMap.builder();
 
         expressionResolver.getFuncMap().keySet()
             .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
 
-        return new Tpl2(fieldExpToAliasedColumnMapBuilder.build(), aliasToJoinTplMap);
+        return new Tpl3(selectFieldExpToAliasedColumnMapBuilder.build(), fieldExpToAliasedColumnMapBuilder.build(), aliasToJoinTplMap);
     }
 
     private EntityAndAliasPair populatePartAndJoinTplMap(PartAndJoinTplParams params) {

@@ -38,7 +38,14 @@ final public class QueryDataLoaderImpl implements QueryDataLoader {
         final Set<PathExpression> optionalPaths = new OptionalListBuilder(helper, params).build();
 
         ImmutableSet.Builder<FieldExpression> mandatoryListBuilder = ImmutableSet.builder();
-        ImmutableSortedSet.Builder<FieldExpression> optionalListBuilder = ImmutableSortedSet.orderedBy(Comparator.comparingInt(FieldExpression::size));
+        ImmutableSortedSet.Builder<FieldExpression> optionalListBuilder = ImmutableSortedSet.orderedBy((o1, o2) -> {
+
+            if (o1.equals(o2)) {
+                return 0;
+            }
+
+            return o1.size() > o2.size() ? 1 : -1;
+        });
 
         Map<String, Map<String, Map<String, Object>>> map = toOptionalPathsMaps(optionalPaths);
 

@@ -40,7 +40,7 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
     @Override
     public ObjectReader build() {
 
-        Map<PathExpression, PathInfo> map = new ReaderBuilder().build();
+        Map<PathExpression, PathInfo> map = new ReaderBuilder(this).build();
 
         PathInfo pathInfo = map.get(PathExpression.create(rootAlias));
 
@@ -52,10 +52,17 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
 
     }
 
-    final private class PathInfo {
+    static final class PathInfo {
+        final EntityMappingHelper helper;
+        final String rootEntity;
         final ImmutableSet.Builder<FieldAndIndexPair> fieldAndIndexPairsBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<PathExpression> directRelationsBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<PathExpression> indirectRelationsBuilder = ImmutableSet.builder();
+
+        public PathInfo(EntityMappingHelper helper, String rootEntity) {
+            this.helper = helper;
+            this.rootEntity = rootEntity;
+        }
 
         public ObjectReader build(Map<PathExpression, PathInfo> map) {
             final ImmutableSet<FieldAndIndexPair> fieldAndIndexPairs = fieldAndIndexPairsBuilder.build();
@@ -128,82 +135,4 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
         }
     }
 
-    private class ReaderBuilder {
-        final Map<PathExpression, PathInfo> map = new HashMap<>();
-
-        public Map<PathExpression, PathInfo> build() {
-
-            for (int index = 0; index < fieldExpressions.size(); index++) {
-                final PathExpression pathExpression = toFullPathExp(
-                    fieldExpressions.get(index).toPathExpression()
-                );
-
-                process(pathExpression, index);
-            }
-
-            return map;
-        }
-
-        private void process(PathExpression pathExpression, int index) {
-            List<String> parts = pathExpression.parts();
-
-            String entity = rootEntity;
-            for (int i = 1, end = parts.size() - 1; i < end; i++) {
-                String fieldName = parts.get(i);
-                Field field = helper.getField(entity, fieldName);
-
-                final PathInfo pathInfo = getPathInfo(pathExpression.subPath(0, i));
-
-                switch (field.getJavaType()) {
-                    case OBJECT: {
-                        pathInfo.directRelationsBuilder.add(
-                            pathExpression.subPath(0, i + 1)
-                        );
-                    }
-                    break;
-                    case ARRAY: {
-                        pathInfo.indirectRelationsBuilder.add(
-                            pathExpression.subPath(0, i + 1)
-                        );
-                    }
-                    break;
-                }
-
-                entity = field.getRelationship().get().getEntity();
-            }
-
-            Field field = helper.getField(entity, pathExpression.last());
-
-            getPathInfo(pathExpression.subPath(0, pathExpression.size() - 1))
-                .fieldAndIndexPairsBuilder
-                .add(
-                    new FieldAndIndexPair(field.getName(), index)
-                )
-            ;
-        }
-
-        private PathExpression toFullPathExp(PathExpression pathExpression) {
-            if (not(pathExpression.startsWith(rootAlias))) {
-
-                PathExpression fullPath = aliasToFullPathExpressionMap.get(pathExpression.root());
-
-                if (fullPath == null) {
-                    throw new ObjectReaderException("Invalid path expression '" + pathExpression + "' not found in the aliasToFullPathExpressionMap");
-                }
-
-                return fullPath.concat(
-                    pathExpression.subPath(1, pathExpression.size())
-                );
-            }
-            return pathExpression;
-        }
-
-        private PathInfo getPathInfo(PathExpression pathExpression) {
-            PathInfo pathInfo = map.get(pathExpression);
-            if (pathInfo == null) {
-                map.put(pathExpression, pathInfo = new PathInfo());
-            }
-            return pathInfo;
-        }
-    }
 }

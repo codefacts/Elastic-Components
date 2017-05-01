@@ -88,7 +88,16 @@ final public class QueryImpl implements Query {
             Map<String, PathExpression> aliasToFullPathExpressionMap = new PathExpTranslator(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
                 .getAliasToFullPathExpressionMap();
 
-            Tpl2 tpl2 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
+            Tpl3 tpl3 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
+
+            final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = ImmutableMap.<FieldExpression, AliasAndColumn>builder()
+                .putAll(
+                    tpl3.getSelectFieldExpressionToAliasAndColumnMap()
+                )
+                .putAll(
+                    tpl3.getFieldExpToAliasedColumnMap()
+                )
+                .build();
 
             SqlQuery sqlQuery = new SqlQueryBuilder(
                 rootEntity,
@@ -99,9 +108,9 @@ final public class QueryImpl implements Query {
                 groupByExpressions,
                 havingFuncs,
                 helper,
-                tpl2.getAliasToJoinTplMap(),
+                tpl3.getAliasToJoinTplMap(),
                 aliasGenerator,
-                tpl2.getFieldExpToAliasedColumnMap()
+                fieldExpressionToAliasAndColumnMap
             ).build();
 
             ObjectReader objectReader = new ObjectReaderBuilderImpl(
@@ -127,7 +136,16 @@ final public class QueryImpl implements Query {
             Map<String, PathExpression> aliasToFullPathExpressionMap = new PathExpTranslator(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
                 .getAliasToFullPathExpressionMap();
 
-            Tpl2 tpl2 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
+            Tpl3 tpl3 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
+
+            final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = ImmutableMap.<FieldExpression, AliasAndColumn>builder()
+                .putAll(
+                    tpl3.getSelectFieldExpressionToAliasAndColumnMap()
+                )
+                .putAll(
+                    tpl3.getFieldExpToAliasedColumnMap()
+                )
+                .build();
 
             SqlQuery sqlQuery = new SqlQueryBuilder(
                 rootEntity,
@@ -138,9 +156,9 @@ final public class QueryImpl implements Query {
                 groupByExpressions,
                 havingFuncs,
                 helper,
-                tpl2.getAliasToJoinTplMap(),
+                tpl3.getAliasToJoinTplMap(),
                 aliasGenerator,
-                tpl2.getFieldExpToAliasedColumnMap()
+                fieldExpressionToAliasAndColumnMap
             ).build();
 
             return dbInterceptors.interceptSqlQuery(sqlQuery)
@@ -148,9 +166,9 @@ final public class QueryImpl implements Query {
                 .map(ResultSet::getResults);
         }
 
-        private Tpl2 fieldExpressionToAliasAndColumnMap(Map<String, PathExpression> aliasToFullPathExpressionMap) {
+        private Tpl3 fieldExpressionToAliasAndColumnMap(Map<String, PathExpression> aliasToFullPathExpressionMap) {
 
-            Tpl2 tpl2 = new FieldExpressionToAliasAndColumnMapTranslator(
+            Tpl3 tpl3 = new FieldExpressionToAliasAndColumnMapTranslator(
                 rootEntity,
                 rootAlias,
                 selectFieldExpressionResolver,
@@ -161,18 +179,15 @@ final public class QueryImpl implements Query {
 
             ).translate(aliasToFullPathExpressionMap);
 
-            final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = tpl2.getFieldExpToAliasedColumnMap();
-
-            final Map<FieldExpression, FieldExpressionHolderFunc> funcMap = funcMap(fieldExpressionToAliasAndColumnMap);
-
             selectFieldExpressionResolver.setFuncMap(
-                funcMap
+                funcMap(tpl3.getSelectFieldExpressionToAliasAndColumnMap())
             );
+            
             expressionResolver.setFuncMap(
-                funcMap
+                funcMap(tpl3.getFieldExpToAliasedColumnMap())
             );
 
-            return tpl2;
+            return tpl3;
         }
 
         private Map<FieldExpression, FieldExpressionHolderFunc> funcMap(Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap) {
@@ -200,14 +215,6 @@ final public class QueryImpl implements Query {
         PartAndJoinTpl(JoinTpl joinTpl) {
             Objects.requireNonNull(joinTpl);
             this.joinTpl = joinTpl;
-        }
-    }
-
-    public static class AliasCounter {
-        public int aliasCount;
-
-        public AliasCounter(int aliasCount) {
-            this.aliasCount = aliasCount;
         }
     }
 

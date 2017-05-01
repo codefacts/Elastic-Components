@@ -1,5 +1,6 @@
 package elasta.orm.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
@@ -42,7 +43,7 @@ final class DataLoader {
                     .map(
                         optionalData -> reloadJsonObject(
                             jsonObject,
-                            helper.getPrimaryKey(optionalData.getEntity()),
+                            optionalData.getEntity(),
                             optionalData.getPathExpression(),
                             optionalData.getFields()
                         ).mapP(optionalJsonObject -> {
@@ -160,11 +161,16 @@ final class DataLoader {
         return (Map<String, Object>) value;
     }
 
-    private Promise<Optional<JsonObject>> reloadJsonObject(JsonObject jsonObject, String primaryKey, PathExpression pathExpression, Set<String> fields) {
+    private Promise<Optional<JsonObject>> reloadJsonObject(JsonObject jsonObject, String entity, PathExpression pathExpression, Set<String> fields) {
+
+        final String primaryKey = helper.getPrimaryKey(entity);
 
         return baseOrm
             .query(
                 QueryExecutor.QueryParams.builder()
+                    .entity(entity)
+                    .alias(pathExpression.root())
+                    .joinParams(ImmutableList.of())
                     .selections(
                         fields.stream()
                             .map(
@@ -180,12 +186,15 @@ final class DataLoader {
                                 "op", OpNames.eq,
                                 "arg1", ImmutableMap.of(
                                     "op", "field",
-                                    "arg", pathExpression.root().concat(primaryKey)
+                                    "arg", (pathExpression.root() + "." + primaryKey)
                                 ),
                                 "arg2", jsonObject.getValue(primaryKey)
                             )
                         )
                     )
+                    .having(new JsonObject())
+                    .groupBy(ImmutableList.of())
+                    .orderBy(ImmutableList.of())
                     .build()
             )
             .map(jsonObjects -> {

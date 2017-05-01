@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import elasta.core.promise.impl.Promises;
 import elasta.orm.BaseOrm;
 import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
+import elasta.orm.impl.QueryDataLoaderImpl;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
@@ -13,13 +14,12 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Created by sohan on 3/22/2017.
+ * Created by sohan on 5/1/2017.
  */
-public interface Read {
+public interface QueryDataLoaderTest {
     Vertx vertx = Vertx.vertx(
         new VertxOptions()
             .setEventLoopPoolSize(1)
@@ -28,7 +28,7 @@ public interface Read {
             .setBlockedThreadCheckInterval(10_000_000)
     );
 
-    static void main(String[] asdfasd) {
+    static void main(String[] asfd) {
         JDBCClient jdbcClient = Test.jdbcClient("jpadb", vertx);
 
         BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
@@ -43,16 +43,12 @@ public interface Read {
             ))
             .build());
 
-        baseOrm.query(
+        QueryDataLoaderImpl queryDataLoader = new QueryDataLoaderImpl(baseOrm, Test.helper(Employees.entities()));
+
+        queryDataLoader.findAll(
             QueryExecutor.QueryParams.builder()
                 .entity("employee").alias("r")
-                .joinParams(ImmutableList.of(
-                    QueryExecutor.JoinParam.builder()
-                        .path(PathExpression.parseAndCreate("r.departments"))
-                        .alias("d")
-                        .joinType(JoinType.INNER_JOIN)
-                        .build()
-                ))
+                .joinParams(ImmutableList.of())
                 .selections(ImmutableList.of(
                     "r.eid",
                     "r.ename",
@@ -84,18 +80,6 @@ public interface Read {
                     "r.department2.department.department.employee.eid",
                     "r.department2.department.department.employee.ename",
                     "r.department2.department.department.employee.salary"
-//                    "d.id",
-//                    "d.name",
-//                    "d.department.id",
-//                    "d.department.name",
-//                    "d.department.department.id",
-//                    "d.department.department.name",
-//                    "d.department.employee.eid",
-//                    "d.department.employee.ename",
-//                    "d.department.employee.departments.id",
-//                    "d.department.employee.departments.name",
-//                    "d.department.employee.departments.department.id",
-//                    "d.department.employee.departments.department.name"
                 ).stream().map(FieldExpressionImpl::new).collect(Collectors.toList()))
                 .criteria(new JsonObject())
                 .orderBy(ImmutableList.of())

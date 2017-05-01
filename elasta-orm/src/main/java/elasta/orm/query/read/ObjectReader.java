@@ -14,25 +14,4 @@ import java.util.List;
 public interface ObjectReader {
 
     JsonObject read(JsonArray data, List<JsonArray> dataList);
-
-    static void main(String[] args) {
-        final Vertx vertx = Vertx.vertx();
-        JDBCClient client = JDBCClient.createShared(vertx, new JsonObject(
-            ImmutableMap.of(
-                "user", "root",
-                "password", "",
-                "url", "jdbc:mysql://127.0.0.1:3306/jpadb",
-                "driver_class", "com.mysql.jdbc.Driver"
-            )
-        ));
-
-        client.getConnection(event -> {
-            if (event.failed()) event.cause().printStackTrace();
-            event.result().query("select a.id, a.name, b.id from area a, area b", result -> {
-                if (result.failed()) result.cause().printStackTrace();
-                List<String> columnNames = result.result().getColumnNames();
-                System.out.println(columnNames);
-            });
-        });
-    }
 }

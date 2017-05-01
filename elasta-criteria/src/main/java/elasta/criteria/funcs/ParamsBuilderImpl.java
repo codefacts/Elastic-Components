@@ -10,7 +10,6 @@ import java.util.Objects;
  */
 public class ParamsBuilderImpl implements ParamsBuilder {
     final ImmutableList.Builder<Object> listBuilder;
-    int counter = 1;
 
     public ParamsBuilderImpl(ImmutableList.Builder<Object> listBuilder) {
         Objects.requireNonNull(listBuilder);
@@ -20,6 +19,6 @@ public class ParamsBuilderImpl implements ParamsBuilder {
     @Override
     public String add(Object value) {
         listBuilder.add(value);
-        return String.valueOf(counter++);
+        return "?";
     }
 }

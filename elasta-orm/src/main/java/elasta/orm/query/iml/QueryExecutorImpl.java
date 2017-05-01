@@ -57,12 +57,16 @@ final public class QueryExecutorImpl implements QueryExecutor {
             dbInterceptors
         );
 
-        params.getSelections().forEach(field -> qb.selectBuilder().add(
-            qb.select(field)
-        ));
+        params.getSelections()
+            .forEach(
+                field -> qb.selectBuilder().add(
+                    qb.select(field)
+                )
+            );
 
         return prepareAndExecute(
-            qb, Params.builder()
+            qb,
+            Params.builder()
                 .entity(params.getEntity())
                 .alias(params.getAlias())
                 .joinParams(params.getJoinParams())
