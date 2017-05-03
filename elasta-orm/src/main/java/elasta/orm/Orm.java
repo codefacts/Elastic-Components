@@ -24,15 +24,15 @@ public interface Orm {
 
     <T> Promise<JsonObject> findOne(String entity, T id);
 
-    <T> Promise<JsonObject> findOne(String entity, String alias, T id, List<FieldExpression> selections);
+    <T> Promise<JsonObject> findOne(String entity, String alias, T id, Collection<FieldExpression> selections);
 
-    <T> Promise<List<JsonObject>> findAll(String entity, List<T> ids);
+    <T> Promise<List<JsonObject>> findAll(String entity, Collection<T> ids);
 
-    <T> Promise<List<JsonObject>> findAll(String entity, String alias, List<T> ids, List<FieldExpression> selections);
+    <T> Promise<List<JsonObject>> findAll(String entity, String alias, Collection<T> ids, Collection<FieldExpression> selections);
 
     Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria);
 
-    Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, List<FieldExpression> selections);
+    Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections);
 
     Promise<List<JsonObject>> findAll(QueryExecutor.QueryParams params);
 
@@ -44,15 +44,15 @@ public interface Orm {
 
     Promise<JsonObject> upsert(String entity, JsonObject data);
 
-    Promise<List<JsonObject>> upsertAll(String entity, List<JsonObject> jsonObjects);
+    Promise<List<JsonObject>> upsertAll(String entity, Collection<JsonObject> jsonObjects);
 
     <T> Promise<T> delete(String entity, T id);
 
-    <T> Promise<List<T>> deleteAll(String entity, List<T> ids);
+    <T> Promise<List<T>> deleteAll(String entity, Collection<T> ids);
 
     Promise<List<JsonObject>> deleteChildRelations(String entity, JsonObject jsonObject);
 
-    Promise<List<JsonObject>> deleteAllChildRelations(String entity, List<JsonObject> jsonObjects);
+    Promise<List<JsonObject>> deleteAllChildRelations(String entity, Collection<JsonObject> jsonObjects);
 
     Promise<Void> execute(BaseOrm.ExecuteParams params);
 

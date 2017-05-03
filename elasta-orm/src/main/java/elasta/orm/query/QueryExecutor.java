@@ -30,14 +30,14 @@ public interface QueryExecutor {
     final class QueryArrayParams {
         final String entity;
         final String alias;
-        final List<JoinParam> joinParams;
+        final Collection<JoinParam> joinParams;
         final JsonObject criteria;
-        final List<JsonObject> selections;
-        final List<OrderTpl> orderBy;
-        final List<FieldExpression> groupBy;
+        final Collection<JsonObject> selections;
+        final Collection<OrderTpl> orderBy;
+        final Collection<FieldExpression> groupBy;
         final JsonObject having;
 
-        public QueryArrayParams(String entity, String alias, List<JoinParam> joinParams, JsonObject criteria, List<JsonObject> selections, List<OrderTpl> orderBy, List<FieldExpression> groupBy, JsonObject having) {
+        public QueryArrayParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<JsonObject> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
             Objects.requireNonNull(joinParams);

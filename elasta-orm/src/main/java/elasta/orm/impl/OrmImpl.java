@@ -34,17 +34,17 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public <T> Promise<JsonObject> findOne(String entity, String alias, T id, List<FieldExpression> selections) {
+    public <T> Promise<JsonObject> findOne(String entity, String alias, T id, Collection<FieldExpression> selections) {
         return null;
     }
 
     @Override
-    public <T> Promise<List<JsonObject>> findAll(String entity, List<T> ids) {
+    public <T> Promise<List<JsonObject>> findAll(String entity, Collection<T> ids) {
         return null;
     }
 
     @Override
-    public <T> Promise<List<JsonObject>> findAll(String entity, String alias, List<T> ids, List<FieldExpression> selections) {
+    public <T> Promise<List<JsonObject>> findAll(String entity, String alias, Collection<T> ids, Collection<FieldExpression> selections) {
         return null;
     }
 
@@ -54,7 +54,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, List<FieldExpression> selections) {
+    public Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections) {
         return null;
     }
 
@@ -84,7 +84,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public Promise<List<JsonObject>> upsertAll(String entity, List<JsonObject> jsonObjects) {
+    public Promise<List<JsonObject>> upsertAll(String entity, Collection<JsonObject> jsonObjects) {
         return null;
     }
 
@@ -94,7 +94,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public <T> Promise<List<T>> deleteAll(String entity, List<T> ids) {
+    public <T> Promise<List<T>> deleteAll(String entity, Collection<T> ids) {
         return null;
     }
 
@@ -104,7 +104,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public Promise<List<JsonObject>> deleteAllChildRelations(String entity, List<JsonObject> jsonObjects) {
+    public Promise<List<JsonObject>> deleteAllChildRelations(String entity, Collection<JsonObject> jsonObjects) {
         return null;
     }
 

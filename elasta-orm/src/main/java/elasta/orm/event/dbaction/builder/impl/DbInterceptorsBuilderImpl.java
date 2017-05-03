@@ -8,6 +8,7 @@ import elasta.orm.event.dbaction.builder.DbInterceptorsBuilder;
 import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,14 +16,14 @@ import java.util.Objects;
  * Created by sohan on 4/6/2017.
  */
 final public class DbInterceptorsBuilderImpl implements DbInterceptorsBuilder {
-    final List<UpdateTplInterceptor> updateTplInterceptors;
-    final List<SqlQueryInterceptor> sqlQueryInterceptors;
+    final Collection<UpdateTplInterceptor> updateTplInterceptors;
+    final Collection<SqlQueryInterceptor> sqlQueryInterceptors;
 
     public DbInterceptorsBuilderImpl() {
         this(new ArrayList<>(), new ArrayList<>());
     }
 
-    public DbInterceptorsBuilderImpl(List<UpdateTplInterceptor> updateTplInterceptors, List<SqlQueryInterceptor> sqlQueryInterceptors) {
+    public DbInterceptorsBuilderImpl(Collection<UpdateTplInterceptor> updateTplInterceptors, Collection<SqlQueryInterceptor> sqlQueryInterceptors) {
         Objects.requireNonNull(updateTplInterceptors);
         Objects.requireNonNull(sqlQueryInterceptors);
         this.updateTplInterceptors = updateTplInterceptors;

@@ -6,6 +6,7 @@ import elasta.orm.delete.TableToTableDataMap;
 import elasta.orm.delete.TableToTableDeleteFunctionMap;
 import elasta.orm.upsert.TableData;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,7 +22,7 @@ final public class MultiTableDeleteFunctionImpl implements MultiTableDeleteFunct
     }
 
     @Override
-    public void delete(List<TableData> tableDataListToDelete, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
+    public void delete(Collection<TableData> tableDataListToDelete, DeleteContext context, TableToTableDataMap tableToTableDataMap) {
         tableDataListToDelete.forEach(
             tableData -> tableToTableDeleteFunctionMap.get(tableData.getTable())
                 .delete(tableData, context, tableToTableDataMap)

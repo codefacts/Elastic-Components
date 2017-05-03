@@ -10,7 +10,6 @@ import elasta.orm.delete.impl.ColumnValuePair;
 import elasta.orm.delete.impl.DeleteContextImpl;
 import elasta.orm.delete.impl.DeleteData;
 import elasta.orm.event.dbaction.DbInterceptors;
-import elasta.orm.ex.BaseOrmException;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
@@ -214,7 +213,7 @@ final public class BaseOrmImpl implements BaseOrm {
                         );
                     }
                 }
-                throw new BaseOrmException("Invalid OperationType '" + params.getOperationType() + "' in ExecuteParams");
+                throw new OrmException("Invalid OperationType '" + params.getOperationType() + "' in ExecuteParams");
             })
             .collect(Collectors.toList());
 

@@ -10,6 +10,7 @@ import elasta.orm.upsert.TableData;
 import elasta.orm.delete.impl.ColumnValuePair;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -37,7 +38,7 @@ public interface DeleteUtils {
             .filter(relationMapping -> relationMapping.getOptions().getCascadeDelete() == RelationMappingOptions.CascadeDelete.YES);
     }
 
-    static Stream<DependencyInfo> getTableDependenciesForLoadAndDelete(List<DependencyInfo> dependencyInfos) {
+    static Stream<DependencyInfo> getTableDependenciesForLoadAndDelete(Collection<DependencyInfo> dependencyInfos) {
         return dependencyInfos.stream()
             .filter(dependencyInfo -> {
                 RelationMapping relationMapping = dependencyInfo.getRelationMapping();
