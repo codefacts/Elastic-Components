@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
+import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.immutable.Tpl3;
@@ -57,7 +58,16 @@ final public class QueryDataLoaderImpl implements QueryDataLoader {
                     .entity(params.getEntity())
                     .alias(params.getAlias())
                     .selections(fields.getMandatoryFieldExpressions())
-                    .joinParams(params.getJoinParams())
+                    .joinParams(
+                        params.getJoinParams()
+                            .stream()
+                            .filter(
+                                joinParam -> Utils.not(
+                                    fields.getAliasToFieldsMap().containsKey(joinParam.getAlias())
+                                )
+                            )
+                            .collect(Collectors.toList())
+                    )
                     .criteria(params.getCriteria())
                     .having(params.getHaving())
                     .groupBy(params.getGroupBy())
@@ -78,7 +88,7 @@ final public class QueryDataLoaderImpl implements QueryDataLoader {
                     return Promises.when(
                         jsonObjects.stream()
                             .map(
-                                rootEntity -> loadJsonObject(rootEntity, fields.getAliasToFieldsMap(), rootAliasToDataMap, aliasToFullPathExpressionMap, params.getAlias(), params.getEntity())
+                                jsonObject -> loadJsonObject(jsonObject, fields.getAliasToFieldsMap(), rootAliasToDataMap, aliasToFullPathExpressionMap, params.getAlias(), params.getEntity())
                             )
                             .collect(Collectors.toList())
                     );
