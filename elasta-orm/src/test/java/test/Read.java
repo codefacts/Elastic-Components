@@ -83,19 +83,19 @@ public interface Read {
                     "r.department2.department.department.name",
                     "r.department2.department.department.employee.eid",
                     "r.department2.department.department.employee.ename",
-                    "r.department2.department.department.employee.salary"
-//                    "d.id",
-//                    "d.name",
-//                    "d.department.id",
-//                    "d.department.name",
-//                    "d.department.department.id",
-//                    "d.department.department.name",
-//                    "d.department.employee.eid",
-//                    "d.department.employee.ename",
-//                    "d.department.employee.departments.id",
-//                    "d.department.employee.departments.name",
-//                    "d.department.employee.departments.department.id",
-//                    "d.department.employee.departments.department.name"
+                    "r.department2.department.department.employee.salary",
+                    "d.id",
+                    "d.name",
+                    "d.department.id",
+                    "d.department.name",
+                    "d.department.department.id",
+                    "d.department.department.name",
+                    "d.department.employee.eid",
+                    "d.department.employee.ename",
+                    "d.department.employee.departments.id",
+                    "d.department.employee.departments.name",
+                    "d.department.employee.departments.department.id",
+                    "d.department.employee.departments.department.name"
                 ).stream().map(FieldExpressionImpl::new).collect(Collectors.toList()))
                 .criteria(new JsonObject())
                 .orderBy(ImmutableList.of())

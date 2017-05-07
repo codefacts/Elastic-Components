@@ -10,5 +10,5 @@ import java.util.List;
  * Created by sohan on 4/20/2017.
  */
 public interface QueryDataLoader {
-    Promise<List<JsonObject>> findAll(QueryExecutor.QueryParams params);
+    Promise<List<JsonObject>> query(QueryExecutor.QueryParams params);
 }

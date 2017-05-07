@@ -10,31 +10,38 @@ import elasta.orm.query.expression.builder.impl.PathExpressionAndAliasPair;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static elasta.commons.Utils.not;
 
 /**
  * Created by sohan on 4/9/2017.
  */
-final class PathExpTranslator {
+final public class AliasToFullPathExpressionBuilder {
     final String rootAlias;
     final String rootEntity;
-    final List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;
+    final Stream<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;
     final Map<String, PathExpression> map;
 
-    public PathExpTranslator(String rootAlias, String rootEntity, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs) {
+    public AliasToFullPathExpressionBuilder(String rootAlias, String rootEntity, Stream<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs) {
         this.rootAlias = rootAlias;
         this.rootEntity = rootEntity;
-        this.fromPathExpressionAndAliasPairs = fromPathExpressionAndAliasPairs;
+        Stream.Builder<PathExpressionAndAliasPair> streamBuilder = Stream.builder();
+        this.map = toMap(fromPathExpressionAndAliasPairs, streamBuilder);
+        this.fromPathExpressionAndAliasPairs = streamBuilder.build();
+    }
 
-        this.map = fromPathExpressionAndAliasPairs.stream().collect(Collectors.toMap(
-            PathExpressionAndAliasPair::getAlias,
-            PathExpressionAndAliasPair::getPathExpression
-        ));
+    private Map<String, PathExpression> toMap(Stream<PathExpressionAndAliasPair> expressionAndAliasPairs, Stream.Builder<PathExpressionAndAliasPair> streamBuilder) {
+        return expressionAndAliasPairs
+            .peek(streamBuilder::accept)
+            .collect(Collectors.toMap(
+                PathExpressionAndAliasPair::getAlias,
+                PathExpressionAndAliasPair::getPathExpression
+            ));
     }
 
 
-    public Map<String, PathExpression> getAliasToFullPathExpressionMap() {
+    public Map<String, PathExpression> build() {
 
         final ImmutableMap.Builder<String, PathExpression> aliasToPathExpressionMapBuilder = ImmutableMap.builder();
 

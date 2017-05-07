@@ -53,6 +53,8 @@ public interface PathExpression {
 
     PathExpression subPath(int fromIndex, int toIndex);
 
+    PathExpression subPath(int fromIndex);
+
     boolean startsWith(String rootAlias);
 
     PathExpression concat(PathExpression... pathExpression);

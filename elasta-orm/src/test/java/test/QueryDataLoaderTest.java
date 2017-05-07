@@ -45,10 +45,16 @@ public interface QueryDataLoaderTest {
 
         QueryDataLoaderImpl queryDataLoader = new QueryDataLoaderImpl(baseOrm, Test.helper(Employees.entities()));
 
-        queryDataLoader.findAll(
+        queryDataLoader.query(
             QueryExecutor.QueryParams.builder()
                 .entity("employee").alias("r")
-                .joinParams(ImmutableList.of())
+                .joinParams(ImmutableList.of(
+                    QueryExecutor.JoinParam.builder()
+                        .path(PathExpression.parseAndCreate("r.departments"))
+                        .alias("d")
+                        .joinType(JoinType.INNER_JOIN)
+                        .build()
+                ))
                 .selections(ImmutableList.of(
                     "r.eid",
                     "r.ename",
@@ -79,7 +85,19 @@ public interface QueryDataLoaderTest {
                     "r.department2.department.department.name",
                     "r.department2.department.department.employee.eid",
                     "r.department2.department.department.employee.ename",
-                    "r.department2.department.department.employee.salary"
+                    "r.department2.department.department.employee.salary",
+                    "d.id",
+                    "d.name",
+                    "d.department.id",
+                    "d.department.name",
+                    "d.department.department.id",
+                    "d.department.department.name",
+                    "d.department.employee.eid",
+                    "d.department.employee.ename",
+                    "d.department.employee.departments.id",
+                    "d.department.employee.departments.name",
+                    "d.department.employee.departments.department.id",
+                    "d.department.employee.departments.department.name"
                 ).stream().map(FieldExpressionImpl::new).collect(Collectors.toList()))
                 .criteria(new JsonObject())
                 .orderBy(ImmutableList.of())
@@ -92,6 +110,7 @@ public interface QueryDataLoaderTest {
                 System.out.println("size: " + jsonObjects.size());
                 jsonObjects.forEach(jsonObject -> {
                     System.out.println(jsonObject.encodePrettily());
+                    System.out.println("--------------------------------------------------------------------------------------------------------------------");
                 });
             });
     }

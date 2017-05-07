@@ -85,19 +85,17 @@ final public class QueryImpl implements Query {
 
         public Promise<List<JsonObject>> execute() {
 
-            Map<String, PathExpression> aliasToFullPathExpressionMap = new PathExpTranslator(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
-                .getAliasToFullPathExpressionMap();
+            Map<String, PathExpression> aliasToFullPathExpressionMap = new AliasToFullPathExpressionBuilder(
+                rootAlias, rootEntity,
+                fromPathExpressionAndAliasPairs.stream()
+            ).build();
 
             Tpl3 tpl3 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
 
-            final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = ImmutableMap.<FieldExpression, AliasAndColumn>builder()
-                .putAll(
-                    tpl3.getSelectFieldExpressionToAliasAndColumnMap()
-                )
-                .putAll(
-                    tpl3.getFieldExpToAliasedColumnMap()
-                )
-                .build();
+            final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = combineAliasAndColumnMaps(
+                tpl3.getSelectFieldExpressionToAliasAndColumnMap(),
+                tpl3.getFieldExpToAliasedColumnMap()
+            );
 
             SqlQuery sqlQuery = new SqlQueryBuilder(
                 rootEntity,
@@ -131,10 +129,18 @@ final public class QueryImpl implements Query {
                 ;
         }
 
+        private Map<FieldExpression, AliasAndColumn> combineAliasAndColumnMaps(Map<FieldExpression, AliasAndColumn> selectFieldExpressionToAliasAndColumnMap, Map<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMap) {
+            HashMap<FieldExpression, AliasAndColumn> hashMap = new HashMap<>(selectFieldExpressionToAliasAndColumnMap);
+            hashMap.putAll(fieldExpToAliasedColumnMap);
+            return Collections.unmodifiableMap(hashMap);
+        }
+
         public Promise<List<JsonArray>> executeArray() {
 
-            Map<String, PathExpression> aliasToFullPathExpressionMap = new PathExpTranslator(rootAlias, rootEntity, fromPathExpressionAndAliasPairs)
-                .getAliasToFullPathExpressionMap();
+            Map<String, PathExpression> aliasToFullPathExpressionMap = new AliasToFullPathExpressionBuilder(
+                rootAlias, rootEntity,
+                fromPathExpressionAndAliasPairs.stream()
+            ).build();
 
             Tpl3 tpl3 = fieldExpressionToAliasAndColumnMap(aliasToFullPathExpressionMap);
 
@@ -182,7 +188,7 @@ final public class QueryImpl implements Query {
             selectFieldExpressionResolver.setFuncMap(
                 funcMap(tpl3.getSelectFieldExpressionToAliasAndColumnMap())
             );
-            
+
             expressionResolver.setFuncMap(
                 funcMap(tpl3.getFieldExpToAliasedColumnMap())
             );

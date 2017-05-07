@@ -11,36 +11,68 @@ import java.util.*;
 /**
  * Created by sohan on 4/30/2017.
  */
-class OptionalDataMapBuilder {
+final class OptionalDataMapBuilder {
     final String rootEntity;
+    final String rootAlias;
     final Set<FieldExpression> optionalFieldExpressions;
+    final Map<String, PathExpression> aliasToFullPathExpressionMap;
     final EntityMappingHelper helper;
 
-    OptionalDataMapBuilder(String rootEntity, Set<FieldExpression> optionalFieldExpressions, EntityMappingHelper helper) {
+    OptionalDataMapBuilder(String rootEntity, String rootAlias, Set<FieldExpression> optionalFieldExpressions, Map<String, PathExpression> aliasToFullPathExpressionMap, EntityMappingHelper helper) {
         Objects.requireNonNull(rootEntity);
+        Objects.requireNonNull(rootAlias);
         Objects.requireNonNull(optionalFieldExpressions);
+        Objects.requireNonNull(aliasToFullPathExpressionMap);
         Objects.requireNonNull(helper);
         this.rootEntity = rootEntity;
+        this.rootAlias = rootAlias;
         this.optionalFieldExpressions = optionalFieldExpressions;
+        this.aliasToFullPathExpressionMap = aliasToFullPathExpressionMap;
         this.helper = helper;
     }
 
-    public Map<PathExpression, OptionalData> build() {
+    public Map<String, Map<PathExpression, OptionalData>> build() {
         return toOptionalDataMap();
     }
 
-    private Map<PathExpression, OptionalData> toOptionalDataMap() {
+    private Map<String, Map<PathExpression, OptionalData>> toOptionalDataMap() {
 
-        final Map<PathExpression, OptionalData> root = new HashMap<>();
+        final Map<String, Map<PathExpression, OptionalData>> rootMap = new HashMap<>();
 
         optionalFieldExpressions.forEach(fieldExpression -> {
 
-            OptionalData optionalData = getAndSetDataRecursive(root, fieldExpression.getParent(), rootEntity);
+            final PathExpression pathExpression = fieldExpression.getParent();
+            final String alias = pathExpression.root();
+
+            Map<PathExpression, OptionalData> optionalDataMap = getRootOptionalDataMap(
+                rootMap,
+                alias
+            );
+
+            OptionalData optionalData = getAndSetDataRecursive(optionalDataMap, pathExpression, rootEntity(alias));
 
             optionalData.getFields().add(fieldExpression.getField());
         });
 
-        return root;
+        return rootMap;
+    }
+
+    private String rootEntity(String alias) {
+        if (Objects.equals(alias, rootAlias)) {
+            return rootEntity;
+        }
+        return helper.getReferencingEntity(rootEntity, new FieldExpressionImpl(
+            aliasToFullPathExpressionMap.get(alias)
+        ));
+    }
+
+    private Map<PathExpression, OptionalData> getRootOptionalDataMap(final Map<String, Map<PathExpression, OptionalData>> root, final String rootAlias) {
+        Map<PathExpression, OptionalData> optionalDataMap = root.get(rootAlias);
+        if (optionalDataMap == null) {
+            root.put(rootAlias, optionalDataMap = new LinkedHashMap<>());
+        }
+
+        return optionalDataMap;
     }
 
     private OptionalData getAndSetDataRecursive(Map<PathExpression, OptionalData> map, PathExpression pathExpression, String entity) {

@@ -18,55 +18,80 @@ import java.util.stream.Stream;
 /**
  * Created by sohan on 4/30/2017.
  */
-class OptionalListBuilder {
+final class OptionalListBuilder {
     static final String op = "op";
     final EntityMappingHelper helper;
     final QueryExecutor.QueryParams params;
+    final Map<String, PathExpression> aliasToFullPathExpressionMap;
 
-    public OptionalListBuilder(EntityMappingHelper helper, QueryExecutor.QueryParams params) {
+    public OptionalListBuilder(EntityMappingHelper helper, QueryExecutor.QueryParams params, Map<String, PathExpression> aliasToFullPathExpressionMap) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(params);
+        Objects.requireNonNull(aliasToFullPathExpressionMap);
         this.helper = helper;
         this.params = params;
+        this.aliasToFullPathExpressionMap = aliasToFullPathExpressionMap;
     }
 
     public Set<PathExpression> build() {
         return ImmutableSet.<PathExpression>builder()
             .addAll(optionalPaths(params.getEntity(), params.getCriteria()))
             .addAll(optionalPaths(params.getEntity(), params.getHaving()))
-            .addAll(optionalPaths2(params.getEntity(), params.getGroupBy()))
-            .addAll(optionalPaths3(params.getEntity(), params.getOrderBy()))
+            .addAll(optionalPaths2(params.getGroupBy()))
+            .addAll(optionalPaths3(params.getOrderBy()))
             .build();
     }
 
-    private Collection<PathExpression> optionalPaths3(String entity, Collection<QueryExecutor.OrderTpl> orderBy) {
+    private Collection<PathExpression> optionalPaths3(Collection<QueryExecutor.OrderTpl> orderBy) {
 
-        return toOptionalPaths(entity, orderBy.stream().map(QueryExecutor.OrderTpl::getField));
+        return toOptionalPaths(orderBy.stream().map(QueryExecutor.OrderTpl::getField));
     }
 
-    private Collection<PathExpression> optionalPaths2(String entity, Collection<FieldExpression> fieldExpressions) {
+    private Collection<PathExpression> optionalPaths2(Collection<FieldExpression> fieldExpressions) {
 
-        return toOptionalPaths(entity, fieldExpressions.stream());
+        return toOptionalPaths(fieldExpressions.stream());
     }
 
-    private Collection<PathExpression> toOptionalPaths(String entity, Stream<FieldExpression> stream) {
+    private Collection<PathExpression> toOptionalPaths(Stream<FieldExpression> stream) {
 
         ImmutableList.Builder<PathExpression> optionalListBuilder = ImmutableList.builder();
 
         stream
             .filter(fieldExpression -> {
 
-                if (Utils.not(fieldExpression.getParent().startsWith(params.getAlias()))) {
-                    throw new OptionalListBuilderException("FieldExpression '" + fieldExpression + "' does not starts with root alias '" + params.getAlias() + "'");
-                }
+                checkAliasOrThrow(fieldExpression);
 
                 return Utils.not(
-                    helper.isMandatory(params.getEntity(), fieldExpression.getParent())
+                    helper.isMandatory(
+                        params.getEntity(),
+                        toFullPathExp(fieldExpression.getParent())
+                    )
                 );
             })
-            .forEach(expression -> optionalListBuilder.add(expression.getParent()));
+            .forEach(fieldExpression -> optionalListBuilder.add(fieldExpression.getParent()));
 
         return optionalListBuilder.build();
+    }
+
+    private PathExpression toFullPathExp(PathExpression pathExpression) {
+        if (Objects.equals(pathExpression.root(), params.getAlias())) {
+            return pathExpression;
+        }
+        return aliasToFullPathExpressionMap.get(pathExpression.root())
+            .concat(pathExpression.subPath(1, pathExpression.size()));
+    }
+
+    private void checkAliasOrThrow(FieldExpression fieldExpression) {
+
+        final String alias = fieldExpression.getParent().root();
+
+        boolean aliasNotFound = Utils.not(
+            aliasToFullPathExpressionMap.containsKey(alias) || Objects.equals(alias, params.getAlias())
+        );
+
+        if (aliasNotFound) {
+            throw new OptionalListBuilderException("FieldExpression '" + fieldExpression + "' does not starts with root alias '" + params.getAlias() + "'");
+        }
     }
 
     private List<PathExpression> optionalPaths(String entity, JsonObject criteria) {
@@ -87,11 +112,20 @@ class OptionalListBuilder {
                 criteria.getString("arg")
             );
 
-            if (helper.isMandatory(entity, fieldExpression.getParent())) {
+            final PathExpression pathExpression = fieldExpression.getParent();
+
+            checkAliasOrThrow(fieldExpression);
+
+            final boolean isMandatoy = helper.isMandatory(
+                entity,
+                toFullPathExp(pathExpression)
+            );
+
+            if (isMandatoy) {
                 return;
             }
 
-            listBuilder.add(fieldExpression.getParent());
+            listBuilder.add(pathExpression);
             return;
         }
 

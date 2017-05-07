@@ -78,6 +78,11 @@ final public class PathExpressionImpl implements PathExpression {
     }
 
     @Override
+    public PathExpression subPath(int fromIndex) {
+        return subPath(fromIndex, size());
+    }
+
+    @Override
     public boolean startsWith(String rootAlias) {
         return root().equals(rootAlias);
     }
