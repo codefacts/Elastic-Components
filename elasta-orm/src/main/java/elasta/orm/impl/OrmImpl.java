@@ -1,10 +1,14 @@
 package elasta.orm.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.BaseOrm;
 import elasta.orm.Orm;
 import elasta.orm.OrmUtils;
+import elasta.orm.QueryDataLoader;
+import elasta.orm.entity.EntityMappingHelper;
+import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
 import io.vertx.core.json.JsonArray;
@@ -13,108 +17,224 @@ import io.vertx.core.json.JsonObject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by sohan on 3/22/2017.
  */
 final public class OrmImpl implements Orm {
-    @Override
-    public Promise<Long> count(String entity) {
-        return null;
+    final EntityMappingHelper helper;
+    final BaseOrm baseOrm;
+    final QueryDataLoader queryDataLoader;
+
+    public OrmImpl(EntityMappingHelper helper, BaseOrm baseOrm, QueryDataLoader queryDataLoader) {
+        Objects.requireNonNull(helper);
+        Objects.requireNonNull(baseOrm);
+        Objects.requireNonNull(queryDataLoader);
+        this.helper = helper;
+        this.baseOrm = baseOrm;
+        this.queryDataLoader = queryDataLoader;
     }
 
     @Override
-    public Promise<Long> count(String entity, String alias, JsonObject criteria) {
-        return null;
+    public Promise<Long> countDistinct(String entity) {
+        return countDistinct(entity, "r", OrmUtils.emptyJsonObject());
     }
 
     @Override
-    public <T> Promise<JsonObject> findOne(String entity, T id) {
-        return null;
+    public Promise<Long> countDistinct(String entity, String alias, JsonObject criteria) {
+        return baseOrm.queryArray(
+            QueryExecutor.QueryArrayParams.builder()
+                .alias(alias)
+                .entity(entity)
+                .joinParams(ImmutableList.of())
+                .criteria(criteria)
+                .having(OrmUtils.emptyJsonObject())
+                .groupBy(ImmutableList.of())
+                .orderBy(ImmutableList.of())
+                .selections(ImmutableList.of(
+                    OperatorUtils.countDistinct(alias + "." + helper.getPrimaryKey(entity))
+                ))
+                .build()
+        ).map(jsonArrays -> jsonArrays.get(0).getLong(0));
     }
 
     @Override
     public <T> Promise<JsonObject> findOne(String entity, String alias, T id, Collection<FieldExpression> selections) {
-        return null;
-    }
-
-    @Override
-    public <T> Promise<List<JsonObject>> findAll(String entity, Collection<T> ids) {
-        return null;
+        return queryDataLoader.query(
+            QueryExecutor.QueryParams.builder()
+                .entity(entity)
+                .alias(alias)
+                .joinParams(ImmutableList.of())
+                .criteria(
+                    OperatorUtils.eq(
+                        alias + "." + helper.getPrimaryKey(entity), id
+                    )
+                )
+                .having(OrmUtils.emptyJsonObject())
+                .groupBy(ImmutableList.of())
+                .orderBy(ImmutableList.of())
+                .selections(selections)
+                .build()
+        ).map(jsonObjects -> {
+            if (jsonObjects.size() <= 0) {
+                throw new OrmException("No Entity found for id '" + id + "'");
+            }
+            return jsonObjects.get(0);
+        });
     }
 
     @Override
     public <T> Promise<List<JsonObject>> findAll(String entity, String alias, Collection<T> ids, Collection<FieldExpression> selections) {
-        return null;
-    }
-
-    @Override
-    public Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria) {
-        return null;
+        return queryDataLoader.query(
+            QueryExecutor.QueryParams.builder()
+                .entity(entity)
+                .alias(alias)
+                .joinParams(ImmutableList.of())
+                .criteria(
+                    OperatorUtils.in(alias + "." + helper.getPrimaryKey(entity), ids)
+                )
+                .having(OrmUtils.emptyJsonObject())
+                .groupBy(ImmutableList.of())
+                .orderBy(ImmutableList.of())
+                .selections(selections)
+                .build()
+        );
     }
 
     @Override
     public Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections) {
-        return null;
+        return queryDataLoader.query(
+            QueryExecutor.QueryParams.builder()
+                .entity(entity)
+                .alias(alias)
+                .joinParams(ImmutableList.of())
+                .criteria(criteria)
+                .having(OrmUtils.emptyJsonObject())
+                .groupBy(ImmutableList.of())
+                .orderBy(ImmutableList.of())
+                .selections(selections)
+                .build()
+        );
     }
 
     @Override
     public Promise<List<JsonObject>> findAll(QueryExecutor.QueryParams params) {
-        return null;
-    }
-
-    @Override
-    public Promise<List<JsonObject>> findAll() {
-        return null;
+        return queryDataLoader.query(params);
     }
 
     @Override
     public Promise<List<JsonArray>> queryArray(QueryExecutor.QueryArrayParams params) {
-        return null;
+        return baseOrm.queryArray(params);
     }
 
     @Override
     public <T> Promise<T> querySingle(QueryExecutor.QueryArrayParams params) {
-        return null;
+        return baseOrm.queryArray(params).map(jsonArrays -> {
+            if (jsonArrays.size() <= 0) {
+                throw new OrmException("Multiple Result exists, expected single result");
+            }
+            return (T) jsonArrays.get(0).getValue(0);
+        });
     }
 
     @Override
-    public Promise<JsonObject> upsert(String entity, JsonObject data) {
-        return null;
+    public Promise<JsonObject> upsert(String entity, JsonObject jsonObject) {
+        return baseOrm.upsert(
+            BaseOrm.UpsertParams.builder()
+                .entity(entity)
+                .jsonObject(jsonObject)
+                .build()
+        );
     }
 
     @Override
-    public Promise<List<JsonObject>> upsertAll(String entity, Collection<JsonObject> jsonObjects) {
-        return null;
+    public <T extends Collection<JsonObject>> Promise<T> upsertAll(String entity, T jsonObjects) {
+        return baseOrm.execute(
+
+            jsonObjects.stream()
+                .map(jsonObject -> BaseOrm.ExecuteParams.builder()
+                    .operationType(BaseOrm.OperationType.UPSERT)
+                    .entity(entity)
+                    .jsonObject(jsonObject)
+                    .build())
+                .collect(Collectors.toList())
+
+        ).map(aVoid -> jsonObjects);
     }
 
     @Override
     public <T> Promise<T> delete(String entity, T id) {
-        return null;
+        return baseOrm.delete(
+            BaseOrm.DeleteParams.builder()
+                .entity(entity)
+                .jsonObject(
+                    new JsonObject(
+                        ImmutableMap.of(
+                            helper.getPrimaryKey(entity), id
+                        )
+                    )
+                )
+                .build()
+        ).map(jsonObject -> id);
     }
 
     @Override
-    public <T> Promise<List<T>> deleteAll(String entity, Collection<T> ids) {
-        return null;
+    public <T, R extends Collection<T>> Promise<R> deleteAll(String entity, R ids) {
+        return baseOrm.execute(
+
+            ids.stream()
+                .map(
+                    id -> BaseOrm.ExecuteParams.builder()
+                        .operationType(BaseOrm.OperationType.DELETE)
+                        .entity(entity)
+                        .jsonObject(
+                            new JsonObject(
+                                ImmutableMap.of(
+                                    helper.getPrimaryKey(entity), id
+                                )
+                            )
+                        )
+                        .build()
+                )
+                .collect(Collectors.toList())
+
+        ).map(aVoid -> ids);
     }
 
     @Override
-    public Promise<List<JsonObject>> deleteChildRelations(String entity, JsonObject jsonObject) {
-        return null;
+    public Promise<JsonObject> deleteChildRelations(String entity, JsonObject jsonObject) {
+        return baseOrm.deleteChildRelations(
+            BaseOrm.DeleteChildRelationsParams.builder()
+                .entity(entity)
+                .jsonObject(jsonObject)
+                .build()
+        );
     }
 
     @Override
-    public Promise<List<JsonObject>> deleteAllChildRelations(String entity, Collection<JsonObject> jsonObjects) {
-        return null;
+    public <T extends Collection<JsonObject>> Promise<T> deleteAllChildRelations(String entity, T jsonObjects) {
+        return baseOrm.execute(
+            jsonObjects.stream()
+                .map(
+                    jsonObject -> BaseOrm.ExecuteParams.builder()
+                        .operationType(BaseOrm.OperationType.DELETE_CHILD_RELATIONS)
+                        .entity(entity)
+                        .jsonObject(jsonObject)
+                        .build()
+                )
+                .collect(Collectors.toList())
+        ).map(aVoid -> jsonObjects);
     }
 
     @Override
     public Promise<Void> execute(BaseOrm.ExecuteParams params) {
-        return null;
+        return baseOrm.execute(ImmutableList.of(params));
     }
 
     @Override
     public Promise<Void> executeAll(Collection<BaseOrm.ExecuteParams> paramss) {
-        return null;
+        return baseOrm.execute(paramss);
     }
 }

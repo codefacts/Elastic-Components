@@ -144,7 +144,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
 
         String sql = select(sqlQuery.getSelectFuncs(), paramsBuilder).toSql();
 
-        builder.append("select ").append(sql);
+        builder.append("SELECT ").append(sql);
 
         sql = new FromClauseHandlerImpl(
             ImmutableList.of(
@@ -158,30 +158,30 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
             )
         ).toSql();
 
-        builder.append(" from ").append(sql);
+        builder.append(" FROM ").append(sql);
 
         sql = where(sqlQuery.getWhereFuncs(), paramsBuilder).toSql();
 
         if (not(sql.trim().isEmpty())) {
-            builder.append(" where ").append(sql);
+            builder.append(" WHERE ").append(sql);
         }
 
         sql = having(sqlQuery.getHavingFuncs(), paramsBuilder).toSql();
 
         if (not(sql.trim().isEmpty())) {
-            builder.append(" having " + sql);
+            builder.append(" HAVING " + sql);
         }
 
         sql = new OrderByHandlerImpl(sqlQuery.getOrderByDatas()).toSql();
 
         if (not(sql.trim().isEmpty())) {
-            builder.append(" order by ").append(sql);
+            builder.append(" ORDER BY ").append(sql);
         }
 
         sql = new GroupByHandlerImpl(sqlQuery.getColumnAliasPairs()).toSql();
 
         if (not(sql.trim().isEmpty())) {
-            builder.append(" group by " + sql);
+            builder.append(" GROUP BY " + sql);
         }
 
         return new SqlAndParams(
@@ -273,7 +273,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
             .map(sqlCriteria -> {
 
                 if (sqlCriteria.getValue() == null) {
-                    return column(sqlCriteria.getColumn(), sqlCriteria.getAlias().orElse("")) + " is " + nul1();
+                    return column(sqlCriteria.getColumn(), sqlCriteria.getAlias().orElse("")) + " IS " + nul1();
                 }
 
                 builder.add(sqlCriteria.getValue());
@@ -318,7 +318,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
             .map(e -> {
 
                 if (e.getValue() == null) {
-                    return column(e.getKey(), "") + " is " + nul1();
+                    return column(e.getKey(), "") + " IS " + nul1();
                 }
 
                 paramsBuilder.add(e.getValue());

@@ -14,4 +14,7 @@ public interface OpNames {
     String lte = "lte";
     String gt = "gt";
     String gte = "gte";
+    String count = "count";
+    String distinct = "distinct";
+    String in = "in";
 }

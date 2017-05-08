@@ -18,25 +18,17 @@ import java.util.Objects;
  */
 public interface Orm {
 
-    Promise<Long> count(String entity);
+    Promise<Long> countDistinct(String entity);
 
-    Promise<Long> count(String entity, String alias, JsonObject criteria);
-
-    <T> Promise<JsonObject> findOne(String entity, T id);
+    Promise<Long> countDistinct(String entity, String alias, JsonObject criteria);
 
     <T> Promise<JsonObject> findOne(String entity, String alias, T id, Collection<FieldExpression> selections);
 
-    <T> Promise<List<JsonObject>> findAll(String entity, Collection<T> ids);
-
     <T> Promise<List<JsonObject>> findAll(String entity, String alias, Collection<T> ids, Collection<FieldExpression> selections);
-
-    Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria);
 
     Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections);
 
     Promise<List<JsonObject>> findAll(QueryExecutor.QueryParams params);
-
-    Promise<List<JsonObject>> findAll();
 
     Promise<List<JsonArray>> queryArray(QueryExecutor.QueryArrayParams params);
 
@@ -44,15 +36,15 @@ public interface Orm {
 
     Promise<JsonObject> upsert(String entity, JsonObject data);
 
-    Promise<List<JsonObject>> upsertAll(String entity, Collection<JsonObject> jsonObjects);
+    <T extends Collection<JsonObject>> Promise<T> upsertAll(String entity, T jsonObjects);
 
     <T> Promise<T> delete(String entity, T id);
 
-    <T> Promise<List<T>> deleteAll(String entity, Collection<T> ids);
+    <T, R extends Collection<T>> Promise<R> deleteAll(String entity, R ids);
 
-    Promise<List<JsonObject>> deleteChildRelations(String entity, JsonObject jsonObject);
+    Promise<JsonObject> deleteChildRelations(String entity, JsonObject jsonObject);
 
-    Promise<List<JsonObject>> deleteAllChildRelations(String entity, Collection<JsonObject> jsonObjects);
+    <T extends Collection<JsonObject>> Promise<T> deleteAllChildRelations(String entity, T jsonObjects);
 
     Promise<Void> execute(BaseOrm.ExecuteParams params);
 

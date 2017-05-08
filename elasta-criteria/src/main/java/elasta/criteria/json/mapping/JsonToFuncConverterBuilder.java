@@ -15,4 +15,6 @@ public interface JsonToFuncConverterBuilder {
     JsonToFuncConverter op3(Operation3Builder builder);
 
     JsonToFuncConverter arrayOp(ArrayOperationBuilder opsBuilder);
+
+    Func toFunc(Object value, JsonToFuncConverterMap converterMap);
 }

@@ -89,7 +89,8 @@ final public class JsonToFuncConverterBuilderImpl implements JsonToFuncConverter
         };
     }
 
-    private Func toFunc(Object value, JsonToFuncConverterMap converterMap) {
+    @Override
+    public Func toFunc(Object value, JsonToFuncConverterMap converterMap) {
 
         if (value == null) {
             return valueHolderOperationBuilder.build(value);

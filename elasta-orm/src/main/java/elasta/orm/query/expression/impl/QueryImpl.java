@@ -11,6 +11,7 @@ import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
 import elasta.orm.query.expression.builder.FieldExpressionHolderFunc;
 import elasta.orm.query.expression.builder.impl.PathExpressionAndAliasPair;
 import elasta.orm.query.expression.core.*;
+import elasta.orm.query.expression.ex.QueryException;
 import elasta.orm.query.read.ObjectReader;
 import elasta.orm.query.read.builder.ObjectReaderBuilderImpl;
 import elasta.sql.SqlDB;
@@ -59,7 +60,7 @@ final public class QueryImpl implements Query {
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
         this.expressionResolver = expressionResolver;
-        this.selectFuncs = selectFuncs;
+        this.selectFuncs = checkSelectFuns(selectFuncs);
         this.fromPathExpressionAndAliasPairs = fromPathExpressionAndAliasPairs;
         this.whereFuncs = whereFuncs;
         this.orderByPairs = orderByPairs;
@@ -68,6 +69,13 @@ final public class QueryImpl implements Query {
         this.helper = helper;
         this.sqlDB = sqlDB;
         this.dbInterceptors = dbInterceptors;
+    }
+
+    private List<Func> checkSelectFuns(List<Func> selectFuncs) {
+        if (selectFuncs.isEmpty()) {
+            throw new QueryException("Selections can not be empty");
+        }
+        return selectFuncs;
     }
 
     @Override

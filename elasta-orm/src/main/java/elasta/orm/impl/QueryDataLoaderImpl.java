@@ -88,7 +88,14 @@ final public class QueryDataLoaderImpl implements QueryDataLoader {
                     return Promises.when(
                         jsonObjects.stream()
                             .map(
-                                jsonObject -> loadJsonObject(jsonObject, fields.getAliasToFieldsMap(), rootAliasToDataMap, aliasToFullPathExpressionMap, params.getAlias(), params.getEntity())
+                                jsonObject -> loadJsonObject(
+                                    jsonObject,
+                                    fields.getAliasToFieldsMap(),
+                                    rootAliasToDataMap,
+                                    aliasToFullPathExpressionMap,
+                                    params.getAlias(),
+                                    params.getEntity()
+                                )
                             )
                             .collect(Collectors.toList())
                     );
@@ -104,7 +111,11 @@ final public class QueryDataLoaderImpl implements QueryDataLoader {
         return Promises
             .when(
                 rootAliasToDataMap.entrySet().stream()
-                    .filter(e -> e.getValue().size() > 0)
+                    .filter(e -> {
+                        final String alias = e.getKey();
+                        Set<String> fields = aliasToFieldsMap.get(alias);
+                        return (fields != null && fields.size() > 0) || (e.getValue().size() > 0);
+                    })
                     .map(
                         e -> Tpls.of(
                             toPathExp(e.getKey(), aliasToFullPathExpressionMap, rootAlias),

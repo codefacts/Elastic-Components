@@ -2,17 +2,12 @@ package elasta.criteria.json.mapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.json.mapping.impl.JsonToFuncConverterMapBuilderImpl;
-import elasta.criteria.json.mapping.impl.ValueHolderOperationBuilderImpl;
+import elasta.criteria.funcs.ops.impl.*;
+import elasta.criteria.json.mapping.impl.*;
 import elasta.module.ModuleSystem;
 import elasta.criteria.funcs.ops.ComparisionOps;
 import elasta.criteria.funcs.ops.ValueHolderOps;
-import elasta.criteria.funcs.ops.impl.ComparisionOpsImpl;
-import elasta.criteria.funcs.ops.impl.LogicalOpsImpl;
-import elasta.criteria.funcs.ops.impl.ValueHolderOpsImpl;
-import elasta.criteria.json.mapping.impl.JsonQueryParserImpl;
 import elasta.criteria.funcs.ops.LogicalOps;
-import elasta.criteria.json.mapping.impl.JsonToFuncConverterBuilderImpl;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -24,13 +19,14 @@ public interface Main {
 
         moduleSystem.export(JsonQueryParser.class, module -> {
             module.export(new JsonQueryParserImpl(
-                operation -> {
-                    if (operation.equals("field")) {
-                        return (jsonObject, converterMap) -> paramsBuilder -> jsonObject.getString("arg");
-                    }
-                    JsonToFuncConverterMap converterMap = module.require(JsonToFuncConverterMap.class);
-                    return converterMap.get(operation);
-                },
+                new JsonToFuncConverterMapImpl(
+                    ImmutableMap.<String, JsonToFuncConverter>builder()
+                        .put("field", (jsonObject, converterMap) -> paramsBuilder -> jsonObject.getString("arg"))
+                        .putAll(
+                            module.require(JsonToFuncConverterMap.class).getMap()
+                        )
+                        .build()
+                ),
                 new GenericJsonToFuncConverterImpl()
             ));
         });
@@ -42,6 +38,9 @@ public interface Main {
                     module.require(LogicalOps.class),
                     module.require(ComparisionOps.class),
                     module.require(ValueHolderOps.class),
+                    new ArrayOpsImpl(),
+                    new StringOpsImpl(),
+                    new FunctionalOpsImpl(),
                     new JsonToFuncConverterBuilderImpl(
                         new ValueHolderOperationBuilderImpl(
                             module.require(ValueHolderOps.class)

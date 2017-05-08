@@ -2,9 +2,7 @@ package test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.funcs.ops.impl.ComparisionOpsImpl;
-import elasta.criteria.funcs.ops.impl.LogicalOpsImpl;
-import elasta.criteria.funcs.ops.impl.ValueHolderOpsImpl;
+import elasta.criteria.funcs.ops.impl.*;
 import elasta.criteria.json.mapping.GenericJsonToFuncConverterImpl;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.criteria.json.mapping.impl.JsonToFuncConverterBuilderImpl;
@@ -132,6 +130,9 @@ public interface Test {
             new LogicalOpsImpl(),
             new ComparisionOpsImpl(),
             new ValueHolderOpsImpl(),
+            new ArrayOpsImpl(),
+            new StringOpsImpl(),
+            new FunctionalOpsImpl(),
             new JsonToFuncConverterBuilderImpl(
                 new ValueHolderOperationBuilderImpl(
                     new ValueHolderOpsImpl()

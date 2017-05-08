@@ -1,5 +1,6 @@
 package elasta.criteria.json.mapping.impl;
 
+import com.google.common.collect.ImmutableMap;
 import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.ex.JsonToFuncConverterException;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
@@ -15,7 +16,7 @@ final public class JsonToFuncConverterMapImpl implements JsonToFuncConverterMap 
 
     public JsonToFuncConverterMapImpl(Map<String, JsonToFuncConverter> converterMap) {
         Objects.requireNonNull(converterMap);
-        this.converterMap = converterMap;
+        this.converterMap = ImmutableMap.copyOf(converterMap);
     }
 
     @Override
@@ -25,5 +26,10 @@ final public class JsonToFuncConverterMapImpl implements JsonToFuncConverterMap 
             throw new JsonToFuncConverterException("No converter found for operation '" + operation + "'");
         }
         return converter;
+    }
+
+    @Override
+    public Map<String, JsonToFuncConverter> getMap() {
+        return converterMap;
     }
 }

@@ -3,6 +3,7 @@ package elasta.orm.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import elasta.commons.Utils;
+import elasta.orm.delete.JoHandler;
 import elasta.orm.delete.impl.JsonDependencyHandler;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.ex.OptionalListBuilderException;
@@ -10,6 +11,7 @@ import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.*;
@@ -106,7 +108,7 @@ final class OptionalListBuilder {
 
         final String operation = criteria.getString(op);
 
-        if (operation != null && operation.equals("field")) {
+        if (Objects.equals(operation, "field")) {
 
             FieldExpressionImpl fieldExpression = new FieldExpressionImpl(
                 criteria.getString("arg")
@@ -130,8 +132,58 @@ final class OptionalListBuilder {
         }
 
         criteria.forEach(
-            entry -> new JsonDependencyHandler(jsonObject -> traverseRecursive(entity, jsonObject, listBuilder))
+            entry -> new JsonHandler(jsonObject -> traverseRecursive(entity, jsonObject, listBuilder))
                 .handle(entry.getValue())
         );
+    }
+
+    final private class JsonHandler {
+        final JoHandler joHandler;
+
+        public JsonHandler(JoHandler joHandler) {
+            Objects.requireNonNull(joHandler);
+            this.joHandler = joHandler;
+        }
+
+        public void handle(Object value) {
+
+            if (value instanceof JsonObject) {
+
+                handleJo((JsonObject) value);
+
+            } else if (value instanceof Map) {
+
+                handleJo(new JsonObject(toMap(value)));
+
+            } else if (value instanceof JsonArray) {
+
+                handleJa((JsonArray) value);
+
+            } else if (value instanceof List) {
+
+                handleJa(new JsonArray(toList(value)));
+            }
+        }
+
+        private void handleJo(JsonObject value) {
+            joHandler.handle(value);
+        }
+
+        private void handleJa(JsonArray value) {
+            for (int i = 0; i < value.size(); i++) {
+                final Object object = value.getValue(i);
+                if (object instanceof Map || object instanceof JsonObject) {
+                    handleJo(value.getJsonObject(i));
+                }
+            }
+        }
+
+        private List toList(Object value) {
+            return (List) value;
+        }
+
+        private Map<String, Object> toMap(Object value) {
+            return (Map<String, Object>) value;
+        }
     }
 }
