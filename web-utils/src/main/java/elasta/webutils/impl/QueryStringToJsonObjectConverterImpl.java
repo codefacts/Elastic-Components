@@ -1,8 +1,8 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.impl;
 
 import elasta.pipeline.util.NestedMapBuilder;
 import elasta.pipeline.util.NestedMapBuilderImpl;
-import elasta.webutils.app.QueryStringToJsonObjectConverter;
+import elasta.webutils.QueryStringToJsonObjectConverter;
 import io.vertx.core.MultiMap;
 import io.vertx.core.json.JsonObject;
 

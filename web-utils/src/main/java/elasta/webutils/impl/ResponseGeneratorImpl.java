@@ -1,7 +1,7 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.impl;
 
-import elasta.webutils.app.ContentTypes;
-import elasta.webutils.app.ResponseGenerator;
+import elasta.webutils.ContentTypes;
+import elasta.webutils.ResponseGenerator;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;

@@ -1,4 +1,4 @@
-package elasta.webutils.app;
+package elasta.webutils;
 
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.http.HttpMethod;

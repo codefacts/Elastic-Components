@@ -1,14 +1,8 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.impl;
 
-import com.google.common.collect.ImmutableMap;
-import elasta.webutils.app.DefaultValues;
-import elasta.webutils.app.UriToEventTranslator;
-import elasta.webutils.app.exceptions.WebException;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
+import elasta.webutils.UriToEventTranslator;
+import elasta.webutils.exceptions.WebException;
 import io.vertx.ext.web.RoutingContext;
-
-import java.util.Map;
 
 /**
  * Created by Jango on 11/7/2016.

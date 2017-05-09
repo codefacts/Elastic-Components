@@ -1,4 +1,4 @@
-package elasta.webutils.app.module.exporter;
+package elasta.webutils.module.exporter;
 
 import elasta.module.ModuleSystem;
 

@@ -1,4 +1,4 @@
-package elasta.webutils.app;
+package elasta.webutils;
 
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;

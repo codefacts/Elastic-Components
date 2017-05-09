@@ -1,4 +1,4 @@
-package elasta.webutils.app;
+package elasta.webutils;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;

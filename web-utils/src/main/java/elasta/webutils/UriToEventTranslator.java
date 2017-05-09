@@ -1,4 +1,4 @@
-package elasta.webutils.app;
+package elasta.webutils;
 
 import elasta.core.intfs.Fun1Unckd;
 import elasta.core.intfs.Fun2Unckd;

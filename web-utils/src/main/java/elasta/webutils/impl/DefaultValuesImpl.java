@@ -1,7 +1,7 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.impl;
 
 import com.google.common.collect.ImmutableMap;
-import elasta.webutils.app.DefaultValues;
+import elasta.webutils.DefaultValues;
 import io.vertx.core.http.HttpMethod;
 
 import java.util.Map;

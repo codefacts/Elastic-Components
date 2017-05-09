@@ -1,6 +1,6 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.impl;
 
-import elasta.webutils.app.JsonObjectToQueryStringConverter;
+import elasta.webutils.JsonObjectToQueryStringConverter;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -18,7 +18,9 @@ public class JsonObjectToQueryStringConverterImpl<T> implements JsonObjectToQuer
             return "";
         }
 
-        seializeJsonObject(jsonObject);
+        StringBuilder stringBuilder = new StringBuilder();
+        Serializer serializer = new Serializer(stringBuilder);
+        serializer.seializeJsonObject(jsonObject);
 
         return stringBuilder.toString();
     }

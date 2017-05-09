@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 /**
  * Created by Jango on 9/15/2016.
  */
-final public class Utils {
+public interface Utils {
     public static boolean not(boolean val) {
         return !val;
     }
@@ -19,7 +19,7 @@ final public class Utils {
         return isEmptyNullSpace(val) ? val : defaultValue;
     }
 
-    private static boolean isEmptyNullSpace(String val) {
+    static boolean isEmptyNullSpace(String val) {
         return (val == null) || val.isEmpty() || val.trim().isEmpty();
     }
 

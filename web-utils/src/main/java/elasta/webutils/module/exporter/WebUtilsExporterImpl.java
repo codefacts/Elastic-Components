@@ -1,9 +1,10 @@
-package elasta.webutils.app.module.exporter;
+package elasta.webutils.module.exporter;
 
 import elasta.core.eventbus.SimpleEventBus;
 import elasta.module.ModuleSystem;
-import elasta.webutils.app.*;
-import elasta.webutils.app.impl.*;
+import elasta.webutils.*;
+import elasta.webutils.*;
+import elasta.webutils.impl.*;
 
 /**
  * Created by Jango on 11/9/2016.
@@ -21,7 +22,7 @@ public class WebUtilsExporterImpl implements WebUtilsExporter {
         )));
 
         moduleSystem.export(RequestConverter.class, module -> module.export(
-            new RequestConverterImpl(
+            new JsonObjectRequestConverterImpl(
                 module.require(QueryStringToJsonObjectConverter.class)
             )
         ));

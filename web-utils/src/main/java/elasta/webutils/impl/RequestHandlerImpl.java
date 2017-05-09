@@ -1,7 +1,11 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.impl;
 
 import elasta.core.eventbus.SimpleEventBus;
-import elasta.webutils.app.*;
+import elasta.webutils.JsonObjectRequestConverter;
+import elasta.webutils.RequestHandler;
+import elasta.webutils.ResponseGenerator;
+import elasta.webutils.UriToEventTranslator;
+import elasta.webutils.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 

@@ -1,10 +1,9 @@
-package elasta.webutils.app.impl;
+package elasta.webutils.impl;
 
-import elasta.webutils.app.JsonObjectRequestConverter;
-import elasta.webutils.app.QueryStringToJsonObjectConverter;
-import elasta.webutils.app.RequestCnsts;
-import elasta.webutils.app.RequestConverter;
-import elasta.webutils.app.exceptions.RequestConvertersionException;
+import elasta.webutils.JsonObjectRequestConverter;
+import elasta.webutils.QueryStringToJsonObjectConverter;
+import elasta.webutils.RequestCnsts;
+import elasta.webutils.exceptions.RequestConvertersionException;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -17,10 +16,10 @@ import static elasta.commons.Utils.not;
 /**
  * Created by Jango on 11/7/2016.
  */
-public class RequestConverterImpl implements JsonObjectRequestConverter {
+final public class JsonObjectRequestConverterImpl implements JsonObjectRequestConverter {
     private final QueryStringToJsonObjectConverter queryStringToJsonObjectConverter;
 
-    public RequestConverterImpl(QueryStringToJsonObjectConverter queryStringToJsonObjectConverter) {
+    public JsonObjectRequestConverterImpl(QueryStringToJsonObjectConverter queryStringToJsonObjectConverter) {
         this.queryStringToJsonObjectConverter = queryStringToJsonObjectConverter;
     }
 
@@ -32,7 +31,7 @@ public class RequestConverterImpl implements JsonObjectRequestConverter {
                 throw new RequestConvertersionException("Content-Type is not present. Content-Type: '" + contentType + "'");
             }
 
-            if (!contentType.trim().startsWith("application/json")) {
+            if (not(contentType.trim().startsWith("application/json"))) {
                 throw new RequestConvertersionException("Unsupported content-type. Content-Type: '" + contentType + "'");
             }
         }
