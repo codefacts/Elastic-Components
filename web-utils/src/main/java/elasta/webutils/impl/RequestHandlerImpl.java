@@ -1,36 +1,35 @@
 package elasta.webutils.impl;
 
-import elasta.core.eventbus.SimpleEventBus;
-import elasta.webutils.JsonObjectRequestConverter;
-import elasta.webutils.RequestHandler;
-import elasta.webutils.ResponseGenerator;
-import elasta.webutils.UriToEventTranslator;
+import elasta.eventbus.SimpleEventBus;
 import elasta.webutils.*;
+import elasta.webutils.model.UriAndHttpMethodPair;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 import java.util.Objects;
 
 /**
- * Created by Jango on 11/6/2016.
+ * Created by sohan on 5/10/2017.
  */
-public class RequestHandlerImpl implements RequestHandler {
-    private final JsonObjectRequestConverter jsonObjectRequestConverter;
-    private final UriToEventTranslator<JsonObject> uriToEventTranslator;
-    private final ResponseGenerator<JsonObject> responseGenerator;
+final public class RequestHandlerImpl implements RequestHandler {
+    private final RequestConverter requestConverter;
+    private final UriToEventAddressTranslator uriToEventAddressTranslator;
+    private final ResponseGenerator responseGenerator;
     private final SimpleEventBus eventBus;
 
     public RequestHandlerImpl(
-        JsonObjectRequestConverter jsonObjectRequestConverter,
-        UriToEventTranslator<JsonObject> uriToEventTranslator,
-        ResponseGenerator<JsonObject> responseGenerator,
-        SimpleEventBus eventBus) {
-        Objects.requireNonNull(jsonObjectRequestConverter);
-        Objects.requireNonNull(uriToEventTranslator);
+        RequestConverter requestConverter,
+        UriToEventAddressTranslator uriToEventAddressTranslator,
+        ResponseGenerator responseGenerator,
+        SimpleEventBus eventBus
+    ) {
+        Objects.requireNonNull(requestConverter);
+        Objects.requireNonNull(uriToEventAddressTranslator);
         Objects.requireNonNull(responseGenerator);
+        Objects.requireNonNull(eventBus);
 
-        this.jsonObjectRequestConverter = jsonObjectRequestConverter;
-        this.uriToEventTranslator = uriToEventTranslator;
+        this.requestConverter = requestConverter;
+        this.uriToEventAddressTranslator = uriToEventAddressTranslator;
         this.responseGenerator = responseGenerator;
         this.eventBus = eventBus;
     }
@@ -40,12 +39,17 @@ public class RequestHandlerImpl implements RequestHandler {
 
         try {
 
-            JsonObject val = jsonObjectRequestConverter.apply(context);
+            final String eventAddress = uriToEventAddressTranslator.apply(
+                UriAndHttpMethodPair.builder()
+                    .uri(context.request().uri())
+                    .httpMethod(context.request().method())
+                    .build()
+            );
 
-            String eventAddress = uriToEventTranslator.apply(context, val);
+            final Object value = requestConverter.apply(context);
 
-            eventBus.<JsonObject>fire(eventAddress, val)
-                .then(jsonObject -> responseGenerator.reply(jsonObject, context))
+            eventBus.<JsonObject>sendAndReceiveJsonObject(eventAddress, value)
+                .then(message -> responseGenerator.reply(message, context))
                 .err(context::fail)
             ;
 

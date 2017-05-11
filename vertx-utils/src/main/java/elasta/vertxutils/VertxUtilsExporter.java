@@ -12,22 +12,7 @@ public interface VertxUtilsExporter {
     void export(ModuleSystem moduleSystem);
 
     static VertxUtilsExporter get() {
-
         return moduleSystem -> {
-
-            moduleSystem.export(FailureCodeHandler.class, module -> module.export(throwable -> new FailureTuple(500, "UNEXPECTED_ERROR")));
-
-            moduleSystem.export(ReplyHandler.class, module -> module.export(Message::reply));
-
-            moduleSystem.export(
-                SenderUtils.class,
-                module -> module.export(
-                    new SenderUtilsImpl(
-                        module.require(Vertx.class)
-                    )
-                ));
-
-            moduleSystem.export(HandlerUtils.class, module -> module.export(new HandlerUtilsImpl(module.require(FailureCodeHandler.class), module.require(ReplyHandler.class))));
         };
     }
 

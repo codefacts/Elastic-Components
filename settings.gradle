@@ -12,4 +12,5 @@ include 'simple-eventbus'
 include 'sql'
 include 'elasta-sql'
 include 'elasta-criteria'
+include 'elasta-eventbus'
 

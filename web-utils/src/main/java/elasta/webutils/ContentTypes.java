@@ -5,4 +5,5 @@ package elasta.webutils;
  */
 public interface ContentTypes {
     String APPLICATION_JSON = "application/json";
+    String TEXT_PLAIN = "text/plain";
 }

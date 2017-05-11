@@ -3,6 +3,7 @@ package elasta.core.promise.impl;
 import com.google.common.collect.ImmutableList;
 import elasta.core.intfs.CallableUnckd;
 import elasta.core.intfs.Consumer1Unckd;
+import elasta.core.intfs.PredicateUnckd;
 import elasta.core.intfs.RunnableUnckd;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.MapHandler;
@@ -49,6 +50,22 @@ final public class Promises {
         return defer.promise();
     }
 
+    public static <T> Promise<T> filter(T value, final PredicateUnckd<T> predicateUnckd) {
+        Objects.requireNonNull(predicateUnckd, "Argument to Promises.callable can't be null.");
+        Defer<T> defer = defer();
+        try {
+            boolean pass = predicateUnckd.test(value);
+            if (pass) {
+                defer.resolve(value);
+            } else {
+                defer.filter();
+            }
+        } catch (Throwable ex) {
+            defer.reject(ex, value);
+        }
+        return defer.promise();
+    }
+
     public static <T> Promise<T> callableP(final CallableUnckd<Promise<T>> callableUnckd) {
         try {
             return callableUnckd.call();
@@ -69,6 +86,10 @@ final public class Promises {
 
     public static <T> Promise<T> error(Throwable error) {
         return new PromiseImpl<>(SignalImpl.error(error));
+    }
+
+    public static <T> Promise<T> error(Throwable error, Object value) {
+        return new PromiseImpl<>(SignalImpl.error(error, value));
     }
 
     public static <T> Defer<T> defer() {
@@ -373,4 +394,5 @@ final public class Promises {
     public static <T> MapHandler<T, Void> toVoid() {
         return s -> (Void) s;
     }
+
 }

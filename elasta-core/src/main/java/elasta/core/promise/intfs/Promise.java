@@ -19,11 +19,11 @@ public interface Promise<T> {
 
     Promise<T> err(ErrorHandler errorHandler);
 
-    Promise<T> err2(Error2Handler errorHandler);
+    Promise<T> err2(Error2Handler<T> errorHandler);
 
     Promise<T> errP(ErrorPHandler errorHandler);
 
-    Promise<T> err2P(Error2PHandler errorHandler);
+    Promise<T> err2P(Error2PHandler<T> errorHandler);
 
     <P> Promise<T> errd(DoOnErrorHandler<P, T> doOnErrorHandler);
 
