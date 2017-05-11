@@ -65,6 +65,10 @@ public interface EventBusUtils {
         new RegisterEventHandlersPipeHelper().register(params);
     }
 
+    static void registerLocaleEventHandlersPipeMap(RegisterHandlersParams params) {
+        new RegisterEventHandlersPipeHelper().registerLocale(params);
+    }
+
     @Value
     @Builder
     final class RegisterHandlersParams {

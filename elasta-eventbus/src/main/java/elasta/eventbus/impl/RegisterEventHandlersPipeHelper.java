@@ -22,6 +22,13 @@ final public class RegisterEventHandlersPipeHelper {
         });
     }
 
+    public void registerLocale(final EventBusUtils.RegisterHandlersParams params) {
+        Objects.requireNonNull(params);
+        params.getEventAddressToEventHandlersPipeMap().getMap().forEach((address, eventHandlersPipe) -> {
+            params.getEventBus().localConsumer(address, message -> handleMessage(address, message, eventHandlersPipe, params));
+        });
+    }
+
     private <T, R> void handleMessage(String address, Message<T> message, EventHandlersPipe<T, R> trEventHandlersPipe, EventBusUtils.RegisterHandlersParams params) {
 
         try {
