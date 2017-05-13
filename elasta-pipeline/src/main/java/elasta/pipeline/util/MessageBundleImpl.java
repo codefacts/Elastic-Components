@@ -1,6 +1,7 @@
 package elasta.pipeline.util;
 
 import com.google.common.collect.ImmutableMap;
+import elasta.pipeline.MessageBundle;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
@@ -10,11 +11,11 @@ import java.util.regex.Pattern;
 /**
  * Created by shahadat on 2/28/16.
  */
-final public class MessageBundle {
+final public class MessageBundleImpl implements MessageBundle {
     private final Map<String, String> bundle;
     private static final Pattern pattern = Pattern.compile("\\$\\{[a-zA-Z]\\w*?\\}");
 
-    public MessageBundle(String str) {
+    public MessageBundleImpl(String str) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         new JsonObject(str).getMap().forEach((k, v) -> {
             builder.put(k, v.toString());
@@ -22,6 +23,7 @@ final public class MessageBundle {
         bundle = builder.build();
     }
 
+    @Override
     public String translate(String messageCode, JsonObject json) {
         return translateMessage(or(bundle.get(or(messageCode, "")), ""), json);
     }

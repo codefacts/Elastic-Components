@@ -178,7 +178,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
             builder.append(" ORDER BY ").append(sql);
         }
 
-        sql = new GroupByHandlerImpl(sqlQuery.getColumnAliasPairs()).toSql();
+        sql = new GroupByHandlerImpl(sqlQuery.getGroupBy()).toSql();
 
         if (not(sql.trim().isEmpty())) {
             builder.append(" GROUP BY " + sql);

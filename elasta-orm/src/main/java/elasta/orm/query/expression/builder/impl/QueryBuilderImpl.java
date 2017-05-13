@@ -2,6 +2,7 @@ package elasta.orm.query.expression.builder.impl;
 
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.event.dbaction.DbInterceptors;
+import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.Query;
 import elasta.orm.query.expression.impl.QueryImpl;
@@ -27,8 +28,9 @@ final public class QueryBuilderImpl implements QueryBuilder {
     final EntityMappingHelper entityMappingHelper;
     final SqlDB sqlDB;
     final DbInterceptors dbInterceptors;
+    final QueryExecutor.Pagination pagination;
 
-    public QueryBuilderImpl(EntityMappingHelper entityMappingHelper, SqlDB sqlDB, DbInterceptors dbInterceptors) {
+    public QueryBuilderImpl(EntityMappingHelper entityMappingHelper, SqlDB sqlDB, DbInterceptors dbInterceptors, QueryExecutor.Pagination pagination) {
         Objects.requireNonNull(entityMappingHelper);
         Objects.requireNonNull(sqlDB);
         Objects.requireNonNull(dbInterceptors);
@@ -43,6 +45,7 @@ final public class QueryBuilderImpl implements QueryBuilder {
         this.fieldExpressionResolver = new FieldExpressionResolverImpl(new LinkedHashMap<>());
         this.sqlDB = sqlDB;
         this.dbInterceptors = dbInterceptors;
+        this.pagination = (pagination == null) ? null : pagination;
     }
 
     @Override
@@ -116,6 +119,7 @@ final public class QueryBuilderImpl implements QueryBuilder {
             orderByBuilder.build(),
             groupByBuilder.build(),
             havingBuilder.build(),
+            pagination,
             entityMappingHelper,
             sqlDB,
             dbInterceptors

@@ -36,16 +36,12 @@ public class JsonObjectValidationPipelineAsync implements JsonObjectValidatorAsy
             final JsonObjectValidatorAsync validatorAsync = list.get(i);
             promise = promise
                 .mapP(result -> validatorAsync.validate(jsonObject))
-                .then(result -> {
-                    if (result != null) {
-                        builder.addAll(result);
-                    }
-                });
+                .then(builder::addAll);
         }
 
         return promise.map(v -> {
             final ImmutableList<ValidationResult> results = builder.build();
-            return results.size() <= 0 ? null : results;
+            return results;
         });
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.columnmapping.ColumnMapping;
+import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.ex.QueryParserException;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
@@ -22,28 +23,30 @@ import static elasta.commons.Utils.not;
 /**
  * Created by sohan on 4/9/2017.
  */
-final class FieldExpressionToAliasAndColumnMapTranslator {
+final class FieldExpressionToAliasAndColumnMapBuilder {
     final String rootEntity;
     final String rootAlias;
     final FieldExpressionResolverImpl selectFieldExpressionResolver;
     final FieldExpressionResolverImpl expressionResolver;
+    final Collection<FieldExpression> groupBy;
     final List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs;
     final EntityMappingHelper helper;
     final AliasGenerator aliasGenerator;
 
     final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap = new LinkedHashMap<>();
 
-    FieldExpressionToAliasAndColumnMapTranslator(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, AliasGenerator aliasGenerator) {
+    FieldExpressionToAliasAndColumnMapBuilder(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, Collection<FieldExpression> groupBy, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, EntityMappingHelper helper, AliasGenerator aliasGenerator) {
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
         this.expressionResolver = expressionResolver;
+        this.groupBy = groupBy;
         this.fromPathExpressionAndAliasPairs = fromPathExpressionAndAliasPairs;
         this.helper = helper;
         this.aliasGenerator = aliasGenerator;
     }
 
-    Tpl3 translate(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
+    Tpl3 build(final Map<String, PathExpression> aliasToFullPathExpressionMap) {
 
         final ImmutableMap.Builder<String, String> aliasToEntityMapBuilder = ImmutableMap.builder();
 
@@ -82,6 +85,8 @@ final class FieldExpressionToAliasAndColumnMapTranslator {
 
         expressionResolver.getFuncMap().keySet()
             .forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
+
+        groupBy.forEach(fieldExpression -> applyFieldExp(fieldExpression, aliasToEntityMap, fieldExpToAliasedColumnMapBuilder));
 
         return new Tpl3(selectFieldExpToAliasedColumnMapBuilder.build(), fieldExpToAliasedColumnMapBuilder.build(), aliasToJoinTplMap);
     }

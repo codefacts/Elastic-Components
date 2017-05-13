@@ -61,6 +61,24 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
+    public Promise<Long> countDistinct(CountDistinctParams params) {
+        return baseOrm.queryArray(
+            QueryExecutor.QueryArrayParams.builder()
+                .alias(params.getAlias())
+                .entity(params.getEntity())
+                .joinParams(params.getJoinParams())
+                .criteria(params.getCriteria())
+                .having(params.getHaving())
+                .groupBy(params.getGroupBy())
+                .orderBy(ImmutableList.of())
+                .selections(ImmutableList.of(
+                    OperatorUtils.countDistinct(params.getAlias() + "." + helper.getPrimaryKey(params.getEntity()))
+                ))
+                .build()
+        ).map(jsonArrays -> jsonArrays.get(0).getLong(0));
+    }
+
+    @Override
     public <T> Promise<JsonObject> findOne(String entity, String alias, T id, Collection<FieldExpression> selections) {
         return queryDataLoader.query(
             QueryExecutor.QueryParams.builder()
@@ -83,6 +101,21 @@ final public class OrmImpl implements Orm {
             }
             return jsonObjects.get(0);
         });
+    }
+
+    @Override
+    public <T> Promise<JsonObject> findOne(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections) {
+        return findAll(entity, alias, criteria, selections)
+            .map(jsonObjects -> {
+                if (jsonObjects.size() > 1) {
+                    throw new OrmException("Multiple results found but expected one");
+                }
+                if (jsonObjects.size() <= 0) {
+                    throw new OrmException("No result found");
+                }
+
+                return jsonObjects.get(0);
+            });
     }
 
     @Override

@@ -63,6 +63,11 @@ final public class PathExpressionImpl implements PathExpression {
     }
 
     @Override
+    public boolean isEmpty() {
+        return parts.isEmpty();
+    }
+
+    @Override
     public String root() {
         return parts.get(0);
     }

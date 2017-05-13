@@ -22,7 +22,11 @@ public interface Orm {
 
     Promise<Long> countDistinct(String entity, String alias, JsonObject criteria);
 
+    Promise<Long> countDistinct(CountDistinctParams params);
+
     <T> Promise<JsonObject> findOne(String entity, String alias, T id, Collection<FieldExpression> selections);
+
+    <T> Promise<JsonObject> findOne(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections);
 
     <T> Promise<List<JsonObject>> findAll(String entity, String alias, Collection<T> ids, Collection<FieldExpression> selections);
 
@@ -49,4 +53,30 @@ public interface Orm {
     Promise<Void> execute(BaseOrm.ExecuteParams params);
 
     Promise<Void> executeAll(Collection<BaseOrm.ExecuteParams> paramss);
+
+    @Value
+    @Builder
+    class CountDistinctParams {
+        final String entity;
+        final String alias;
+        final Collection<QueryExecutor.JoinParam> joinParams;
+        final JsonObject criteria;
+        final Collection<FieldExpression> groupBy;
+        final JsonObject having;
+
+        CountDistinctParams(String entity, String alias, Collection<QueryExecutor.JoinParam> joinParams, JsonObject criteria, Collection<FieldExpression> groupBy, JsonObject having) {
+            Objects.requireNonNull(entity);
+            Objects.requireNonNull(alias);
+            Objects.requireNonNull(joinParams);
+            Objects.requireNonNull(criteria);
+            Objects.requireNonNull(groupBy);
+            Objects.requireNonNull(having);
+            this.entity = entity;
+            this.alias = alias;
+            this.joinParams = joinParams;
+            this.criteria = criteria;
+            this.groupBy = groupBy;
+            this.having = having;
+        }
+    }
 }

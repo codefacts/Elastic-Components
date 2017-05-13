@@ -6,6 +6,7 @@ import elasta.core.promise.intfs.Promise;
 import elasta.criteria.Func;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.event.dbaction.DbInterceptors;
+import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.*;
 import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
 import elasta.orm.query.expression.builder.FieldExpressionHolderFunc;
@@ -38,11 +39,12 @@ final public class QueryImpl implements Query {
     final List<FieldExpressionAndOrderPair> orderByPairs;
     final List<FieldExpression> groupByExpressions;
     final List<Func> havingFuncs;
+    final QueryExecutor.Pagination pagination;
     final EntityMappingHelper helper;
     final SqlDB sqlDB;
     final DbInterceptors dbInterceptors;
 
-    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, EntityMappingHelper helper, SqlDB sqlDB, DbInterceptors dbInterceptors) {
+    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, QueryExecutor.Pagination pagination, EntityMappingHelper helper, SqlDB sqlDB, DbInterceptors dbInterceptors) {
         Objects.requireNonNull(rootEntity);
         Objects.requireNonNull(rootAlias);
         Objects.requireNonNull(selectFieldExpressionResolver);
@@ -66,6 +68,7 @@ final public class QueryImpl implements Query {
         this.orderByPairs = orderByPairs;
         this.groupByExpressions = groupByExpressions;
         this.havingFuncs = havingFuncs;
+        this.pagination = (pagination == null) ? null : pagination;
         this.helper = helper;
         this.sqlDB = sqlDB;
         this.dbInterceptors = dbInterceptors;
@@ -102,7 +105,7 @@ final public class QueryImpl implements Query {
 
             final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = combineAliasAndColumnMaps(
                 tpl3.getSelectFieldExpressionToAliasAndColumnMap(),
-                tpl3.getFieldExpToAliasedColumnMap()
+                tpl3.getFieldExpToAliasAndColumnMap()
             );
 
             SqlQuery sqlQuery = new SqlQueryBuilder(
@@ -113,6 +116,7 @@ final public class QueryImpl implements Query {
                 orderByPairs,
                 groupByExpressions,
                 havingFuncs,
+                pagination,
                 helper,
                 tpl3.getAliasToJoinTplMap(),
                 aliasGenerator,
@@ -157,7 +161,7 @@ final public class QueryImpl implements Query {
                     tpl3.getSelectFieldExpressionToAliasAndColumnMap()
                 )
                 .putAll(
-                    tpl3.getFieldExpToAliasedColumnMap()
+                    tpl3.getFieldExpToAliasAndColumnMap()
                 )
                 .build();
 
@@ -169,6 +173,7 @@ final public class QueryImpl implements Query {
                 orderByPairs,
                 groupByExpressions,
                 havingFuncs,
+                pagination,
                 helper,
                 tpl3.getAliasToJoinTplMap(),
                 aliasGenerator,
@@ -182,23 +187,24 @@ final public class QueryImpl implements Query {
 
         private Tpl3 fieldExpressionToAliasAndColumnMap(Map<String, PathExpression> aliasToFullPathExpressionMap) {
 
-            Tpl3 tpl3 = new FieldExpressionToAliasAndColumnMapTranslator(
+            Tpl3 tpl3 = new FieldExpressionToAliasAndColumnMapBuilder(
                 rootEntity,
                 rootAlias,
                 selectFieldExpressionResolver,
                 expressionResolver,
+                groupByExpressions,
                 fromPathExpressionAndAliasPairs,
                 helper,
                 aliasGenerator
 
-            ).translate(aliasToFullPathExpressionMap);
+            ).build(aliasToFullPathExpressionMap);
 
             selectFieldExpressionResolver.setFuncMap(
                 funcMap(tpl3.getSelectFieldExpressionToAliasAndColumnMap())
             );
 
             expressionResolver.setFuncMap(
-                funcMap(tpl3.getFieldExpToAliasedColumnMap())
+                funcMap(tpl3.getFieldExpToAliasAndColumnMap())
             );
 
             return tpl3;

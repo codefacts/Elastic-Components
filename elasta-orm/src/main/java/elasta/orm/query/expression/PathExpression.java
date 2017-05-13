@@ -19,9 +19,29 @@ public interface PathExpression {
 
     int size();
 
+    boolean isEmpty();
+
     String root();
 
     String last();
+
+    PathExpression subPath(int fromIndex, int toIndex);
+
+    PathExpression subPath(int fromIndex);
+
+    boolean startsWith(String rootAlias);
+
+    PathExpression concat(PathExpression... pathExpression);
+
+    PathExpression concat(List<PathExpression> pathExpression);
+
+    PathExpression concat(String... parts);
+
+    PathExpression concat(List<String>... parts);
+
+    static PathExpression parseAndCreate(String path) {
+        return new PathExpressionImpl(path);
+    }
 
     static PathExpression create(String... parts) {
         return new PathExpressionImpl(ImmutableList.copyOf(parts));
@@ -49,23 +69,5 @@ public interface PathExpression {
             listBuilder.addAll(pathExpression.parts());
         }
         return new PathExpressionImpl(listBuilder.build());
-    }
-
-    PathExpression subPath(int fromIndex, int toIndex);
-
-    PathExpression subPath(int fromIndex);
-
-    boolean startsWith(String rootAlias);
-
-    PathExpression concat(PathExpression... pathExpression);
-
-    PathExpression concat(List<PathExpression> pathExpression);
-
-    PathExpression concat(String... parts);
-
-    PathExpression concat(List<String>... parts);
-
-    static PathExpression parseAndCreate(String path) {
-        return new PathExpressionImpl(path);
     }
 }

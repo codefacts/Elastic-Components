@@ -13,15 +13,15 @@ import java.util.Objects;
 @Value
 final class Tpl3 {
     final Map<FieldExpression, AliasAndColumn> selectFieldExpressionToAliasAndColumnMap;
-    final Map<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMap;
+    final Map<FieldExpression, AliasAndColumn> fieldExpToAliasAndColumnMap;
     final Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap;
 
-    Tpl3(Map<FieldExpression, AliasAndColumn> selectFieldExpressionToAliasAndColumnMap, Map<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMap, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap) {
+    Tpl3(Map<FieldExpression, AliasAndColumn> selectFieldExpressionToAliasAndColumnMap, Map<FieldExpression, AliasAndColumn> fieldExpToAliasAndColumnMap, Map<String, Map<String, QueryImpl.PartAndJoinTpl>> aliasToJoinTplMap) {
         Objects.requireNonNull(selectFieldExpressionToAliasAndColumnMap);
-        Objects.requireNonNull(fieldExpToAliasedColumnMap);
+        Objects.requireNonNull(fieldExpToAliasAndColumnMap);
         Objects.requireNonNull(aliasToJoinTplMap);
         this.selectFieldExpressionToAliasAndColumnMap = selectFieldExpressionToAliasAndColumnMap;
-        this.fieldExpToAliasedColumnMap = fieldExpToAliasedColumnMap;
+        this.fieldExpToAliasAndColumnMap = fieldExpToAliasAndColumnMap;
         this.aliasToJoinTplMap = aliasToJoinTplMap;
     }
 }

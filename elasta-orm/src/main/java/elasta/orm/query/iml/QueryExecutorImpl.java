@@ -18,6 +18,7 @@ import lombok.Value;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Created by sohan on 3/19/2017.
@@ -49,10 +50,13 @@ final public class QueryExecutorImpl implements QueryExecutor {
 
     private Promise<List<JsonObject>> doQuery(QueryParams params) {
 
+        Optional<Pagination> pagination = params.getPagination();
+
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
             sqlDB,
-            dbInterceptors
+            dbInterceptors,
+            pagination.isPresent() ? pagination.get() : null
         );
 
         params.getSelections()
@@ -80,10 +84,13 @@ final public class QueryExecutorImpl implements QueryExecutor {
     @Override
     public Promise<List<JsonArray>> queryArray(QueryArrayParams params) {
 
+        Optional<Pagination> pagination = params.getPagination();
+
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
             sqlDB,
-            dbInterceptors
+            dbInterceptors,
+            pagination.isPresent() ? pagination.get() : null
         );
 
         final CriteriaBuilderJsonToFuncConverterMap converterMap = new CriteriaBuilderJsonToFuncConverterMap(jsonToFuncConverterMap, qb);

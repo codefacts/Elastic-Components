@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 /**
@@ -36,8 +37,9 @@ public interface QueryExecutor {
         final Collection<OrderTpl> orderBy;
         final Collection<FieldExpression> groupBy;
         final JsonObject having;
+        final Pagination pagination;
 
-        public QueryArrayParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<JsonObject> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having) {
+        QueryArrayParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<JsonObject> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having, Pagination pagination) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
             Objects.requireNonNull(joinParams);
@@ -54,6 +56,11 @@ public interface QueryExecutor {
             this.orderBy = orderBy;
             this.groupBy = groupBy;
             this.having = having;
+            this.pagination = (pagination == null) ? null : pagination;
+        }
+
+        public Optional<Pagination> getPagination() {
+            return Optional.ofNullable(pagination);
         }
     }
 
@@ -68,8 +75,9 @@ public interface QueryExecutor {
         final Collection<OrderTpl> orderBy;
         final Collection<FieldExpression> groupBy;
         final JsonObject having;
+        final Pagination pagination;
 
-        public QueryParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<FieldExpression> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having) {
+        QueryParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<FieldExpression> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having, Pagination pagination) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
             Objects.requireNonNull(joinParams);
@@ -86,6 +94,11 @@ public interface QueryExecutor {
             this.orderBy = orderBy;
             this.groupBy = groupBy;
             this.having = having;
+            this.pagination = (pagination == null) ? null : pagination;
+        }
+
+        public Optional<Pagination> getPagination() {
+            return Optional.ofNullable(pagination);
         }
     }
 
@@ -93,6 +106,7 @@ public interface QueryExecutor {
      * Created by sohan on 3/21/2017.
      */
     @Value
+    @Builder
     final class OrderTpl {
         final FieldExpression field;
         final Order order;
@@ -126,6 +140,23 @@ public interface QueryExecutor {
 
         public Optional<JoinType> getJoinType() {
             return Optional.ofNullable(joinType);
+        }
+    }
+
+    @Value
+    @Builder
+    final class Pagination {
+        final FieldExpression fieldExpression;
+        final long offset;
+        final int size;
+
+        Pagination(FieldExpression fieldExpression, long offset, int size) {
+            Objects.requireNonNull(fieldExpression);
+            Objects.requireNonNull(offset);
+            Objects.requireNonNull(size);
+            this.fieldExpression = fieldExpression;
+            this.offset = offset;
+            this.size = size;
         }
     }
 }

@@ -25,9 +25,9 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    testCompileOnly "org.projectlombok:lombok:1.16.14"
-
     testCompile group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.1.1'
     testCompile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '2.6.4'
     testCompile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+
+    testCompileOnly "org.projectlombok:lombok:1.16.14"
 }
