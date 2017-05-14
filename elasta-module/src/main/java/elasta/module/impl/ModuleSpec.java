@@ -3,7 +3,7 @@ package elasta.module.impl;
 /**
  * Created by Jango on 9/12/2016.
  */
-public class ModuleSpec {
+final public class ModuleSpec {
     final Class moduleClass;
     final String moduleName;
 

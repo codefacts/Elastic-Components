@@ -1,19 +1,16 @@
 package elasta.module.impl;
 
 import elasta.module.ExportScript;
-import elasta.module.Module;
 import elasta.module.ModuleSystem;
+import elasta.module.ex.ModuleSystemException;
 
-import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 /**
  * Created by Jango on 9/12/2016.
  */
-public class ModuleSystemImpl implements ModuleSystem {
+final public class ModuleSystemImpl implements ModuleSystem {
 
     private static final boolean DEFALUT_PROTOTYPE = false;
     private final Map<ModuleSpec, ModuleInfo> scriptMap = new HashMap<>();
@@ -47,11 +44,6 @@ public class ModuleSystemImpl implements ModuleSystem {
     public <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue) {
         T module = getOrCreate(tClass, moduleName);
         return module == null ? defaultValue : module;
-    }
-
-    @Override
-    public ModuleSystem moduleSystem() {
-        return this;
     }
 
     private <T> T getOrCreate(Class<T> moduleClass, String moduleName) {
@@ -110,23 +102,15 @@ public class ModuleSystemImpl implements ModuleSystem {
     }
 
     @Override
-    public <T> void export(Class<T> moduleClass, ExportScript<T> exportScript) {
+    public <T> ModuleSystemImpl export(Class<T> moduleClass, ExportScript<T> exportScript) {
         export(moduleClass, null, exportScript);
+        return this;
     }
 
     @Override
-    public <T> void export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript) {
+    public <T> ModuleSystemImpl export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript) {
         scriptMap.put(new ModuleSpec(moduleClass, moduleName), new ModuleInfo<>(exportScript, DEFALUT_PROTOTYPE));
-    }
-
-    @Override
-    public <T> void exportPrototype(Class<T> moduleClass, ExportScript<T> exportScript) {
-        exportPrototype(moduleClass, null, exportScript);
-    }
-
-    @Override
-    public <T> void exportPrototype(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript) {
-        scriptMap.put(new ModuleSpec(moduleClass, moduleName), new ModuleInfo<>(exportScript, true));
+        return this;
     }
 
     private <T> T createModule(ExportScript<T> exportScript) {

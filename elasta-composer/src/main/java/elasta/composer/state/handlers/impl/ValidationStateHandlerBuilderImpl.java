@@ -39,7 +39,7 @@ final public class ValidationStateHandlerBuilderImpl implements ValidationStateH
                         validationErrorModelBuilder.build(
                             ValidationErrorModelBuilder.BuildParams.builder()
                                 .entity(entity)
-                                .validationErrors(validationResults.stream().map(ValidationResult::toJson).collect(Collectors.toList()))
+                                .validationErrors(validationResults)
                                 .build()
                         )
                     );

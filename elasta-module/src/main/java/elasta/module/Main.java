@@ -1,27 +1,25 @@
 package elasta.module;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 /**
  * Created by Jango on 9/12/2016.
  */
 public class Main {
     public static void main(String[] args) {
-        ModuleSystem moduleSystem = ModuleSystem.create();
-
-        moduleSystem.exportPrototype(String.class, "prop1", module -> {
-            module.export("newModule1");
-            System.out.println("11");
-        });
-
-        moduleSystem.export(String.class, "prop2", module -> {
-            String prop1 = module.require(String.class, "prop1");
-            module.export(prop1 + " newModule2");
-            System.out.println("11");
-        });
-
-        String require = moduleSystem.require(String.class);
+        ImmutableModuleSystem moduleSystem = ImmutableModuleSystem.builder()
+            .export(String.class, "1", module -> module.export("module 1"))
+            .export(String.class, module -> module.export("ff"))
+            .export(Integer.class, module -> module.export(1))
+            .export(Boolean.class, module -> {
+                System.out.println(module.require(Integer.class));
+                System.out.println(module.require(String.class));
+                System.out.println(module.require(String.class, "1"));
+                module.export(true);
+            })
+            .build();
+        Boolean require = moduleSystem.require(Boolean.class);
         System.out.println(require);
 
-        System.out.println(moduleSystem.require(String.class, "prop1"));
-        System.out.println(moduleSystem.require(String.class, "prop2"));
     }
 }

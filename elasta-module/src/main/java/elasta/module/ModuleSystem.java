@@ -5,25 +5,11 @@ import elasta.module.impl.ModuleSystemImpl;
 /**
  * Created by Jango on 9/12/2016.
  */
-public interface ModuleSystem {
+public interface ModuleSystem extends ImmutableModuleSystem {
 
-    <T> T require(Class<T> tClass);
+    <T> ModuleSystem export(Class<T> moduleClass, ExportScript<T> exportScript);
 
-    <T> T require(Class<T> tClass, String moduleName);
-
-    <T> T requireOrElse(Class<T> tClass, T defaultValue);
-
-    <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue);
-
-    ModuleSystem moduleSystem();
-
-    <T> void export(Class<T> moduleClass, ExportScript<T> exportScript);
-
-    <T> void export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript);
-
-    <T> void exportPrototype(Class<T> moduleClass, ExportScript<T> exportScript);
-
-    <T> void exportPrototype(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript);
+    <T> ModuleSystem export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript);
 
     static ModuleSystem create() {
         return new ModuleSystemImpl();

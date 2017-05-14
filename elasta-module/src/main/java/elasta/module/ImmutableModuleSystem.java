@@ -1,9 +1,11 @@
 package elasta.module;
 
+import elasta.module.impl.ImmutableModuleSystemBuilderImpl;
+
 /**
- * Created by Jango on 9/12/2016.
+ * Created by sohan on 5/14/2017.
  */
-public interface Module<TT> {
+public interface ImmutableModuleSystem {
 
     <T> T require(Class<T> tClass);
 
@@ -13,5 +15,7 @@ public interface Module<TT> {
 
     <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue);
 
-    void export(TT newModule);
+    static ImmutableModuleSystemBuilder builder() {
+        return new ImmutableModuleSystemBuilderImpl();
+    }
 }

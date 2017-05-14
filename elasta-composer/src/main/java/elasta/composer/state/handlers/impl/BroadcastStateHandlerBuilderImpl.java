@@ -16,11 +16,11 @@ final public class BroadcastStateHandlerBuilderImpl implements BroadcastStateHan
     final SimpleEventBus simpleEventBus;
     final String eventAddress;
 
-    public BroadcastStateHandlerBuilderImpl(SimpleEventBus simpleEventBus, String eventAddress) {
+    public BroadcastStateHandlerBuilderImpl(SimpleEventBus simpleEventBus, String broadcastAddress) {
         Objects.requireNonNull(simpleEventBus);
-        Objects.requireNonNull(eventAddress);
+        Objects.requireNonNull(broadcastAddress);
         this.simpleEventBus = simpleEventBus;
-        this.eventAddress = eventAddress;
+        this.eventAddress = broadcastAddress;
     }
 
     @Override

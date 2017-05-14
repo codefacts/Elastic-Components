@@ -1,9 +1,11 @@
 package elasta.composer.model.response.builder;
 
+import elasta.pipeline.validator.ValidationResult;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,9 +20,9 @@ public interface ValidationErrorModelBuilder {
     @Builder
     final class BuildParams {
         final String entity;
-        final List<JsonObject> validationErrors;
+        final Collection<ValidationResult> validationErrors;
 
-        BuildParams(String entity, List<JsonObject> validationErrors) {
+        BuildParams(String entity, Collection<ValidationResult> validationErrors) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(validationErrors);
             this.entity = entity;

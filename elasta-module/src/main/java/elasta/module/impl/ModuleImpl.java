@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Created by Jango on 9/12/2016.
  */
-public class ModuleImpl<T> implements Module<T> {
+final public class ModuleImpl<T> implements Module<T> {
     private final ModuleSystemImpl moduleSystem;
     private T module;
 
@@ -40,11 +40,6 @@ public class ModuleImpl<T> implements Module<T> {
     @Override
     public void export(T newModule) {
         this.module = newModule;
-    }
-
-    @Override
-    public ModuleSystem moduleSystem() {
-        return moduleSystem;
     }
 
     public T getModule() {
