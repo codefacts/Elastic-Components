@@ -1,6 +1,7 @@
 package elasta.composer.state.handlers.impl;
 
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.model.response.builder.PageModelBuilder;
 import elasta.composer.converter.JsonObjectToPageRequestConverter;
 import elasta.composer.converter.JsonObjectToQueryParamsConverter;
@@ -43,8 +44,10 @@ final public class FindAllStateHandlerBuilderImpl implements FindAllStateHandler
     }
 
     @Override
-    public EnterEventHandlerP<JsonObject, JsonObject> build() {
-        return query -> {
+    public MsgEnterEventHandlerP<JsonObject, JsonObject> build() {
+        return msg -> {
+
+            JsonObject query = msg.body();
 
             final PageRequest pageRequest = jsonObjectToPageRequestConverter.convert(query);
 
@@ -69,12 +72,14 @@ final public class FindAllStateHandlerBuilderImpl implements FindAllStateHandler
                         .having(params.getHaving())
                         .build()
                 )
-            ).map(tpl2 -> tpl2.apply((jsonObjects, count) -> Flow.trigger(Events.next, pageModelBuilder.build(
-                PageModelBuilder.BuildParams.builder()
-                    .content(jsonObjects)
-                    .pageRequest(pageRequest)
-                    .totalElementsCount(count)
-                    .build()
+            ).map(tpl2 -> tpl2.apply((jsonObjects, count) -> Flow.trigger(Events.next, msg.withBody(
+                pageModelBuilder.build(
+                    PageModelBuilder.BuildParams.builder()
+                        .content(jsonObjects)
+                        .pageRequest(pageRequest)
+                        .totalElementsCount(count)
+                        .build()
+                )
             ))));
         };
     }

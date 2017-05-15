@@ -1,11 +1,11 @@
 package elasta.composer.impl;
 
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import elasta.commons.Utils;
-import elasta.composer.ContextHolder;
-import elasta.composer.RequestContext;
+import elasta.composer.Headers;
 import elasta.composer.ex.AppContextException;
 import elasta.pipeline.converter.Converter;
 
@@ -14,14 +14,14 @@ import java.util.*;
 /**
  * Created by sohan on 5/12/2017.
  */
-final public class RequestContextImpl implements RequestContext {
-    final ContextHolder contextHolder;
+final public class HeadersImpl implements Headers {
+    final ListMultimap<String, String> multimap;
     final Map<Class, Converter> convertersMap;
 
-    public RequestContextImpl(ContextHolder contextHolder, Map<Class, Converter> convertersMap) {
-        Objects.requireNonNull(contextHolder);
+    public HeadersImpl(ListMultimap<String, String> multimap, Map<Class, Converter> convertersMap) {
+        Objects.requireNonNull(multimap);
         Objects.requireNonNull(convertersMap);
-        this.contextHolder = contextHolder;
+        this.multimap = multimap;
         this.convertersMap = ImmutableMap.copyOf(
             checkConvertersMap(convertersMap)
         );
@@ -29,12 +29,12 @@ final public class RequestContextImpl implements RequestContext {
 
     @Override
     public boolean containsKey(String key) {
-        return contextHolder.getMap().containsKey(key);
+        return multimap.containsKey(key);
     }
 
     @Override
     public Set<String> keySet() {
-        return contextHolder.getMap().keySet();
+        return multimap.keySet();
     }
 
     @Override
@@ -69,12 +69,34 @@ final public class RequestContextImpl implements RequestContext {
 
     @Override
     public List<String> getAll(String key) {
-        return contextHolder.getMap().get(key);
+        return multimap.get(key);
     }
 
     @Override
     public ListMultimap<String, String> getMultimap() {
-        return contextHolder.getMap();
+        return multimap;
+    }
+
+    @Override
+    public Headers addAll(ListMultimap<String, String> multimap) {
+        return new HeadersImpl(
+            ImmutableListMultimap.<String, String>builder().putAll(multimap).build(),
+            convertersMap
+        );
+    }
+
+    @Override
+    public Headers addAll(Map<String, String> map) {
+        return new HeadersImpl(
+            ImmutableListMultimap.<String, String>builder().putAll(
+                map.entrySet()
+            ).build(),
+            convertersMap
+        );
+    }
+
+    public Map<Class, Converter> getConvertersMap() {
+        return convertersMap;
     }
 
     private <T> T convert(Class<T> tClass, String value) {
@@ -83,7 +105,7 @@ final public class RequestContextImpl implements RequestContext {
 
     private Optional<String> getValue(String key) {
 
-        List<String> strings = contextHolder.getMap().get(key);
+        List<String> strings = multimap.get(key);
 
         if (strings.isEmpty()) {
             return Optional.empty();

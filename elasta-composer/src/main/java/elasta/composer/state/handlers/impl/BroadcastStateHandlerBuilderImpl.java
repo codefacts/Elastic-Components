@@ -1,11 +1,11 @@
 package elasta.composer.state.handlers.impl;
 
-import elasta.composer.Events;
+import elasta.composer.*;
 import elasta.composer.state.handlers.BroadcastStateHandlerBuilder;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
 import elasta.eventbus.SimpleEventBus;
+import io.vertx.core.eventbus.DeliveryOptions;
 
 import java.util.Objects;
 
@@ -24,14 +24,21 @@ final public class BroadcastStateHandlerBuilderImpl implements BroadcastStateHan
     }
 
     @Override
-    public EnterEventHandlerP build() {
+    public MsgEnterEventHandlerP<Object, Object> build() {
         return request -> {
 
-            simpleEventBus.publish(eventAddress, request);
+            simpleEventBus.publish(
+                eventAddress, request.body(),
+                new DeliveryOptions()
+                    .setHeaders(
+                        ComposerUtils.toMultimap(request.headers().getMultimap())
+                    )
+            );
 
             return Promises.of(
                 Flow.trigger(Events.next, request)
             );
         };
     }
+
 }

@@ -1,5 +1,6 @@
 package elasta.authorization;
 
+import elasta.core.promise.intfs.Promise;
 import lombok.Builder;
 import lombok.Value;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
 @FunctionalInterface
 public interface Authorizer {
 
-    boolean authorize(AuthorizeParams params);
+    Promise<Boolean> authorize(AuthorizeParams params);
 
     @Value
     @Builder

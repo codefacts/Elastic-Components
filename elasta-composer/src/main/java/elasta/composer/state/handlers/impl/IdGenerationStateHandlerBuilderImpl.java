@@ -2,6 +2,7 @@ package elasta.composer.state.handlers.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.producer.IdGenerator;
 import elasta.composer.state.handlers.IdGenerationStateHandlerBuilder;
 import elasta.core.flow.EnterEventHandlerP;
@@ -28,13 +29,15 @@ final public class IdGenerationStateHandlerBuilderImpl implements IdGenerationSt
     }
 
     @Override
-    public EnterEventHandlerP<JsonObject, JsonObject> build() {
-        return jsonObject -> idGenerator.nextId(entity)
-            .map(id -> Flow.trigger(Events.next, new JsonObject(
-                ImmutableMap.<String, Object>builder()
-                    .putAll(jsonObject.getMap())
-                    .put(primaryKey, id)
-                    .build()
+    public MsgEnterEventHandlerP<JsonObject, JsonObject> build() {
+        return msg -> idGenerator.nextId(entity)
+            .map(id -> Flow.trigger(Events.next, msg.withBody(
+                new JsonObject(
+                    ImmutableMap.<String, Object>builder()
+                        .putAll(msg.body().getMap())
+                        .put(primaryKey, id)
+                        .build()
+                )
             )));
     }
 }

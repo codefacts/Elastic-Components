@@ -1,5 +1,6 @@
 package elasta.composer.state.handlers.impl;
 
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.EndStateHandlerBuilder;
 import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
@@ -10,9 +11,9 @@ import elasta.core.promise.impl.Promises;
  */
 final public class EndStateHandlerBuilderImpl implements EndStateHandlerBuilder {
     @Override
-    public EnterEventHandlerP build() {
-        return message -> Promises.of(
-            Flow.triggerExit(message)
+    public MsgEnterEventHandlerP<Object, Object> build() {
+        return msg -> Promises.of(
+            Flow.triggerExit(msg)
         );
     }
 }

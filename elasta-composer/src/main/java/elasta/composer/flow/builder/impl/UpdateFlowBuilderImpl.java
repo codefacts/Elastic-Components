@@ -1,9 +1,9 @@
 package elasta.composer.flow.builder.impl;
 
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.UpdateFlowBuilder;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,15 +12,15 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
-    final EnterEventHandlerP startHandler;
-    final EnterEventHandlerP authorizationHandler;
-    final EnterEventHandlerP validationHandler;
-    final EnterEventHandlerP updateHandler;
-    final EnterEventHandlerP broadcastHandler;
-    final EnterEventHandlerP generateResponseHandler;
-    final EnterEventHandlerP endHandler;
+    final MsgEnterEventHandlerP startHandler;
+    final MsgEnterEventHandlerP authorizationHandler;
+    final MsgEnterEventHandlerP validationHandler;
+    final MsgEnterEventHandlerP updateHandler;
+    final MsgEnterEventHandlerP broadcastHandler;
+    final MsgEnterEventHandlerP generateResponseHandler;
+    final MsgEnterEventHandlerP endHandler;
 
-    public UpdateFlowBuilderImpl(EnterEventHandlerP startHandler, EnterEventHandlerP authorizationHandler, EnterEventHandlerP validationHandler, EnterEventHandlerP updateHandler, EnterEventHandlerP broadcastHandler, EnterEventHandlerP generateResponseHandler, EnterEventHandlerP endHandler) {
+    public UpdateFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizationHandler, MsgEnterEventHandlerP validationHandler, MsgEnterEventHandlerP updateHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizationHandler);
         Objects.requireNonNull(validationHandler);

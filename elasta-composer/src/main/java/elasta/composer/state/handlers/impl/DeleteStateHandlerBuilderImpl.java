@@ -1,6 +1,7 @@
 package elasta.composer.state.handlers.impl;
 
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.DeleteStateHandlerBuilder;
 import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
@@ -24,9 +25,9 @@ final public class DeleteStateHandlerBuilderImpl implements DeleteStateHandlerBu
     }
 
     @Override
-    public EnterEventHandlerP build() {
+    public MsgEnterEventHandlerP<Object, Object> build() {
 
-        return id -> orm.delete(entity, id)
-            .map(deletedId -> Flow.trigger(Events.next, deletedId));
+        return msg -> orm.delete(entity, msg.body())
+            .map(deletedId -> Flow.trigger(Events.next, msg.withBody(deletedId)));
     }
 }

@@ -1,5 +1,6 @@
 package elasta.composer.state.handlers;
 
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.core.flow.EnterEventHandlerP;
 
 /**
@@ -7,5 +8,5 @@ import elasta.core.flow.EnterEventHandlerP;
  */
 public interface StartStateHandlerBuilder extends StateHandlerBuilder {
     @Override
-    EnterEventHandlerP build();
+    MsgEnterEventHandlerP build();
 }

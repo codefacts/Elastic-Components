@@ -1,6 +1,7 @@
 package elasta.composer.state.handlers.impl;
 
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
 import elasta.composer.state.handlers.ValidationStateHandlerBuilder;
 import elasta.core.flow.EnterEventHandlerP;
@@ -30,21 +31,23 @@ final public class ValidationStateHandlerBuilderImpl implements ValidationStateH
     }
 
     @Override
-    public EnterEventHandlerP<JsonObject, JsonObject> build() {
-        return jsonObject -> jsonObjectValidatorAsync.validate(jsonObject)
+    public MsgEnterEventHandlerP<JsonObject, JsonObject> build() {
+        return msg -> jsonObjectValidatorAsync.validate(msg.body())
             .map(validationResults -> {
                 if (validationResults.size() <= 0) {
                     return Flow.trigger(
                         Events.validationError,
-                        validationErrorModelBuilder.build(
-                            ValidationErrorModelBuilder.BuildParams.builder()
-                                .entity(entity)
-                                .validationErrors(validationResults)
-                                .build()
+                        msg.withBody(
+                            validationErrorModelBuilder.build(
+                                ValidationErrorModelBuilder.BuildParams.builder()
+                                    .entity(entity)
+                                    .validationErrors(validationResults)
+                                    .build()
+                            )
                         )
                     );
                 }
-                return Flow.trigger(Events.next, jsonObject);
+                return Flow.trigger(Events.next, msg);
             });
     }
 }

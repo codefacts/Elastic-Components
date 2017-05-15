@@ -2,10 +2,8 @@ package elasta.composer.message.handlers.builder.impl;
 
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
-import elasta.composer.RequestContext;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.flow.builder.impl.UpdateFlowBuilderImpl;
-import elasta.composer.impl.ContextHolderImpl;
-import elasta.composer.impl.RequestContextImpl;
 import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.builder.UpdateMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
@@ -13,13 +11,10 @@ import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
 import elasta.composer.state.handlers.UserIdConverter;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
 
@@ -36,11 +31,10 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
     final ValidationErrorModelBuilder validationErrorModelBuilder;
     final ConvertersMap convertersMap;
     final Authorizer authorizer;
-    final UserIdConverter userIdConverter;
     final String action;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
 
-    public UpdateMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, String broadcastAddress, SimpleEventBus simpleEventBus, String entity, Orm orm, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ConvertersMap convertersMap, Authorizer authorizer, UserIdConverter userIdConverter, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder) {
+    public UpdateMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, String broadcastAddress, SimpleEventBus simpleEventBus, String entity, Orm orm, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ConvertersMap convertersMap, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder) {
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(simpleEventBus);
@@ -60,7 +54,6 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
         this.validationErrorModelBuilder = validationErrorModelBuilder;
         this.convertersMap = convertersMap;
         this.authorizer = authorizer;
-        this.userIdConverter = userIdConverter;
         this.action = action;
         this.authorizationErrorModelBuilder = authorizationErrorModelBuilder;
     }
@@ -68,15 +61,9 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
     @Override
     public JsonObjectMessageHandler build() {
 
-        final ContextHolderImpl contextHolder = new ContextHolderImpl();
-        final RequestContextImpl requestContext = new RequestContextImpl(
-            contextHolder,
-            convertersMap.getMap()
-        );
-
         Flow flow = new UpdateFlowBuilderImpl(
             startHandler(),
-            authorizationHandler(requestContext),
+            authorizationHandler(),
             validationHandler(),
             updateHandler(),
             broadcastHandler(),
@@ -87,31 +74,31 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
         return message -> flow.start(message.body());
     }
 
-    private EnterEventHandlerP endHandler() {
+    private MsgEnterEventHandlerP endHandler() {
         return new EndStateHandlerBuilderImpl().build();
     }
 
-    private EnterEventHandlerP generateResponseHandler() {
+    private MsgEnterEventHandlerP generateResponseHandler() {
         return new GenerateResponseStateHandlerImpl(
             responseGenerator
         ).build();
     }
 
-    private EnterEventHandlerP broadcastHandler() {
+    private MsgEnterEventHandlerP broadcastHandler() {
         return new BroadcastStateHandlerBuilderImpl(
             simpleEventBus,
             broadcastAddress
         ).build();
     }
 
-    private EnterEventHandlerP updateHandler() {
+    private MsgEnterEventHandlerP updateHandler() {
         return new UpdateStateHandlerBuilderImpl(
             entity,
             orm
         ).build();
     }
 
-    private EnterEventHandlerP validationHandler() {
+    private MsgEnterEventHandlerP validationHandler() {
         return new ValidationStateHandlerBuilderImpl(
             entity,
             jsonObjectValidatorAsync,
@@ -119,17 +106,15 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
         ).build();
     }
 
-    private EnterEventHandlerP authorizationHandler(RequestContext requestContext) {
+    private MsgEnterEventHandlerP authorizationHandler() {
         return new AuthorizationStateHandlerBuilderImpl(
             authorizer,
-            requestContext,
-            userIdConverter,
             action,
             authorizationErrorModelBuilder
         ).build();
     }
 
-    private EnterEventHandlerP startHandler() {
+    private MsgEnterEventHandlerP startHandler() {
         return new StartStateHandlerBuilderImpl().build();
     }
 }

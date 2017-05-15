@@ -1,6 +1,7 @@
 package elasta.composer.state.handlers.impl;
 
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.FindOneStateHandlerBuilder;
 import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
@@ -33,8 +34,8 @@ final public class FindOneStateHandlerBuilderImpl implements FindOneStateHandler
     }
 
     @Override
-    public EnterEventHandlerP<JsonObject, JsonObject> build() {
-        return criteria -> orm.findOne(entity, alias, criteria, selections)
-            .map(jsonObject -> Flow.trigger(Events.next, jsonObject));
+    public MsgEnterEventHandlerP<JsonObject, JsonObject> build() {
+        return msg -> orm.findOne(entity, alias, msg.body(), selections)
+            .map(jsonObject -> Flow.trigger(Events.next, msg.withBody(jsonObject)));
     }
 }

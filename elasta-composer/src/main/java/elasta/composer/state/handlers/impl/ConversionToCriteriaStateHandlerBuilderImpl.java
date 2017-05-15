@@ -2,6 +2,7 @@ package elasta.composer.state.handlers.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.ConversionToCriteriaStateHandlerBuilder;
 import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
@@ -24,13 +25,15 @@ final public class ConversionToCriteriaStateHandlerBuilderImpl implements Conver
     }
 
     @Override
-    public EnterEventHandlerP build() {
-        return value -> {
+    public MsgEnterEventHandlerP<Object, Object> build() {
+        return msg -> {
 
-            final JsonObject criteria = OperatorUtils.eq(fieldExpression, value);
+            final JsonObject criteria = OperatorUtils.eq(fieldExpression, msg.body());
 
             return Promises.of(
-                Flow.trigger(Events.next, criteria)
+                Flow.trigger(Events.next, msg.withBody(
+                    criteria
+                ))
             );
         };
     }

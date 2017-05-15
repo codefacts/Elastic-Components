@@ -2,6 +2,7 @@ package elasta.composer.state.handlers.impl;
 
 import com.google.common.base.Preconditions;
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.InsertStateHandlerBuilder;
 import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
@@ -25,8 +26,8 @@ final public class InsertStateHandlerBuilderImpl implements InsertStateHandlerBu
     }
 
     @Override
-    public EnterEventHandlerP<JsonObject, JsonObject> build() {
-        return jsonObject -> orm.upsert(entity, jsonObject)
-            .map(jo -> Flow.trigger(Events.next, jo));
+    public MsgEnterEventHandlerP<JsonObject, JsonObject> build() {
+        return msg -> orm.upsert(entity, msg.body())
+            .map(jo -> Flow.trigger(Events.next, msg.withBody(jo)));
     }
 }

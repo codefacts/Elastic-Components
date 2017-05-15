@@ -1,9 +1,9 @@
 package elasta.composer.flow.builder.impl;
 
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.flow.builder.InsertFlowBuilder;
 import elasta.composer.States;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,16 +12,16 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class InsertFlowBuilderImpl implements InsertFlowBuilder {
-    final EnterEventHandlerP startHandler;
-    final EnterEventHandlerP authorizationHandler;
-    final EnterEventHandlerP idGenerationHandler;
-    final EnterEventHandlerP validationHandler;
-    final EnterEventHandlerP insertHandler;
-    final EnterEventHandlerP broadcastHandler;
-    final EnterEventHandlerP generateResponseHandler;
-    final EnterEventHandlerP endHandler;
+    final MsgEnterEventHandlerP startHandler;
+    final MsgEnterEventHandlerP authorizationHandler;
+    final MsgEnterEventHandlerP idGenerationHandler;
+    final MsgEnterEventHandlerP validationHandler;
+    final MsgEnterEventHandlerP insertHandler;
+    final MsgEnterEventHandlerP broadcastHandler;
+    final MsgEnterEventHandlerP generateResponseHandler;
+    final MsgEnterEventHandlerP endHandler;
 
-    public InsertFlowBuilderImpl(EnterEventHandlerP startHandler, EnterEventHandlerP authorizationHandler, EnterEventHandlerP idGenerationHandler, EnterEventHandlerP validationHandler, EnterEventHandlerP insertHandler, EnterEventHandlerP broadcastHandler, EnterEventHandlerP generateResponseHandler, EnterEventHandlerP endHandler) {
+    public InsertFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizationHandler, MsgEnterEventHandlerP idGenerationHandler, MsgEnterEventHandlerP validationHandler, MsgEnterEventHandlerP insertHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizationHandler);
         Objects.requireNonNull(idGenerationHandler);

@@ -2,6 +2,8 @@ package elasta.composer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ListMultimap;
+import io.vertx.core.MultiMap;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -18,5 +20,9 @@ public interface ComposerUtils {
 
     static JsonArray emptyJsonArray() {
         return JSON_ARRAY;
+    }
+
+    static MultiMap toMultimap(ListMultimap<String, String> headers) {
+        return new VertxMultiMap(headers);
     }
 }

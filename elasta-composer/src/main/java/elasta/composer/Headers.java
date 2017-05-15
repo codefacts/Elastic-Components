@@ -3,15 +3,12 @@ package elasta.composer;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by sohan on 5/12/2017.
  */
-public interface RequestContext {
+public interface Headers {
 
     boolean containsKey(String key);
 
@@ -32,4 +29,8 @@ public interface RequestContext {
     List<String> getAll(String key);
 
     ListMultimap<String, String> getMultimap();
+
+    Headers addAll(ListMultimap<String, String> multimap);
+
+    Headers addAll(Map<String, String> multimap);
 }

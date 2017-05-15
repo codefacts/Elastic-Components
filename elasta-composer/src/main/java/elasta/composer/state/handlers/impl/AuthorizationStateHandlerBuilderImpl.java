@@ -3,7 +3,8 @@ package elasta.composer.state.handlers.impl;
 import elasta.authorization.Authorizer;
 import elasta.commons.Utils;
 import elasta.composer.Events;
-import elasta.composer.RequestContext;
+import elasta.composer.Headers;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.model.request.UserModel;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.state.handlers.AuthorizationStateHandlerBuilder;
@@ -11,7 +12,6 @@ import elasta.composer.state.handlers.UserIdConverter;
 import elasta.composer.state.handlers.ex.UserIdNotFoundException;
 import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
-import elasta.core.promise.impl.Promises;
 
 import java.util.Objects;
 
@@ -20,56 +20,43 @@ import java.util.Objects;
  */
 final public class AuthorizationStateHandlerBuilderImpl implements AuthorizationStateHandlerBuilder {
     final Authorizer authorizer;
-    final RequestContext requestContext;
-    final UserIdConverter userIdConverter;
     final String action;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
 
-    public AuthorizationStateHandlerBuilderImpl(Authorizer authorizer, RequestContext requestContext, UserIdConverter userIdConverter, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder) {
+    public AuthorizationStateHandlerBuilderImpl(Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder) {
         Objects.requireNonNull(authorizer);
-        Objects.requireNonNull(requestContext);
-        Objects.requireNonNull(userIdConverter);
         Objects.requireNonNull(action);
         Objects.requireNonNull(authorizationErrorModelBuilder);
         this.authorizer = authorizer;
-        this.requestContext = requestContext;
-        this.userIdConverter = userIdConverter;
         this.action = action;
         this.authorizationErrorModelBuilder = authorizationErrorModelBuilder;
     }
 
     @Override
-    public EnterEventHandlerP build() {
-        return request -> {
-
-            final boolean authorize = authorizer.authorize(
-                Authorizer.AuthorizeParams.builder()
-                    .action(action)
-                    .userId(userId())
-                    .request(request)
-                    .build()
-            );
-
-            if (Utils.not(authorize)) {
-                return Promises.of(
-                    Flow.trigger(
-                        Events.authorizationError,
-                        authorizationErrorModelBuilder.build(
-                            AuthorizationErrorModelBuilder.BuildParams.builder().build()
-                        )
+    public MsgEnterEventHandlerP<Object, Object> build() {
+        return
+            request ->
+                authorizer
+                    .authorize(
+                        Authorizer.AuthorizeParams.builder()
+                            .action(action)
+                            .userId(request.userId())
+                            .request(request.body())
+                            .build()
                     )
-                );
-            }
+                    .map(authorize -> {
+                        if (Utils.not(authorize)) {
+                            return Flow.trigger(
+                                Events.authorizationError,
+                                request.withBody(
+                                    authorizationErrorModelBuilder.build(
+                                        AuthorizationErrorModelBuilder.BuildParams.builder().build()
+                                    )
+                                )
+                            );
+                        }
 
-            return Promises.of(
-                Flow.trigger(Events.next, request)
-            );
-        };
-    }
-
-    private Object userId() {
-        return userIdConverter.convert(
-            requestContext.getString(UserModel.userId).orElseThrow(() -> new UserIdNotFoundException("User id does not exists in context"))
-        );
+                        return Flow.trigger(Events.next, request);
+                    });
     }
 }

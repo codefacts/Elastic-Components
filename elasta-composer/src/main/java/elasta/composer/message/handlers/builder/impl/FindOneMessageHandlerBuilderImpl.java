@@ -2,16 +2,13 @@ package elasta.composer.message.handlers.builder.impl;
 
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
-import elasta.composer.RequestContext;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.flow.builder.impl.FindOneFlowBuilderImpl;
-import elasta.composer.impl.ContextHolderImpl;
-import elasta.composer.impl.RequestContextImpl;
 import elasta.composer.message.handlers.MessageHandler;
 import elasta.composer.message.handlers.builder.FindOneMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.state.handlers.UserIdConverter;
 import elasta.composer.state.handlers.impl.*;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 import elasta.orm.Orm;
 import elasta.orm.query.expression.FieldExpression;
@@ -31,10 +28,9 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
     final Authorizer authorizer;
     final String action;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
-    final UserIdConverter userIdConverter;
     final ConvertersMap convertersMap;
 
-    public FindOneMessageHandlerBuilderImpl(String alias, String entity, FieldExpression findOneByFieldExpression, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, UserIdConverter userIdConverter, ConvertersMap convertersMap) {
+    public FindOneMessageHandlerBuilderImpl(String alias, String entity, FieldExpression findOneByFieldExpression, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap) {
         Objects.requireNonNull(alias);
         Objects.requireNonNull(entity);
         Objects.requireNonNull(findOneByFieldExpression);
@@ -43,7 +39,6 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(action);
         Objects.requireNonNull(authorizationErrorModelBuilder);
-        Objects.requireNonNull(userIdConverter);
         Objects.requireNonNull(convertersMap);
         this.alias = alias;
         this.entity = entity;
@@ -53,22 +48,15 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
         this.authorizer = authorizer;
         this.action = action;
         this.authorizationErrorModelBuilder = authorizationErrorModelBuilder;
-        this.userIdConverter = userIdConverter;
         this.convertersMap = convertersMap;
     }
 
     @Override
     public MessageHandler<Object> build() {
 
-        final ContextHolderImpl contextHolder = new ContextHolderImpl();
-        final RequestContextImpl requestContext = new RequestContextImpl(
-            contextHolder,
-            convertersMap.getMap()
-        );
-
         Flow flow = new FindOneFlowBuilderImpl(
             startHandler(),
-            authorizationHandler(requestContext),
+            authorizationHandler(),
             conversionToCriteriaHandler(),
             findOneHandler(),
             endHandler()
@@ -79,11 +67,11 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
         };
     }
 
-    private EnterEventHandlerP endHandler() {
+    private MsgEnterEventHandlerP endHandler() {
         return new EndStateHandlerBuilderImpl().build();
     }
 
-    private EnterEventHandlerP findOneHandler() {
+    private MsgEnterEventHandlerP findOneHandler() {
         return new FindOneStateHandlerBuilderImpl(
             alias,
             entity,
@@ -92,23 +80,21 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
         ).build();
     }
 
-    private EnterEventHandlerP conversionToCriteriaHandler() {
+    private MsgEnterEventHandlerP conversionToCriteriaHandler() {
         return new ConversionToCriteriaStateHandlerBuilderImpl(
             findOneByFieldExpression
         ).build();
     }
 
-    private EnterEventHandlerP authorizationHandler(RequestContext requestContext) {
+    private MsgEnterEventHandlerP authorizationHandler() {
         return new AuthorizationStateHandlerBuilderImpl(
             authorizer,
-            requestContext,
-            userIdConverter,
             action,
             authorizationErrorModelBuilder
         ).build();
     }
 
-    private EnterEventHandlerP startHandler() {
+    private MsgEnterEventHandlerP startHandler() {
         return new StartStateHandlerBuilderImpl().build();
     }
 }

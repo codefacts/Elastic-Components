@@ -1,10 +1,10 @@
 package elasta.composer.flow.builder.impl;
 
 import elasta.composer.Events;
+import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.FindOneFlowBuilder;
 import elasta.core.flow.EnterEventHandler;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -13,13 +13,13 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class FindOneFlowBuilderImpl implements FindOneFlowBuilder {
-    final EnterEventHandlerP startHandler;
-    final EnterEventHandlerP authorizationHandler;
-    final EnterEventHandlerP conversionToCriteriaHandler;
-    final EnterEventHandlerP findOneHandler;
-    final EnterEventHandlerP endHandler;
+    final MsgEnterEventHandlerP startHandler;
+    final MsgEnterEventHandlerP authorizationHandler;
+    final MsgEnterEventHandlerP conversionToCriteriaHandler;
+    final MsgEnterEventHandlerP findOneHandler;
+    final MsgEnterEventHandlerP endHandler;
 
-    public FindOneFlowBuilderImpl(EnterEventHandlerP startHandler, EnterEventHandlerP authorizationHandler, EnterEventHandlerP conversionToCriteriaHandler, EnterEventHandlerP findOneHandler, EnterEventHandlerP endHandler) {
+    public FindOneFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizationHandler, MsgEnterEventHandlerP conversionToCriteriaHandler, MsgEnterEventHandlerP findOneHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizationHandler);
         Objects.requireNonNull(conversionToCriteriaHandler);
