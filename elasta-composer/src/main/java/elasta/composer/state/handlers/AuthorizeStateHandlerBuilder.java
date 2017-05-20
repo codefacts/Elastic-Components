@@ -6,7 +6,7 @@ import elasta.core.flow.EnterEventHandlerP;
 /**
  * Created by sohan on 5/12/2017.
  */
-public interface AuthorizationStateHandlerBuilder extends StateHandlerBuilder {
+public interface AuthorizeStateHandlerBuilder extends StateHandlerBuilder {
     @Override
     MsgEnterEventHandlerP build();
 }

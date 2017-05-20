@@ -1,10 +1,13 @@
 package elasta.composer.impl;
 
 import com.google.common.collect.ListMultimap;
+import elasta.commons.Utils;
 import elasta.composer.Context;
 import elasta.composer.Headers;
 import elasta.composer.Msg;
 import elasta.composer.RequestBuilder;
+import elasta.composer.ex.NoUserInContextException;
+import elasta.composer.model.request.UserModel;
 
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +26,7 @@ final public class MsgImpl<T> implements Msg<T> {
         Objects.requireNonNull(context);
         Objects.requireNonNull(body);
         Objects.requireNonNull(userId);
+        checkHeadersContainsUserId(headers);
         this.headers = headers;
         this.context = context;
         this.body = body;
@@ -87,6 +91,12 @@ final public class MsgImpl<T> implements Msg<T> {
             body,
             userId
         );
+    }
+
+    private void checkHeadersContainsUserId(Headers headers) {
+        if (Utils.not(headers.getString(UserModel.userId).isPresent())) {
+            throw new NoUserInContextException("No '" + UserModel.userId + "' found in headers");
+        }
     }
 
     private <R> R cast(Object userId) {

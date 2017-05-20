@@ -3,13 +3,13 @@ package elasta.composer.message.handlers.builder.impl;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
+import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.InsertFlowBuilderImpl;
 import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.builder.InsertMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
 import elasta.composer.producer.IdGenerator;
-import elasta.composer.state.handlers.UserIdConverter;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
@@ -36,8 +36,9 @@ final public class InsertMessageHandlerBuilderImpl implements InsertMessageHandl
     final SimpleEventBus simpleEventBus;
     final String broadcastAddress;
     final ResponseGenerator responseGenerator;
+    final FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter;
 
-    public InsertMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, String entity, String primaryKey, IdGenerator idGenerator, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator) {
+    public InsertMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, String entity, String primaryKey, IdGenerator idGenerator, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter) {
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
@@ -51,6 +52,7 @@ final public class InsertMessageHandlerBuilderImpl implements InsertMessageHandl
         Objects.requireNonNull(simpleEventBus);
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(responseGenerator);
+        Objects.requireNonNull(flowToJsonObjectMessageHandlerConverter);
         this.authorizer = authorizer;
         this.convertersMap = convertersMap;
         this.action = action;
@@ -64,6 +66,7 @@ final public class InsertMessageHandlerBuilderImpl implements InsertMessageHandl
         this.simpleEventBus = simpleEventBus;
         this.broadcastAddress = broadcastAddress;
         this.responseGenerator = responseGenerator;
+        this.flowToJsonObjectMessageHandlerConverter = flowToJsonObjectMessageHandlerConverter;
     }
 
     @Override
@@ -71,16 +74,16 @@ final public class InsertMessageHandlerBuilderImpl implements InsertMessageHandl
 
         Flow flow = new InsertFlowBuilderImpl(
             startHandler(),
-            authorizationHandler(),
+            authorizeHandler(),
             idGenerationHandler(),
-            validationHandler(),
+            validateHandler(),
             insertHandler(),
             broadcastHandler(),
             generateResponseHandler(),
             endHandler()
         ).build();
 
-        return message -> flow.start(message.body());
+        return flowToJsonObjectMessageHandlerConverter.convert(flow);
     }
 
     private MsgEnterEventHandlerP endHandler() {
@@ -107,8 +110,8 @@ final public class InsertMessageHandlerBuilderImpl implements InsertMessageHandl
         ).build();
     }
 
-    private MsgEnterEventHandlerP validationHandler() {
-        return new ValidationStateHandlerBuilderImpl(
+    private MsgEnterEventHandlerP validateHandler() {
+        return new ValidateStateHandlerBuilderImpl(
             entity,
             jsonObjectValidatorAsync,
             validationErrorModelBuilder
@@ -123,8 +126,8 @@ final public class InsertMessageHandlerBuilderImpl implements InsertMessageHandl
         ).build();
     }
 
-    private MsgEnterEventHandlerP authorizationHandler() {
-        return new AuthorizationStateHandlerBuilderImpl(
+    private MsgEnterEventHandlerP authorizeHandler() {
+        return new AuthorizeStateHandlerBuilderImpl(
             authorizer,
             action,
             authorizationErrorModelBuilder

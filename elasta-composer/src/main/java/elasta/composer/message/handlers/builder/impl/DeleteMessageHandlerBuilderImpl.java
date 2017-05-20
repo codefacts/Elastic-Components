@@ -3,11 +3,11 @@ package elasta.composer.message.handlers.builder.impl;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
+import elasta.composer.converter.FlowToMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.DeleteFlowBuilderImpl;
 import elasta.composer.message.handlers.MessageHandler;
 import elasta.composer.message.handlers.builder.DeleteMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
-import elasta.composer.state.handlers.UserIdConverter;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
@@ -29,8 +29,9 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
     final Authorizer authorizer;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
     final ConvertersMap convertersMap;
+    final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
 
-    public DeleteMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, SimpleEventBus simpleEventBus, String broadcastAddress, Orm orm, String entity, String action, Authorizer authorizer, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap) {
+    public DeleteMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, SimpleEventBus simpleEventBus, String broadcastAddress, Orm orm, String entity, String action, Authorizer authorizer, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToMessageHandlerConverter flowToMessageHandlerConverter) {
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(simpleEventBus);
         Objects.requireNonNull(broadcastAddress);
@@ -40,6 +41,7 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(authorizationErrorModelBuilder);
         Objects.requireNonNull(convertersMap);
+        Objects.requireNonNull(flowToMessageHandlerConverter);
         this.responseGenerator = responseGenerator;
         this.simpleEventBus = simpleEventBus;
         this.broadcastAddress = broadcastAddress;
@@ -49,6 +51,7 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
         this.authorizer = authorizer;
         this.authorizationErrorModelBuilder = authorizationErrorModelBuilder;
         this.convertersMap = convertersMap;
+        this.flowToMessageHandlerConverter = flowToMessageHandlerConverter;
     }
 
     @Override
@@ -56,14 +59,14 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
 
         Flow flow = new DeleteFlowBuilderImpl(
             startHandler(),
-            authorizationHandler(),
+            authorizeHandler(),
             deleteHandler(),
             broadcastHandler(),
             generateResponseHandler(),
             endHandler()
         ).build();
 
-        return message -> flow.start(message.body());
+        return flowToMessageHandlerConverter.convert(flow);
     }
 
     private MsgEnterEventHandlerP endHandler() {
@@ -90,8 +93,8 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
         ).build();
     }
 
-    private MsgEnterEventHandlerP authorizationHandler() {
-        return new AuthorizationStateHandlerBuilderImpl(
+    private MsgEnterEventHandlerP authorizeHandler() {
+        return new AuthorizeStateHandlerBuilderImpl(
             authorizer,
             action,
             authorizationErrorModelBuilder

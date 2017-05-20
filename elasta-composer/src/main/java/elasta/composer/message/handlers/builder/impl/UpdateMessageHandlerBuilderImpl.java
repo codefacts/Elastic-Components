@@ -3,12 +3,12 @@ package elasta.composer.message.handlers.builder.impl;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
+import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.UpdateFlowBuilderImpl;
 import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.builder.UpdateMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
-import elasta.composer.state.handlers.UserIdConverter;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
@@ -33,8 +33,9 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
     final Authorizer authorizer;
     final String action;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
+    final FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter;
 
-    public UpdateMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, String broadcastAddress, SimpleEventBus simpleEventBus, String entity, Orm orm, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ConvertersMap convertersMap, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder) {
+    public UpdateMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, String broadcastAddress, SimpleEventBus simpleEventBus, String entity, Orm orm, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ConvertersMap convertersMap, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter) {
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(simpleEventBus);
@@ -45,6 +46,7 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
         Objects.requireNonNull(authorizationErrorModelBuilder);
+        Objects.requireNonNull(flowToJsonObjectMessageHandlerConverter);
         this.responseGenerator = responseGenerator;
         this.broadcastAddress = broadcastAddress;
         this.simpleEventBus = simpleEventBus;
@@ -56,6 +58,7 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
         this.authorizer = authorizer;
         this.action = action;
         this.authorizationErrorModelBuilder = authorizationErrorModelBuilder;
+        this.flowToJsonObjectMessageHandlerConverter = flowToJsonObjectMessageHandlerConverter;
     }
 
     @Override
@@ -63,15 +66,15 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
 
         Flow flow = new UpdateFlowBuilderImpl(
             startHandler(),
-            authorizationHandler(),
-            validationHandler(),
+            authorizeHandler(),
+            validateHandler(),
             updateHandler(),
             broadcastHandler(),
             generateResponseHandler(),
             endHandler()
         ).build();
 
-        return message -> flow.start(message.body());
+        return flowToJsonObjectMessageHandlerConverter.convert(flow);
     }
 
     private MsgEnterEventHandlerP endHandler() {
@@ -98,16 +101,16 @@ final public class UpdateMessageHandlerBuilderImpl implements UpdateMessageHandl
         ).build();
     }
 
-    private MsgEnterEventHandlerP validationHandler() {
-        return new ValidationStateHandlerBuilderImpl(
+    private MsgEnterEventHandlerP validateHandler() {
+        return new ValidateStateHandlerBuilderImpl(
             entity,
             jsonObjectValidatorAsync,
             validationErrorModelBuilder
         ).build();
     }
 
-    private MsgEnterEventHandlerP authorizationHandler() {
-        return new AuthorizationStateHandlerBuilderImpl(
+    private MsgEnterEventHandlerP authorizeHandler() {
+        return new AuthorizeStateHandlerBuilderImpl(
             authorizer,
             action,
             authorizationErrorModelBuilder

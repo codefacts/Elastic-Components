@@ -5,8 +5,8 @@ package elasta.composer;
  */
 public interface States {
     String start = "start";
-    String authorization = "authorization";
-    String validation = "validation";
+    String authorize = "authorize";
+    String validate = "validate";
     String insert = "insert";
     String update = "update";
     String delete = "delete";
@@ -17,4 +17,9 @@ public interface States {
     String findAll = "findAll";
     String broadcast = "broadcast";
     String generateResponse = "generateResponse";
+    String authorizeAll = "authorizeAll";
+    String deleteAll = "deleteAll";
+    String validateAll = "validateAll";
+    String insertAll = "insertAll";
+    String updateAll = "updateAll";
 }

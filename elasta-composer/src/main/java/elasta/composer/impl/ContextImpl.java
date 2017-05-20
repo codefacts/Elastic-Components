@@ -1,6 +1,7 @@
-package elasta.composer;
+package elasta.composer.impl;
 
 import com.google.common.collect.ImmutableMap;
+import elasta.composer.Context;
 
 import java.util.Map;
 import java.util.Objects;

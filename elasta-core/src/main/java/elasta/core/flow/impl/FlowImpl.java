@@ -31,11 +31,11 @@ public class FlowImpl implements Flow {
         this.stateCallbacksMap = stateCallbacksMap;
     }
 
-    public <T, R> Promise<R> start(T message) {
+    public <R> Promise<R> start(Object message) {
         return start(initialState, message);
     }
 
-    public <T, R> Promise<R> start(String state, T message) {
+    public <R> Promise<R> start(String state, Object message) {
         return execState(state, message);
     }
 

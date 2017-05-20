@@ -3,11 +3,11 @@ package elasta.composer.message.handlers.builder.impl;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
+import elasta.composer.converter.FlowToMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.FindOneFlowBuilderImpl;
 import elasta.composer.message.handlers.MessageHandler;
 import elasta.composer.message.handlers.builder.FindOneMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
-import elasta.composer.state.handlers.UserIdConverter;
 import elasta.composer.state.handlers.impl.*;
 import elasta.core.flow.Flow;
 import elasta.orm.Orm;
@@ -29,8 +29,9 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
     final String action;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
     final ConvertersMap convertersMap;
+    final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
 
-    public FindOneMessageHandlerBuilderImpl(String alias, String entity, FieldExpression findOneByFieldExpression, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap) {
+    public FindOneMessageHandlerBuilderImpl(String alias, String entity, FieldExpression findOneByFieldExpression, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToMessageHandlerConverter flowToMessageHandlerConverter) {
         Objects.requireNonNull(alias);
         Objects.requireNonNull(entity);
         Objects.requireNonNull(findOneByFieldExpression);
@@ -40,6 +41,7 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
         Objects.requireNonNull(action);
         Objects.requireNonNull(authorizationErrorModelBuilder);
         Objects.requireNonNull(convertersMap);
+        Objects.requireNonNull(flowToMessageHandlerConverter);
         this.alias = alias;
         this.entity = entity;
         this.findOneByFieldExpression = findOneByFieldExpression;
@@ -49,6 +51,7 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
         this.action = action;
         this.authorizationErrorModelBuilder = authorizationErrorModelBuilder;
         this.convertersMap = convertersMap;
+        this.flowToMessageHandlerConverter = flowToMessageHandlerConverter;
     }
 
     @Override
@@ -56,15 +59,13 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
 
         Flow flow = new FindOneFlowBuilderImpl(
             startHandler(),
-            authorizationHandler(),
+            authorizeHandler(),
             conversionToCriteriaHandler(),
             findOneHandler(),
             endHandler()
         ).build();
 
-        return message -> {
-            flow.start(message.body());
-        };
+        return flowToMessageHandlerConverter.convert(flow);
     }
 
     private MsgEnterEventHandlerP endHandler() {
@@ -86,8 +87,8 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
         ).build();
     }
 
-    private MsgEnterEventHandlerP authorizationHandler() {
-        return new AuthorizationStateHandlerBuilderImpl(
+    private MsgEnterEventHandlerP authorizeHandler() {
+        return new AuthorizeStateHandlerBuilderImpl(
             authorizer,
             action,
             authorizationErrorModelBuilder

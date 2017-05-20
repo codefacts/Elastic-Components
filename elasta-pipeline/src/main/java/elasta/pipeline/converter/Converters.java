@@ -1,5 +1,11 @@
 package elasta.pipeline.converter;
 
+import elasta.pipeline.converter.ex.ConversionException;
+
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
 /**
  * Created by Jango on 2016-11-20.
  */
@@ -64,6 +70,20 @@ public interface Converters {
             return null;
         }
         return object.toString();
+    }
+
+    static Date toDate(Object object) {
+        if (object instanceof Date) {
+            return (Date) object;
+        }
+        if (object.getClass() == String.class) {
+            return Date.from(
+                Instant.from(
+                    DateTimeFormatter.ISO_INSTANT.parse(object.toString())
+                )
+            );
+        }
+        throw new ConversionException("Object '" + object + "' can not be converted to Date");
     }
 
     public static void main(String[] args) {

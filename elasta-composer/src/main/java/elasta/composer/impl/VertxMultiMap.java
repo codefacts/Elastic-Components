@@ -1,4 +1,4 @@
-package elasta.composer;
+package elasta.composer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;

@@ -12,10 +12,11 @@ import elasta.core.promise.intfs.Promise;
 public interface Flow {
 
     String NEXT = "next";
+    EventAndState[] EMPTY_EVENT_AND_STATES = new EventAndState[]{};
 
-    public <T, R> Promise<R> start(T message);
+    public <R> Promise<R> start(Object message);
 
-    public <T, R> Promise<R> start(String state, T message);
+    public <R> Promise<R> start(String state, Object message);
 
     public static FlowBuilder builder(Flow flow) {
         return FlowBuilder.create(flow);
@@ -34,7 +35,7 @@ public interface Flow {
     }
 
     public static EventAndState[] end() {
-        return new EventAndState[]{};
+        return EMPTY_EVENT_AND_STATES;
     }
 
     public static <T> StateTrigger<T> trigger(String event, T message) {

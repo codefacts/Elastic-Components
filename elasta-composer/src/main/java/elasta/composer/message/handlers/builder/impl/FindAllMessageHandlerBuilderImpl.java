@@ -3,6 +3,7 @@ package elasta.composer.message.handlers.builder.impl;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
+import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
 import elasta.composer.converter.JsonObjectToPageRequestConverter;
 import elasta.composer.converter.JsonObjectToQueryParamsConverter;
 import elasta.composer.flow.builder.impl.FindAllFlowBuilderImpl;
@@ -10,8 +11,7 @@ import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.builder.FindAllMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.model.response.builder.PageModelBuilder;
-import elasta.composer.state.handlers.UserIdConverter;
-import elasta.composer.state.handlers.impl.AuthorizationStateHandlerBuilderImpl;
+import elasta.composer.state.handlers.impl.AuthorizeStateHandlerBuilderImpl;
 import elasta.composer.state.handlers.impl.EndStateHandlerBuilderImpl;
 import elasta.composer.state.handlers.impl.FindAllStateHandlerBuilderImpl;
 import elasta.composer.state.handlers.impl.StartStateHandlerBuilderImpl;
@@ -35,8 +35,9 @@ final public class FindAllMessageHandlerBuilderImpl implements FindAllMessageHan
     final JsonObjectToPageRequestConverter jsonObjectToPageRequestConverter;
     final JsonObjectToQueryParamsConverter jsonObjectToQueryParamsConverter;
     final PageModelBuilder pageModelBuilder;
+    final FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter;
 
-    public FindAllMessageHandlerBuilderImpl(String entity, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FieldExpression paginationKey, JsonObjectToPageRequestConverter jsonObjectToPageRequestConverter, JsonObjectToQueryParamsConverter jsonObjectToQueryParamsConverter, PageModelBuilder pageModelBuilder) {
+    public FindAllMessageHandlerBuilderImpl(String entity, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FieldExpression paginationKey, JsonObjectToPageRequestConverter jsonObjectToPageRequestConverter, JsonObjectToQueryParamsConverter jsonObjectToQueryParamsConverter, PageModelBuilder pageModelBuilder, FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter) {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(orm);
         Objects.requireNonNull(authorizer);
@@ -47,6 +48,7 @@ final public class FindAllMessageHandlerBuilderImpl implements FindAllMessageHan
         Objects.requireNonNull(jsonObjectToPageRequestConverter);
         Objects.requireNonNull(jsonObjectToQueryParamsConverter);
         Objects.requireNonNull(pageModelBuilder);
+        Objects.requireNonNull(flowToJsonObjectMessageHandlerConverter);
         this.entity = entity;
         this.orm = orm;
         this.authorizer = authorizer;
@@ -57,6 +59,7 @@ final public class FindAllMessageHandlerBuilderImpl implements FindAllMessageHan
         this.jsonObjectToPageRequestConverter = jsonObjectToPageRequestConverter;
         this.jsonObjectToQueryParamsConverter = jsonObjectToQueryParamsConverter;
         this.pageModelBuilder = pageModelBuilder;
+        this.flowToJsonObjectMessageHandlerConverter = flowToJsonObjectMessageHandlerConverter;
     }
 
     @Override
@@ -64,11 +67,11 @@ final public class FindAllMessageHandlerBuilderImpl implements FindAllMessageHan
 
         final Flow flow = new FindAllFlowBuilderImpl(
             startHandler(),
-            authorizationHandler(),
+            authorizeHandler(),
             findAllHandler(),
             endHandler()
         ).build();
-        return message -> flow.start(message.body());
+        return flowToJsonObjectMessageHandlerConverter.convert(flow);
     }
 
     private MsgEnterEventHandlerP endHandler() {
@@ -86,8 +89,8 @@ final public class FindAllMessageHandlerBuilderImpl implements FindAllMessageHan
         ).build();
     }
 
-    private MsgEnterEventHandlerP authorizationHandler() {
-        return new AuthorizationStateHandlerBuilderImpl(
+    private MsgEnterEventHandlerP authorizeHandler() {
+        return new AuthorizeStateHandlerBuilderImpl(
             authorizer,
             action,
             authorizationErrorModelBuilder
