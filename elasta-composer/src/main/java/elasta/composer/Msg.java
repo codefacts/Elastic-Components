@@ -27,7 +27,7 @@ public interface Msg<T> {
 
     Msg<T> addContext(Map<String, Object> map);
 
-    Msg<T> withBody(T body);
+    <R> Msg<R> withBody(R body);
 
     static <TT> RequestBuilder<TT> builder() {
         return new MsgImpl.RequestImplBuilder<>();

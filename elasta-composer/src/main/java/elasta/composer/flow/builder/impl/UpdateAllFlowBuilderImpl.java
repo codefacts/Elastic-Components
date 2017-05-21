@@ -16,23 +16,23 @@ final public class UpdateAllFlowBuilderImpl implements UpdateAllFlowBuilder {
     final MsgEnterEventHandlerP authorizeAllHandler;
     final MsgEnterEventHandlerP validateAllHandler;
     final MsgEnterEventHandlerP updateAllHandler;
-    final MsgEnterEventHandlerP broadcastHandler;
+    final MsgEnterEventHandlerP broadcastAllHandler;
     final MsgEnterEventHandlerP generateResponseHandler;
     final MsgEnterEventHandlerP endHandler;
 
-    public UpdateAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP updateAllHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public UpdateAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP updateAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeAllHandler);
         Objects.requireNonNull(validateAllHandler);
         Objects.requireNonNull(updateAllHandler);
-        Objects.requireNonNull(broadcastHandler);
+        Objects.requireNonNull(broadcastAllHandler);
         Objects.requireNonNull(generateResponseHandler);
         Objects.requireNonNull(endHandler);
         this.startHandler = startHandler;
         this.authorizeAllHandler = authorizeAllHandler;
         this.validateAllHandler = validateAllHandler;
         this.updateAllHandler = updateAllHandler;
-        this.broadcastHandler = broadcastHandler;
+        this.broadcastAllHandler = broadcastAllHandler;
         this.generateResponseHandler = generateResponseHandler;
         this.endHandler = endHandler;
     }
@@ -51,15 +51,15 @@ final public class UpdateAllFlowBuilderImpl implements UpdateAllFlowBuilder {
                 Flow.on(Events.next, States.updateAll),
                 Flow.on(Events.validationError, States.end)
             )
-            .when(States.updateAll, Flow.on(Events.next, States.broadcast))
-            .when(States.broadcast, Flow.on(Events.next, States.generateResponse))
+            .when(States.updateAll, Flow.on(Events.next, States.broadcastAll))
+            .when(States.broadcastAll, Flow.on(Events.next, States.generateResponse))
             .when(States.generateResponse, Flow.on(Events.next, States.end))
             .when(States.end, Flow.end())
             .handlersP(States.start, startHandler)
             .handlersP(States.authorizeAll, authorizeAllHandler)
             .handlersP(States.validateAll, validateAllHandler)
             .handlersP(States.updateAll, updateAllHandler)
-            .handlersP(States.broadcast, broadcastHandler)
+            .handlersP(States.broadcastAll, broadcastAllHandler)
             .handlersP(States.generateResponse, generateResponseHandler)
             .handlersP(States.end, endHandler)
             .initialState(States.start)

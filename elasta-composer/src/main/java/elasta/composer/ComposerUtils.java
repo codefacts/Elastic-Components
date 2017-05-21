@@ -31,7 +31,7 @@ public interface ComposerUtils {
         return JSON_ARRAY;
     }
 
-    static MultiMap toMultimap(ListMultimap<String, String> headers) {
+    static MultiMap toVertxMultimap(ListMultimap<String, String> headers) {
         return new VertxMultiMap(headers);
     }
 

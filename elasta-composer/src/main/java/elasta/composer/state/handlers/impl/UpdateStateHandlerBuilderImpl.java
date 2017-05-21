@@ -28,6 +28,6 @@ final public class UpdateStateHandlerBuilderImpl implements UpdateStateHandlerBu
     @Override
     public MsgEnterEventHandlerP<JsonObject, JsonObject> build() {
         return msg -> orm.upsert(entity, msg.body())
-            .map(jo -> Flow.trigger(Events.next, msg.withBody(jo)));
+            .map(jo -> Flow.trigger(Events.next, msg));
     }
 }

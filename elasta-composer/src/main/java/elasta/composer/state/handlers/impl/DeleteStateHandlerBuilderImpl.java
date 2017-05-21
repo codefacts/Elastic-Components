@@ -28,6 +28,6 @@ final public class DeleteStateHandlerBuilderImpl implements DeleteStateHandlerBu
     public MsgEnterEventHandlerP<Object, Object> build() {
 
         return msg -> orm.delete(entity, msg.body())
-            .map(deletedId -> Flow.trigger(Events.next, msg.withBody(deletedId)));
+            .map(deletedId -> Flow.trigger(Events.next, msg));
     }
 }

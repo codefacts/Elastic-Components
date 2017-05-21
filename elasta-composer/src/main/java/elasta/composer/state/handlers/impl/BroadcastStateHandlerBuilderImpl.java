@@ -31,7 +31,7 @@ final public class BroadcastStateHandlerBuilderImpl implements BroadcastStateHan
                 eventAddress, request.body(),
                 new DeliveryOptions()
                     .setHeaders(
-                        ComposerUtils.toMultimap(request.headers().getMultimap())
+                        ComposerUtils.toVertxMultimap(request.headers().getMultimap())
                     )
             );
 

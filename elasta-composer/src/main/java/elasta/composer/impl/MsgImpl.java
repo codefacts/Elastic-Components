@@ -84,8 +84,8 @@ final public class MsgImpl<T> implements Msg<T> {
     }
 
     @Override
-    public Msg<T> withBody(T body) {
-        return new MsgImpl<T>(
+    public <R> Msg<R> withBody(R body) {
+        return new MsgImpl<R>(
             headers,
             context,
             body,

@@ -1,24 +1,24 @@
 package elasta.composer.state.handlers.impl;
 
-import com.google.common.base.Preconditions;
 import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
-import elasta.composer.state.handlers.InsertStateHandlerBuilder;
-import elasta.core.flow.EnterEventHandlerP;
+import elasta.composer.state.handlers.UpdateAllStateHandlerBuilder;
 import elasta.core.flow.Flow;
 import elasta.orm.Orm;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by sohan on 5/12/2017.
+ * Created by sohan on 5/21/2017.
  */
-final public class InsertStateHandlerBuilderImpl implements InsertStateHandlerBuilder {
+final public class UpdateAllStateHandlerBuilderImpl implements UpdateAllStateHandlerBuilder {
     final String entity;
     final Orm orm;
 
-    public InsertStateHandlerBuilderImpl(String entity, Orm orm) {
+    public UpdateAllStateHandlerBuilderImpl(String entity, Orm orm) {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(orm);
         this.entity = entity;
@@ -26,8 +26,8 @@ final public class InsertStateHandlerBuilderImpl implements InsertStateHandlerBu
     }
 
     @Override
-    public MsgEnterEventHandlerP<JsonObject, JsonObject> build() {
-        return msg -> orm.upsert(entity, msg.body())
+    public MsgEnterEventHandlerP<JsonArray, JsonArray> build() {
+        return msg -> orm.upsertAll(entity, msg.body().getList())
             .map(jo -> Flow.trigger(Events.next, msg));
     }
 }

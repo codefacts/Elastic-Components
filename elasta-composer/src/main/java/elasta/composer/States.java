@@ -22,4 +22,5 @@ public interface States {
     String validateAll = "validateAll";
     String insertAll = "insertAll";
     String updateAll = "updateAll";
+    String broadcastAll = "broadcastAll";
 }

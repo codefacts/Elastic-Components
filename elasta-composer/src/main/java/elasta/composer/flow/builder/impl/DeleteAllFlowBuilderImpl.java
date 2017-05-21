@@ -15,21 +15,21 @@ final public class DeleteAllFlowBuilderImpl implements DeleteAllFlowBuilder {
     final MsgEnterEventHandlerP startHandler;
     final MsgEnterEventHandlerP authorizeAllHandler;
     final MsgEnterEventHandlerP deleteAllHandler;
-    final MsgEnterEventHandlerP broadcastHandler;
+    final MsgEnterEventHandlerP broadcastAllHandler;
     final MsgEnterEventHandlerP generateResponseHandler;
     final MsgEnterEventHandlerP endHandler;
 
-    public DeleteAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP deleteAllHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public DeleteAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP deleteAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeAllHandler);
         Objects.requireNonNull(deleteAllHandler);
-        Objects.requireNonNull(broadcastHandler);
+        Objects.requireNonNull(broadcastAllHandler);
         Objects.requireNonNull(generateResponseHandler);
         Objects.requireNonNull(endHandler);
         this.startHandler = startHandler;
         this.authorizeAllHandler = authorizeAllHandler;
         this.deleteAllHandler = deleteAllHandler;
-        this.broadcastHandler = broadcastHandler;
+        this.broadcastAllHandler = broadcastAllHandler;
         this.generateResponseHandler = generateResponseHandler;
         this.endHandler = endHandler;
     }
@@ -43,14 +43,14 @@ final public class DeleteAllFlowBuilderImpl implements DeleteAllFlowBuilder {
                 Flow.on(Events.next, States.deleteAll),
                 Flow.on(Events.authorizationError, States.end)
             )
-            .when(States.deleteAll, Flow.on(Events.next, States.broadcast))
-            .when(States.broadcast, Flow.on(Events.next, States.generateResponse))
+            .when(States.deleteAll, Flow.on(Events.next, States.broadcastAll))
+            .when(States.broadcastAll, Flow.on(Events.next, States.generateResponse))
             .when(States.generateResponse, Flow.on(Events.next, States.end))
             .when(States.end, Flow.end())
             .handlersP(States.start, startHandler)
             .handlersP(States.authorizeAll, authorizeAllHandler)
             .handlersP(States.deleteAll, deleteAllHandler)
-            .handlersP(States.broadcast, broadcastHandler)
+            .handlersP(States.broadcastAll, broadcastAllHandler)
             .handlersP(States.generateResponse, generateResponseHandler)
             .handlersP(States.end, endHandler)
             .initialState(States.start)
