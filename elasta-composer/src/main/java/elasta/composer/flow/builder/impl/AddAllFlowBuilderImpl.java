@@ -3,7 +3,7 @@ package elasta.composer.flow.builder.impl;
 import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
-import elasta.composer.flow.builder.InsertAllFlowBuilder;
+import elasta.composer.flow.builder.AddAllFlowBuilder;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * Created by sohan on 5/20/2017.
  */
-final public class InsertAllFlowBuilderImpl implements InsertAllFlowBuilder {
+final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
     final MsgEnterEventHandlerP startHandler;
     final MsgEnterEventHandlerP authorizeAllHandler;
     final MsgEnterEventHandlerP idGenerationHandler;
@@ -21,7 +21,7 @@ final public class InsertAllFlowBuilderImpl implements InsertAllFlowBuilder {
     final MsgEnterEventHandlerP generateResponseHandler;
     final MsgEnterEventHandlerP endHandler;
 
-    public InsertAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP idGenerationHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP insertAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public AddAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP idGenerationHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP insertAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeAllHandler);
         Objects.requireNonNull(idGenerationHandler);

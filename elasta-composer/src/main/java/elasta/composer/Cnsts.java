@@ -6,4 +6,5 @@ package elasta.composer;
 public interface Cnsts {
     String entity = "entity";
     String data = "data";
+    String resourcePath = "resourcePath";
 }

@@ -22,7 +22,7 @@ public interface Headers {
 
     Optional<Double> getDouble(String key);
 
-    Optional<String> getString(String key);
+    Optional<String> get(String key);
 
     Optional<Date> getDate(String key);
 

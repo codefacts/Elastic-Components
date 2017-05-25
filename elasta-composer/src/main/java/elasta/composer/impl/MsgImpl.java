@@ -94,7 +94,7 @@ final public class MsgImpl<T> implements Msg<T> {
     }
 
     private void checkHeadersContainsUserId(Headers headers) {
-        if (Utils.not(headers.getString(UserModel.userId).isPresent())) {
+        if (Utils.not(headers.get(UserModel.userId).isPresent())) {
             throw new NoUserInContextException("No '" + UserModel.userId + "' found in headers");
         }
     }

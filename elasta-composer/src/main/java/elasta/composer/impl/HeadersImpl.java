@@ -39,32 +39,32 @@ final public class HeadersImpl implements Headers {
 
     @Override
     public Optional<Integer> getInt(String key) {
-        return getString(key).map(s -> convert(Integer.class, s));
+        return get(key).map(s -> convert(Integer.class, s));
     }
 
     @Override
     public Optional<Long> getLong(String key) {
-        return getString(key).map(s -> convert(Long.class, s));
+        return get(key).map(s -> convert(Long.class, s));
     }
 
     @Override
     public Optional<Float> getFloat(String key) {
-        return getString(key).map(s -> convert(Float.class, s));
+        return get(key).map(s -> convert(Float.class, s));
     }
 
     @Override
     public Optional<Double> getDouble(String key) {
-        return getString(key).map(s -> convert(Double.class, s));
+        return get(key).map(s -> convert(Double.class, s));
     }
 
     @Override
-    public Optional<String> getString(String key) {
+    public Optional<String> get(String key) {
         return getValue(key);
     }
 
     @Override
     public Optional<Date> getDate(String key) {
-        return getString(key).map(s -> convert(Date.class, s));
+        return get(key).map(s -> convert(Date.class, s));
     }
 
     @Override

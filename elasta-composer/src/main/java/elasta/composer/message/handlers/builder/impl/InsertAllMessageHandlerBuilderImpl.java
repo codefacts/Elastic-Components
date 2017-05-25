@@ -3,9 +3,8 @@ package elasta.composer.message.handlers.builder.impl;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
-import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
 import elasta.composer.converter.FlowToMessageHandlerConverter;
-import elasta.composer.flow.builder.impl.InsertAllFlowBuilderImpl;
+import elasta.composer.flow.builder.impl.AddAllFlowBuilderImpl;
 import elasta.composer.message.handlers.MessageHandler;
 import elasta.composer.message.handlers.builder.InsertAllMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
@@ -83,7 +82,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
     @Override
     public MessageHandler<List<JsonObject>> build() {
 
-        Flow flow = new InsertAllFlowBuilderImpl(
+        Flow flow = new AddAllFlowBuilderImpl(
             startHandler(),
             authorizeAllHandler(),
             idGenerationHandler(),

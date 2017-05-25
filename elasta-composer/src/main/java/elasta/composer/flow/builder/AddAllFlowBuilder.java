@@ -5,7 +5,7 @@ import elasta.core.flow.Flow;
 /**
  * Created by sohan on 5/20/2017.
  */
-public interface InsertAllFlowBuilder extends FlowBuilder {
+public interface AddAllFlowBuilder extends FlowBuilder {
     @Override
     Flow build();
 }

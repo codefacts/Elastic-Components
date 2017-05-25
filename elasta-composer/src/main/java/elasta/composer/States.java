@@ -23,4 +23,5 @@ public interface States {
     String insertAll = "insertAll";
     String updateAll = "updateAll";
     String broadcastAll = "broadcastAll";
+    String loadParent = "loadParent";
 }

@@ -2,7 +2,7 @@ package elasta.composer.flow.builder.impl;
 
 import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
-import elasta.composer.flow.builder.InsertFlowBuilder;
+import elasta.composer.flow.builder.AddFlowBuilder;
 import elasta.composer.States;
 import elasta.core.flow.Flow;
 
@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * Created by sohan on 5/12/2017.
  */
-final public class InsertFlowBuilderImpl implements InsertFlowBuilder {
+final public class AddFlowBuilderImpl implements AddFlowBuilder {
     final MsgEnterEventHandlerP startHandler;
     final MsgEnterEventHandlerP authorizeHandler;
     final MsgEnterEventHandlerP idGenerationHandler;
@@ -21,7 +21,7 @@ final public class InsertFlowBuilderImpl implements InsertFlowBuilder {
     final MsgEnterEventHandlerP generateResponseHandler;
     final MsgEnterEventHandlerP endHandler;
 
-    public InsertFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP idGenerationHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP insertHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public AddFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP idGenerationHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP insertHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
         Objects.requireNonNull(idGenerationHandler);

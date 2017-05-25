@@ -4,7 +4,7 @@ import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
-import elasta.composer.flow.builder.impl.InsertFlowBuilderImpl;
+import elasta.composer.flow.builder.impl.AddFlowBuilderImpl;
 import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.builder.InsertMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
@@ -72,7 +72,7 @@ final public class InsertMessageHandlerBuilderImpl implements InsertMessageHandl
     @Override
     public JsonObjectMessageHandler build() {
 
-        Flow flow = new InsertFlowBuilderImpl(
+        Flow flow = new AddFlowBuilderImpl(
             startHandler(),
             authorizeHandler(),
             idGenerationHandler(),
