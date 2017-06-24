@@ -18,13 +18,13 @@ final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConver
     final ArrayOps arrayOps;
     final StringOps stringOps;
     final FunctionalOps functionalOps;
-    final JsonToFuncConverterBuilder jsonToFuncConverterBuilder;
+    final JsonToFuncConverterHelper jsonToFuncConverterHelper;
 
-    public JsonToFuncConverterMapBuilderImpl(LogicalOps logicalOps, ComparisionOps comparisionOps, ValueHolderOps valueHolderOps, ArrayOps arrayOps, StringOps stringOps, FunctionalOps functionalOps, JsonToFuncConverterBuilder jsonToFuncConverterBuilder) {
+    public JsonToFuncConverterMapBuilderImpl(LogicalOps logicalOps, ComparisionOps comparisionOps, ValueHolderOps valueHolderOps, ArrayOps arrayOps, StringOps stringOps, FunctionalOps functionalOps, JsonToFuncConverterHelper jsonToFuncConverterHelper) {
         Objects.requireNonNull(logicalOps);
         Objects.requireNonNull(comparisionOps);
         Objects.requireNonNull(valueHolderOps);
-        Objects.requireNonNull(jsonToFuncConverterBuilder);
+        Objects.requireNonNull(jsonToFuncConverterHelper);
         Objects.requireNonNull(arrayOps);
         Objects.requireNonNull(stringOps);
         Objects.requireNonNull(functionalOps);
@@ -34,7 +34,7 @@ final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConver
         this.arrayOps = arrayOps;
         this.stringOps = stringOps;
         this.functionalOps = functionalOps;
-        this.jsonToFuncConverterBuilder = jsonToFuncConverterBuilder;
+        this.jsonToFuncConverterHelper = jsonToFuncConverterHelper;
     }
 
     @Override
@@ -42,23 +42,23 @@ final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConver
 
         ImmutableMap.Builder<String, JsonToFuncConverter> builder = ImmutableMap.builder();
 
-        builder.put(OpNames.and, jsonToFuncConverterBuilder.arrayOp(logicalOps::and));
-        builder.put(OpNames.or, jsonToFuncConverterBuilder.arrayOp(logicalOps::or));
+        builder.put(OpNames.and, jsonToFuncConverterHelper.arrayOp(logicalOps::and));
+        builder.put(OpNames.or, jsonToFuncConverterHelper.arrayOp(logicalOps::or));
 
-        builder.put(OpNames.not, jsonToFuncConverterBuilder.op1(logicalOps::not));
+        builder.put(OpNames.not, jsonToFuncConverterHelper.op1(logicalOps::not));
 
-        builder.put(OpNames.eq, jsonToFuncConverterBuilder.op2(comparisionOps::eq));
-        builder.put(OpNames.ne, jsonToFuncConverterBuilder.op2(comparisionOps::ne));
-        builder.put(OpNames.lt, jsonToFuncConverterBuilder.op2(comparisionOps::lt));
-        builder.put(OpNames.lte, jsonToFuncConverterBuilder.op2(comparisionOps::lte));
-        builder.put(OpNames.gt, jsonToFuncConverterBuilder.op2(comparisionOps::gt));
-        builder.put(OpNames.gte, jsonToFuncConverterBuilder.op2(comparisionOps::gte));
+        builder.put(OpNames.eq, jsonToFuncConverterHelper.op2(comparisionOps::eq));
+        builder.put(OpNames.ne, jsonToFuncConverterHelper.op2(comparisionOps::ne));
+        builder.put(OpNames.lt, jsonToFuncConverterHelper.op2(comparisionOps::lt));
+        builder.put(OpNames.lte, jsonToFuncConverterHelper.op2(comparisionOps::lte));
+        builder.put(OpNames.gt, jsonToFuncConverterHelper.op2(comparisionOps::gt));
+        builder.put(OpNames.gte, jsonToFuncConverterHelper.op2(comparisionOps::gte));
 
-        builder.put(OpNames.count, jsonToFuncConverterBuilder.op1(functionalOps::count));
-        builder.put(OpNames.distinct, jsonToFuncConverterBuilder.op1(functionalOps::distinct));
+        builder.put(OpNames.count, jsonToFuncConverterHelper.op1(functionalOps::count));
+        builder.put(OpNames.distinct, jsonToFuncConverterHelper.op1(functionalOps::distinct));
 
         builder.put(OpNames.in, (jsonObject, converterMap) -> arrayOps.in(
-            jsonToFuncConverterBuilder.toFunc(
+            jsonToFuncConverterHelper.toFunc(
                 jsonObject.getValue("arg1"),
                 converterMap
             ),
@@ -76,7 +76,7 @@ final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConver
     private Func[] toFuncArray(JsonArray args, JsonToFuncConverterMap converterMap) {
         Func[] funcs = new Func[args.size()];
         for (int i = 0; i < args.size(); i++) {
-            funcs[i] = jsonToFuncConverterBuilder.toFunc(
+            funcs[i] = jsonToFuncConverterHelper.toFunc(
                 args.getValue(i),
                 converterMap
             );

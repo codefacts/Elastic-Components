@@ -3,7 +3,7 @@ package elasta.orm;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
-import elasta.sql.core.Order;
+import elasta.sql.core.UpdateTpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
@@ -12,6 +12,7 @@ import lombok.Value;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Created by Jango on 9/14/2016.
@@ -38,7 +39,7 @@ public interface Orm {
 
     <T> Promise<T> querySingle(QueryExecutor.QueryArrayParams params);
 
-    Promise<JsonObject> upsert(String entity, JsonObject data);
+    Promise<List<UpdateTpl>> upsert(String entity, JsonObject data);
 
     <T extends Collection<JsonObject>> Promise<T> upsertAll(String entity, T jsonObjects);
 
@@ -46,17 +47,18 @@ public interface Orm {
 
     <T, R extends Collection<T>> Promise<R> deleteAll(String entity, R ids);
 
-    Promise<JsonObject> deleteChildRelations(String entity, JsonObject jsonObject);
+    Promise<List<UpdateTpl>> deleteChildRelations(String entity, JsonObject jsonObject);
 
     <T extends Collection<JsonObject>> Promise<T> deleteAllChildRelations(String entity, T jsonObjects);
 
-    Promise<Void> execute(BaseOrm.ExecuteParams params);
+    Promise<List<UpdateTpl>> execute(BaseOrm.ExecuteParams params);
 
-    Promise<Void> executeAll(Collection<BaseOrm.ExecuteParams> paramss);
+    Promise<List<UpdateTpl>> executeAll(Collection<BaseOrm.ExecuteParams> paramss);
 
     @Value
     @Builder
     class CountDistinctParams {
+        final FieldExpression countingKey;
         final String entity;
         final String alias;
         final Collection<QueryExecutor.JoinParam> joinParams;
@@ -64,19 +66,24 @@ public interface Orm {
         final Collection<FieldExpression> groupBy;
         final JsonObject having;
 
-        CountDistinctParams(String entity, String alias, Collection<QueryExecutor.JoinParam> joinParams, JsonObject criteria, Collection<FieldExpression> groupBy, JsonObject having) {
+        CountDistinctParams(FieldExpression countingKey, String entity, String alias, Collection<QueryExecutor.JoinParam> joinParams, JsonObject criteria, Collection<FieldExpression> groupBy, JsonObject having) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
             Objects.requireNonNull(joinParams);
             Objects.requireNonNull(criteria);
             Objects.requireNonNull(groupBy);
             Objects.requireNonNull(having);
+            this.countingKey = (countingKey == null) ? null : countingKey;
             this.entity = entity;
             this.alias = alias;
             this.joinParams = joinParams;
             this.criteria = criteria;
             this.groupBy = groupBy;
             this.having = having;
+        }
+
+        public Optional<FieldExpression> getCountingKey() {
+            return Optional.ofNullable(countingKey);
         }
     }
 }

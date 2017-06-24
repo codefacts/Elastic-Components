@@ -2,9 +2,11 @@ package elasta.orm.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.entity.EntityMappingHelper;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,15 +14,28 @@ import java.util.Objects;
  */
 public interface OperatorUtils {
 
-    static <T> JsonObject eq(String fieldExpStr, T id) {
+    String field = "field";
+    String op = "op";
+    String arg = "arg";
+    String args = "args";
+    String arg1 = "arg1";
+    String arg2 = "arg2";
+
+    static JsonObject field(String fieldExpStr) {
         return new JsonObject(
             ImmutableMap.of(
-                "op", "eq",
-                "arg1", ImmutableMap.of(
-                    "op", "field",
-                    "arg", fieldExpStr
-                ),
-                "arg2", id
+                op, field,
+                "arg", fieldExpStr
+            )
+        );
+    }
+
+    static <T> JsonObject eq(String fieldExpStr, T value) {
+        return new JsonObject(
+            ImmutableMap.of(
+                op, "eq",
+                "arg1", field(fieldExpStr),
+                "arg2", value
             )
         );
     }
@@ -28,13 +43,10 @@ public interface OperatorUtils {
     static JsonObject countDistinct(String fieldExpStr) {
         return new JsonObject(
             ImmutableMap.of(
-                "op", "count",
+                op, "count",
                 "arg", ImmutableMap.of(
-                    "op", "distinct",
-                    "arg", ImmutableMap.of(
-                        "op", "field",
-                        "arg", fieldExpStr
-                    )
+                    op, "distinct",
+                    "arg", field(fieldExpStr)
                 )
             )
         );
@@ -43,12 +55,27 @@ public interface OperatorUtils {
     static <T> JsonObject in(String fieldExpStr, Collection<T> ids) {
         return new JsonObject(
             ImmutableMap.of(
-                "op", "in",
-                "arg1", ImmutableMap.of(
-                    "op", "field",
-                    "arg", fieldExpStr
-                ),
+                op, "in",
+                "arg1", field(fieldExpStr),
                 "args", ids
+            )
+        );
+    }
+
+    static JsonObject and(List<JsonObject> criterias) {
+        return new JsonObject(
+            ImmutableMap.of(
+                op, "and",
+                "args", criterias
+            )
+        );
+    }
+
+    static JsonObject and(JsonArray criterias) {
+        return new JsonObject(
+            ImmutableMap.of(
+                op, "and",
+                "args", criterias
             )
         );
     }

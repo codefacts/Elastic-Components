@@ -1,17 +1,21 @@
 package elasta.module;
 
-import elasta.module.impl.ModuleSystemImpl;
+import elasta.module.impl.ModuleSystemBuilderImpl;
 
 /**
- * Created by Jango on 9/12/2016.
+ * Created by sohan on 5/14/2017.
  */
-public interface ModuleSystem extends ImmutableModuleSystem {
+public interface ModuleSystem {
 
-    <T> ModuleSystem export(Class<T> moduleClass, ExportScript<T> exportScript);
+    <T> T require(Class<T> tClass);
 
-    <T> ModuleSystem export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript);
+    <T> T require(Class<T> tClass, String moduleName);
 
-    static ModuleSystem create() {
-        return new ModuleSystemImpl();
+    <T> T requireOrElse(Class<T> tClass, T defaultValue);
+
+    <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue);
+
+    static ModuleSystemBuilder builder() {
+        return new ModuleSystemBuilderImpl();
     }
 }

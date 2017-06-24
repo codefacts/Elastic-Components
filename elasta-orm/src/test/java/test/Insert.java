@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
 import elasta.orm.BaseOrm;
-import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
+import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;

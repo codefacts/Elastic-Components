@@ -17,7 +17,7 @@ final public class OperationMapBuilder {
     final EntityMappingHelper helper;
     final SqlDB sqlDB;
 
-    OperationMapBuilder(Collection<Entity> entities, EntityMappingHelper helper, SqlDB sqlDB) {
+    public OperationMapBuilder(Collection<Entity> entities, EntityMappingHelper helper, SqlDB sqlDB) {
         Objects.requireNonNull(entities);
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);

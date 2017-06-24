@@ -1,137 +1,89 @@
 package elasta.module.impl;
 
-import elasta.module.ExportScript;
 import elasta.module.ModuleSystem;
+import elasta.module.ModuleProvider;
 import elasta.module.ex.ModuleSystemException;
+import lombok.Builder;
+import lombok.Value;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
- * Created by Jango on 9/12/2016.
+ * Created by sohan on 5/14/2017.
  */
 final public class ModuleSystemImpl implements ModuleSystem {
+    final Map<TypeAndNamePair, ModuleProvider> typeAndNamePairToModuleHolderMap;
 
-    private static final boolean DEFALUT_PROTOTYPE = false;
-    private final Map<ModuleSpec, ModuleInfo> scriptMap = new HashMap<>();
-    private final Map<ModuleSpec, Object> moduleMap = new HashMap<>();
-
-    @Override
-    public <T> T require(Class<T> tClass) {
-        return require(tClass, (String) null);
+    public ModuleSystemImpl(Map<TypeAndNamePair, ModuleProvider> typeAndNamePairToModuleHolderMap) {
+        Objects.requireNonNull(typeAndNamePairToModuleHolderMap);
+        this.typeAndNamePairToModuleHolderMap = typeAndNamePairToModuleHolderMap;
     }
 
     @Override
-    public <T> T require(Class<T> tClass, String moduleName) {
-        T module = getOrCreate(tClass, moduleName);
+    public <T> T require(Class<T> type) {
+        Objects.requireNonNull(type);
+        return this.<T>get(
+            TypeAndNamePair.builder()
+                .type(type)
+                .build()
+        ).orElseThrow(() -> new ModuleSystemException("No module found for type '" + type + "'"));
+    }
 
-        if (module == null) {
+    @Override
+    public <T> T require(Class<T> type, String moduleName) {
+        Objects.requireNonNull(type);
+        return this.<T>get(
+            TypeAndNamePair.builder()
+                .type(type)
+                .name(moduleName)
+                .build()
+        ).orElseThrow(() -> new ModuleSystemException("No module found for type '" + type + "' and name '" + moduleName + "'"));
+    }
 
-            moduleName = moduleName == null ? "" : (" and name: '" + moduleName + "'");
+    @Override
+    public <T> T requireOrElse(Class<T> type, T defaultValue) {
+        Objects.requireNonNull(type);
+        return this.<T>get(
+            TypeAndNamePair.builder()
+                .type(type)
+                .build()
+        ).orElse(defaultValue);
+    }
 
-            throw new ModuleSystemException("No module is found for type: '" + tClass + "'" + moduleName);
+    @Override
+    public <T> T requireOrElse(Class<T> type, String moduleName, T defaultValue) {
+        Objects.requireNonNull(type);
+        return this.<T>get(
+            TypeAndNamePair.builder()
+                .type(type)
+                .name(moduleName)
+                .build()
+        ).orElse(defaultValue);
+    }
+
+    private <T> Optional<T> get(TypeAndNamePair typeAndNamePair) {
+        Objects.requireNonNull(typeAndNamePair);
+        ModuleProvider moduleProvider = typeAndNamePairToModuleHolderMap.get(typeAndNamePair);
+        return Optional.ofNullable(moduleProvider).map(ModuleProvider::get);
+    }
+
+    @Value
+    @Builder
+    final static class TypeAndNamePair {
+        final Class type;
+        final String name;
+
+        public TypeAndNamePair(Class type, String name) {
+            Objects.requireNonNull(type);
+            this.type = type;
+            this.name = (name == null) ? null : name;
         }
 
-        return module;
-    }
-
-    @Override
-    public <T> T requireOrElse(Class<T> tClass, T defaultValue) {
-        return requireOrElse(tClass, null, defaultValue);
-    }
-
-    @Override
-    public <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue) {
-        T module = getOrCreate(tClass, moduleName);
-        return module == null ? defaultValue : module;
-    }
-
-    private <T> T getOrCreate(Class<T> moduleClass, String moduleName) {
-
-        final ModuleSpec moduleSpec = new ModuleSpec(moduleClass, moduleName);
-
-        ModuleInfo moduleInfo = scriptMap.get(moduleSpec);
-
-        if (moduleInfo == null) {
-
-            if (moduleName == null) {
-
-                ModuleSpec spec = scriptMap.keySet().stream()
-                    .filter(ms -> ms.moduleClass == moduleClass)
-                    .findFirst()
-                    .orElseThrow(() -> new ModuleSystemException("Module is not found for type: '" + moduleClass + "'"));
-
-                if (spec == null) {
-                    return null;
-                }
-
-                moduleInfo = scriptMap.get(spec);
-
-            } else {
-                return null;
-            }
-
-        }
-
-        if (moduleInfo.isPrototype) {
-            return (T) createModule(moduleInfo.exportScript);
-        } else {
-            return findModule(moduleSpec, moduleInfo);
-        }
-    }
-
-    private <T> T findModule(ModuleSpec moduleSpec, ModuleInfo moduleInfo) {
-
-        T module = (T) moduleMap.get(moduleSpec);
-        Class moduleClass = moduleSpec.moduleClass;
-        String moduleName = moduleSpec.moduleName;
-
-        if (module == null) {
-
-            module = (T) createModule(moduleInfo.exportScript);
-
-            ensureModuleExportedOrThrow(module, moduleClass, moduleName);
-
-            moduleMap.put(moduleSpec, module);
-
-            //Check Default Exists or register this module as default
-            moduleMap.putIfAbsent(new ModuleSpec(moduleClass, null), module);
-
-        }
-        return (T) module;
-    }
-
-    @Override
-    public <T> ModuleSystemImpl export(Class<T> moduleClass, ExportScript<T> exportScript) {
-        export(moduleClass, null, exportScript);
-        return this;
-    }
-
-    @Override
-    public <T> ModuleSystemImpl export(Class<T> moduleClass, String moduleName, ExportScript<T> exportScript) {
-        scriptMap.put(new ModuleSpec(moduleClass, moduleName), new ModuleInfo<>(exportScript, DEFALUT_PROTOTYPE));
-        return this;
-    }
-
-    private <T> T createModule(ExportScript<T> exportScript) {
-
-        ModuleImpl<T> module = new ModuleImpl<>(this);
-
-        exportScript.run(module);
-
-        T newModule = module.getModule();
-
-        return newModule;
-    }
-
-    private <T> void ensureModuleExportedOrThrow(Object module, Class<T> tClass, String moduleName) {
-        if (module == null) {
-            throw new ModuleSystemException("Module is not exported after script execution for type: '" + tClass + "'" +
-                (moduleName == null ? "" : " and moduleName: '" + moduleName + "'"));
+        public Optional<String> getName() {
+            return Optional.ofNullable(name);
         }
     }
 
-    public static void main(String[] args) {
-
-    }
 }

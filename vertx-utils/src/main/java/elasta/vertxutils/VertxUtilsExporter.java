@@ -1,15 +1,13 @@
 package elasta.vertxutils;
 
-import elasta.module.ModuleSystem;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
+import elasta.module.MutableModuleSystem;
 
 /**
  * Created by Jango on 9/12/2016.
  */
 public interface VertxUtilsExporter {
 
-    void export(ModuleSystem moduleSystem);
+    void export(MutableModuleSystem mutableModuleSystem);
 
     static VertxUtilsExporter get() {
         return moduleSystem -> {

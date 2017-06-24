@@ -3,7 +3,7 @@ package test;
 import com.google.common.collect.ImmutableList;
 import elasta.core.promise.impl.Promises;
 import elasta.orm.BaseOrm;
-import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
+import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.impl.QueryDataLoaderImpl;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.PathExpression;

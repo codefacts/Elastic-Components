@@ -1,15 +1,14 @@
 package elasta.orm.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.BaseOrm;
+import elasta.orm.OrmUtils;
 import elasta.orm.delete.DeleteFunction;
 import elasta.orm.delete.impl.ColumnValuePair;
 import elasta.orm.delete.impl.DeleteContextImpl;
 import elasta.orm.delete.impl.DeleteData;
-import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
@@ -19,8 +18,6 @@ import elasta.sql.core.*;
 import elasta.orm.upsert.TableData;
 import elasta.orm.upsert.impl.UpsertContextImpl;
 import elasta.orm.upsert.UpsertFunction;
-import elasta.sql.SqlDB;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
@@ -32,34 +29,24 @@ import java.util.stream.Collectors;
  * Created by sohan on 3/19/2017.
  */
 final public class BaseOrmImpl implements BaseOrm {
-    static final JsonObject EMPTY_JSON_OBJECT = new JsonObject(ImmutableMap.of());
     final Map<String, EntityOperation> operationMap;
     final QueryExecutor queryExecutor;
-    final SqlDB sqlDB;
-    final DbInterceptors dbInterceptors;
 
-    public BaseOrmImpl(Map<String, EntityOperation> operationMap, QueryExecutor queryExecutor, SqlDB sqlDB, DbInterceptors dbInterceptors) {
-        this.dbInterceptors = dbInterceptors;
+    public BaseOrmImpl(Map<String, EntityOperation> operationMap, QueryExecutor queryExecutor) {
         Objects.requireNonNull(operationMap);
         Objects.requireNonNull(queryExecutor);
-        Objects.requireNonNull(sqlDB);
         this.operationMap = operationMap;
         this.queryExecutor = queryExecutor;
-        this.sqlDB = sqlDB;
     }
 
     @Override
-    public Promise<JsonObject> upsert(UpsertParams params) {
-        return doUpsert(params)
-            .thenP(sqlDB::update)
-            .map(updateTpls -> params.getJsonObject());
+    public Promise<List<UpdateTpl>> upsert(UpsertParams params) {
+        return doUpsert(params);
     }
 
     @Override
-    public Promise<JsonObject> delete(DeleteParams params) {
-        return doDelete(params)
-            .thenP(sqlDB::update)
-            .map(updateTplList -> params.getJsonObject());
+    public Promise<List<UpdateTpl>> delete(DeleteParams params) {
+        return doDelete(params);
     }
 
     @Override
@@ -73,19 +60,14 @@ final public class BaseOrmImpl implements BaseOrm {
     }
 
     @Override
-    public Promise<JsonObject> deleteChildRelations(DeleteChildRelationsParams params) {
-        return doDeleteChildRelations(params)
-            .mapP(sqlDB::update)
-            .map(aVoid -> params.getJsonObject())
-            ;
+    public Promise<List<UpdateTpl>> deleteChildRelations(DeleteChildRelationsParams params) {
+        return doDeleteChildRelations(params);
     }
 
     @Override
-    public Promise<Void> execute(Collection<ExecuteParams> paramss) {
+    public Promise<List<UpdateTpl>> execute(Collection<ExecuteParams> paramss) {
 
-        return doExecute(paramss)
-            .map(sqlDB::update)
-            .map(voidPromise -> null);
+        return doExecute(paramss);
     }
 
     private Promise<List<UpdateTpl>> doUpsert(UpsertParams params) {
@@ -99,28 +81,15 @@ final public class BaseOrmImpl implements BaseOrm {
         );
 
         List<Promise<UpdateTpl>> promiseList = map.values().stream()
-            .map(tableData -> {
-
-                final List<SqlCriteria> sqlCriterias = Arrays.stream(tableData.getPrimaryColumns())
-                    .map(column -> new SqlCriteria(column, tableData.getValues().getValue(column), Optional.empty()))
-                    .collect(Collectors.toList());
-
-                return sqlDB
-                    .exists(
-                        tableData.getTable(),
-                        tableData.getPrimaryColumns()[0],
-                        sqlCriterias
-                    )
+            .map(
+                tableData -> Promises.empty()
                     .map(exists -> UpdateTpl.builder()
-                        .updateOperationType(exists ? UpdateOperationType.UPDATE : UpdateOperationType.INSERT)
+                        .updateOperationType(UpdateOperationType.INSERT)
                         .table(tableData.getTable())
-                        .sqlCriterias(exists ? sqlCriterias : ImmutableList.of())
+                        .sqlCriterias(ImmutableList.of())
                         .data(tableData.getValues())
                         .build())
-                    .mapP(dbInterceptors::interceptUpdateTpl)
-                    ;
-
-            }).collect(Collectors.toList());
+            ).collect(Collectors.toList());
 
         return Promises.when(promiseList);
     }
@@ -133,32 +102,27 @@ final public class BaseOrmImpl implements BaseOrm {
                     deleteDatas
                 )
             )
-            .mapP(jsonObject -> {
+            .map(jsonObject -> deleteDatas.stream()
+                .map(this::toUpdateTpl)
+                .collect(Collectors.toList()));
+    }
 
-                List<Promise<UpdateTpl>> promiseList = deleteDatas.stream()
-                    .map(
-                        deleteData ->
-                            deleteData.getOperationType() == DeleteData.OperationType.UPDATE
-                                ?
-                                UpdateTpl.builder()
-                                    .updateOperationType(UpdateOperationType.UPDATE)
-                                    .table(deleteData.getTable())
-                                    .data(toJsonObject(deleteData.getUpdateValues()))
-                                    .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
-                                    .build()
-                                :
-                                UpdateTpl.builder()
-                                    .updateOperationType(UpdateOperationType.DELETE)
-                                    .table(deleteData.getTable())
-                                    .data(EMPTY_JSON_OBJECT)
-                                    .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
-                                    .build()
-                    )
-                    .map(dbInterceptors::interceptUpdateTpl)
-                    .collect(Collectors.toList());
-
-                return Promises.when(promiseList);
-            });
+    private UpdateTpl toUpdateTpl(DeleteData deleteData) {
+        return deleteData.getOperationType() == DeleteData.OperationType.UPDATE
+            ?
+            UpdateTpl.builder()
+                .updateOperationType(UpdateOperationType.UPDATE)
+                .table(deleteData.getTable())
+                .data(toJsonObject(deleteData.getUpdateValues()))
+                .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
+                .build()
+            :
+            UpdateTpl.builder()
+                .updateOperationType(UpdateOperationType.DELETE)
+                .table(deleteData.getTable())
+                .data(OrmUtils.emptyJsonObject())
+                .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
+                .build();
     }
 
     private Promise<List<UpdateTpl>> doDeleteChildRelations(DeleteChildRelationsParams params) {
@@ -172,7 +136,7 @@ final public class BaseOrmImpl implements BaseOrm {
             )
         ;
 
-        List<Promise<UpdateTpl>> promiseList = deleteRelationDataSet.stream()
+        List<UpdateTpl> updateTpls = deleteRelationDataSet.stream()
             .map(
                 deleteRelationData -> new UpdateTpl(
                     UpdateOperationType.valueOf(deleteRelationData.getOperationType().name()),
@@ -187,10 +151,9 @@ final public class BaseOrmImpl implements BaseOrm {
                     toSqlCriterias(deleteRelationData.getPrimaryColumnValuePairs())
                 )
             )
-            .map(dbInterceptors::interceptUpdateTpl)
             .collect(Collectors.toList());
 
-        return Promises.when(promiseList);
+        return Promises.of(updateTpls);
     }
 
     private Promise<List<UpdateTpl>> doExecute(Collection<ExecuteParams> paramss) {

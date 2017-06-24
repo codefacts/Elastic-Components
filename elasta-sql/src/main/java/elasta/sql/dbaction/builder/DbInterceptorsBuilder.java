@@ -1,7 +1,7 @@
-package elasta.orm.event.dbaction.builder;
+package elasta.sql.dbaction.builder;
 
-import elasta.orm.event.dbaction.DbInterceptors;
-import elasta.orm.event.dbaction.UpdateTplInterceptor;
+import elasta.sql.dbaction.DbInterceptors;
+import elasta.sql.dbaction.UpdateTplInterceptor;
 
 import java.util.List;
 

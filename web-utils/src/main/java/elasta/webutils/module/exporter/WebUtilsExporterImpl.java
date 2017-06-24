@@ -1,6 +1,6 @@
 package elasta.webutils.module.exporter;
 
-import elasta.module.ModuleSystem;
+import elasta.module.MutableModuleSystem;
 import elasta.webutils.*;
 import elasta.webutils.impl.*;
 import elasta.webutils.query.string.QueryStringToJsonObjectConverter;
@@ -12,18 +12,18 @@ import elasta.webutils.query.string.impl.QueryStringToJsonObjectConverterImpl;
  */
 final public class WebUtilsExporterImpl implements WebUtilsExporter {
     @Override
-    public void exportTo(ModuleSystem moduleSystem) {
+    public void exportTo(MutableModuleSystem mutableModuleSystem) {
 
 
-        moduleSystem.export(RequestConverter.class, module -> module.export(
+        mutableModuleSystem.export(RequestConverter.class, module -> module.export(
             new JsonObjectRequestConverterImpl()
         ));
 
-        moduleSystem.export(QueryStringToJsonObjectConverter.class, module -> module.export(
+        mutableModuleSystem.export(QueryStringToJsonObjectConverter.class, module -> module.export(
             new QueryStringToJsonObjectConverterImpl()
         ));
 
-        moduleSystem.export(ResponseGenerator.class, module -> module.export(new JsonObjectResponseGeneratorImpl()));
+        mutableModuleSystem.export(ResponseGenerator.class, module -> module.export(new JsonObjectResponseGeneratorImpl()));
         
     }
 }

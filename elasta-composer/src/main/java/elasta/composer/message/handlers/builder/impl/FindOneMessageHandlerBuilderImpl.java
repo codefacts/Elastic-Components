@@ -83,7 +83,7 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
 
     private MsgEnterEventHandlerP conversionToCriteriaHandler() {
         return new ConversionToCriteriaStateHandlerBuilderImpl(
-            findOneByFieldExpression
+            alias
         ).build();
     }
 

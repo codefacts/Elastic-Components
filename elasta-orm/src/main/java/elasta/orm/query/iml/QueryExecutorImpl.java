@@ -4,7 +4,6 @@ import elasta.core.promise.intfs.Promise;
 import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.orm.entity.EntityMappingHelper;
-import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.Query;
@@ -28,19 +27,16 @@ final public class QueryExecutorImpl implements QueryExecutor {
     final JsonToFuncConverterMap jsonToFuncConverterMap;
     final JsonToFuncConverter jsonToFuncConverter;
     final SqlDB sqlDB;
-    final DbInterceptors dbInterceptors;
 
-    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter, SqlDB sqlDB, DbInterceptors dbInterceptors) {
+    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter, SqlDB sqlDB) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(jsonToFuncConverterMap);
         Objects.requireNonNull(jsonToFuncConverter);
         Objects.requireNonNull(sqlDB);
-        Objects.requireNonNull(dbInterceptors);
         this.helper = helper;
         this.jsonToFuncConverterMap = jsonToFuncConverterMap;
         this.jsonToFuncConverter = jsonToFuncConverter;
         this.sqlDB = sqlDB;
-        this.dbInterceptors = dbInterceptors;
     }
 
     @Override
@@ -55,7 +51,6 @@ final public class QueryExecutorImpl implements QueryExecutor {
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
             sqlDB,
-            dbInterceptors,
             pagination.isPresent() ? pagination.get() : null
         );
 
@@ -89,7 +84,6 @@ final public class QueryExecutorImpl implements QueryExecutor {
         QueryBuilderImpl qb = new QueryBuilderImpl(
             helper,
             sqlDB,
-            dbInterceptors,
             pagination.isPresent() ? pagination.get() : null
         );
 

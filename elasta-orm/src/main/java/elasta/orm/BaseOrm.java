@@ -2,6 +2,9 @@ package elasta.orm;
 
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.query.QueryExecutor;
+import elasta.orm.upsert.TableData;
+import elasta.sql.core.SqlQuery;
+import elasta.sql.core.UpdateTpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
@@ -16,15 +19,15 @@ import java.util.Objects;
  */
 public interface BaseOrm {
 
-    Promise<JsonObject> upsert(UpsertParams params);
+    Promise<List<UpdateTpl>> upsert(UpsertParams params);
 
-    Promise<JsonObject> delete(DeleteParams params);
+    Promise<List<UpdateTpl>> delete(DeleteParams params);
 
-    Promise<JsonObject> deleteChildRelations(
+    Promise<List<UpdateTpl>> deleteChildRelations(
         DeleteChildRelationsParams params
     );
 
-    Promise<Void> execute(Collection<ExecuteParams> paramss);
+    Promise<List<UpdateTpl>> execute(Collection<ExecuteParams> paramss);
 
     Promise<List<JsonObject>> query(
         QueryExecutor.QueryParams params

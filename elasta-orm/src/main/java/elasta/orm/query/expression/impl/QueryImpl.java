@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
 import elasta.criteria.Func;
 import elasta.orm.entity.EntityMappingHelper;
-import elasta.orm.event.dbaction.DbInterceptors;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.*;
 import elasta.orm.query.expression.builder.FieldExpressionAndOrderPair;
@@ -42,9 +41,8 @@ final public class QueryImpl implements Query {
     final QueryExecutor.Pagination pagination;
     final EntityMappingHelper helper;
     final SqlDB sqlDB;
-    final DbInterceptors dbInterceptors;
 
-    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, QueryExecutor.Pagination pagination, EntityMappingHelper helper, SqlDB sqlDB, DbInterceptors dbInterceptors) {
+    public QueryImpl(String rootEntity, String rootAlias, FieldExpressionResolverImpl selectFieldExpressionResolver, FieldExpressionResolverImpl expressionResolver, List<Func> selectFuncs, List<PathExpressionAndAliasPair> fromPathExpressionAndAliasPairs, List<Func> whereFuncs, List<FieldExpressionAndOrderPair> orderByPairs, List<FieldExpression> groupByExpressions, List<Func> havingFuncs, QueryExecutor.Pagination pagination, EntityMappingHelper helper, SqlDB sqlDB) {
         Objects.requireNonNull(rootEntity);
         Objects.requireNonNull(rootAlias);
         Objects.requireNonNull(selectFieldExpressionResolver);
@@ -57,7 +55,6 @@ final public class QueryImpl implements Query {
         Objects.requireNonNull(havingFuncs);
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);
-        Objects.requireNonNull(dbInterceptors);
         this.rootEntity = rootEntity;
         this.rootAlias = rootAlias;
         this.selectFieldExpressionResolver = selectFieldExpressionResolver;
@@ -71,7 +68,6 @@ final public class QueryImpl implements Query {
         this.pagination = (pagination == null) ? null : pagination;
         this.helper = helper;
         this.sqlDB = sqlDB;
-        this.dbInterceptors = dbInterceptors;
     }
 
     private List<Func> checkSelectFuns(List<Func> selectFuncs) {
@@ -130,8 +126,7 @@ final public class QueryImpl implements Query {
                 helper
             ).build();
 
-            return dbInterceptors.interceptSqlQuery(sqlQuery)
-                .mapP(sqlDB::query)
+            return sqlDB.query(sqlQuery)
                 .map(ResultSet::getResults)
                 .map(
                     jsonArrays -> jsonArrays.stream()
@@ -180,8 +175,8 @@ final public class QueryImpl implements Query {
                 fieldExpressionToAliasAndColumnMap
             ).build();
 
-            return dbInterceptors.interceptSqlQuery(sqlQuery)
-                .mapP(sqlDB::query)
+            return sqlDB
+                .query(sqlQuery)
                 .map(ResultSet::getResults);
         }
 

@@ -3,9 +3,9 @@ package elasta.composer.flow.builder;
 import elasta.core.flow.Flow;
 
 /**
- * Created by sohan on 5/24/2017.
+ * Created by sohan on 5/28/2017.
  */
-public interface AddChildFlowBuilder extends FlowBuilder {
+public interface FindAllChildFlowBuilder extends FlowBuilder {
     @Override
     Flow build();
 }

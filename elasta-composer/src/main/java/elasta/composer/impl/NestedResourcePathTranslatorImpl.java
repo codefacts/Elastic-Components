@@ -1,7 +1,7 @@
 package elasta.composer.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.commons.Utils;
+import com.google.common.collect.ImmutableSet;
 import elasta.composer.NestedResourcePathTranslator;
 import elasta.composer.ParameterFieldsInfoProvider;
 import elasta.composer.ex.NestedResourcePathTranslatorException;
@@ -9,11 +9,14 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.Relationship;
 import elasta.orm.query.QueryExecutor;
+import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
-import lombok.Value;
+import elasta.orm.query.expression.impl.FieldExpressionImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static elasta.commons.Utils.not;
 
 /**
  * Created by sohan on 5/25/2017.
@@ -22,6 +25,10 @@ final public class NestedResourcePathTranslatorImpl implements NestedResourcePat
     final String splitBy;
     final EntityMappingHelper helper;
     final ParameterFieldsInfoProvider parameterFieldsInfoProvider;
+
+    public NestedResourcePathTranslatorImpl(EntityMappingHelper helper, ParameterFieldsInfoProvider parameterFieldsInfoProvider) {
+        this("/", helper, parameterFieldsInfoProvider);
+    }
 
     public NestedResourcePathTranslatorImpl(String splitBy, EntityMappingHelper helper, ParameterFieldsInfoProvider parameterFieldsInfoProvider) {
         Objects.requireNonNull(splitBy);
@@ -33,40 +40,58 @@ final public class NestedResourcePathTranslatorImpl implements NestedResourcePat
     }
 
     @Override
-    public QueryParamsAndFullPath translate(String rootEntity, String nestedResourcePath) {
+    public QueryParamsAndFullPath translate(String rootEntity, String rootAlias, String nestedResourcePath) {
         Objects.requireNonNull(rootEntity);
         Objects.requireNonNull(nestedResourcePath);
 
-        readAll(rootEntity, "r", Arrays.asList(
+        final BuilderContext builderContext = readAll(rootEntity, rootAlias, Arrays.asList(
             nestedResourcePath.trim().split(splitBy)
         ));
 
-        return null;
+        return QueryParamsAndFullPath.builder()
+            .selections(builderContext.selections.build())
+            .fullPath(PathExpression.create(builderContext.fullPathParts.build()))
+            .joins(builderContext.joins.build())
+            .criterias(builderContext.criterias.build())
+            .build();
     }
 
-    private void readAll(String rootEntity, final String rootAlias, List<String> parts) {
+    private BuilderContext readAll(final String rootEntity, final String rootAlias, final List<String> parts) {
+
+        final BuilderContext builderContext = new BuilderContext(
+            parts,
+            rootAlias,
+            new FieldExpressionImpl(
+                PathExpression.create(rootAlias).concat(
+                    helper.getPrimaryKey(rootEntity)
+                )
+            )
+        );
 
         readRecursive(
-            new BuilderContext(
-                parts
-            ),
-            0,
+            builderContext,
+            1,
             rootEntity,
             PathExpression.create(rootAlias)
         );
 
+        return builderContext;
     }
 
     private void readRecursive(BuilderContext builderContext, int startIndex, String entity, PathExpression pathExpression) {
+
         final List<String> parts = builderContext.parts;
 
         final Set<String> referencingFields = Arrays.stream(helper.getFields(entity)).filter(field -> field.getRelationship().isPresent()).map(Field::getName).collect(Collectors.toSet());
 
         int index = startIndex;
 
-        final FieldValueParser parser = new FieldValueParser(pathExpression, parameterFieldsInfoProvider.get(entity));
+        final List<ParameterFieldsInfoProvider.FieldInfo> fieldInfos = parameterFieldsInfoProvider.get(entity);
+
+        final FieldValueParser parser = new FieldValueParser(pathExpression, fieldInfos);
 
         for (; index < parts.size(); index++) {
+
             final String part = parts.get(index);
 
             if (referencingFields.contains(part)) {
@@ -75,18 +100,21 @@ final public class NestedResourcePathTranslatorImpl implements NestedResourcePat
 
             if (parser.isComplete()) {
 
-                if (index < parts.size() - 1 && Utils.not(referencingFields.contains(parts.get(index + 1)))) {
-                    throw new NestedResourcePathTranslatorException("Malformed resource path");
-                }
-
-                break;
+                throw new NestedResourcePathTranslatorException("Malformed resource path");
             }
 
             parser.add(part);
         }
 
-        if (index == startIndex) {
-            throw new NestedResourcePathTranslatorException("Malformed path '" + builderContext.parts + "'");
+        {
+            List<PathAndValue> pathAndValues = parser.pathAndValueBuilder.build();
+
+            if (pathAndValues.size() > 0 && not(pathAndValues.size() != fieldInfos.size())) {
+
+                throw new NestedResourcePathTranslatorException("Malformed resource path");
+            }
+
+            builderContext.criterias.addAll(pathAndValues);
         }
 
         if (index >= parts.size() - 1) {
@@ -94,23 +122,39 @@ final public class NestedResourcePathTranslatorImpl implements NestedResourcePat
         }
 
         final String childField = parts.get(index);
+
         final Relationship relationship = helper.getField(entity, childField).getRelationship().get();
+        String childEntity = relationship.getEntity();
 
         final String joinAlias = "d" + String.valueOf(index);
+
+        final PathExpression fullPathExp = pathExpression.concat(childField);
+        final int newIndex = index + 1;
+
+
+        {
+            builderContext.fullPathParts.add(childField);
+
+            builderContext.selections.add(
+                new FieldExpressionImpl(
+                    pathExpression.concat(helper.getPrimaryKey(childEntity))
+                )
+            );
+        }
 
         if (relationship.getName() == Relationship.Name.HAS_MANY) {
 
             builderContext.joins.add(
                 QueryExecutor.JoinParam.builder()
-                    .path(pathExpression.concat(childField))
+                    .path(fullPathExp)
                     .alias(joinAlias)
                     .build()
             );
 
             readRecursive(
                 builderContext,
-                startIndex,
-                relationship.getEntity(),
+                newIndex,
+                childEntity,
                 PathExpression.create(joinAlias)
             );
             return;
@@ -118,38 +162,36 @@ final public class NestedResourcePathTranslatorImpl implements NestedResourcePat
 
         readRecursive(
             builderContext,
-            startIndex,
-            relationship.getEntity(),
-            pathExpression.concat(childField)
+            newIndex,
+            childEntity,
+            fullPathExp
         );
     }
 
     public static void main(String[] asdf) {
-        System.out.println(Arrays.toString("c/a/b/d/e/f/g/h".split("/")));
+//        System.out.println(Arrays.toString("c/a/b/d/e/f/g/h".split("/")));
+        int i = 0;
+        for (; i < 10; i++) {
+            if (i == 5) {
+                break;
+            }
+        }
+        System.out.println(i);
     }
 
     static final class BuilderContext {
         final List<String> parts;
-        final ImmutableList.Builder<PathExpression> selections = ImmutableList.builder();
+        final ImmutableList.Builder<FieldExpression> selections = ImmutableList.builder();
+        final ImmutableList.Builder<String> fullPathParts = ImmutableList.builder();
         final ImmutableList.Builder<QueryExecutor.JoinParam> joins = ImmutableList.builder();
         final ImmutableList.Builder<PathAndValue> criterias = ImmutableList.builder();
 
-        BuilderContext(List<String> parts) {
+        BuilderContext(List<String> parts, String rootAlias, FieldExpression rootEntityPrimaryKeyPathExp) {
             Objects.requireNonNull(parts);
+            Objects.requireNonNull(rootAlias);
             this.parts = parts;
-        }
-    }
-
-    @Value
-    static final class PathAndValue {
-        final PathExpression pathExpression;
-        final Object value;
-
-        PathAndValue(PathExpression pathExpression, Object value) {
-            Objects.requireNonNull(pathExpression);
-            Objects.requireNonNull(value);
-            this.pathExpression = pathExpression;
-            this.value = value;
+            fullPathParts.add(rootAlias);
+            selections.add(rootEntityPrimaryKeyPathExp);
         }
     }
 
@@ -160,7 +202,7 @@ final public class NestedResourcePathTranslatorImpl implements NestedResourcePat
         int size = 0;
         Optional<String> field = Optional.empty();
 
-        public FieldValueParser(PathExpression pathExpression, List<ParameterFieldsInfoProvider.FieldInfo> fieldInfos) {
+        FieldValueParser(PathExpression pathExpression, List<ParameterFieldsInfoProvider.FieldInfo> fieldInfos) {
             Objects.requireNonNull(pathExpression);
             Objects.requireNonNull(fieldInfos);
             this.pathExpression = pathExpression;

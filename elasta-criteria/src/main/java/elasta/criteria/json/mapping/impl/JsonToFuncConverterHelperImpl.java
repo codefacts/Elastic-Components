@@ -1,9 +1,6 @@
 package elasta.criteria.json.mapping.impl;
 
-import com.google.common.collect.ImmutableMap;
 import elasta.criteria.Func;
-import elasta.criteria.funcs.ops.ComparisionOps;
-import elasta.criteria.funcs.ops.LogicalOps;
 import elasta.criteria.json.mapping.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -14,10 +11,10 @@ import java.util.Objects;
 /**
  * Created by Jango on 2017-01-07.
  */
-final public class JsonToFuncConverterBuilderImpl implements JsonToFuncConverterBuilder {
+final public class JsonToFuncConverterHelperImpl implements JsonToFuncConverterHelper {
     final ValueHolderOperationBuilder valueHolderOperationBuilder;
 
-    public JsonToFuncConverterBuilderImpl(ValueHolderOperationBuilder valueHolderOperationBuilder) {
+    public JsonToFuncConverterHelperImpl(ValueHolderOperationBuilder valueHolderOperationBuilder) {
         Objects.requireNonNull(valueHolderOperationBuilder);
         this.valueHolderOperationBuilder = valueHolderOperationBuilder;
     }

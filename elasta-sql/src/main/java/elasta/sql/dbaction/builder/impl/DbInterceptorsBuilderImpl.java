@@ -1,11 +1,11 @@
-package elasta.orm.event.dbaction.builder.impl;
+package elasta.sql.dbaction.builder.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.orm.event.dbaction.DbInterceptors;
-import elasta.orm.event.dbaction.SqlQueryInterceptor;
-import elasta.orm.event.dbaction.UpdateTplInterceptor;
-import elasta.orm.event.dbaction.builder.DbInterceptorsBuilder;
-import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
+import elasta.sql.dbaction.DbInterceptors;
+import elasta.sql.dbaction.SqlQueryInterceptor;
+import elasta.sql.dbaction.UpdateTplInterceptor;
+import elasta.sql.dbaction.builder.DbInterceptorsBuilder;
+import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.criteria.funcs.ops.impl.*;
 import elasta.criteria.json.mapping.GenericJsonToFuncConverterImpl;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
-import elasta.criteria.json.mapping.impl.JsonToFuncConverterBuilderImpl;
+import elasta.criteria.json.mapping.impl.JsonToFuncConverterHelperImpl;
 import elasta.criteria.json.mapping.impl.JsonToFuncConverterMapBuilderImpl;
 import elasta.criteria.json.mapping.impl.ValueHolderOperationBuilderImpl;
 import elasta.orm.BaseOrm;
@@ -19,8 +19,8 @@ import elasta.orm.entity.impl.EntitiesPreprocessorImpl;
 import elasta.orm.entity.impl.EntitiesValidatorImpl;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
 import elasta.orm.entity.impl.EntityValidatorImpl;
-import elasta.orm.event.dbaction.DbInterceptors;
-import elasta.orm.event.dbaction.impl.DbInterceptorsImpl;
+import elasta.sql.dbaction.DbInterceptors;
+import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.query.iml.QueryExecutorImpl;
 import elasta.sql.SqlDB;
 import elasta.sql.SqlExecutor;
@@ -93,10 +93,8 @@ public interface Test {
                 helper,
                 jsonToFuncConverterMap(),
                 new GenericJsonToFuncConverterImpl(),
-                sqlDB,
-                params.getDbInterceptors()
-            ),
-            params.getDbInterceptors()
+                sqlDB
+            )
         ).build(params.entities);
     }
 
@@ -133,7 +131,7 @@ public interface Test {
             new ArrayOpsImpl(),
             new StringOpsImpl(),
             new FunctionalOpsImpl(),
-            new JsonToFuncConverterBuilderImpl(
+            new JsonToFuncConverterHelperImpl(
                 new ValueHolderOperationBuilderImpl(
                     new ValueHolderOpsImpl()
                 )

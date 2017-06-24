@@ -1,19 +1,15 @@
 package elasta.module.impl;
 
-import elasta.module.ExportScript;
 import elasta.module.Module;
-import elasta.module.ModuleSystem;
-
-import java.util.Map;
 
 /**
  * Created by Jango on 9/12/2016.
  */
 final public class ModuleImpl<T> implements Module<T> {
-    private final ModuleSystemImpl moduleSystem;
+    private final MutableModuleSystemImpl moduleSystem;
     private T module;
 
-    public ModuleImpl(ModuleSystemImpl moduleSystem) {
+    public ModuleImpl(MutableModuleSystemImpl moduleSystem) {
         this.moduleSystem = moduleSystem;
     }
 

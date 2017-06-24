@@ -1,9 +1,8 @@
 package elasta.module.impl;
 
-import elasta.module.ImmutableModuleSystem;
+import elasta.module.ModuleSystem;
 import elasta.module.Module;
 import elasta.module.ModuleProvider;
-import elasta.module.ex.ModuleSystemException;
 
 import java.util.Map;
 import java.util.Objects;
@@ -13,34 +12,34 @@ import java.util.Optional;
  * Created by sohan on 5/14/2017.
  */
 final public class ImmutableModuleImpl<TT> implements Module<TT> {
-    final ImmutableModuleSystem immutableModuleSystem;
+    final ModuleSystem moduleSystem;
     TT exportedModule;
 
-    public ImmutableModuleImpl(Map<ImmutableModuleSystemImpl.TypeAndNamePair, ModuleProvider> typeAndNamePairToModuleHolderMap) {
+    public ImmutableModuleImpl(Map<ModuleSystemImpl.TypeAndNamePair, ModuleProvider> typeAndNamePairToModuleHolderMap) {
         Objects.requireNonNull(typeAndNamePairToModuleHolderMap);
-        immutableModuleSystem = new ImmutableModuleSystemImpl(
+        moduleSystem = new ModuleSystemImpl(
             typeAndNamePairToModuleHolderMap
         );
     }
 
     @Override
     public <T> T require(Class<T> tClass) {
-        return immutableModuleSystem.require(tClass);
+        return moduleSystem.require(tClass);
     }
 
     @Override
     public <T> T require(Class<T> tClass, String moduleName) {
-        return immutableModuleSystem.require(tClass, moduleName);
+        return moduleSystem.require(tClass, moduleName);
     }
 
     @Override
     public <T> T requireOrElse(Class<T> tClass, T defaultValue) {
-        return immutableModuleSystem.requireOrElse(tClass, defaultValue);
+        return moduleSystem.requireOrElse(tClass, defaultValue);
     }
 
     @Override
     public <T> T requireOrElse(Class<T> tClass, String moduleName, T defaultValue) {
-        return immutableModuleSystem.requireOrElse(tClass, moduleName, defaultValue);
+        return moduleSystem.requireOrElse(tClass, moduleName, defaultValue);
     }
 
     @Override

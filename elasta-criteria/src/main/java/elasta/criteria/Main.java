@@ -3,20 +3,20 @@ package elasta.criteria;
 import elasta.criteria.funcs.ops.ComparisionOps;import elasta.criteria.funcs.ops.LogicalOps;import elasta.criteria.funcs.ops.ValueHolderOps;import elasta.criteria.funcs.ops.ComparisionOps;
 import elasta.criteria.funcs.ops.LogicalOps;
 import elasta.criteria.funcs.ops.ValueHolderOps;
+import elasta.criteria.funcs.ops.impl.ComparisionOpsImpl;
+import elasta.criteria.funcs.ops.impl.LogicalOpsImpl;
+import elasta.criteria.funcs.ops.impl.ValueHolderOpsImpl;
 
 /**
  * Created by Jango on 2017-01-06.
  */
 public interface Main {
     static void main(String[] args) {
-        LogicalOps logicalOps = new LogicalOps() {
-        };
+        LogicalOps logicalOps = new LogicalOpsImpl();
 
-        ValueHolderOps valueHolderOps = new ValueHolderOps() {
-        };
+        ValueHolderOps valueHolderOps = new ValueHolderOpsImpl();
 
-        ComparisionOps comparisionOps = new ComparisionOps() {
-        };
+        ComparisionOps comparisionOps = new ComparisionOpsImpl();
 
         Func and = logicalOps.and(
             comparisionOps.eq(

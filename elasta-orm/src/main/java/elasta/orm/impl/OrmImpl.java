@@ -11,6 +11,7 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
+import elasta.sql.core.UpdateTpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -72,7 +73,11 @@ final public class OrmImpl implements Orm {
                 .groupBy(params.getGroupBy())
                 .orderBy(ImmutableList.of())
                 .selections(ImmutableList.of(
-                    OperatorUtils.countDistinct(params.getAlias() + "." + helper.getPrimaryKey(params.getEntity()))
+                    OperatorUtils.countDistinct(
+                        params.getCountingKey()
+                            .map(Object::toString)
+                            .orElseGet(() -> params.getAlias() + "." + helper.getPrimaryKey(params.getEntity()))
+                    )
                 ))
                 .build()
         ).map(jsonArrays -> jsonArrays.get(0).getLong(0));
@@ -173,7 +178,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public Promise<JsonObject> upsert(String entity, JsonObject jsonObject) {
+    public Promise<List<UpdateTpl>> upsert(String entity, JsonObject jsonObject) {
         return baseOrm.upsert(
             BaseOrm.UpsertParams.builder()
                 .entity(entity)
@@ -237,7 +242,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public Promise<JsonObject> deleteChildRelations(String entity, JsonObject jsonObject) {
+    public Promise<List<UpdateTpl>> deleteChildRelations(String entity, JsonObject jsonObject) {
         return baseOrm.deleteChildRelations(
             BaseOrm.DeleteChildRelationsParams.builder()
                 .entity(entity)
@@ -262,12 +267,12 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public Promise<Void> execute(BaseOrm.ExecuteParams params) {
+    public Promise<List<UpdateTpl>> execute(BaseOrm.ExecuteParams params) {
         return baseOrm.execute(ImmutableList.of(params));
     }
 
     @Override
-    public Promise<Void> executeAll(Collection<BaseOrm.ExecuteParams> paramss) {
+    public Promise<List<UpdateTpl>> executeAll(Collection<BaseOrm.ExecuteParams> paramss) {
         return baseOrm.execute(paramss);
     }
 }

@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonArray;
 /**
  * Created by sohan on 3/20/2017.
  */
-public interface JsonToFuncConverterBuilder {
+public interface JsonToFuncConverterHelper {
 
     JsonToFuncConverter op1(Operation1Builder builder);
 

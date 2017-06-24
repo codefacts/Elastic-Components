@@ -1,5 +1,8 @@
 package elasta.composer.state.handlers.impl;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import elasta.composer.*;
 import elasta.composer.state.handlers.NestedLoadParentStateHandlerBuilder;
 import elasta.composer.state.handlers.ex.InvalidValueException;
@@ -9,6 +12,8 @@ import elasta.composer.state.handlers.ex.ParentDoesNotExistsException;
 import elasta.core.flow.Flow;
 import elasta.core.touple.immutable.Tpls;
 import elasta.orm.BaseOrm;
+import elasta.orm.impl.OperatorUtils;
+import elasta.orm.query.QueryExecutor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -22,6 +27,7 @@ import java.util.Optional;
  */
 final public class NestedLoadParentStateHandlerBuilderImpl implements NestedLoadParentStateHandlerBuilder {
     final String rootEntity;
+    final String rootAlias = "r";
     final NestedResourcePathTranslator nestedResourcePathTranslator;
     final BaseOrm baseOrm;
 
@@ -40,10 +46,14 @@ final public class NestedLoadParentStateHandlerBuilderImpl implements NestedLoad
 
             NestedResourcePathTranslator.QueryParamsAndFullPath paramsAndFullPath = nestedResourcePathTranslator.translate(
                 rootEntity,
+                rootAlias,
                 msg.headers().get(Cnsts.resourcePath).get()
             );
 
-            return baseOrm.query(paramsAndFullPath.getQueryParams())
+            return baseOrm
+                .query(
+                    toQueryParams(paramsAndFullPath)
+                )
                 .map(jsonObjects -> {
 
                     if (jsonObjects.size() <= 0) {
@@ -76,6 +86,38 @@ final public class NestedLoadParentStateHandlerBuilderImpl implements NestedLoad
                 .map(jsonObject -> Flow.trigger(Events.next, msg.withBody(jsonObject)))
                 ;
         };
+    }
+
+    private QueryExecutor.QueryParams toQueryParams(NestedResourcePathTranslator.QueryParamsAndFullPath paramsAndFullPath) {
+        return QueryExecutor.QueryParams.builder()
+            .entity(rootEntity)
+            .alias(rootAlias)
+            .selections(
+                paramsAndFullPath.getSelections()
+            )
+            .joinParams(paramsAndFullPath.getJoins())
+            .criteria(
+                toCriteria(paramsAndFullPath.getCriterias())
+            )
+            .having(ComposerUtils.emptyJsonObject())
+            .orderBy(ImmutableSet.of())
+            .groupBy(ImmutableSet.of())
+            .build();
+    }
+
+    private JsonObject toCriteria(List<NestedResourcePathTranslator.PathAndValue> criterias) {
+
+        ImmutableList.Builder<JsonObject> builder = ImmutableList.builder();
+
+        criterias.forEach(pathAndValue -> {
+            builder.add(
+                OperatorUtils.eq(pathAndValue.getPathExpression().toString(), pathAndValue.getValue())
+            );
+        });
+
+        return OperatorUtils.and(
+            builder.build()
+        );
     }
 
     private Optional<JsonObject> toJsonArray(Object value) {

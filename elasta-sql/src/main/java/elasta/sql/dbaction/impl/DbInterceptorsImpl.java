@@ -1,13 +1,12 @@
-package elasta.orm.event.dbaction.impl;
+package elasta.sql.dbaction.impl;
 
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.event.dbaction.*;
+import elasta.sql.dbaction.*;
 import elasta.sql.core.SqlQuery;
 import elasta.sql.core.UpdateTpl;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,12 +24,12 @@ final public class DbInterceptorsImpl implements DbInterceptors {
     }
 
     @Override
-    public Promise<UpdateTpl> interceptUpdateTpl(UpdateTpl updateTpl) {
+    public Promise<UpdateTpl> interceptUpdate(UpdateTpl updateTpl) {
         return dispatch(updateTplInterceptors, updateTpl);
     }
 
     @Override
-    public Promise<SqlQuery> interceptSqlQuery(SqlQuery sqlQuery) {
+    public Promise<SqlQuery> interceptQuery(SqlQuery sqlQuery) {
         return dispatch(sqlQueryInterceptors, sqlQuery);
     }
 

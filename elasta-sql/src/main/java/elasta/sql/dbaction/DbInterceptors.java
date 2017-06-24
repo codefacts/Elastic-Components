@@ -1,4 +1,4 @@
-package elasta.orm.event.dbaction;
+package elasta.sql.dbaction;
 
 import elasta.core.promise.intfs.Promise;
 import elasta.sql.core.SqlQuery;
@@ -9,7 +9,7 @@ import elasta.sql.core.UpdateTpl;
  */
 public interface DbInterceptors {
 
-    Promise<UpdateTpl> interceptUpdateTpl(UpdateTpl updateTpl);
+    Promise<UpdateTpl> interceptUpdate(UpdateTpl updateTpl);
 
-    Promise<SqlQuery> interceptSqlQuery(SqlQuery sqlQuery);
+    Promise<SqlQuery> interceptQuery(SqlQuery sqlQuery);
 }

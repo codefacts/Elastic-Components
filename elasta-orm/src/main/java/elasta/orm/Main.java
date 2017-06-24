@@ -8,6 +8,6 @@ import elasta.core.promise.impl.Promises;
 public class Main {
     public static void main(String[] asfd) {
 
-        Promises.empty().filter(o -> false).then(o -> System.out.println("passed"));
+        Promises.empty().filter(o -> true).then(o -> System.out.println("passed"));
     }
 }
