@@ -1,6 +1,8 @@
 package elasta.criteria.json.mapping.impl;
 
+import elasta.criteria.Func;
 import elasta.criteria.ParamsBuilder;
+import elasta.criteria.json.mapping.GenericJsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonQueryParser;
 import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
@@ -13,18 +15,18 @@ import java.util.Objects;
  */
 final public class JsonQueryParserImpl implements JsonQueryParser {
     final JsonToFuncConverterMap jsonToFuncConverterMap;
-    final JsonToFuncConverter jsonToFuncConverter;
+    final GenericJsonToFuncConverter genericJsonToFuncConverter;
 
-    public JsonQueryParserImpl(JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter) {
+    public JsonQueryParserImpl(JsonToFuncConverterMap jsonToFuncConverterMap, GenericJsonToFuncConverter genericJsonToFuncConverter) {
         Objects.requireNonNull(jsonToFuncConverterMap);
-        Objects.requireNonNull(jsonToFuncConverter);
+        Objects.requireNonNull(genericJsonToFuncConverter);
         this.jsonToFuncConverterMap = jsonToFuncConverterMap;
-        this.jsonToFuncConverter = jsonToFuncConverter;
+        this.genericJsonToFuncConverter = genericJsonToFuncConverter;
     }
 
     @Override
     public String toSql(JsonObject query, ParamsBuilder paramsBuilder) {
 
-        return jsonToFuncConverter.convert(query, jsonToFuncConverterMap).get(paramsBuilder);
+        return genericJsonToFuncConverter.convert(query, jsonToFuncConverterMap).get(paramsBuilder);
     }
 }

@@ -46,7 +46,7 @@ final public class DirectRelation {
     @Override
     public String toString() {
         return "DirectRelation{" +
-            "field='" + field + '\'' +
+            "column='" + field + '\'' +
             ", directRelationReader=" + directRelationReader +
             '}';
     }

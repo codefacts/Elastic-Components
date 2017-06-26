@@ -2,7 +2,6 @@ package elasta.sql;
 
 import elasta.criteria.Func;
 import elasta.sql.core.*;
-import elasta.sql.impl.SqlListAndParamsList;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Collection;
@@ -12,12 +11,6 @@ import java.util.List;
  * Created by Jango on 10/12/2016.
  */
 public interface SqlBuilderUtils {
-
-    SqlAndParams insertSql(String table, JsonObject jsonObject);
-
-    SqlAndParams updateSql(UpdateTpl updateTpl);
-
-    SqlAndParams toSql(SqlQuery sqlQuery);
 
     List<Func> toSelectFuncs(Collection<SqlSelection> sqlSelections);
 

@@ -1,7 +1,5 @@
 package elasta.criteria;
 
-import elasta.criteria.funcs.ops.Ops;
-
 /**
  * Created by Jango on 2017-01-06.
  */

@@ -1,5 +1,5 @@
 import elasta.criteria.Func;
-import elasta.criteria.funcs.ops.Ops;
+import elasta.criteria.Ops;
 
 /**
  * Created by sohan on 5/8/2017.

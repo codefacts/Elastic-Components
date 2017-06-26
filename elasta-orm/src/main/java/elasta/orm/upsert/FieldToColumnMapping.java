@@ -46,7 +46,7 @@ final public class FieldToColumnMapping {
     @Override
     public String toString() {
         return "FieldToColumnMapping{" +
-            "field='" + field + '\'' +
+            "column='" + field + '\'' +
             ", column='" + column + '\'' +
             '}';
     }

@@ -49,7 +49,7 @@ final class VirtualColumnValidator {
                 .filter(this::findDependencyInfoInOppositeSide)
                 .findAny()
             )
-//            .orElseThrow(() -> new EntityValidationException("No Mapping found in the opposite side for mapping '" + mapping + "' in relationship '" + entity.getName() + "." + field.getName() + "' <- '" + dependencyTplOptional.map(dependencyTpl -> dependencyTpl.getEntity().getName()).orElse("") + "'"));
+//            .orElseThrow(() -> new EntityValidationException("No Mapping found in the opposite side for mapping '" + mapping + "' in relationship '" + entity.getName() + "." + column.getName() + "' <- '" + dependencyTplOptional.map(dependencyTpl -> dependencyTpl.getEntity().getName()).orElse("") + "'"));
             .ifPresent(dependencyInfo -> {
 
                 DependencyTpl dependencyTpl = dependencyTplOptional.get();
@@ -70,7 +70,7 @@ final class VirtualColumnValidator {
 
 //                        if (mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size()) {
 //                            throw new EntityValidationException(
-//                                "mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size() in relationship '" + entity.getName() + "." + field.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "'"
+//                                "mapping.getForeignColumnMappingList().size() != depMapping.getForeignColumnMappingList().size() in relationship '" + entity.getName() + "." + column.getName() + "' -> '" + dependencyTpl.getEntity().getName() + "'"
 //                            );
 //                        }
 

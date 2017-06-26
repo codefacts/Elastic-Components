@@ -114,7 +114,7 @@ final public class SqlQueryBuilder {
             AliasAndColumn aliasAndColumn = aliasAndColumn(pair.getFieldExpression());
 
             if (aliasAndColumn == null) {
-                throw new QueryParserException("Invalid field expression '" + pair.getFieldExpression() + "' in order by clause");
+                throw new QueryParserException("Invalid column expression '" + pair.getFieldExpression() + "' in order by clause");
             }
 
             orderByDataListBuilder.add(

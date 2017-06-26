@@ -117,21 +117,21 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
             .map(dbColumnMapping -> dbColumnMapping)
             .filter(simpleDbColumnMapping -> simpleDbColumnMapping.getColumn().equals(column))
             .map(simpleDbColumnMapping -> getField(entity, simpleDbColumnMapping.getField()))
-            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No field found for column '" + column + "' in entity '" + entity + "'"));
+            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No column found for column '" + column + "' in entity '" + entity + "'"));
     }
 
     @Override
     public ColumnMapping getColumnMapping(String entity, String field) {
         return Arrays.stream(getEntity(entity).getDbMapping().getColumnMappings())
             .filter(dbColumnMapping -> dbColumnMapping.getField().equals(field))
-            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No ColumnMapping found for field '" + entity + "." + field + "'"));
+            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No ColumnMapping found for column '" + entity + "." + field + "'"));
     }
 
     @Override
     public RelationMapping getRelationMapping(String entity, String field) {
         return Arrays.stream(getEntity(entity).getDbMapping().getRelationMappings())
             .filter(dbColumnMapping -> dbColumnMapping.getField().equals(field))
-            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No ColumnMapping found for field '" + entity + "." + field + "'"));
+            .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("No ColumnMapping found for column '" + entity + "." + field + "'"));
     }
 
     @Override

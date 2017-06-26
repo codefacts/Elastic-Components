@@ -1,4 +1,4 @@
-package elasta.criteria.json.mapping;
+package elasta.sql;
 
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.json.JsonArray;
@@ -6,24 +6,24 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by sohan on 5/8/2017.
  */
-public interface JsonOps {
+public interface SqlOps {
 
-    String field = "field";
     String op = "op";
     String arg = "arg";
     String args = "args";
     String arg1 = "arg1";
     String arg2 = "arg2";
 
+    String field = "field";
+
     static JsonObject field(String fieldExpStr) {
         return new JsonObject(
             ImmutableMap.of(
-                op, field,
+                SqlOps.op, field,
                 "arg", fieldExpStr
             )
         );

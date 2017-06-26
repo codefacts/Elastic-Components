@@ -6,7 +6,7 @@ import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.ConversionToCriteriaStateHandlerBuilder;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
-import elasta.criteria.json.mapping.JsonOps;
+import elasta.sql.SqlOps;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
@@ -42,10 +42,10 @@ final public class ConversionToCriteriaStateHandlerBuilderImpl implements Conver
 
         criteria.getMap().forEach((fieldName, value) -> {
             criteriaListBuilder.add(
-                JsonOps.eq(alias + "." + fieldName, value)
+                SqlOps.eq(alias + "." + fieldName, value)
             );
         });
 
-        return JsonOps.and(criteriaListBuilder.build());
+        return SqlOps.and(criteriaListBuilder.build());
     }
 }

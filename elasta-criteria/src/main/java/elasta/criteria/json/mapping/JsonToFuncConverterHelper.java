@@ -1,10 +1,7 @@
 package elasta.criteria.json.mapping;
 
-import elasta.criteria.Func;
-import io.vertx.core.json.JsonArray;
-
 /**
- * Created by sohan on 3/20/2017.
+ * Created by sohan on 6/27/2017.
  */
 public interface JsonToFuncConverterHelper {
 
@@ -16,5 +13,4 @@ public interface JsonToFuncConverterHelper {
 
     JsonToFuncConverter arrayOp(ArrayOperationBuilder opsBuilder);
 
-    Func toFunc(Object value, JsonToFuncConverterMap converterMap);
 }

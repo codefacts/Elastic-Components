@@ -1,13 +1,10 @@
 package elasta.orm;
 
 import com.google.common.collect.ImmutableList;
-import elasta.criteria.json.mapping.GenericJsonToFuncConverterImpl;
-import elasta.criteria.json.mapping.JsonToFuncConverter;
-import elasta.criteria.json.mapping.JsonToFuncConverterHelper;
-import elasta.criteria.json.mapping.JsonToFuncConverterMap;
-import elasta.criteria.json.mapping.impl.JsonToFuncConverterHelperImpl;
+import elasta.criteria.json.mapping.*;
+import elasta.criteria.json.mapping.impl.JsonToFuncConverterBuilderHelperImpl;
 import elasta.criteria.json.mapping.impl.JsonToFuncConverterMapBuilderImpl;
-import elasta.criteria.json.mapping.impl.ValueHolderOperationBuilderImpl;
+import elasta.criteria.json.mapping.impl.ValueHolderOperationBuilderHelperImpl;
 import elasta.module.ModuleExporter;
 import elasta.module.ModuleSystemBuilder;
 import elasta.orm.builder.impl.OperationMapBuilder;
@@ -15,7 +12,7 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
-import elasta.sql.BaseSqlDB;
+import elasta.sql.*;
 import elasta.sql.dbaction.DbInterceptors;
 import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.impl.BaseOrmImpl;
@@ -23,9 +20,6 @@ import elasta.orm.impl.OrmImpl;
 import elasta.orm.impl.QueryDataLoaderImpl;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.iml.QueryExecutorImpl;
-import elasta.sql.SqlBuilderUtils;
-import elasta.sql.SqlDB;
-import elasta.sql.SqlExecutor;
 import elasta.sql.impl.BaseSqlDBImpl;
 import elasta.sql.impl.SqlBuilderUtilsImpl;
 import elasta.sql.impl.SqlDBImpl;
@@ -99,7 +93,7 @@ public interface OrmExporter extends ModuleExporter {
             module.export(new QueryExecutorImpl(
                 module.require(EntityMappingHelper.class),
                 module.require(JsonToFuncConverterMap.class),
-                module.require(JsonToFuncConverter.class),
+                module.require(GenericJsonToFuncConverter.class),
                 module.require(SqlDB.class)
             ));
         });
@@ -108,35 +102,36 @@ public interface OrmExporter extends ModuleExporter {
 
             module.export(
                 new JsonToFuncConverterMapBuilderImpl(
-                    module.require(JsonToFuncConverterHelper.class)
+                    module.require(JsonToFuncConverterHelper.class),
+                    module.require(JsonToFuncConverterBuilderHelper.class)
                 ).build()
             );
 
         });
 
-        builder.export(JsonToFuncConverterHelper.class, module -> {
+        builder.export(JsonToFuncConverterBuilderHelper.class, module -> {
             module.export(
-                new JsonToFuncConverterHelperImpl(
-                    new ValueHolderOperationBuilderImpl()
+                new JsonToFuncConverterBuilderHelperImpl(
+                    new ValueHolderOperationBuilderHelperImpl()
                 )
             );
-        });
-
-        builder.export(JsonToFuncConverter.class, module -> {
-            module.export(new GenericJsonToFuncConverterImpl());
         });
 
         builder.export(SqlDB.class, module -> {
             module.export(new SqlDBImpl(
                 module.require(BaseSqlDB.class),
-                module.require(SqlBuilderUtils.class)
+                module.require(SqlBuilderUtils.class),
+                new DbInterceptorsImpl(
+                    ImmutableList.of(),
+                    ImmutableList.of()
+                )
             ));
         });
 
         builder.export(BaseSqlDB.class, module -> {
             module.export(new BaseSqlDBImpl(
                 module.require(SqlExecutor.class),
-                module.require(SqlBuilderUtils.class)
+                module.require(SqlQueryBuilderUtils.class)
             ));
         });
 

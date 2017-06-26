@@ -7,7 +7,7 @@ import elasta.orm.query.expression.PathExpression;
  * Created by sohan on 5/14/2017.
  */
 public interface ValidationResultModel {
-    String field = "field";
+    String field = "column";
     String value = "value";
     String validationErrorCode = "validationErrorCode";
     String message = "message";

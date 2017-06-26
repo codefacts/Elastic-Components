@@ -1,14 +1,14 @@
 package elasta.criteria.json.mapping.impl;
 
 import elasta.criteria.Func;
-import elasta.criteria.funcs.ops.Ops;
-import elasta.criteria.json.mapping.ValueHolderOperationBuilder;
+import elasta.criteria.Ops;
+import elasta.criteria.json.mapping.ValueHolderOperationBuilderHelper;
 import elasta.criteria.json.mapping.ex.ValueHolderException;
 
 /**
  * Created by Jango on 2017-01-07.
  */
-final public class ValueHolderOperationBuilderImpl implements ValueHolderOperationBuilder {
+final public class ValueHolderOperationBuilderHelperImpl implements ValueHolderOperationBuilderHelper {
 
     @Override
     public Func build(Object value) {

@@ -147,7 +147,7 @@ public interface OrmTest {
                 ImmutableMap.of(
                     "op", "gte",
                     "arg1", ImmutableMap.of(
-                        "op", "field",
+                        "op", "column",
                         "arg", "e.salary"
                     ),
                     "arg2", 8000
@@ -177,7 +177,7 @@ public interface OrmTest {
             ImmutableMap.of(
                 "op", "gte",
                 "arg1", ImmutableMap.of(
-                    "op", "field",
+                    "op", "column",
                     "arg", "e.salary"
                 ),
                 "arg2", 8000

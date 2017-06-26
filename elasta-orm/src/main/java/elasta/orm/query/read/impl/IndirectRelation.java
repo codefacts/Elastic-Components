@@ -46,7 +46,7 @@ final public class IndirectRelation {
     @Override
     public String toString() {
         return "IndirectRelation{" +
-            "field='" + field + '\'' +
+            "column='" + field + '\'' +
             ", indirectRelationReader=" + indirectRelationReader +
             '}';
     }

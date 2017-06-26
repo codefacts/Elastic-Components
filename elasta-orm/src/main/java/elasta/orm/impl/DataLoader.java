@@ -193,7 +193,7 @@ final class DataLoader {
                             ImmutableMap.of(
                                 "op", OpNames.eq,
                                 "arg1", ImmutableMap.of(
-                                    "op", "field",
+                                    "op", "column",
                                     "arg", (pathExpression.root() + "." + primaryKey)
                                 ),
                                 "arg2", jsonObject.getValue(primaryKey)

@@ -1,6 +1,7 @@
 package elasta.orm.query.iml;
 
 import elasta.core.promise.intfs.Promise;
+import elasta.criteria.json.mapping.GenericJsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.orm.entity.EntityMappingHelper;
@@ -25,10 +26,10 @@ import java.util.Optional;
 final public class QueryExecutorImpl implements QueryExecutor {
     final EntityMappingHelper helper;
     final JsonToFuncConverterMap jsonToFuncConverterMap;
-    final JsonToFuncConverter jsonToFuncConverter;
+    final GenericJsonToFuncConverter jsonToFuncConverter;
     final SqlDB sqlDB;
 
-    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, JsonToFuncConverter jsonToFuncConverter, SqlDB sqlDB) {
+    public QueryExecutorImpl(EntityMappingHelper helper, JsonToFuncConverterMap jsonToFuncConverterMap, GenericJsonToFuncConverter jsonToFuncConverter, SqlDB sqlDB) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(jsonToFuncConverterMap);
         Objects.requireNonNull(jsonToFuncConverter);

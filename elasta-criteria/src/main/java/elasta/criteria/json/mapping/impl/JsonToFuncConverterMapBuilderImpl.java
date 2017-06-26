@@ -2,7 +2,7 @@ package elasta.criteria.json.mapping.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.criteria.Func;
-import elasta.criteria.funcs.ops.*;
+import elasta.criteria.Ops;
 import elasta.criteria.json.mapping.*;
 import io.vertx.core.json.JsonArray;
 
@@ -13,10 +13,13 @@ import java.util.Objects;
  */
 final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConverterMapBuilder {
     final JsonToFuncConverterHelper jsonToFuncConverterHelper;
+    final JsonToFuncConverterBuilderHelper jsonToFuncConverterBuilderHelper;
 
-    public JsonToFuncConverterMapBuilderImpl(JsonToFuncConverterHelper jsonToFuncConverterHelper) {
+    public JsonToFuncConverterMapBuilderImpl(JsonToFuncConverterHelper jsonToFuncConverterHelper, JsonToFuncConverterBuilderHelper jsonToFuncConverterBuilderHelper) {
         Objects.requireNonNull(jsonToFuncConverterHelper);
+        Objects.requireNonNull(jsonToFuncConverterBuilderHelper);
         this.jsonToFuncConverterHelper = jsonToFuncConverterHelper;
+        this.jsonToFuncConverterBuilderHelper = jsonToFuncConverterBuilderHelper;
     }
 
     @Override
@@ -40,7 +43,7 @@ final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConver
         builder.put(OpNames.distinct, jsonToFuncConverterHelper.op1(Ops::distinct));
 
         builder.put(OpNames.in, (jsonObject, converterMap) -> Ops.in(
-            jsonToFuncConverterHelper.toFunc(
+            jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue("arg1"),
                 converterMap
             ),
@@ -58,7 +61,7 @@ final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConver
     private Func[] toFuncArray(JsonArray args, JsonToFuncConverterMap converterMap) {
         Func[] funcs = new Func[args.size()];
         for (int i = 0; i < args.size(); i++) {
-            funcs[i] = jsonToFuncConverterHelper.toFunc(
+            funcs[i] = jsonToFuncConverterBuilderHelper.toFunc(
                 args.getValue(i),
                 converterMap
             );

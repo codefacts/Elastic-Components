@@ -10,7 +10,7 @@ import java.util.Optional;
  * Created by sohan on 4/15/2017.
  */
 final public class DirectDependencyDataPopulatorImpl implements DirectDependencyDataPopulator {
-//    final String field;
+//    final String column;
 
 
     @Override

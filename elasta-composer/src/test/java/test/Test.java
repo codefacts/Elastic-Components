@@ -2,11 +2,8 @@ package test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.json.mapping.GenericJsonToFuncConverterImpl;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
-import elasta.criteria.json.mapping.impl.JsonToFuncConverterHelperImpl;
-import elasta.criteria.json.mapping.impl.JsonToFuncConverterMapBuilderImpl;
-import elasta.criteria.json.mapping.impl.ValueHolderOperationBuilderImpl;
+import elasta.criteria.json.mapping.impl.*;
 import elasta.orm.BaseOrm;
 import elasta.orm.builder.impl.BaseOrmBuilderImpl;
 import elasta.orm.entity.EntitiesPreprocessor;
@@ -23,10 +20,7 @@ import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.query.iml.QueryExecutorImpl;
 import elasta.sql.SqlDB;
 import elasta.sql.SqlExecutor;
-import elasta.sql.impl.BaseSqlDBImpl;
-import elasta.sql.impl.SqlBuilderUtilsImpl;
-import elasta.sql.impl.SqlDBImpl;
-import elasta.sql.impl.SqlExecutorImpl;
+import elasta.sql.impl.*;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -52,9 +46,15 @@ public interface Test {
         final SqlDBImpl dbSql = new SqlDBImpl(
             new BaseSqlDBImpl(
                 sqlExecutor,
-                new SqlBuilderUtilsImpl()
+                new SqlQueryBuilderUtilsImpl(
+                    new MySqlSqlBuilderDialectImpl()
+                )
             ),
-            new SqlBuilderUtilsImpl()
+            new SqlBuilderUtilsImpl(),
+            new DbInterceptorsImpl(
+                ImmutableList.of(),
+                ImmutableList.of()
+            )
         );
         return dbSql;
     }
@@ -127,10 +127,14 @@ public interface Test {
     }
 
     static JsonToFuncConverterMap jsonToFuncConverterMap() {
+        JsonToFuncConverterBuilderHelperImpl jsonToFuncConverterBuilderHelper = new JsonToFuncConverterBuilderHelperImpl(
+            new ValueHolderOperationBuilderHelperImpl()
+        );
         return new JsonToFuncConverterMapBuilderImpl(
             new JsonToFuncConverterHelperImpl(
-                new ValueHolderOperationBuilderImpl()
-            )
+                jsonToFuncConverterBuilderHelper
+            ),
+            jsonToFuncConverterBuilderHelper
         ).build();
     }
 

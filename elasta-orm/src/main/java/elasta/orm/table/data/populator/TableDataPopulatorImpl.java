@@ -41,10 +41,10 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
 //
 //        for (FieldToColumnMapping fieldToColumnMapping : fieldToColumnMappings) {
 //
-//            final String field = fieldToColumnMapping.getField();
+//            final String column = fieldToColumnMapping.getField();
 //
 //            Object value = entity.getJsonObject(
-//                field
+//                column
 //            );
 //
 //            if (value == null) {
@@ -59,12 +59,12 @@ final public class TableDataPopulatorImpl implements TableDataPopulator {
 //
 //        directDependencyDataPopulators
 //            .stream()
-//            .filter(directDependencyDataPopulator -> entity.containsKey(directDependencyDataPopulator.field()))
+//            .filter(directDependencyDataPopulator -> entity.containsKey(directDependencyDataPopulator.column()))
 //            .forEach(directDependencyDataPopulator -> {
 //
 //                    final Map<String, Object> childColumnToValueMap = directDependencyDataPopulator.populateColumnToValueMap(
 //                        Optional.ofNullable(
-//                            entity.getJsonObject(directDependencyDataPopulator.field())
+//                            entity.getJsonObject(directDependencyDataPopulator.column())
 //                        )
 //                    );
 //

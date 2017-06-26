@@ -46,7 +46,7 @@ final public class IndirectDependency {
     @Override
     public String toString() {
         return "IndirectDependency{" +
-            "field='" + field + '\'' +
+            "column='" + field + '\'' +
             ", indirectDependencyHandler=" + indirectDependencyHandler +
             '}';
     }

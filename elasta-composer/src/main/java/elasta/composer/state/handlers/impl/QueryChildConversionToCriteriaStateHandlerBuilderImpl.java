@@ -7,7 +7,7 @@ import elasta.composer.model.request.QueryChildModel;
 import elasta.composer.state.handlers.QueryChildConversionToCriteriaStateHandlerBuilder;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
-import elasta.criteria.json.mapping.JsonOps;
+import elasta.sql.SqlOps;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
@@ -48,9 +48,9 @@ final public class QueryChildConversionToCriteriaStateHandlerBuilderImpl impleme
 
             return Promises.of(
                 Flow.trigger(Events.next, msg.withBody(
-                    JsonOps.and(
+                    SqlOps.and(
                         ImmutableList.of(
-                            JsonOps.eq(parentPrimaryKeyExpStr, parentId),
+                            SqlOps.eq(parentPrimaryKeyExpStr, parentId),
                             criteria
                         )
                     )
@@ -65,10 +65,10 @@ final public class QueryChildConversionToCriteriaStateHandlerBuilderImpl impleme
 
         criteria.getMap().forEach((fieldName, value) -> {
             criteriaListBuilder.add(
-                JsonOps.eq(parentToChildPathExpStr + "." + fieldName, value)
+                SqlOps.eq(parentToChildPathExpStr + "." + fieldName, value)
             );
         });
 
-        return JsonOps.and(criteriaListBuilder.build());
+        return SqlOps.and(criteriaListBuilder.build());
     }
 }

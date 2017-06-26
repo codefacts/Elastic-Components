@@ -1,15 +1,19 @@
 package elasta.sql.impl;
 
 import com.google.common.collect.ImmutableList;
+import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.criteria.funcs.FieldFunc;
 import elasta.sql.BaseSqlDB;
 import elasta.sql.SqlBuilderUtils;
 import elasta.sql.core.*;
 import elasta.sql.SqlDB;
+import elasta.sql.dbaction.DbInterceptors;
+import elasta.sql.ex.SqlDbException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
+import java.sql.SQLDataException;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -19,18 +23,21 @@ import java.util.Objects;
 final public class SqlDBImpl implements SqlDB {
     final BaseSqlDB baseSqlDB;
     final SqlBuilderUtils sqlBuilderUtils;
+    final DbInterceptors dbInterceptors;
 
-    public SqlDBImpl(BaseSqlDB baseSqlDB, SqlBuilderUtils sqlBuilderUtils) {
+    public SqlDBImpl(BaseSqlDB baseSqlDB, SqlBuilderUtils sqlBuilderUtils, DbInterceptors dbInterceptors) {
         Objects.requireNonNull(baseSqlDB);
         Objects.requireNonNull(sqlBuilderUtils);
+        Objects.requireNonNull(dbInterceptors);
         this.baseSqlDB = baseSqlDB;
         this.sqlBuilderUtils = sqlBuilderUtils;
+        this.dbInterceptors = dbInterceptors;
     }
 
     @Override
     public Promise<ResultSet> query(Collection<SqlSelection> sqlSelections, SqlFrom sqlFrom, Collection<SqlJoin> sqlJoins, Collection<SqlCriteria> sqlCriterias) {
 
-        return baseSqlDB.query(
+        return querySql(
             SqlQuery.builder()
                 .selectFuncs(sqlBuilderUtils.toSelectFuncs(sqlSelections))
                 .tableAliasPair(new TableAliasPair(sqlFrom.getTable(), sqlFrom.getAlias()))
@@ -41,40 +48,11 @@ final public class SqlDBImpl implements SqlDB {
     }
 
     @Override
-    public Promise<Void> insertJo(String table, JsonObject jsonObject) {
-
-        return baseSqlDB.update(
-            ImmutableList.of(
-                sqlBuilderUtils.toInsertUpdateTpl(table, jsonObject)
-            )
-        );
-    }
-
-    @Override
-    public Promise<Void> insertJo(String table, Collection<JsonObject> jsonObjects) {
-        return baseSqlDB.update(
-            sqlBuilderUtils.toInsertUpdateTpls(table, jsonObjects)
-        );
-    }
-
-    @Override
-    public Promise<Void> update(Collection<UpdateTpl> updateTpls) {
-        return baseSqlDB.update(updateTpls);
-    }
-
-    @Override
-    public Promise<Void> delete(String table, JsonObject where) {
-        return baseSqlDB.update(ImmutableList.of(
-            sqlBuilderUtils.toDeleteUpdateTpl(table, where)
-        ));
-    }
-
-    @Override
     public Promise<ResultSet> query(String table, Collection<String> selectedColumns, JsonObject whereCriteria) {
 
         final String alias = "r";
 
-        return baseSqlDB.query(
+        return querySql(
             SqlQuery.builder()
                 .selectFuncs(sqlBuilderUtils.toSelectFuncs(alias, selectedColumns))
                 .tableAliasPair(new TableAliasPair(table, alias))
@@ -108,7 +86,61 @@ final public class SqlDBImpl implements SqlDB {
 
     @Override
     public Promise<ResultSet> query(SqlQuery sqlQuery) {
-        return baseSqlDB.query(sqlQuery);
+        return querySql(sqlQuery);
+    }
+
+    private Promise<ResultSet> querySql(SqlQuery sqlQuery) {
+        return dbInterceptors.interceptQuery(sqlQuery)
+            .mapP(baseSqlDB::query);
+    }
+
+    @Override
+    public Promise<Void> insertJo(String table, JsonObject jsonObject) {
+
+        return exeUpdate(
+            ImmutableList.of(
+                sqlBuilderUtils.toInsertUpdateTpl(table, jsonObject)
+            )
+        );
+    }
+
+    @Override
+    public Promise<Void> insertJo(String table, Collection<JsonObject> jsonObjects) {
+        return exeUpdate(
+            sqlBuilderUtils.toInsertUpdateTpls(table, jsonObjects)
+        );
+    }
+
+    @Override
+    public Promise<Void> update(Collection<UpdateTpl> updateTpls) {
+        return exeUpdate(updateTpls);
+    }
+
+    private Promise<Void> exeUpdate(Collection<UpdateTpl> updateTpls) {
+
+        if (updateTpls.isEmpty()) {
+            throw new SqlDbException("UpdateTpls can not be empty");
+        }
+
+        ImmutableList.Builder<UpdateTpl> builder = ImmutableList.builder();
+
+        Promise<UpdateTpl> promise = Promises.of(updateTpls.stream().findFirst().get());
+
+        for (UpdateTpl updateTpl : updateTpls) {
+            promise = promise.mapP(dbInterceptors::interceptUpdate)
+                .then(builder::add)
+                .map(tpl -> updateTpl)
+            ;
+        }
+
+        return promise.mapP(updateTpl -> baseSqlDB.update(builder.build()));
+    }
+
+    @Override
+    public Promise<Void> delete(String table, JsonObject where) {
+        return exeUpdate(ImmutableList.of(
+            sqlBuilderUtils.toDeleteUpdateTpl(table, where)
+        ));
     }
 
     public static void main(String[] arg) {

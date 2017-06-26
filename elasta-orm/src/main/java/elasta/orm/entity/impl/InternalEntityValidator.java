@@ -52,7 +52,7 @@ final class InternalEntityValidator {
     private void validateField(Field field) {
 
         if (Utils.not(fieldToColumnMappingMap.containsKey(field.getName()) || fieldToRelationMappingMap.containsKey(field.getName()))) {
-            throw new EntityValidationException("No DbColumnMapping found for field '" + field.getName() + "'");
+            throw new EntityValidationException("No DbColumnMapping found for column '" + field.getName() + "'");
         }
 
         if (Utils.not(fieldToRelationMappingMap.containsKey(field.getName()))) {
@@ -235,7 +235,7 @@ final class InternalEntityValidator {
             )
         )) {
             throw new EntityValidationException(
-                "javaType '" + field.getJavaType() + "' is not valid for relationship name '" + relationship.getName() + "' in field '" + field.getName() + "'"
+                "javaType '" + field.getJavaType() + "' is not valid for relationship name '" + relationship.getName() + "' in column '" + field.getName() + "'"
             );
         }
     }

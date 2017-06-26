@@ -1,10 +1,11 @@
-package elasta.criteria.funcs.ops;
+package elasta.criteria;
 
 import elasta.criteria.Func;
 import elasta.criteria.funcs.ArrayOperation;
 import elasta.criteria.funcs.FnCnst;
 import elasta.criteria.funcs.Operation1;
 import elasta.criteria.funcs.Operation2;
+import elasta.criteria.funcs.ops.Functional1;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

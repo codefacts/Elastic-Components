@@ -3,25 +3,23 @@ package elasta.criteria.json.mapping.impl;
 import elasta.criteria.Func;
 import elasta.criteria.json.mapping.*;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
- * Created by Jango on 2017-01-07.
+ * Created by sohan on 6/27/2017.
  */
 final public class JsonToFuncConverterHelperImpl implements JsonToFuncConverterHelper {
-    final ValueHolderOperationBuilder valueHolderOperationBuilder;
+    final JsonToFuncConverterBuilderHelper jsonToFuncConverterBuilderHelper;
 
-    public JsonToFuncConverterHelperImpl(ValueHolderOperationBuilder valueHolderOperationBuilder) {
-        Objects.requireNonNull(valueHolderOperationBuilder);
-        this.valueHolderOperationBuilder = valueHolderOperationBuilder;
+    public JsonToFuncConverterHelperImpl(JsonToFuncConverterBuilderHelper jsonToFuncConverterBuilderHelper) {
+        Objects.requireNonNull(jsonToFuncConverterBuilderHelper);
+        this.jsonToFuncConverterBuilderHelper = jsonToFuncConverterBuilderHelper;
     }
 
     public JsonToFuncConverter op1(Operation1Builder builder) {
         return (jsonObject, converterMap) -> builder.build(
-            toFunc(
+            jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue(Mp.arg),
                 converterMap
             )
@@ -31,12 +29,12 @@ final public class JsonToFuncConverterHelperImpl implements JsonToFuncConverterH
     public JsonToFuncConverter op2(Operation2Builder builder) {
 
         return (jsonObject, converterMap) -> {
-            Func func1 = toFunc(
+            Func func1 = jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue(Mp.arg1),
                 converterMap
             );
 
-            Func func2 = toFunc(
+            Func func2 = jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue(Mp.arg2),
                 converterMap
             );
@@ -48,17 +46,17 @@ final public class JsonToFuncConverterHelperImpl implements JsonToFuncConverterH
     public JsonToFuncConverter op3(Operation3Builder builder) {
 
         return (jsonObject, converterMap) -> {
-            Func func1 = toFunc(
+            Func func1 = jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue(Mp.arg1),
                 converterMap
             );
 
-            Func func2 = toFunc(
+            Func func2 = jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue(Mp.arg2),
                 converterMap
             );
 
-            Func func3 = toFunc(
+            Func func3 = jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue(Mp.arg3),
                 converterMap
             );
@@ -76,7 +74,7 @@ final public class JsonToFuncConverterHelperImpl implements JsonToFuncConverterH
 
             for (int i = 0; i < args.size(); i++) {
 
-                funcs[i] = toFunc(
+                funcs[i] = jsonToFuncConverterBuilderHelper.toFunc(
                     args.getValue(i),
                     converterMap
                 );
@@ -84,30 +82,5 @@ final public class JsonToFuncConverterHelperImpl implements JsonToFuncConverterH
 
             return opsBuilder.build(funcs);
         };
-    }
-
-    @Override
-    public Func toFunc(Object value, JsonToFuncConverterMap converterMap) {
-
-        if (value == null) {
-            return valueHolderOperationBuilder.build(value);
-        }
-
-        if (value instanceof JsonObject) {
-
-            return convert((JsonObject) value, converterMap);
-        }
-
-        if (value instanceof Map) {
-
-            return convert(new JsonObject((Map<String, Object>) value), converterMap);
-        }
-
-        return valueHolderOperationBuilder.build(value);
-    }
-
-    private Func convert(JsonObject jsonObject, JsonToFuncConverterMap converterMap) {
-        String op = jsonObject.getString(Mp.op);
-        return converterMap.get(op).convert(jsonObject, converterMap);
     }
 }

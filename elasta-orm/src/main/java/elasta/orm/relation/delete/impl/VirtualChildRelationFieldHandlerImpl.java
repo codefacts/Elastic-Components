@@ -74,7 +74,7 @@ final public class VirtualChildRelationFieldHandlerImpl implements RelationField
             }
             break;
             default: {
-                throw new VirtualChildRelationFieldHandlerException("Invalid fieldJavaType '" + fieldJavaType + "' for field '" + field + "'");
+                throw new VirtualChildRelationFieldHandlerException("Invalid fieldJavaType '" + fieldJavaType + "' for column '" + field + "'");
             }
         }
     }

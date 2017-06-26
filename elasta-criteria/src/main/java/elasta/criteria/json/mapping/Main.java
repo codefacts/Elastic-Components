@@ -3,7 +3,6 @@ package elasta.criteria.json.mapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.criteria.funcs.FieldFunc;
-import elasta.criteria.funcs.ops.Ops;
 import elasta.criteria.json.mapping.impl.*;
 import elasta.module.MutableModuleSystem;
 import io.vertx.core.json.JsonObject;
@@ -19,7 +18,7 @@ public interface Main {
             module.export(new JsonQueryParserImpl(
                 new JsonToFuncConverterMapImpl(
                     ImmutableMap.<String, JsonToFuncConverter>builder()
-                        .put("field", (jsonObject, converterMap) -> new FieldFunc(jsonObject.getString("arg")))
+                        .put("column", (jsonObject, converterMap) -> new FieldFunc(jsonObject.getString("arg")))
                         .putAll(
                             module.require(JsonToFuncConverterMap.class).getMap()
                         )
@@ -31,17 +30,22 @@ public interface Main {
 
         mutableModuleSystem.export(JsonToFuncConverterMap.class, module -> {
 
+            final JsonToFuncConverterBuilderHelperImpl jsonToFuncConverterBuilderHelper = new JsonToFuncConverterBuilderHelperImpl(
+                new ValueHolderOperationBuilderHelperImpl()
+            );
+
             module.export(
                 new JsonToFuncConverterMapBuilderImpl(
                     new JsonToFuncConverterHelperImpl(
-                        new ValueHolderOperationBuilderImpl()
-                    )
+                        jsonToFuncConverterBuilderHelper
+                    ),
+                    jsonToFuncConverterBuilderHelper
                 ).build()
             );
         });
 
-        mutableModuleSystem.export(ValueHolderOperationBuilder.class, module -> module.export(
-            new ValueHolderOperationBuilderImpl()
+        mutableModuleSystem.export(ValueHolderOperationBuilderHelper.class, module -> module.export(
+            new ValueHolderOperationBuilderHelperImpl()
         ));
 
         JsonQueryParser parser = mutableModuleSystem.require(JsonQueryParser.class);
@@ -54,7 +58,7 @@ public interface Main {
                         ImmutableMap.of(
                             "op", "eq",
                             "arg1", ImmutableMap.of(
-                                "op", "field",
+                                "op", "column",
                                 "arg", "name"
                             ),
                             "arg2", "sohan"
@@ -62,7 +66,7 @@ public interface Main {
                         ImmutableMap.of(
                             "op", "gte",
                             "arg1", ImmutableMap.of(
-                                "op", "field",
+                                "op", "column",
                                 "arg", "age"
                             ),
                             "arg2", 18
@@ -70,7 +74,7 @@ public interface Main {
                         ImmutableMap.of(
                             "op", "lte",
                             "arg1", ImmutableMap.of(
-                                "op", "field",
+                                "op", "column",
                                 "arg", "salary"
                             ),
                             "arg2", 50000
@@ -83,7 +87,7 @@ public interface Main {
                                     "arg", ImmutableMap.of(
                                         "op", "eq",
                                         "arg1", ImmutableMap.of(
-                                            "op", "field",
+                                            "op", "column",
                                             "arg", "name"
                                         ),
                                         "arg2", "kana"
@@ -95,7 +99,7 @@ public interface Main {
                                         ImmutableMap.of(
                                             "op", "eq",
                                             "arg1", ImmutableMap.of(
-                                                "op", "field",
+                                                "op", "column",
                                                 "arg", "firstName"
                                             ),
                                             "arg2", "kona"
@@ -103,7 +107,7 @@ public interface Main {
                                         ImmutableMap.of(
                                             "op", "gte",
                                             "arg1", ImmutableMap.of(
-                                                "op", "field",
+                                                "op", "column",
                                                 "arg", "degree"
                                             ),
                                             "arg2", "Bsc"

@@ -108,7 +108,7 @@ final class OptionalListBuilder {
 
         final String operation = criteria.getString(op);
 
-        if (Objects.equals(operation, "field")) {
+        if (Objects.equals(operation, "column")) {
 
             FieldExpressionImpl fieldExpression = new FieldExpressionImpl(
                 criteria.getString("arg")
