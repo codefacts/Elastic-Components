@@ -8,9 +8,9 @@ import java.util.Optional;
  */
 final public class SqlSelection {
     final String column;
-    final Optional<String> alias;
+    final String alias;
 
-    public SqlSelection(String column, Optional<String> alias) {
+    public SqlSelection(String column, String alias) {
         Objects.requireNonNull(column);
         Objects.requireNonNull(alias);
         this.column = column;
@@ -21,7 +21,7 @@ final public class SqlSelection {
         return column;
     }
 
-    public Optional<String> getAlias() {
+    public String getAlias() {
         return alias;
     }
 
@@ -45,6 +45,6 @@ final public class SqlSelection {
 
     @Override
     public String toString() {
-        return alias.orElse("") + "." + column;
+        return alias + "." + column;
     }
 }

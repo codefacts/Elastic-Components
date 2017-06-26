@@ -2,11 +2,11 @@ package elasta.sql.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.core.promise.intfs.Promise;
+import elasta.criteria.funcs.FieldFunc;
+import elasta.sql.BaseSqlDB;
 import elasta.sql.SqlBuilderUtils;
 import elasta.sql.core.*;
 import elasta.sql.SqlDB;
-import elasta.sql.SqlExecutor;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 
@@ -16,77 +16,86 @@ import java.util.Objects;
 /**
  * Created by Jango on 9/25/2016.
  */
-public class SqlDBImpl implements SqlDB {
-    private final SqlExecutor sqlExecutor;
-    private final SqlBuilderUtils sqlBuilderUtils;
+final public class SqlDBImpl implements SqlDB {
+    final BaseSqlDB baseSqlDB;
+    final SqlBuilderUtils sqlBuilderUtils;
 
-    public SqlDBImpl(SqlExecutor sqlExecutor, SqlBuilderUtils sqlBuilderUtils) {
-        Objects.requireNonNull(sqlExecutor);
+    public SqlDBImpl(BaseSqlDB baseSqlDB, SqlBuilderUtils sqlBuilderUtils) {
+        Objects.requireNonNull(baseSqlDB);
         Objects.requireNonNull(sqlBuilderUtils);
-        this.sqlExecutor = sqlExecutor;
+        this.baseSqlDB = baseSqlDB;
         this.sqlBuilderUtils = sqlBuilderUtils;
     }
 
     @Override
     public Promise<ResultSet> query(Collection<SqlSelection> sqlSelections, SqlFrom sqlFrom, Collection<SqlJoin> sqlJoins, Collection<SqlCriteria> sqlCriterias) {
-        SqlAndParams sqlAndParams = sqlBuilderUtils.querySql(sqlSelections, sqlFrom, sqlJoins, sqlCriterias);
-        return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams());
+
+        return baseSqlDB.query(
+            SqlQuery.builder()
+                .selectFuncs(sqlBuilderUtils.toSelectFuncs(sqlSelections))
+                .tableAliasPair(new TableAliasPair(sqlFrom.getTable(), sqlFrom.getAlias()))
+                .joinDatas(sqlBuilderUtils.toJoinDatas(sqlFrom.getAlias(), sqlJoins))
+                .whereFuncs(sqlBuilderUtils.toWhereFuncs(sqlCriterias))
+                .build()
+        );
     }
 
     @Override
     public Promise<Void> insertJo(String table, JsonObject jsonObject) {
-        SqlAndParams sqlAndParams = sqlBuilderUtils.insertSql(table, jsonObject);
-        return sqlExecutor.update(sqlAndParams.getSql(), sqlAndParams.getParams());
+
+        return baseSqlDB.update(
+            ImmutableList.of(
+                sqlBuilderUtils.toInsertUpdateTpl(table, jsonObject)
+            )
+        );
     }
 
     @Override
     public Promise<Void> insertJo(String table, Collection<JsonObject> jsonObjects) {
-        ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
-        ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
-
-        jsonObjects.stream().map(jsonObject -> sqlBuilderUtils.insertSql(table, jsonObject))
-            .forEach(sqlAndParams -> {
-                sqlListBuilder.add(sqlAndParams.getSql());
-                paramsListBuilder.add(sqlAndParams.getParams());
-            });
-
-        return sqlExecutor.update(sqlListBuilder.build(), paramsListBuilder.build());
+        return baseSqlDB.update(
+            sqlBuilderUtils.toInsertUpdateTpls(table, jsonObjects)
+        );
     }
 
     @Override
     public Promise<Void> update(Collection<UpdateTpl> updateTpls) {
-
-        ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
-        ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();
-
-        updateTpls.stream()
-            .map(sqlBuilderUtils::updateSql)
-            .forEach(sqlAndParams -> {
-                sqlListBuilder.add(sqlAndParams.getSql());
-                paramsListBuilder.add(sqlAndParams.getParams());
-            });
-
-        return sqlExecutor.update(sqlListBuilder.build(), paramsListBuilder.build());
+        return baseSqlDB.update(updateTpls);
     }
 
     @Override
     public Promise<Void> delete(String table, JsonObject where) {
-        SqlAndParams sqlAndParams = sqlBuilderUtils.deleteSql(table, where);
-        return sqlExecutor.update(sqlAndParams.getSql(), sqlAndParams.getParams());
+        return baseSqlDB.update(ImmutableList.of(
+            sqlBuilderUtils.toDeleteUpdateTpl(table, where)
+        ));
     }
 
     @Override
-    public Promise<ResultSet> query(String table, Collection<String> columns, JsonObject whereCriteria) {
+    public Promise<ResultSet> query(String table, Collection<String> selectedColumns, JsonObject whereCriteria) {
 
-        SqlAndParams sqlAndParams = sqlBuilderUtils.querySql(table, columns, whereCriteria);
+        final String alias = "r";
 
-        return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams());
+        return baseSqlDB.query(
+            SqlQuery.builder()
+                .selectFuncs(sqlBuilderUtils.toSelectFuncs(alias, selectedColumns))
+                .tableAliasPair(new TableAliasPair(table, alias))
+                .whereFuncs(sqlBuilderUtils.toWhereFuncs2(alias, whereCriteria))
+                .build()
+        );
     }
 
     @Override
-    public Promise<Boolean> exists(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias) {
-        SqlAndParams sqlAndParams = sqlBuilderUtils.existSql(table, primaryKey, sqlCriterias);
-        return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams())
+    public Promise<Boolean> exists(String table, String primaryKey, Collection<SqlCondition> sqlConditions) {
+
+        final String rootAlias = "r";
+
+        return baseSqlDB
+            .query(
+                SqlQuery.builder()
+                    .selectFuncs(ImmutableList.of(new FieldFunc(rootAlias + "." + primaryKey)))
+                    .tableAliasPair(new TableAliasPair(table, rootAlias))
+                    .whereFuncs(sqlBuilderUtils.toWhereFuncs(rootAlias, sqlConditions))
+                    .build()
+            )
             .map(
                 resultSet -> resultSet.getResults().stream()
                     .limit(1)
@@ -99,10 +108,7 @@ public class SqlDBImpl implements SqlDB {
 
     @Override
     public Promise<ResultSet> query(SqlQuery sqlQuery) {
-
-        SqlAndParams sqlAndParams = sqlBuilderUtils.toSql(sqlQuery);
-
-        return sqlExecutor.query(sqlAndParams.getSql(), sqlAndParams.getParams());
+        return baseSqlDB.query(sqlQuery);
     }
 
     public static void main(String[] arg) {

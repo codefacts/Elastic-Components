@@ -3,7 +3,8 @@ package elasta.orm.delete.loader.impl;
 import com.google.common.collect.ImmutableList;
 import elasta.core.promise.intfs.Promise;
 import elasta.orm.delete.loader.DependencyDataLoader;
-import elasta.sql.core.ColumnToColumnMapping;import elasta.sql.SqlDB;
+import elasta.sql.core.ColumnToColumnMapping;
+import elasta.sql.SqlDB;
 import elasta.sql.core.*;
 import elasta.orm.upsert.TableData;
 
@@ -60,14 +61,14 @@ final public class IndirectDependencyDataLoaderImpl implements DependencyDataLoa
                 new SqlCriteria(
                     dstColumnMapping.getDstColumn(),
                     parentTableData.getValues().getValue(dstColumnMapping.getSrcColumn()),
-                    Optional.of(relationTableAlias)
+                    relationTableAlias
                 )
             );
         }
 
         return sqlDB.query(
             sqlSelections(alias, primaryColumns, columns),
-            new SqlFrom(dependentTable, Optional.of(alias)),
+            new SqlFrom(dependentTable, alias),
             sqlJoins(relationTable, alias, relationTableAlias, dstColumnMappings),
             listBuilder.build()
         ).map(resultSet -> resultSet.getRows().stream().map(jo -> new TableData(dependentTable, primaryColumns, jo))
@@ -89,7 +90,7 @@ final public class IndirectDependencyDataLoaderImpl implements DependencyDataLoa
             new SqlJoin(
                 JoinType.INNER_JOIN,
                 relationTable,
-                Optional.of(alias),
+                alias,
                 listBuilder.build()
             )
         );
@@ -99,12 +100,12 @@ final public class IndirectDependencyDataLoaderImpl implements DependencyDataLoa
         ImmutableList.Builder<SqlSelection> listBuilder = ImmutableList.builder();
         for (String primaryColumn : primaryColumns) {
             listBuilder.add(
-                new SqlSelection(primaryColumn, Optional.of(alias))
+                new SqlSelection(primaryColumn, alias)
             );
         }
         for (String column : columns) {
             listBuilder.add(
-                new SqlSelection(column, Optional.of(alias))
+                new SqlSelection(column, alias)
             );
         }
         return listBuilder.build();

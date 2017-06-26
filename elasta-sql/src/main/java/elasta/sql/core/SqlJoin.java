@@ -10,10 +10,10 @@ import java.util.Optional;
 final public class SqlJoin {
     final JoinType joinType;
     final String joinTable;
-    final Optional<String> alias;
+    final String alias;
     final List<SqlJoinColumn> sqlJoinColumns;
 
-    public SqlJoin(JoinType joinType, String joinTable, Optional<String> alias, List<SqlJoinColumn> sqlJoinColumns) {
+    public SqlJoin(JoinType joinType, String joinTable, String alias, List<SqlJoinColumn> sqlJoinColumns) {
         Objects.requireNonNull(joinType);
         Objects.requireNonNull(joinTable);
         Objects.requireNonNull(alias);
@@ -36,7 +36,7 @@ final public class SqlJoin {
         return joinTable;
     }
 
-    public Optional<String> getAlias() {
+    public String getAlias() {
         return alias;
     }
 

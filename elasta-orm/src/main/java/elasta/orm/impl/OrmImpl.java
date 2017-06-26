@@ -3,10 +3,8 @@ package elasta.orm.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
-import elasta.orm.BaseOrm;
-import elasta.orm.Orm;
-import elasta.orm.OrmUtils;
-import elasta.orm.QueryDataLoader;
+import elasta.criteria.json.mapping.JsonOps;
+import elasta.orm.*;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.ex.OrmException;
 import elasta.orm.query.QueryExecutor;
@@ -16,7 +14,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -55,7 +52,7 @@ final public class OrmImpl implements Orm {
                 .groupBy(ImmutableList.of())
                 .orderBy(ImmutableList.of())
                 .selections(ImmutableList.of(
-                    OperatorUtils.countDistinct(alias + "." + helper.getPrimaryKey(entity))
+                    JsonOps.countDistinct(alias + "." + helper.getPrimaryKey(entity))
                 ))
                 .build()
         ).map(jsonArrays -> jsonArrays.get(0).getLong(0));
@@ -73,7 +70,7 @@ final public class OrmImpl implements Orm {
                 .groupBy(params.getGroupBy())
                 .orderBy(ImmutableList.of())
                 .selections(ImmutableList.of(
-                    OperatorUtils.countDistinct(
+                    JsonOps.countDistinct(
                         params.getCountingKey()
                             .map(Object::toString)
                             .orElseGet(() -> params.getAlias() + "." + helper.getPrimaryKey(params.getEntity()))
@@ -91,7 +88,7 @@ final public class OrmImpl implements Orm {
                 .alias(alias)
                 .joinParams(ImmutableList.of())
                 .criteria(
-                    OperatorUtils.eq(
+                    JsonOps.eq(
                         alias + "." + helper.getPrimaryKey(entity), id
                     )
                 )
@@ -131,7 +128,7 @@ final public class OrmImpl implements Orm {
                 .alias(alias)
                 .joinParams(ImmutableList.of())
                 .criteria(
-                    OperatorUtils.in(alias + "." + helper.getPrimaryKey(entity), ids)
+                    JsonOps.in(alias + "." + helper.getPrimaryKey(entity), ids)
                 )
                 .having(OrmUtils.emptyJsonObject())
                 .groupBy(ImmutableList.of())

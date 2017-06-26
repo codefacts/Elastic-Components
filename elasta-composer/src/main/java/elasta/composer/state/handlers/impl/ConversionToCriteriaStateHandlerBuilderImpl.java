@@ -1,17 +1,12 @@
 package elasta.composer.state.handlers.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.ConversionToCriteriaStateHandlerBuilder;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
-import elasta.criteria.Func;
-import elasta.criteria.funcs.ops.impl.LogicalOpsImpl;
-import elasta.orm.impl.OperatorUtils;
-import elasta.orm.query.expression.FieldExpression;
+import elasta.criteria.json.mapping.JsonOps;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
@@ -47,10 +42,10 @@ final public class ConversionToCriteriaStateHandlerBuilderImpl implements Conver
 
         criteria.getMap().forEach((fieldName, value) -> {
             criteriaListBuilder.add(
-                OperatorUtils.eq(alias + "." + fieldName, value)
+                JsonOps.eq(alias + "." + fieldName, value)
             );
         });
 
-        return OperatorUtils.and(criteriaListBuilder.build());
+        return JsonOps.and(criteriaListBuilder.build());
     }
 }

@@ -1,7 +1,6 @@
-package elasta.orm.impl;
+package elasta.criteria.json.mapping;
 
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.entity.EntityMappingHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -12,7 +11,7 @@ import java.util.Objects;
 /**
  * Created by sohan on 5/8/2017.
  */
-public interface OperatorUtils {
+public interface JsonOps {
 
     String field = "field";
     String op = "op";

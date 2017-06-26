@@ -1,49 +1,39 @@
 package elasta.criteria;
 
-import elasta.criteria.funcs.ops.ComparisionOps;import elasta.criteria.funcs.ops.LogicalOps;import elasta.criteria.funcs.ops.ValueHolderOps;import elasta.criteria.funcs.ops.ComparisionOps;
-import elasta.criteria.funcs.ops.LogicalOps;
-import elasta.criteria.funcs.ops.ValueHolderOps;
-import elasta.criteria.funcs.ops.impl.ComparisionOpsImpl;
-import elasta.criteria.funcs.ops.impl.LogicalOpsImpl;
-import elasta.criteria.funcs.ops.impl.ValueHolderOpsImpl;
+import elasta.criteria.funcs.ops.Ops;
 
 /**
  * Created by Jango on 2017-01-06.
  */
 public interface Main {
     static void main(String[] args) {
-        LogicalOps logicalOps = new LogicalOpsImpl();
 
-        ValueHolderOps valueHolderOps = new ValueHolderOpsImpl();
-
-        ComparisionOps comparisionOps = new ComparisionOpsImpl();
-
-        Func and = logicalOps.and(
-            comparisionOps.eq(
-                valueHolderOps.valueOf("location"),
-                valueHolderOps.valueOf("Dhaka")
+        Func and = Ops.and(
+            Ops.eq(
+                Ops.valueOf("location"),
+                Ops.valueOf("Dhaka")
             ),
-            comparisionOps.lt(
-                valueHolderOps.valueOf("height"),
-                valueHolderOps.valueOf(8)
+            Ops.lt(
+                Ops.valueOf("height"),
+                Ops.valueOf(8)
             ),
-            logicalOps.and(
-                comparisionOps.eq(
-                    valueHolderOps.valueOf("name"),
-                    valueHolderOps.valueOf("sohan")),
-                comparisionOps.lt(
-                    valueHolderOps.valueOf("salaray"),
-                    valueHolderOps.valueOf(12000)),
-                logicalOps.or(
-                    logicalOps.not(
-                        comparisionOps.gt(
-                            valueHolderOps.valueOf("age"),
-                            valueHolderOps.valueOf(12)
+            Ops.and(
+                Ops.eq(
+                    Ops.valueOf("name"),
+                    Ops.valueOf("sohan")),
+                Ops.lt(
+                    Ops.valueOf("salaray"),
+                    Ops.valueOf(12000)),
+                Ops.or(
+                    Ops.not(
+                        Ops.gt(
+                            Ops.valueOf("age"),
+                            Ops.valueOf(12)
                         )
                     ),
-                    comparisionOps.ne(
-                        valueHolderOps.valueOf("size"),
-                        valueHolderOps.valueOf("34")
+                    Ops.ne(
+                        Ops.valueOf("size"),
+                        Ops.valueOf("34")
                     )
                 )
             )

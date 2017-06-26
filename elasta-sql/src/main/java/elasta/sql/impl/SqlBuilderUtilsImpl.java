@@ -4,9 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.criteria.Func;
+import elasta.criteria.funcs.FieldFunc;
 import elasta.criteria.funcs.ParamsBuilderImpl;
+import elasta.criteria.funcs.ops.Ops;
 import elasta.sql.SqlBuilderDialect;
 import elasta.sql.SqlBuilderUtils;
+import elasta.sql.SqlUtils;
 import elasta.sql.core.*;
 import elasta.sql.ex.SqlBuilderUtilsException;
 import io.vertx.core.json.JsonArray;
@@ -69,33 +72,6 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     @Override
-    public SqlAndParams querySql(String table, Collection<String> columns, JsonObject whereCriteria) {
-        ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
-        String selectSql = toSelectSql(columns);
-        String whereSql = toWhereSql(whereCriteria, paramsBuilder);
-        return new SqlAndParams(
-            "SELECT " + selectSql +
-                " FROM " + table(table, "")
-                + (whereSql.isEmpty() ? "" : " WHERE " + whereSql)
-            ,
-            new JsonArray(paramsBuilder.build())
-        );
-    }
-
-    @Override
-    public SqlAndParams querySql(Collection<SqlSelection> sqlSelections, SqlFrom sqlFrom, Collection<SqlJoin> sqlJoins, Collection<SqlCriteria> sqlCriterias) {
-        String select = toSqlSelect(sqlSelections);
-        String from = toSqlFrom(sqlFrom);
-        String join = toSqlJoin(sqlJoins);
-        ImmutableList.Builder<Object> builder = ImmutableList.builder();
-        String whereSql = toWhere(sqlCriterias, builder);
-        return new SqlAndParams(
-            "SELECT " + select + " FROM " + from + join + (whereSql.isEmpty() ? "" : " WHERE " + whereSql),
-            new JsonArray(builder.build())
-        );
-    }
-
-    @Override
     public SqlAndParams updateSql(UpdateTpl updateTpl) {
 
         switch (updateTpl.getUpdateOperationType()) {
@@ -110,28 +86,6 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
             }
         }
         throw new SqlBuilderUtilsException("Invalid updateOperationType '" + updateTpl.getUpdateOperationType() + "'");
-    }
-
-    @Override
-    public SqlAndParams deleteSql(String table, JsonObject where) {
-        ImmutableList.Builder<Object> builder = ImmutableList.builder();
-        String whereSql = toWhereSql(where, builder);
-        return new SqlAndParams(
-            "DELETE FROM " + table(table, "") + (whereSql.isEmpty() ? " WHERE 1" : " WHERE " + whereSql),
-            new JsonArray(builder.build())
-        );
-    }
-
-    @Override
-    public SqlAndParams existSql(String table, String primaryKey, Collection<SqlCriteria> sqlCriterias) {
-        ImmutableList.Builder<Object> paramsBuilder = ImmutableList.builder();
-        String where = toWhere(sqlCriterias, paramsBuilder);
-        return new SqlAndParams(
-            "SELECT COUNT(*) FROM " + table(table, "") + " WHERE " + (where.isEmpty() ? "1" : where),
-            new JsonArray(
-                paramsBuilder.build()
-            )
-        );
     }
 
     @Override
@@ -192,6 +146,131 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         );
     }
 
+    public List<Func> toWhereFuncs(Collection<SqlCriteria> sqlCriterias) {
+        ImmutableList.Builder<Func> builder = ImmutableList.builder();
+
+        sqlCriterias.stream()
+            .map(sqlCriteria -> Ops.eq(
+                new FieldFunc(sqlCriteria.getAlias() + "." + sqlCriteria.getColumn()),
+                Ops.valueOfObj(sqlCriteria.getValue())
+            ))
+            .forEach(builder::add);
+
+        return builder.build();
+    }
+
+    public Collection<JoinData> toJoinDatas(String parentAlias, Collection<SqlJoin> sqlJoins) {
+
+        ImmutableList.Builder<JoinData> builder = ImmutableList.builder();
+
+        for (SqlJoin sqlJoin : sqlJoins) {
+            builder.add(
+                new JoinData(
+                    parentAlias,
+                    sqlJoin.getJoinType(),
+                    sqlJoin.getJoinTable(),
+                    sqlJoin.getAlias(),
+                    toColumnToColumnMappings(sqlJoin.getAlias(), sqlJoin.getSqlJoinColumns())
+                )
+            );
+        }
+
+        return builder.build();
+    }
+
+    public List<Func> toSelectFuncs(Collection<SqlSelection> sqlSelections) {
+
+        ImmutableList.Builder<Func> funcBuilder = ImmutableList.builder();
+
+        sqlSelections.stream().map(sqlSelection -> new FieldFunc(
+            sqlSelection.getAlias() + "." + sqlSelection.getColumn()
+        )).forEach(funcBuilder::add);
+
+        return funcBuilder.build();
+    }
+
+    public List<Func> toWhereFuncs(String rootAlias, Collection<SqlCondition> sqlConditions) {
+
+        ImmutableList.Builder<Func> builder = ImmutableList.builder();
+
+        for (SqlCondition sqlCondition : sqlConditions) {
+            builder.add(
+                Ops.eq(new FieldFunc(rootAlias + "." + sqlCondition.getColumn()), Ops.valueOfObj(sqlCondition.getValue()))
+            );
+        }
+
+        return builder.build();
+    }
+
+    public List<Func> toWhereFuncs2(String alias, JsonObject whereCriteria) {
+        ImmutableList.Builder<Func> builder = ImmutableList.builder();
+
+        whereCriteria.fieldNames().forEach(column -> builder.add(
+            Ops.eq(new FieldFunc(alias + "." + column), Ops.valueOfObj(whereCriteria.getValue(column)))
+        ));
+
+        return builder.build();
+    }
+
+    public List<Func> toSelectFuncs(String alias, Collection<String> selectedColumns) {
+
+        ImmutableList.Builder<Func> builder = ImmutableList.builder();
+
+        selectedColumns.forEach(column -> builder.add(
+            new FieldFunc(alias + "." + column)
+        ));
+
+        return builder.build();
+    }
+
+    public UpdateTpl toDeleteUpdateTpl(String table, JsonObject where) {
+        return new UpdateTpl(
+            UpdateOperationType.DELETE,
+            table,
+            SqlUtils.emptyJsonObject(),
+            toSqlCriteria(where)
+        );
+    }
+
+    public UpdateTpl toInsertUpdateTpl(String table, JsonObject jsonObject) {
+        return new UpdateTpl(
+            UpdateOperationType.INSERT,
+            table,
+            jsonObject,
+            ImmutableList.of()
+        );
+    }
+
+    public Collection<UpdateTpl> toInsertUpdateTpls(String table, Collection<JsonObject> jsonObjects) {
+
+        ImmutableList.Builder<UpdateTpl> builder = ImmutableList.builder();
+
+        jsonObjects.stream().map(jsonObject -> toInsertUpdateTpl(table, jsonObject)).forEach(builder::add);
+
+        return builder.build();
+    }
+
+    private List<ColumnToColumnMapping> toColumnToColumnMappings(String alias, List<SqlJoinColumn> sqlJoinColumns) {
+        ImmutableList.Builder<ColumnToColumnMapping> builder = ImmutableList.builder();
+
+        sqlJoinColumns.stream().map(sqlJoinColumn -> new ColumnToColumnMapping(
+            alias + "." + sqlJoinColumn.getJoinTableColumn(),
+            sqlJoinColumn.getParentTableAlias() + "." + sqlJoinColumn.getParentTableColumn()
+        )).forEach(builder::add);
+
+        return builder.build();
+    }
+
+    private Collection<SqlCondition> toSqlCriteria(JsonObject where) {
+        ImmutableList.Builder<SqlCondition> builder = ImmutableList.builder();
+        for (String column : where.fieldNames()) {
+            builder.add(
+                new SqlCondition(column, where.getValue(column))
+            );
+        }
+        return builder.build();
+    }
+
     private SelectClauseHandlerImpl select(List<Func> selectFuncs, ParamsBuilderImpl paramsBuilder) {
         return new SelectClauseHandlerImpl(
             selectFuncs,
@@ -218,7 +297,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
 
         String set = toSetSql(updateTpl.getData(), paramsListBuilder);
 
-        String where = toWhere(updateTpl.getSqlCriterias(), paramsListBuilder);
+        String where = toWhere(updateTpl.getSqlConditions(), paramsListBuilder);
 
         return new SqlAndParams(
             "UPDATE " + table(updateTpl.getTable(), "") + " SET " + set + (where.isEmpty() ? "" : " WHERE " + where),
@@ -247,7 +326,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
 
     private SqlAndParams createInsertSql(UpdateTpl updateTpl) {
 
-        if (Utils.not(updateTpl.getSqlCriterias().isEmpty())) {
+        if (Utils.not(updateTpl.getSqlConditions().isEmpty())) {
             throw new SqlBuilderUtilsException("UpdateTpl with operationType 'INSERT' must have an empty SqlCriteria List");
         }
 
@@ -258,7 +337,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
 
         ImmutableList.Builder<Object> paramsListBuilder = ImmutableList.builder();
 
-        String where = toWhere(updateTpl.getSqlCriterias(), paramsListBuilder);
+        String where = toWhere(updateTpl.getSqlConditions(), paramsListBuilder);
 
         return new SqlAndParams(
             "DELETE FROM " + table(updateTpl.getTable(), "") + (where.isEmpty() ? " WHERE 1" : " WHERE " + where),
@@ -268,63 +347,17 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         );
     }
 
-    private String toWhere(Collection<SqlCriteria> sqlCriterias, ImmutableList.Builder<Object> builder) {
+    private String toWhere(Collection<SqlCondition> sqlCriterias, ImmutableList.Builder<Object> builder) {
         return sqlCriterias.stream()
-            .map(sqlCriteria -> {
+            .map(sqlCondition -> {
 
-                if (sqlCriteria.getValue() == null) {
-                    return column(sqlCriteria.getColumn(), sqlCriteria.getAlias().orElse("")) + " IS " + nul1();
+                if (sqlCondition.getValue() == null) {
+                    return column(sqlCondition.getColumn(), "") + " IS " + nul1();
                 }
 
-                builder.add(sqlCriteria.getValue());
+                builder.add(sqlCondition.getValue());
 
-                return column(sqlCriteria.getColumn(), sqlCriteria.getAlias().orElse("")) + " = ?";
-            })
-            .collect(Collectors.joining(" AND "));
-    }
-
-    private String toSqlJoin(Collection<SqlJoin> sqlJoins) {
-        return sqlJoins.stream()
-            .map(
-                sqlJoin -> sqlJoin.getJoinType().getValue().toUpperCase()
-                    + " " + table(sqlJoin.getJoinTable(), sqlJoin.getAlias().orElse(""))
-                    + " ON "
-                    + sqlJoin
-                    .getSqlJoinColumns()
-                    .stream()
-                    .map(
-                        sqlJoinColumn ->
-                            column(sqlJoinColumn.getJoinTableColumn(), sqlJoin.getAlias().orElse("")) + " = "
-                                + column(sqlJoinColumn.getParentTableColumn(), sqlJoinColumn.getParentTableAlias().orElse(""))
-                    ).collect(Collectors.joining(" AND "))
-            )
-            .collect(Collectors.joining(" "));
-    }
-
-    private String toSqlFrom(SqlFrom sqlFrom) {
-        return table(sqlFrom.getTable(), sqlFrom.getAlias().orElse(""));
-    }
-
-    private String toSqlSelect(Collection<SqlSelection> sqlSelections) {
-        return sqlSelections.stream()
-            .map(
-                sqlSelection -> column(sqlSelection.getColumn(), sqlSelection.getAlias().orElse(""))
-            )
-            .collect(Collectors.joining(", "));
-    }
-
-    private String toWhereSql(JsonObject whereCriteria, ImmutableList.Builder<Object> paramsBuilder) {
-        return whereCriteria.stream()
-            .map(e -> {
-
-                if (e.getValue() == null) {
-                    return column(e.getKey(), "") + " IS " + nul1();
-                }
-
-                paramsBuilder.add(e.getValue());
-
-                return column(e.getKey(), "") + " = ?";
-
+                return column(sqlCondition.getColumn(), "") + " = ?";
             })
             .collect(Collectors.joining(" AND "));
     }
@@ -341,10 +374,6 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
         return sqlBuilderDialect.nullValue();
     }
 
-    private String toSelectSql(Collection<String> columns) {
-        return columns.stream().map(column -> column(column, "")).collect(Collectors.joining(", "));
-    }
-
     private Collection<JoinData> generateJoinData(String rootAlias, Map<String, JoinData> aliasToJoinDataMap) {
 
         return new JoinDataBuilder(
@@ -353,6 +382,7 @@ final public class SqlBuilderUtilsImpl implements SqlBuilderUtils {
     }
 
     public static void main(String[] asdf) {
+
         SqlBuilderUtilsImpl sqlBuilderUtils = new SqlBuilderUtilsImpl();
 
         SqlAndParams sqlAndParams = sqlBuilderUtils.insertSql("table", new JsonObject(new HashMap<>(

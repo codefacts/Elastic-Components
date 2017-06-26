@@ -12,6 +12,7 @@ import io.vertx.ext.jdbc.JDBCClient;
  */
 public interface Delete33 {
     static void main(String[] asdfasd) {
+
         JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
             .setWorkerPoolSize(1)
             .setEventLoopPoolSize(1)

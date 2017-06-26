@@ -2,12 +2,10 @@ package elasta.criteria.json.mapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.funcs.ops.impl.*;
+import elasta.criteria.funcs.FieldFunc;
+import elasta.criteria.funcs.ops.Ops;
 import elasta.criteria.json.mapping.impl.*;
 import elasta.module.MutableModuleSystem;
-import elasta.criteria.funcs.ops.ComparisionOps;
-import elasta.criteria.funcs.ops.ValueHolderOps;
-import elasta.criteria.funcs.ops.LogicalOps;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -21,7 +19,7 @@ public interface Main {
             module.export(new JsonQueryParserImpl(
                 new JsonToFuncConverterMapImpl(
                     ImmutableMap.<String, JsonToFuncConverter>builder()
-                        .put("field", (jsonObject, converterMap) -> paramsBuilder -> jsonObject.getString("arg"))
+                        .put("field", (jsonObject, converterMap) -> new FieldFunc(jsonObject.getString("arg")))
                         .putAll(
                             module.require(JsonToFuncConverterMap.class).getMap()
                         )
@@ -35,28 +33,15 @@ public interface Main {
 
             module.export(
                 new JsonToFuncConverterMapBuilderImpl(
-                    module.require(LogicalOps.class),
-                    module.require(ComparisionOps.class),
-                    module.require(ValueHolderOps.class),
-                    new ArrayOpsImpl(),
-                    new StringOpsImpl(),
-                    new FunctionalOpsImpl(),
                     new JsonToFuncConverterHelperImpl(
-                        new ValueHolderOperationBuilderImpl(
-                            module.require(ValueHolderOps.class)
-                        )
+                        new ValueHolderOperationBuilderImpl()
                     )
                 ).build()
             );
         });
 
-        mutableModuleSystem.export(LogicalOps.class, module -> module.export(new LogicalOpsImpl()));
-        mutableModuleSystem.export(ComparisionOps.class, module -> module.export(new ComparisionOpsImpl()));
-        mutableModuleSystem.export(ValueHolderOps.class, module -> module.export(new ValueHolderOpsImpl()));
         mutableModuleSystem.export(ValueHolderOperationBuilder.class, module -> module.export(
-            new ValueHolderOperationBuilderImpl(
-                module.require(ValueHolderOps.class)
-            )
+            new ValueHolderOperationBuilderImpl()
         ));
 
         JsonQueryParser parser = mutableModuleSystem.require(JsonQueryParser.class);

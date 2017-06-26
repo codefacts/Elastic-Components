@@ -1,7 +1,6 @@
 package elasta.orm;
 
 import com.google.common.collect.ImmutableList;
-import elasta.criteria.funcs.ops.impl.*;
 import elasta.criteria.json.mapping.GenericJsonToFuncConverterImpl;
 import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterHelper;
@@ -16,6 +15,7 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
+import elasta.sql.BaseSqlDB;
 import elasta.sql.dbaction.DbInterceptors;
 import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.impl.BaseOrmImpl;
@@ -26,6 +26,7 @@ import elasta.orm.query.iml.QueryExecutorImpl;
 import elasta.sql.SqlBuilderUtils;
 import elasta.sql.SqlDB;
 import elasta.sql.SqlExecutor;
+import elasta.sql.impl.BaseSqlDBImpl;
 import elasta.sql.impl.SqlBuilderUtilsImpl;
 import elasta.sql.impl.SqlDBImpl;
 import elasta.sql.impl.SqlExecutorImpl;
@@ -107,12 +108,6 @@ public interface OrmExporter extends ModuleExporter {
 
             module.export(
                 new JsonToFuncConverterMapBuilderImpl(
-                    new LogicalOpsImpl(),
-                    new ComparisionOpsImpl(),
-                    new ValueHolderOpsImpl(),
-                    new ArrayOpsImpl(),
-                    new StringOpsImpl(),
-                    new FunctionalOpsImpl(),
                     module.require(JsonToFuncConverterHelper.class)
                 ).build()
             );
@@ -122,9 +117,7 @@ public interface OrmExporter extends ModuleExporter {
         builder.export(JsonToFuncConverterHelper.class, module -> {
             module.export(
                 new JsonToFuncConverterHelperImpl(
-                    new ValueHolderOperationBuilderImpl(
-                        new ValueHolderOpsImpl()
-                    )
+                    new ValueHolderOperationBuilderImpl()
                 )
             );
         });
@@ -135,6 +128,13 @@ public interface OrmExporter extends ModuleExporter {
 
         builder.export(SqlDB.class, module -> {
             module.export(new SqlDBImpl(
+                module.require(BaseSqlDB.class),
+                module.require(SqlBuilderUtils.class)
+            ));
+        });
+
+        builder.export(BaseSqlDB.class, module -> {
+            module.export(new BaseSqlDBImpl(
                 module.require(SqlExecutor.class),
                 module.require(SqlBuilderUtils.class)
             ));

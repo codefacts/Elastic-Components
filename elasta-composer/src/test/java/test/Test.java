@@ -2,7 +2,6 @@ package test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.criteria.funcs.ops.impl.*;
 import elasta.criteria.json.mapping.GenericJsonToFuncConverterImpl;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.criteria.json.mapping.impl.JsonToFuncConverterHelperImpl;
@@ -24,6 +23,7 @@ import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.query.iml.QueryExecutorImpl;
 import elasta.sql.SqlDB;
 import elasta.sql.SqlExecutor;
+import elasta.sql.impl.BaseSqlDBImpl;
 import elasta.sql.impl.SqlBuilderUtilsImpl;
 import elasta.sql.impl.SqlDBImpl;
 import elasta.sql.impl.SqlExecutorImpl;
@@ -50,7 +50,10 @@ public interface Test {
 
     static SqlDB dbSql(SqlExecutor sqlExecutor) {
         final SqlDBImpl dbSql = new SqlDBImpl(
-            sqlExecutor,
+            new BaseSqlDBImpl(
+                sqlExecutor,
+                new SqlBuilderUtilsImpl()
+            ),
             new SqlBuilderUtilsImpl()
         );
         return dbSql;
@@ -125,16 +128,8 @@ public interface Test {
 
     static JsonToFuncConverterMap jsonToFuncConverterMap() {
         return new JsonToFuncConverterMapBuilderImpl(
-            new LogicalOpsImpl(),
-            new ComparisionOpsImpl(),
-            new ValueHolderOpsImpl(),
-            new ArrayOpsImpl(),
-            new StringOpsImpl(),
-            new FunctionalOpsImpl(),
             new JsonToFuncConverterHelperImpl(
-                new ValueHolderOperationBuilderImpl(
-                    new ValueHolderOpsImpl()
-                )
+                new ValueHolderOperationBuilderImpl()
             )
         ).build();
     }

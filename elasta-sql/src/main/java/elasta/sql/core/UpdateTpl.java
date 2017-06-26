@@ -16,16 +16,16 @@ final public class UpdateTpl {
     private final UpdateOperationType updateOperationType;
     private final String table;
     private final JsonObject data;
-    private final Collection<SqlCriteria> sqlCriterias;
+    private final Collection<SqlCondition> sqlConditions;
 
-    public UpdateTpl(UpdateOperationType updateOperationType, String table, JsonObject data, Collection<SqlCriteria> sqlCriterias) {
+    public UpdateTpl(UpdateOperationType updateOperationType, String table, JsonObject data, Collection<SqlCondition> sqlConditions) {
         Objects.requireNonNull(updateOperationType);
         Objects.requireNonNull(table);
         Objects.requireNonNull(data);
-        Objects.requireNonNull(sqlCriterias);
+        Objects.requireNonNull(sqlConditions);
         this.updateOperationType = updateOperationType;
         this.table = table;
         this.data = data;
-        this.sqlCriterias = sqlCriterias;
+        this.sqlConditions = sqlConditions;
     }
 }

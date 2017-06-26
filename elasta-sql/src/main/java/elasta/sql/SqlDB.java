@@ -29,7 +29,7 @@ public interface SqlDB {
 
     Promise<ResultSet> query(String table, Collection<String> columns, JsonObject whereCriteria);
 
-    Promise<Boolean> exists(String table, String primaryKey, Collection<SqlCriteria> collect);
+    Promise<Boolean> exists(String table, String primaryKey, Collection<SqlCondition> sqlConditions);
 
     Promise<ResultSet> query(SqlQuery sqlQuery);
 }

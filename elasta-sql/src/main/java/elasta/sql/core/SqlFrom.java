@@ -8,9 +8,9 @@ import java.util.Optional;
  */
 final public class SqlFrom {
     final String table;
-    final Optional<String> alias;
+    final String alias;
 
-    public SqlFrom(String table, Optional<String> alias) {
+    public SqlFrom(String table, String alias) {
         Objects.requireNonNull(table);
         Objects.requireNonNull(alias);
         this.table = table;
@@ -21,7 +21,7 @@ final public class SqlFrom {
         return table;
     }
 
-    public Optional<String> getAlias() {
+    public String getAlias() {
         return alias;
     }
 

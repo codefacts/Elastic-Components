@@ -86,7 +86,7 @@ final public class BaseOrmImpl implements BaseOrm {
                     .map(exists -> UpdateTpl.builder()
                         .updateOperationType(UpdateOperationType.INSERT)
                         .table(tableData.getTable())
-                        .sqlCriterias(ImmutableList.of())
+                        .sqlConditions(ImmutableList.of())
                         .data(tableData.getValues())
                         .build())
             ).collect(Collectors.toList());
@@ -114,14 +114,14 @@ final public class BaseOrmImpl implements BaseOrm {
                 .updateOperationType(UpdateOperationType.UPDATE)
                 .table(deleteData.getTable())
                 .data(toJsonObject(deleteData.getUpdateValues()))
-                .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
+                .sqlConditions(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
                 .build()
             :
             UpdateTpl.builder()
                 .updateOperationType(UpdateOperationType.DELETE)
                 .table(deleteData.getTable())
                 .data(OrmUtils.emptyJsonObject())
-                .sqlCriterias(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
+                .sqlConditions(toSqlCriterias(Arrays.asList(deleteData.getWhereCriteria())))
                 .build();
     }
 
@@ -195,15 +195,14 @@ final public class BaseOrmImpl implements BaseOrm {
         return jsonObject;
     }
 
-    private Collection<SqlCriteria> toSqlCriterias(List<ColumnValuePair> columnValuePairs) {
-        ImmutableList.Builder<SqlCriteria> sqlCriteriaListBuilder = ImmutableList.builder();
+    private Collection<SqlCondition> toSqlCriterias(List<ColumnValuePair> columnValuePairs) {
+        ImmutableList.Builder<SqlCondition> sqlCriteriaListBuilder = ImmutableList.builder();
 
         columnValuePairs.stream()
             .map(
-                columnValuePair -> new SqlCriteria(
+                columnValuePair -> new SqlCondition(
                     columnValuePair.getPrimaryColumn(),
-                    columnValuePair.getValue(),
-                    Optional.empty()
+                    columnValuePair.getValue()
                 )
             )
             .forEach(sqlCriteriaListBuilder::add);

@@ -1,5 +1,6 @@
 package elasta.sql.core;
 
+import com.google.common.collect.ImmutableList;
 import elasta.criteria.Func;
 import lombok.Builder;
 import lombok.Value;
@@ -27,18 +28,13 @@ public class SqlQuery {
     SqlQuery(List<Func> selectFuncs, TableAliasPair tableAliasPair, Collection<JoinData> joinDatas, List<Func> whereFuncs, List<Func> havingFuncs, List<OrderByData> orderByDatas, List<ColumnAliasPair> groupBy, SqlPagination sqlPagination) {
         Objects.requireNonNull(selectFuncs);
         Objects.requireNonNull(tableAliasPair);
-        Objects.requireNonNull(joinDatas);
-        Objects.requireNonNull(whereFuncs);
-        Objects.requireNonNull(havingFuncs);
-        Objects.requireNonNull(orderByDatas);
-        Objects.requireNonNull(groupBy);
         this.selectFuncs = selectFuncs;
         this.tableAliasPair = tableAliasPair;
-        this.joinDatas = joinDatas;
-        this.whereFuncs = whereFuncs;
-        this.havingFuncs = havingFuncs;
-        this.orderByDatas = orderByDatas;
-        this.groupBy = groupBy;
+        this.joinDatas = joinDatas == null ? ImmutableList.of() : joinDatas;
+        this.whereFuncs = whereFuncs == null ? ImmutableList.of() : whereFuncs;
+        this.havingFuncs = havingFuncs == null ? ImmutableList.of() : havingFuncs;
+        this.orderByDatas = orderByDatas == null ? ImmutableList.of() : orderByDatas;
+        this.groupBy = groupBy == null ? ImmutableList.of() : groupBy;
         this.sqlPagination = (sqlPagination == null) ? null : sqlPagination;
     }
 
