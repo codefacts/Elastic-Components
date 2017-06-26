@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.orm.upsert.ex.TableDataException;
 import io.vertx.core.json.JsonObject;
+import lombok.Value;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Jango on 2017-01-09.
  */
+@Value
 final public class TableData {
     final String table;
     final String[] primaryColumns;
@@ -19,6 +21,9 @@ final public class TableData {
     final int hash;
 
     private TableData(String table, String[] primaryColumns, Map<String, Object> values) {
+        Objects.requireNonNull(table);
+        Objects.requireNonNull(primaryColumns);
+        Objects.requireNonNull(values);
         this.table = table;
         this.primaryColumns = primaryColumns;
         this.values = new JsonObject(values);
@@ -29,18 +34,23 @@ final public class TableData {
         Objects.requireNonNull(table);
         Objects.requireNonNull(primaryColumns);
         Objects.requireNonNull(values);
+        
         if (primaryColumns.length <= 0) {
             throw new TableDataException("No primary column is given for table '" + table + "'");
         }
+
         values = new JsonObject(
             ImmutableMap.copyOf(
                 values.getMap().entrySet().stream().filter(entry -> entry.getValue() != null).collect(Collectors.toList())
             )
         );
-        checkValueExistsForEachColumn(primaryColumns, values);
+
         this.table = table;
         this.primaryColumns = primaryColumns;
         this.values = values;
+
+        checkValueExistsForEachColumn(primaryColumns, values);
+
         this.hash = calHashCode();
     }
 
@@ -50,18 +60,6 @@ final public class TableData {
                 throw new TableDataException("No value is given for primary column '" + table + "." + primaryColumn + "'");
             }
         }
-    }
-
-    public String getTable() {
-        return table;
-    }
-
-    public String[] getPrimaryColumns() {
-        return primaryColumns;
-    }
-
-    public JsonObject getValues() {
-        return values;
     }
 
     @Override
@@ -87,16 +85,6 @@ final public class TableData {
     @Override
     public int hashCode() {
         return hash;
-    }
-
-    @Override
-    public String toString() {
-        return "TableData{" +
-            "table='" + table + '\'' +
-            ", primaryColumns=" + Arrays.toString(primaryColumns) +
-            ", values=" + values +
-            ", hash=" + hash +
-            '}';
     }
 
     private int calHashCode() {

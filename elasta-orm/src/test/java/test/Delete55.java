@@ -9,9 +9,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**
- * Created by sohan on 3/26/2017.
+ * Created by sohan on 6/27/2017.
  */
-public interface Delete22 {
+public interface Delete55 {
     static void main(String[] asdfasd) {
         JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
             .setWorkerPoolSize(1)
@@ -23,10 +23,9 @@ public interface Delete22 {
             .jdbcClient(jdbcClient)
             .build());
 
-        JsonObject department = new JsonObject(
+        final JsonObject department = new JsonObject(
             ImmutableMap.of(
-                "id", 94504975049L,
-                "name", "MCE"
+                "id", 8721568
             )
         );
 
@@ -35,7 +34,7 @@ public interface Delete22 {
                 .entity("department")
                 .jsonObject(department)
                 .build()
-        ).mapP(Test.sqlDB(jdbcClient)::update).then(jsonObject -> {
+        ).thenP(Test.sqlDB(jdbcClient)::update).then(jsonObject -> {
             System.out.println("ppp888888888888888888888888888888888888888888888888888888888888888888888");
         }).err(Throwable::printStackTrace);
     }

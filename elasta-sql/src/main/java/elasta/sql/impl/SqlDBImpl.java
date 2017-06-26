@@ -15,6 +15,7 @@ import io.vertx.ext.sql.ResultSet;
 
 import java.sql.SQLDataException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -124,12 +125,14 @@ final public class SqlDBImpl implements SqlDB {
 
         ImmutableList.Builder<UpdateTpl> builder = ImmutableList.builder();
 
-        Promise<UpdateTpl> promise = Promises.of(updateTpls.stream().findFirst().get());
+        Promise<UpdateTpl> promise = Promises.empty();
 
-        for (UpdateTpl updateTpl : updateTpls) {
-            promise = promise.mapP(dbInterceptors::interceptUpdate)
+        for (Iterator<UpdateTpl> iterator = updateTpls.iterator(); iterator.hasNext(); ) {
+
+            promise = promise
+                .map(tpl -> iterator.next())
+                .mapP(dbInterceptors::interceptUpdate)
                 .then(builder::add)
-                .map(tpl -> updateTpl)
             ;
         }
 

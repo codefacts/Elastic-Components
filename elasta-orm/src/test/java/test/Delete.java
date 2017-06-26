@@ -58,7 +58,7 @@ public interface Delete {
                 .entity("employee")
                 .jsonObject(employee)
                 .build()
-        ).then(jsonObject -> {
+        ).thenP(Test.sqlDB(jdbcClient)::update).then(jsonObject -> {
             System.out.println("ppp888888888888888888888888888888888888888888888888888888888888888888888");
         }).err(Throwable::printStackTrace);
     }

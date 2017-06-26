@@ -27,10 +27,10 @@ public interface OrmTest {
 
     static void main(String[] asdfasd) {
 
-//        countDistinct();
+        countDistinct();
 //        findAll();
 //        findAllById();
-//        findAllByQueryParamsWithNestedArrayFields();
+        findAllByQueryParamsWithNestedArrayFields();
     }
 
     static void findAllByQueryParamsWithNestedArrayFields() {
@@ -147,7 +147,7 @@ public interface OrmTest {
                 ImmutableMap.of(
                     "op", "gte",
                     "arg1", ImmutableMap.of(
-                        "op", "column",
+                        "op", "field",
                         "arg", "e.salary"
                     ),
                     "arg2", 8000
@@ -177,7 +177,7 @@ public interface OrmTest {
             ImmutableMap.of(
                 "op", "gte",
                 "arg1", ImmutableMap.of(
-                    "op", "column",
+                    "op", "field",
                     "arg", "e.salary"
                 ),
                 "arg2", 8000

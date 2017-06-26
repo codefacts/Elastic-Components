@@ -16,6 +16,7 @@ import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
+import elasta.sql.SqlOps;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -189,15 +190,9 @@ final class DataLoader {
                             .build()
                     )
                     .criteria(
-                        new JsonObject(
-                            ImmutableMap.of(
-                                "op", OpNames.eq,
-                                "arg1", ImmutableMap.of(
-                                    "op", "column",
-                                    "arg", (pathExpression.root() + "." + primaryKey)
-                                ),
-                                "arg2", jsonObject.getValue(primaryKey)
-                            )
+                        SqlOps.eq(
+                            (pathExpression.root() + "." + primaryKey),
+                            jsonObject.getValue(primaryKey)
                         )
                     )
                     .having(new JsonObject())

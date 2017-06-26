@@ -42,7 +42,26 @@ public interface Test {
         );
     }
 
-    static SqlDB dbSql(SqlExecutor sqlExecutor) {
+    static SqlDB sqlDB(JDBCClient jdbcClient) {
+        final SqlDBImpl dbSql = new SqlDBImpl(
+            new BaseSqlDBImpl(
+                Test.sqlExecutor(
+                    jdbcClient
+                ),
+                new SqlQueryBuilderUtilsImpl(
+                    new MySqlSqlBuilderDialectImpl()
+                )
+            ),
+            new SqlBuilderUtilsImpl(),
+            new DbInterceptorsImpl(
+                ImmutableList.of(),
+                ImmutableList.of()
+            )
+        );
+        return dbSql;
+    }
+
+    static SqlDB sqlDB(SqlExecutor sqlExecutor) {
         final SqlDBImpl dbSql = new SqlDBImpl(
             new BaseSqlDBImpl(
                 sqlExecutor,
@@ -87,7 +106,7 @@ public interface Test {
 
         SqlExecutor sqlExecutor = sqlExecutor(params.jdbcClient);
 
-        SqlDB sqlDB = dbSql(sqlExecutor);
+        SqlDB sqlDB = sqlDB(sqlExecutor);
 
         return new BaseOrmBuilderImpl(
             helper,
