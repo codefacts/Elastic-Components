@@ -1,5 +1,6 @@
 package elasta.orm.upsert;
 
+import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -7,5 +8,5 @@ import io.vertx.core.json.JsonObject;
  */
 @FunctionalInterface
 public interface UpsertFunction {
-    TableData upsert(JsonObject jsonObject, UpsertContext upsertContext);
+    Promise<TableData> upsert(JsonObject jsonObject, UpsertContext upsertContext);
 }

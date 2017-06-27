@@ -21,6 +21,7 @@ import elasta.orm.impl.BaseOrmImpl;
 import elasta.orm.relation.delete.DeleteChildRelationsFunction;
 import elasta.orm.relation.delete.builder.DeleteChildRelationsFunctionBuilder;
 import elasta.orm.relation.delete.builder.impl.DeleteChildRelationsFunctionBuilderImpl;
+import elasta.orm.upsert.IdGenerator;
 import elasta.orm.upsert.UpsertFunction;
 import elasta.orm.upsert.builder.UpsertFunctionBuilder;
 import elasta.orm.upsert.builder.impl.UpsertFunctionBuilderImpl;
@@ -45,12 +46,15 @@ final class EntityOperationBuilder {
     final BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext;
     final BuilderContext<UpsertFunction> upsertFunctionBuilderContext;
     final BuilderContext<DeleteChildRelationsFunction> deleteChildRelationsFunctionBuilderContext;
+    final IdGenerator idGenerator;
 
-    EntityOperationBuilder(EntityMappingHelper helper, SqlDB sqlDB) {
+    EntityOperationBuilder(EntityMappingHelper helper, SqlDB sqlDB, IdGenerator idGenerator) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);
+        Objects.requireNonNull(idGenerator);
         this.helper = helper;
         this.sqlDB = sqlDB;
+        this.idGenerator = idGenerator;
 
         this.deleteTableFunctionBuilderContext = new BuilderContextImpl<>(
             this.deleteTableFunctionMap = new LinkedHashMap<>()
@@ -69,7 +73,8 @@ final class EntityOperationBuilder {
         );
 
         upsertFunctionBuilder = new UpsertFunctionBuilderImpl(
-            this.helper
+            this.helper,
+            this.idGenerator
         );
         this.deleteFunctionBuilder = deleteFunctionBuilder();
 

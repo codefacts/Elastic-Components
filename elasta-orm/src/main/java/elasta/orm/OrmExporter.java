@@ -12,6 +12,7 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
+import elasta.orm.upsert.IdGenerator;
 import elasta.sql.*;
 import elasta.sql.dbaction.DbInterceptors;
 import elasta.sql.dbaction.impl.DbInterceptorsImpl;
@@ -80,7 +81,8 @@ public interface OrmExporter extends ModuleExporter {
             final Map<String, BaseOrmImpl.EntityOperation> operationMap = new OperationMapBuilder(
                 entities,
                 module.require(EntityMappingHelper.class),
-                module.require(SqlDB.class)
+                module.require(SqlDB.class),
+                module.require(IdGenerator.class)
             ).build();
 
             module.export(new BaseOrmImpl(

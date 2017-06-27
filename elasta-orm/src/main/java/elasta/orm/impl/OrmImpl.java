@@ -185,7 +185,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public <T extends Collection<JsonObject>> Promise<T> upsertAll(String entity, T jsonObjects) {
+    public <T extends Collection<JsonObject>> Promise<List<UpdateTpl>> upsertAll(String entity, T jsonObjects) {
         return baseOrm.execute(
 
             jsonObjects.stream()
@@ -196,11 +196,11 @@ final public class OrmImpl implements Orm {
                     .build())
                 .collect(Collectors.toList())
 
-        ).map(aVoid -> jsonObjects);
+        );
     }
 
     @Override
-    public <T> Promise<T> delete(String entity, T id) {
+    public <T> Promise<List<UpdateTpl>> delete(String entity, T id) {
         return baseOrm.delete(
             BaseOrm.DeleteParams.builder()
                 .entity(entity)
@@ -212,13 +212,12 @@ final public class OrmImpl implements Orm {
                     )
                 )
                 .build()
-        ).map(jsonObject -> id);
+        );
     }
 
     @Override
-    public <T, R extends Collection<T>> Promise<R> deleteAll(String entity, R ids) {
+    public <I, T extends Collection<I>> Promise<List<UpdateTpl>> deleteAll(String entity, T ids) {
         return baseOrm.execute(
-
             ids.stream()
                 .map(
                     id -> BaseOrm.ExecuteParams.builder()
@@ -235,7 +234,7 @@ final public class OrmImpl implements Orm {
                 )
                 .collect(Collectors.toList())
 
-        ).map(aVoid -> ids);
+        );
     }
 
     @Override
@@ -249,7 +248,7 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
-    public <T extends Collection<JsonObject>> Promise<T> deleteAllChildRelations(String entity, T jsonObjects) {
+    public <T extends Collection<JsonObject>> Promise<List<UpdateTpl>> deleteAllChildRelations(String entity, T jsonObjects) {
         return baseOrm.execute(
             jsonObjects.stream()
                 .map(
@@ -260,7 +259,7 @@ final public class OrmImpl implements Orm {
                         .build()
                 )
                 .collect(Collectors.toList())
-        ).map(aVoid -> jsonObjects);
+        );
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.commons.Utils;
 import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
-import elasta.composer.producer.IdGenerator;
+import elasta.orm.upsert.IdGenerator;
 import elasta.composer.state.handlers.ChildIdGenerationStateHandlerBuilder;
 import elasta.core.flow.Flow;
 import io.vertx.core.json.JsonObject;

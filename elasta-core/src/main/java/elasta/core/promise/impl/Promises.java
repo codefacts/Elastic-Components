@@ -8,9 +8,11 @@ import elasta.core.intfs.RunnableUnckd;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.MapHandler;
 import elasta.core.promise.intfs.Promise;
+import elasta.core.promise.intfs.Signal;
 import elasta.core.touple.*;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by someone on 16/10/2015.
@@ -98,148 +100,187 @@ final public class Promises {
 
     public static <T> Promise<List<T>> when(final Collection<Promise<T>> promises) {
         try {
+
+            final ReentrantLock lock = new ReentrantLock();
+
             if (promises.size() == 0) {
                 return Promises.of(ImmutableList.of());
             }
-            Defer<List<T>> defer = defer();
-            final SimpleCounter counter = new SimpleCounter(0);
-            MutableTpl3<Boolean, Throwable, Object> pStatus = MutableTpls.of(true, null, null);
-            promises.forEach(pm -> pm.cmp(pms -> {
-                pStatus.t1 &= pms.isSuccess();
 
-                if (pStatus.t2 == null) {
-                    pStatus.t2 = pms.err();
-                    pStatus.t3 = pms.lastValue();
-                }
+            final Defer<List<T>> defer = defer();
+
+            final SimpleCounter counter = new SimpleCounter(0);
+
+            final MutableTpl3<Boolean, Throwable, Object> pStatus = MutableTpls.of(true, null, null);
+
+            promises.forEach(pm -> pm.cmp(pms -> {
+
+                try {
+
+                    lock.lock();
+
+                    pStatus.t1 &= pms.isSuccess();
+
+                    if (pStatus.t2 == null) {
+                        pStatus.t2 = pms.err();
+                        pStatus.t3 = pms.lastValue();
+                    }
 
 //                System.out.println(Thread.currentThread().toString());
 
-                counter.counter++;
-                if (counter.counter >= promises.size()) {
-                    if (pStatus.t1) {
-                        Object[] vals = new Object[promises.size()];
-                        int index = 0;
-                        for (Promise<T> promise : promises) {
-                            vals[index] = promise.val();
-                            index = index + 1;
+                    counter.counter++;
+                    if (counter.counter >= promises.size()) {
+                        if (pStatus.t1) {
+                            Object[] vals = new Object[promises.size()];
+                            int index = 0;
+                            for (Promise<T> promise : promises) {
+                                vals[index] = promise.val();
+                                index = index + 1;
+                            }
+                            defer.resolve(new MyImmutableList<>(vals));
+                        } else {
+                            defer.reject(pStatus.t2, pStatus.t3);
                         }
-                        defer.resolve(new MyImmutableList<>(vals));
-                    } else {
-                        defer.reject(pStatus.t2, pStatus.t3);
                     }
+
+                } catch (Exception ex) {
+
+                    pStatus.t1 = false;
+                    pStatus.t2 = ex;
+                    pStatus.t3 = pms.lastValue();
+
+                } finally {
+                    lock.unlock();
                 }
+
             }));
+
             return defer.promise();
+
         } catch (Exception ex) {
             return Promises.error(ex);
         }
     }
 
     public static <T> Promise<List<Promise<T>>> allComplete(final Collection<Promise<T>> promises) {
-        final Defer<List<Promise<T>>> defer = Promises.defer();
-        if (promises.size() <= 0) defer.resolve(Collections.emptyList());
+
         try {
+
+            final ReentrantLock lock = new ReentrantLock();
+
+            if (promises.size() <= 0) {
+                return Promises.of(Collections.emptyList());
+            }
+
+            final Defer<List<Promise<T>>> defer = Promises.defer();
+
             final ImmutableList.Builder<Promise<T>> builder = ImmutableList.builder();
+
             final SimpleCounter counter = new SimpleCounter(0);
+
             promises.forEach(promise -> {
+
                 final Promise<T> complete = promise.cmp(p -> {
-                    counter.counter++;
-                    if (counter.counter == promises.size()) {
-                        defer.resolve(builder.build());
+
+                    try {
+
+                        lock.lock();
+
+                        if (defer.isComplete()) {
+                            return;
+                        }
+
+                        counter.counter++;
+                        if (counter.counter >= promises.size()) {
+                            defer.resolve(builder.build());
+                        }
+
+                    } catch (Exception ex) {
+
+                        defer.reject(ex);
+
+                    } finally {
+
+                        lock.unlock();
                     }
+
                 });
+
                 builder.add(complete);
             });
+
+            return defer.promise();
+
         } catch (Throwable ex) {
-            defer.reject(ex);
+            return error(ex);
         }
-        return defer.promise();
     }
 
     public static <T1, T2> Promise<MutableTpl2<T1, T2>> when(final Promise<T1> t1Promise, final Promise<T2> t2Promise) {
-        final Defer<MutableTpl2<T1, T2>> defer = defer();
-        SimpleCounter counter = new SimpleCounter();
-        MutableTpl2<T1, T2> mutableTpl2 = new MutableTpl2<>();
-        final int len = 2;
-        t1Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl2.t1 = t.val();
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl2);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
 
-        t2Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl2.t2 = t.val();
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl2);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
-        return defer.promise();
+        try {
+
+            final ReentrantLock lock = new ReentrantLock();
+
+            final Defer<MutableTpl2<T1, T2>> defer = defer();
+
+            final SimpleCounter counter = new SimpleCounter();
+
+            final MutableTpl2<T1, T2> mutableTpl2 = new MutableTpl2<>();
+
+            final int len = 2;
+
+            Promises.<T1>onCompletePromise(t1Promise, lock, defer, counter, val -> {
+                mutableTpl2.t1 = val;
+                return mutableTpl2;
+            }, len);
+
+            Promises.<T2>onCompletePromise(t2Promise, lock, defer, counter, val -> {
+                mutableTpl2.t2 = val;
+                return mutableTpl2;
+            }, len);
+
+            return defer.promise();
+
+        } catch (Exception ex) {
+            return Promises.error(ex);
+        }
     }
 
     public static <T1, T2, T3> Promise<MutableTpl3<T1, T2, T3>> when(final Promise<T1> t1Promise,
                                                                      final Promise<T2> t2Promise,
                                                                      final Promise<T3> t3Promise) {
-        final Defer<MutableTpl3<T1, T2, T3>> defer = defer();
-        SimpleCounter counter = new SimpleCounter();
-        MutableTpl3<T1, T2, T3> mutableTpl3 = new MutableTpl3<>();
-        final int len = 3;
-        t1Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl3.setT1(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl3);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
 
-        t2Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl3.setT2(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl3);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+        try {
 
-        t3Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl3.setT3(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl3);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
-        return defer.promise();
+            final Defer<MutableTpl3<T1, T2, T3>> defer = defer();
+            SimpleCounter counter = new SimpleCounter();
+            MutableTpl3<T1, T2, T3> mutableTpl3 = new MutableTpl3<>();
+            final int len = 3;
+
+            final ReentrantLock lock = new ReentrantLock();
+
+            Promises.<T1>onCompletePromise(t1Promise, lock, defer, counter, val -> {
+                mutableTpl3.t1 = val;
+                return mutableTpl3;
+            }, len);
+
+            Promises.<T2>onCompletePromise(t2Promise, lock, defer, counter, val -> {
+                mutableTpl3.t2 = val;
+                return mutableTpl3;
+            }, len);
+
+            Promises.<T3>onCompletePromise(t3Promise, lock, defer, counter, val -> {
+                mutableTpl3.t3 = val;
+                return mutableTpl3;
+            }, len);
+
+            return defer.promise();
+
+        } catch (Exception ex) {
+
+            return Promises.error(ex);
+        }
     }
 
 
@@ -247,66 +288,40 @@ final public class Promises {
                                                                              final Promise<T2> t2Promise,
                                                                              final Promise<T3> t3Promise,
                                                                              final Promise<T4> t4Promise) {
-        final Defer<MutableTpl4<T1, T2, T3, T4>> defer = defer();
-        SimpleCounter counter = new SimpleCounter();
-        MutableTpl4<T1, T2, T3, T4> mutableTpl4 = new MutableTpl4<>();
-        final int len = 4;
-        t1Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl4.setT1(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl4);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+        try {
 
-        t2Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl4.setT2(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl4);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+            final Defer<MutableTpl4<T1, T2, T3, T4>> defer = defer();
+            SimpleCounter counter = new SimpleCounter();
+            MutableTpl4<T1, T2, T3, T4> mutableTpl4 = new MutableTpl4<>();
+            final int len = 4;
 
-        t3Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl4.setT3(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl4);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+            final ReentrantLock lock = new ReentrantLock();
 
-        t4Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl4.setT4(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl4);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
-        return defer.promise();
+            Promises.<T1>onCompletePromise(t1Promise, lock, defer, counter, val -> {
+                mutableTpl4.t1 = val;
+                return mutableTpl4;
+            }, len);
+
+            Promises.<T2>onCompletePromise(t2Promise, lock, defer, counter, val -> {
+                mutableTpl4.t2 = val;
+                return mutableTpl4;
+            }, len);
+
+            Promises.<T3>onCompletePromise(t3Promise, lock, defer, counter, val -> {
+                mutableTpl4.t3 = val;
+                return mutableTpl4;
+            }, len);
+
+            Promises.<T4>onCompletePromise(t4Promise, lock, defer, counter, val -> {
+                mutableTpl4.t4 = val;
+                return mutableTpl4;
+            }, len);
+
+            return defer.promise();
+
+        } catch (Exception ex) {
+            return Promises.error(ex);
+        }
     }
 
     public static <T1, T2, T3, T4, T5> Promise<MutableTpl5<T1, T2, T3, T4, T5>> when(final Promise<T1> t1Promise,
@@ -314,85 +329,259 @@ final public class Promises {
                                                                                      final Promise<T3> t3Promise,
                                                                                      final Promise<T4> t4Promise,
                                                                                      final Promise<T5> t5Promise) {
-        final Defer<MutableTpl5<T1, T2, T3, T4, T5>> defer = defer();
-        SimpleCounter counter = new SimpleCounter();
-        MutableTpl5<T1, T2, T3, T4, T5> mutableTpl5 = new MutableTpl5<>();
-        final int len = 5;
-        t1Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl5.setT1(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl5);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+        try {
 
-        t2Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl5.setT2(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl5);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+            final Defer<MutableTpl5<T1, T2, T3, T4, T5>> defer = defer();
+            SimpleCounter counter = new SimpleCounter();
+            MutableTpl5<T1, T2, T3, T4, T5> mutableTpl5 = new MutableTpl5<>();
+            final int len = 5;
 
-        t3Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl5.setT3(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl5);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+            final ReentrantLock lock = new ReentrantLock();
 
-        t4Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl5.setT4(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl5);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+            Promises.<T1>onCompletePromise(t1Promise, lock, defer, counter, val -> {
+                mutableTpl5.t1 = val;
+                return mutableTpl5;
+            }, len);
 
-        t5Promise.cmp(t -> {
-            if (!defer.promise().isComplete()) {
-                if (t.isSuccess()) {
-                    mutableTpl5.setT5(t.val());
-                    counter.counter++;
-                    if (counter.counter == len) {
-                        defer.resolve(mutableTpl5);
-                    }
-                } else {
-                    defer.reject(t.err(), t.lastValue());
-                }
-            }
-        });
+            Promises.<T2>onCompletePromise(t2Promise, lock, defer, counter, val -> {
+                mutableTpl5.t2 = val;
+                return mutableTpl5;
+            }, len);
 
-        return defer.promise();
+            Promises.<T3>onCompletePromise(t3Promise, lock, defer, counter, val -> {
+                mutableTpl5.t3 = val;
+                return mutableTpl5;
+            }, len);
+
+            Promises.<T4>onCompletePromise(t4Promise, lock, defer, counter, val -> {
+                mutableTpl5.t4 = val;
+                return mutableTpl5;
+            }, len);
+
+            Promises.<T5>onCompletePromise(t5Promise, lock, defer, counter, val -> {
+                mutableTpl5.t5 = val;
+                return mutableTpl5;
+            }, len);
+
+            return defer.promise();
+
+        } catch (Exception ex) {
+            return Promises.error(ex);
+        }
+    }
+
+    public static <T1, T2, T3, T4, T5, T6> Promise<MutableTpl6<T1, T2, T3, T4, T5, T6>> when(final Promise<T1> t1Promise,
+                                                                                             final Promise<T2> t2Promise,
+                                                                                             final Promise<T3> t3Promise,
+                                                                                             final Promise<T4> t4Promise,
+                                                                                             final Promise<T5> t5Promise,
+                                                                                             final Promise<T6> t6Promise) {
+        try {
+
+            final Defer<MutableTpl6<T1, T2, T3, T4, T5, T6>> defer = defer();
+            SimpleCounter counter = new SimpleCounter();
+            MutableTpl6<T1, T2, T3, T4, T5, T6> mutableTpl6 = new MutableTpl6<>();
+            final int len = 5;
+
+            final ReentrantLock lock = new ReentrantLock();
+
+            Promises.<T1>onCompletePromise(t1Promise, lock, defer, counter, val -> {
+                mutableTpl6.t1 = val;
+                return mutableTpl6;
+            }, len);
+
+            Promises.<T2>onCompletePromise(t2Promise, lock, defer, counter, val -> {
+                mutableTpl6.t2 = val;
+                return mutableTpl6;
+            }, len);
+
+            Promises.<T3>onCompletePromise(t3Promise, lock, defer, counter, val -> {
+                mutableTpl6.t3 = val;
+                return mutableTpl6;
+            }, len);
+
+            Promises.<T4>onCompletePromise(t4Promise, lock, defer, counter, val -> {
+                mutableTpl6.t4 = val;
+                return mutableTpl6;
+            }, len);
+
+            Promises.<T5>onCompletePromise(t5Promise, lock, defer, counter, val -> {
+                mutableTpl6.t5 = val;
+                return mutableTpl6;
+            }, len);
+
+            Promises.<T6>onCompletePromise(t6Promise, lock, defer, counter, val -> {
+                mutableTpl6.t6 = val;
+                return mutableTpl6;
+            }, len);
+
+            return defer.promise();
+
+        } catch (Exception ex) {
+            return Promises.error(ex);
+        }
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7> Promise<MutableTpl7<T1, T2, T3, T4, T5, T6, T7>> when(final Promise<T1> t1Promise,
+                                                                                                     final Promise<T2> t2Promise,
+                                                                                                     final Promise<T3> t3Promise,
+                                                                                                     final Promise<T4> t4Promise,
+                                                                                                     final Promise<T5> t5Promise,
+                                                                                                     final Promise<T6> t6Promise,
+                                                                                                     final Promise<T7> t7Promise
+    ) {
+        try {
+
+            final Defer<MutableTpl7<T1, T2, T3, T4, T5, T6, T7>> defer = defer();
+            SimpleCounter counter = new SimpleCounter();
+            MutableTpl7<T1, T2, T3, T4, T5, T6, T7> mutableTpl7 = new MutableTpl7<>();
+            final int len = 5;
+
+            final ReentrantLock lock = new ReentrantLock();
+
+            Promises.<T1>onCompletePromise(t1Promise, lock, defer, counter, val -> {
+                mutableTpl7.t1 = val;
+                return mutableTpl7;
+            }, len);
+
+            Promises.<T2>onCompletePromise(t2Promise, lock, defer, counter, val -> {
+                mutableTpl7.t2 = val;
+                return mutableTpl7;
+            }, len);
+
+            Promises.<T3>onCompletePromise(t3Promise, lock, defer, counter, val -> {
+                mutableTpl7.t3 = val;
+                return mutableTpl7;
+            }, len);
+
+            Promises.<T4>onCompletePromise(t4Promise, lock, defer, counter, val -> {
+                mutableTpl7.t4 = val;
+                return mutableTpl7;
+            }, len);
+
+            Promises.<T5>onCompletePromise(t5Promise, lock, defer, counter, val -> {
+                mutableTpl7.t5 = val;
+                return mutableTpl7;
+            }, len);
+
+            Promises.<T6>onCompletePromise(t6Promise, lock, defer, counter, val -> {
+                mutableTpl7.t6 = val;
+                return mutableTpl7;
+            }, len);
+
+            Promises.<T7>onCompletePromise(t7Promise, lock, defer, counter, val -> {
+                mutableTpl7.t7 = val;
+                return mutableTpl7;
+            }, len);
+
+            return defer.promise();
+
+        } catch (Exception ex) {
+            return Promises.error(ex);
+        }
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8> Promise<MutableTpl8<T1, T2, T3, T4, T5, T6, T7, T8>> when(final Promise<T1> t1Promise,
+                                                                                                             final Promise<T2> t2Promise,
+                                                                                                             final Promise<T3> t3Promise,
+                                                                                                             final Promise<T4> t4Promise,
+                                                                                                             final Promise<T5> t5Promise,
+                                                                                                             final Promise<T6> t6Promise,
+                                                                                                             final Promise<T7> t7Promise,
+                                                                                                             final Promise<T8> t8Promise
+    ) {
+        try {
+
+            final Defer<MutableTpl8<T1, T2, T3, T4, T5, T6, T7, T8>> defer = defer();
+            SimpleCounter counter = new SimpleCounter();
+            MutableTpl8<T1, T2, T3, T4, T5, T6, T7, T8> mutableTpl8 = new MutableTpl8<>();
+            final int len = 5;
+
+            final ReentrantLock lock = new ReentrantLock();
+
+            Promises.<T1>onCompletePromise(t1Promise, lock, defer, counter, val -> {
+                mutableTpl8.t1 = val;
+                return mutableTpl8;
+            }, len);
+
+            Promises.<T2>onCompletePromise(t2Promise, lock, defer, counter, val -> {
+                mutableTpl8.t2 = val;
+                return mutableTpl8;
+            }, len);
+
+            Promises.<T3>onCompletePromise(t3Promise, lock, defer, counter, val -> {
+                mutableTpl8.t3 = val;
+                return mutableTpl8;
+            }, len);
+
+            Promises.<T4>onCompletePromise(t4Promise, lock, defer, counter, val -> {
+                mutableTpl8.t4 = val;
+                return mutableTpl8;
+            }, len);
+
+            Promises.<T5>onCompletePromise(t5Promise, lock, defer, counter, val -> {
+                mutableTpl8.t5 = val;
+                return mutableTpl8;
+            }, len);
+
+            Promises.<T6>onCompletePromise(t6Promise, lock, defer, counter, val -> {
+                mutableTpl8.t6 = val;
+                return mutableTpl8;
+            }, len);
+
+            Promises.<T7>onCompletePromise(t7Promise, lock, defer, counter, val -> {
+                mutableTpl8.t7 = val;
+                return mutableTpl8;
+            }, len);
+
+            Promises.<T8>onCompletePromise(t8Promise, lock, defer, counter, val -> {
+                mutableTpl8.t8 = val;
+                return mutableTpl8;
+            }, len);
+
+            return defer.promise();
+
+        } catch (Exception ex) {
+            return Promises.error(ex);
+        }
     }
 
     public static <T> MapHandler<T, Void> toVoid() {
         return s -> (Void) s;
+    }
+
+    private static <T1> void onCompletePromise(Promise<T1> t1Promise, ReentrantLock lock, Defer defer, SimpleCounter counter, MutableTplSetter<T1> mutableTplSetter, int len) {
+
+        t1Promise.cmp(t -> {
+            try {
+
+                lock.lock();
+
+                if (!defer.isComplete()) {
+                    if (t.isSuccess()) {
+                        Object mutableTpl2 = mutableTplSetter.setAndGet(t.val());
+                        counter.counter++;
+                        if (counter.counter == len) {
+                            defer.resolve(mutableTpl2);
+                        }
+                    } else {
+                        defer.reject(t.err(), t.lastValue());
+                    }
+                }
+
+            } catch (Exception ex) {
+
+                if (!defer.isComplete()) {
+
+                    Signal<T1> signal = t1Promise.signal();
+
+                    defer.reject(ex, signal.isSuccess() ? signal.val() : signal.lastValue());
+                }
+
+            } finally {
+                lock.unlock();
+            }
+        });
     }
 
 }

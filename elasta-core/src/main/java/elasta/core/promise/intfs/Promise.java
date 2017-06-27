@@ -41,6 +41,8 @@ public interface Promise<T> {
 
     boolean isError();
 
+    Signal<T> signal();
+
     T val();
 
     T orElse(T t);

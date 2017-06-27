@@ -41,15 +41,15 @@ public interface Orm {
 
     Promise<List<UpdateTpl>> upsert(String entity, JsonObject data);
 
-    <T extends Collection<JsonObject>> Promise<T> upsertAll(String entity, T jsonObjects);
+    <T extends Collection<JsonObject>> Promise<List<UpdateTpl>> upsertAll(String entity, T jsonObjects);
 
-    <T> Promise<T> delete(String entity, T id);
+    <T> Promise<List<UpdateTpl>> delete(String entity, T id);
 
-    <T, R extends Collection<T>> Promise<R> deleteAll(String entity, R ids);
+    <I, T extends Collection<I>> Promise<List<UpdateTpl>> deleteAll(String entity, T ids);
 
     Promise<List<UpdateTpl>> deleteChildRelations(String entity, JsonObject jsonObject);
 
-    <T extends Collection<JsonObject>> Promise<T> deleteAllChildRelations(String entity, T jsonObjects);
+    <T extends Collection<JsonObject>> Promise<List<UpdateTpl>> deleteAllChildRelations(String entity, T jsonObjects);
 
     Promise<List<UpdateTpl>> execute(BaseOrm.ExecuteParams params);
 

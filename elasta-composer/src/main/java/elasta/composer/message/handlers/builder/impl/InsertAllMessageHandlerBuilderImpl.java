@@ -11,13 +11,14 @@ import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.model.response.builder.AuthorizationSuccessModelBuilder;
 import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
 import elasta.composer.model.response.builder.ValidationSuccessModelBuilder;
-import elasta.composer.producer.IdGenerator;
+import elasta.orm.upsert.IdGenerator;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
 import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
+import elasta.sql.SqlDB;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -43,8 +44,9 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
     final String broadcastAddress;
     final ResponseGenerator responseGenerator;
     final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
+    final SqlDB sqlDB;
 
-    public InsertAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, IdGenerator idGenerator, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToMessageHandlerConverter flowToMessageHandlerConverter) {
+    public InsertAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, IdGenerator idGenerator, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToMessageHandlerConverter flowToMessageHandlerConverter, SqlDB sqlDB) {
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
@@ -61,6 +63,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(flowToMessageHandlerConverter);
+        Objects.requireNonNull(sqlDB);
         this.authorizer = authorizer;
         this.convertersMap = convertersMap;
         this.action = action;
@@ -77,6 +80,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         this.broadcastAddress = broadcastAddress;
         this.responseGenerator = responseGenerator;
         this.flowToMessageHandlerConverter = flowToMessageHandlerConverter;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -116,6 +120,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
     private MsgEnterEventHandlerP insertAllHandler() {
         return new InsertAllStateHandlerBuilderImpl(
             entity,
+            sqlDB,
             orm
         ).build();
     }

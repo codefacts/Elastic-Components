@@ -71,6 +71,7 @@ final public class BaseOrmImpl implements BaseOrm {
     }
 
     private Promise<List<UpdateTpl>> doUpsert(UpsertParams params) {
+
         LinkedHashMap<String, TableData> map = new LinkedHashMap<>();
 
         getOperation(params.getEntity()).upsertFunction.upsert(
@@ -82,16 +83,36 @@ final public class BaseOrmImpl implements BaseOrm {
 
         List<Promise<UpdateTpl>> promiseList = map.values().stream()
             .map(
-                tableData -> Promises.empty()
-                    .map(exists -> UpdateTpl.builder()
-                        .updateOperationType(UpdateOperationType.INSERT)
-                        .table(tableData.getTable())
-                        .sqlConditions(ImmutableList.of())
-                        .data(tableData.getValues())
-                        .build())
+                tableData -> {
+
+                    if (tableData.isNew()) {
+                        return Promises.of(
+                            UpdateTpl.builder()
+                                .updateOperationType(UpdateOperationType.INSERT)
+                                .table(tableData.getTable())
+                                .sqlConditions(ImmutableList.of())
+                                .data(tableData.getValues())
+                                .build()
+                        );
+                    } else {
+
+                        return Promises.of(
+                            UpdateTpl.builder()
+                                .updateOperationType(UpdateOperationType.UPDATE)
+                                .table(tableData.getTable())
+                                .sqlConditions(toSqlConditions(tableData.getPrimaryColumns(), tableData.getValues()))
+                                .data(tableData.getValues())
+                                .build()
+                        );
+                    }
+                }
             ).collect(Collectors.toList());
 
         return Promises.when(promiseList);
+    }
+
+    private Collection<SqlCondition> toSqlConditions(String[] primaryColumns, JsonObject values) {
+        return Arrays.stream(primaryColumns).map(primaryColumn -> new SqlCondition(primaryColumn, values.getValue(primaryColumn))).collect(Collectors.toList());
     }
 
     private Promise<List<UpdateTpl>> doDelete(DeleteParams params) {

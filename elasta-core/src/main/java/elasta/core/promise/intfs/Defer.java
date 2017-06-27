@@ -18,4 +18,6 @@ public interface Defer<T> {
     void signal(Signal<T> signal);
 
     Promise<T> promise();
+
+    boolean isComplete();
 }

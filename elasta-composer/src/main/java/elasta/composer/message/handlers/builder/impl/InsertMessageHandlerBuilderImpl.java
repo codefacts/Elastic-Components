@@ -9,7 +9,7 @@ import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.builder.InsertMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
-import elasta.composer.producer.IdGenerator;
+import elasta.orm.upsert.IdGenerator;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;

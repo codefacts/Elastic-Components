@@ -3,9 +3,8 @@ package elasta.composer.state.handlers.impl;
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
-import elasta.composer.producer.IdGenerator;
+import elasta.orm.upsert.IdGenerator;
 import elasta.composer.state.handlers.IdGenerationStateHandlerBuilder;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
 import io.vertx.core.json.JsonObject;
 

@@ -1,16 +1,13 @@
 package test;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import elasta.composer.ComposerUtils;
 import elasta.composer.ErrorCodes;
 import elasta.composer.Msg;
 import elasta.composer.builder.impl.ConvertersMapBuilderImpl;
 import elasta.composer.converter.FlowToJsonArrayMessageHandlerConverter;
-import elasta.composer.converter.FlowToMessageHandlerConverter;
 import elasta.composer.message.handlers.MessageHandler;
 import elasta.composer.message.handlers.builder.impl.DeleteAllMessageHandlerBuilderImpl;
-import elasta.composer.message.handlers.builder.impl.UpdateAllMessageHandlerBuilderImpl;
 import elasta.composer.model.response.builder.impl.*;
 import elasta.core.promise.impl.Promises;
 import elasta.eventbus.impl.SimpleEventBusImpl;
@@ -18,9 +15,6 @@ import elasta.pipeline.util.MessageBundleImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
-import java.util.List;
 
 /**
  * Created by sohan on 5/21/2017.
@@ -46,8 +40,8 @@ public class DeleteAllTest {
             new AuthorizationErrorModelBuilderImpl(ErrorCodes.authorizationError, new MessageBundleImpl("{}")),
             new AuthorizationSuccessModelBuilderImpl(new MessageBundleImpl("{}")),
             new ConvertersMapBuilderImpl().build(),
-            buildHandler()
-        ).build();
+            buildHandler(),
+            sqlDB).build();
 
         vertx.eventBus().consumer("employee.delete", messageHandler);
 

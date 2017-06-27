@@ -1,5 +1,6 @@
 package elasta.orm.upsert.impl;
 
+import elasta.core.promise.intfs.Promise;
 import elasta.orm.upsert.*;
 import io.vertx.core.json.JsonObject;
 
@@ -20,16 +21,16 @@ final public class IndirectDependencyHandlerImpl implements IndirectDependencyHa
     }
 
     @Override
-    public TableData requireUpsert(TableData parentTableData, JsonObject entity, UpsertContext upsertContext) {
+    public Promise<TableData> requireUpsert(TableData parentTableData, JsonObject entity, UpsertContext upsertContext) {
 
         Objects.requireNonNull(parentTableData);
         Objects.requireNonNull(entity);
         Objects.requireNonNull(upsertContext);
 
-        TableData childTableData = childUpsertFunction.upsert(entity, upsertContext);
-
-        relationTableUpserFunction.upsert(parentTableData, childTableData, upsertContext);
-
-        return childTableData;
+        return childUpsertFunction.upsert(entity, upsertContext)
+            .map(childTableData -> {
+                relationTableUpserFunction.upsert(parentTableData, childTableData, upsertContext);
+                return childTableData;
+            });
     }
 }

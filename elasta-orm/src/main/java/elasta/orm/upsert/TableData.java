@@ -18,23 +18,29 @@ final public class TableData {
     final String table;
     final String[] primaryColumns;
     final JsonObject values;
+    final boolean isNew;
     final int hash;
 
-    private TableData(String table, String[] primaryColumns, Map<String, Object> values) {
+    private TableData(String table, String[] primaryColumns, Map<String, Object> values, boolean isNew) {
         Objects.requireNonNull(table);
         Objects.requireNonNull(primaryColumns);
         Objects.requireNonNull(values);
         this.table = table;
         this.primaryColumns = primaryColumns;
         this.values = new JsonObject(values);
+        this.isNew = isNew;
         this.hash = calHashCode();
     }
 
     public TableData(String table, String[] primaryColumns, JsonObject values) {
+        this(table, primaryColumns, values, false);
+    }
+
+    public TableData(String table, String[] primaryColumns, JsonObject values, boolean isNew) {
         Objects.requireNonNull(table);
         Objects.requireNonNull(primaryColumns);
         Objects.requireNonNull(values);
-        
+
         if (primaryColumns.length <= 0) {
             throw new TableDataException("No primary column is given for table '" + table + "'");
         }
@@ -48,6 +54,7 @@ final public class TableData {
         this.table = table;
         this.primaryColumns = primaryColumns;
         this.values = values;
+        this.isNew = isNew;
 
         checkValueExistsForEachColumn(primaryColumns, values);
 
@@ -104,7 +111,17 @@ final public class TableData {
         return new TableData(
             table,
             primaryColumns,
-            ImmutableMap.<String, Object>builder().putAll(this.values.getMap()).putAll(mapEntries(map)).build()
+            ImmutableMap.<String, Object>builder().putAll(this.values.getMap()).putAll(mapEntries(map)).build(),
+            isNew
+        );
+    }
+
+    public TableData withIsNew(boolean isNew) {
+        return new TableData(
+            table,
+            primaryColumns,
+            values.getMap(),
+            isNew
         );
     }
 

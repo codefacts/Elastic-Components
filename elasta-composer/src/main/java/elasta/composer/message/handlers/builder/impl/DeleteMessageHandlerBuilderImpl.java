@@ -13,6 +13,7 @@ import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
 import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
+import elasta.sql.SqlDB;
 
 import java.util.Objects;
 
@@ -30,8 +31,9 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
     final ConvertersMap convertersMap;
     final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
+    final SqlDB sqlDB;
 
-    public DeleteMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, SimpleEventBus simpleEventBus, String broadcastAddress, Orm orm, String entity, String action, Authorizer authorizer, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToMessageHandlerConverter flowToMessageHandlerConverter) {
+    public DeleteMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, SimpleEventBus simpleEventBus, String broadcastAddress, Orm orm, String entity, String action, Authorizer authorizer, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToMessageHandlerConverter flowToMessageHandlerConverter, SqlDB sqlDB) {
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(simpleEventBus);
         Objects.requireNonNull(broadcastAddress);
@@ -42,6 +44,7 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
         Objects.requireNonNull(authorizationErrorModelBuilder);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(flowToMessageHandlerConverter);
+        Objects.requireNonNull(sqlDB);
         this.responseGenerator = responseGenerator;
         this.simpleEventBus = simpleEventBus;
         this.broadcastAddress = broadcastAddress;
@@ -52,6 +55,7 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
         this.authorizationErrorModelBuilder = authorizationErrorModelBuilder;
         this.convertersMap = convertersMap;
         this.flowToMessageHandlerConverter = flowToMessageHandlerConverter;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -89,6 +93,7 @@ final public class DeleteMessageHandlerBuilderImpl<T> implements DeleteMessageHa
     private MsgEnterEventHandlerP deleteHandler() {
         return new DeleteStateHandlerBuilderImpl(
             orm,
+            sqlDB,
             entity
         ).build();
     }

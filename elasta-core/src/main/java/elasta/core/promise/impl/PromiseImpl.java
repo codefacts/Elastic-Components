@@ -1,5 +1,6 @@
 package elasta.core.promise.impl;
 
+import elasta.core.promise.ex.PromiseException;
 import elasta.core.promise.intfs.*;
 
 import java.util.Objects;
@@ -161,21 +162,40 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     }
 
     @Override
+    public Signal<T> signal() {
+        checkSignalNonNull();
+        return signal;
+    }
+
+    private void checkSignalNonNull() {
+        if (signal == null) {
+            throw new PromiseException("Promise is not complete yet");
+        }
+    }
+
+    @Override
     public T val() {
+        checkSignalNonNull();
         return signal.val();
     }
 
     @Override
     public T orElse(T defaultValue) {
+        checkSignalNonNull();
         return (signal.val() == null) ? defaultValue : signal.val();
     }
 
     @Override
     public Throwable err() {
+        checkSignalNonNull();
         return signal.err();
     }
 
     static <T> void signal(final PromiseImpl<T> promise, final SignalImpl<T> signal) {
+
+        if (promise.signal != null) {
+            throw new PromiseException("Promise is already complete");
+        }
 
         execute(promise.next, promise.signal = signal);
     }
