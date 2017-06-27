@@ -16,14 +16,17 @@ final public class OperationMapBuilder {
     final Collection<Entity> entities;
     final EntityMappingHelper helper;
     final SqlDB sqlDB;
+    final String isNewKey;
 
-    public OperationMapBuilder(Collection<Entity> entities, EntityMappingHelper helper, SqlDB sqlDB) {
+    public OperationMapBuilder(Collection<Entity> entities, EntityMappingHelper helper, SqlDB sqlDB, String isNewKey) {
         Objects.requireNonNull(entities);
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);
+        Objects.requireNonNull(isNewKey);
         this.entities = entities;
         this.helper = helper;
         this.sqlDB = sqlDB;
+        this.isNewKey = isNewKey;
     }
 
     public Map<String, BaseOrmImpl.EntityOperation> build() {
@@ -34,7 +37,7 @@ final public class OperationMapBuilder {
 
         ImmutableMap.Builder<String, BaseOrmImpl.EntityOperation> mapBuilder = ImmutableMap.builder();
 
-        EntityOperationBuilder operationBuilder = new EntityOperationBuilder(helper, sqlDB);
+        EntityOperationBuilder operationBuilder = new EntityOperationBuilder(helper, sqlDB, isNewKey);
 
         entities.stream()
             .map(operationBuilder::toEntityOperation)

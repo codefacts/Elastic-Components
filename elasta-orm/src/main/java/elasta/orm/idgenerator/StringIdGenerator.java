@@ -1,6 +1,4 @@
-package elasta.orm.upsert;
-
-import elasta.orm.upsert.IdGenerator;
+package elasta.orm.idgenerator;
 
 /**
  * Created by sohan on 6/27/2017.

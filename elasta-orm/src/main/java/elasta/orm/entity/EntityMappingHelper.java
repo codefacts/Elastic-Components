@@ -59,4 +59,6 @@ public interface EntityMappingHelper {
     List<Entity> getEntities();
 
     boolean isMandatory(String entity, PathExpression parent);
+
+    List<RelationMapping> getRelationMappings(String entity);
 }

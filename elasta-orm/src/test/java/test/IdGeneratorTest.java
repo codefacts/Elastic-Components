@@ -1,9 +1,8 @@
 package test;
 
-import elasta.orm.upsert.impl.LongIdGeneratorImpl;
+import elasta.orm.idgenerator.impl.LongIdGeneratorImpl;
 
 import java.util.HashSet;
-import java.util.UUID;
 
 /**
  * Created by sohan on 6/27/2017.

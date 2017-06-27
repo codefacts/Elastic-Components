@@ -22,10 +22,13 @@ import java.util.stream.Collectors;
  */
 public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
     final EntityMappingHelper helper;
+    final String isNewKey;
 
-    public UpsertFunctionBuilderImpl(EntityMappingHelper entityMappingHelper) {
+    public UpsertFunctionBuilderImpl(EntityMappingHelper entityMappingHelper, String isNewKey) {
         Objects.requireNonNull(entityMappingHelper);
+        Objects.requireNonNull(isNewKey);
         this.helper = entityMappingHelper;
+        this.isNewKey = isNewKey;
     }
 
     @Override
@@ -117,6 +120,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
             return new UpsertFunctionImpl(
                 entity,
+                isNewKey,
                 tableDataPopulator,
                 directDependencies.toArray(new DirectDependency[directDependencies.size()]),
                 indirectDependencies.toArray(new IndirectDependency[indirectDependencies.size()]),

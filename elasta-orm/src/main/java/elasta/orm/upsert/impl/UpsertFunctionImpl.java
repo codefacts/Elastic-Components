@@ -1,11 +1,8 @@
 package elasta.orm.upsert.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.orm.delete.impl.JsonDependencyHandler;
 import elasta.orm.upsert.*;
-import elasta.orm.upsert.ex.InvalidValueException;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.*;
@@ -15,19 +12,22 @@ import java.util.*;
  */
 final public class UpsertFunctionImpl implements UpsertFunction {
     final String entity;
+    final String isNewKey;
     final TableDataPopulator tableDataPopulator;
     final DirectDependency[] directDependencies;
     final IndirectDependency[] indirectDependencies;
     final BelongsTo[] belongsTos;
 
-    public UpsertFunctionImpl(String entity, TableDataPopulator tableDataPopulator, DirectDependency[] directDependencies, IndirectDependency[] indirectDependencies, BelongsTo[] belongsTos) {
+    public UpsertFunctionImpl(String entity, String isNewKey, TableDataPopulator tableDataPopulator, DirectDependency[] directDependencies, IndirectDependency[] indirectDependencies, BelongsTo[] belongsTos) {
         Objects.requireNonNull(entity);
+        Objects.requireNonNull(isNewKey);
         Objects.requireNonNull(tableDataPopulator);
         Objects.requireNonNull(directDependencies);
         Objects.requireNonNull(indirectDependencies);
         Objects.requireNonNull(belongsTos);
 
         this.entity = entity;
+        this.isNewKey = isNewKey;
         this.tableDataPopulator = tableDataPopulator;
         this.directDependencies = directDependencies;
         this.indirectDependencies = indirectDependencies;
@@ -82,7 +82,7 @@ final public class UpsertFunctionImpl implements UpsertFunction {
 
         private TableData tableData() {
 
-            TableData tableData = tableDataPopulator.populate(entity);
+            TableData tableData = tableDataPopulator.populate(entity).withIsNew(isNew(entity));
 
             JsonObject tableValues = new JsonObject(
                 new LinkedHashMap<>(
@@ -173,5 +173,12 @@ final public class UpsertFunctionImpl implements UpsertFunction {
                 )
                 .getValues();
         }
+    }
+
+    private boolean isNew(JsonObject entity) {
+        if (entity.containsKey(isNewKey)) {
+            return entity.getBoolean(isNewKey);
+        }
+        return false;
     }
 }

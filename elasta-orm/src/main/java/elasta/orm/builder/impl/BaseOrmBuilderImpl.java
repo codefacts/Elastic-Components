@@ -4,7 +4,6 @@ import elasta.orm.BaseOrm;
 import elasta.orm.builder.BaseOrmBuilder;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.Entity;
-import elasta.sql.dbaction.DbInterceptors;
 import elasta.orm.impl.BaseOrmImpl;
 import elasta.orm.query.QueryExecutor;
 import elasta.sql.SqlDB;
@@ -18,20 +17,23 @@ final public class BaseOrmBuilderImpl implements BaseOrmBuilder {
     final EntityMappingHelper helper;
     final SqlDB sqlDB;
     final QueryExecutor queryExecutor;
+    final String isNewKey;
 
-    public BaseOrmBuilderImpl(EntityMappingHelper helper, SqlDB sqlDB, QueryExecutor queryExecutor) {
+    public BaseOrmBuilderImpl(EntityMappingHelper helper, SqlDB sqlDB, QueryExecutor queryExecutor, String isNewKey) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);
         Objects.requireNonNull(queryExecutor);
+        Objects.requireNonNull(isNewKey);
         this.helper = helper;
         this.sqlDB = sqlDB;
         this.queryExecutor = queryExecutor;
+        this.isNewKey = isNewKey;
     }
 
     @Override
     public BaseOrm build(Collection<Entity> entities) {
         return new BaseOrmImpl(
-            new OperationMapBuilder(entities, helper, sqlDB).build(),
+            new OperationMapBuilder(entities, helper, sqlDB, isNewKey).build(),
             queryExecutor
         );
     }

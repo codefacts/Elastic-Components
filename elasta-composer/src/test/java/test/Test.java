@@ -15,7 +15,7 @@ import elasta.orm.entity.impl.EntitiesPreprocessorImpl;
 import elasta.orm.entity.impl.EntitiesValidatorImpl;
 import elasta.orm.entity.impl.EntityMappingHelperImpl;
 import elasta.orm.entity.impl.EntityValidatorImpl;
-import elasta.orm.upsert.impl.LongIdGeneratorImpl;
+import elasta.orm.idgenerator.impl.LongIdGeneratorImpl;
 import elasta.sql.dbaction.DbInterceptors;
 import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.query.iml.QueryExecutorImpl;
@@ -99,7 +99,7 @@ public interface Test {
                 new GenericJsonToFuncConverterImpl(),
                 sqlDB
             ),
-            new LongIdGeneratorImpl()
+            "$isNew"
         ).build(params.entities);
     }
 

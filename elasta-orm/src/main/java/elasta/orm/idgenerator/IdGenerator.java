@@ -1,4 +1,4 @@
-package elasta.orm.upsert;
+package elasta.orm.idgenerator;
 
 import elasta.core.promise.intfs.Promise;
 

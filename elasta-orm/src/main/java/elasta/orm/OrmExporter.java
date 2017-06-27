@@ -80,7 +80,8 @@ public interface OrmExporter extends ModuleExporter {
             final Map<String, BaseOrmImpl.EntityOperation> operationMap = new OperationMapBuilder(
                 entities,
                 module.require(EntityMappingHelper.class),
-                module.require(SqlDB.class)
+                module.require(SqlDB.class),
+                params.getIsNewKey()
             ).build();
 
             module.export(new BaseOrmImpl(
@@ -155,14 +156,17 @@ public interface OrmExporter extends ModuleExporter {
         final ModuleSystemBuilder moduleSystemBuilder;
         final JDBCClient jdbcClient;
         final Collection<Entity> entities;
+        final String isNewKey;
 
-        public ExportToParams(ModuleSystemBuilder moduleSystemBuilder, JDBCClient jdbcClient, Collection<Entity> entities) {
+        public ExportToParams(ModuleSystemBuilder moduleSystemBuilder, JDBCClient jdbcClient, Collection<Entity> entities, String isNewKey) {
             Objects.requireNonNull(moduleSystemBuilder);
             Objects.requireNonNull(jdbcClient);
             Objects.requireNonNull(entities);
+            Objects.requireNonNull(isNewKey);
             this.moduleSystemBuilder = moduleSystemBuilder;
             this.jdbcClient = jdbcClient;
             this.entities = entities;
+            this.isNewKey = isNewKey;
         }
     }
 }

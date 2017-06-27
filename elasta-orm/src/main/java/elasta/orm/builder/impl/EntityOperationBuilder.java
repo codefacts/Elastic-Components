@@ -45,12 +45,15 @@ final class EntityOperationBuilder {
     final BuilderContext<ListTablesToDeleteFunction> listTablesToDeleteFunctionBuilderContext;
     final BuilderContext<UpsertFunction> upsertFunctionBuilderContext;
     final BuilderContext<DeleteChildRelationsFunction> deleteChildRelationsFunctionBuilderContext;
+    final String isNewKey;
 
-    EntityOperationBuilder(EntityMappingHelper helper, SqlDB sqlDB) {
+    EntityOperationBuilder(EntityMappingHelper helper, SqlDB sqlDB, String isNewKey) {
         Objects.requireNonNull(helper);
         Objects.requireNonNull(sqlDB);
+        Objects.requireNonNull(isNewKey);
         this.helper = helper;
         this.sqlDB = sqlDB;
+        this.isNewKey = isNewKey;
 
         this.deleteTableFunctionBuilderContext = new BuilderContextImpl<>(
             this.deleteTableFunctionMap = new LinkedHashMap<>()
@@ -69,7 +72,8 @@ final class EntityOperationBuilder {
         );
 
         upsertFunctionBuilder = new UpsertFunctionBuilderImpl(
-            this.helper
+            this.helper,
+            this.isNewKey
         );
         this.deleteFunctionBuilder = deleteFunctionBuilder();
 

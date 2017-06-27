@@ -1,6 +1,6 @@
-package elasta.orm.upsert.impl;
+package elasta.orm.idgenerator.impl;
 
-import elasta.orm.upsert.StringIdGenerator;
+import elasta.orm.idgenerator.StringIdGenerator;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 
