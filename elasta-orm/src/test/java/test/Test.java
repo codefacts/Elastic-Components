@@ -118,7 +118,7 @@ public interface Test {
                 new GenericJsonToFuncConverterImpl(),
                 sqlDB
             ),
-            new LongIdGeneratorImpl()
+            "$isNew"
         ).build(params.entities);
     }
 
