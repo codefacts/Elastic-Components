@@ -2,7 +2,6 @@ package elasta.orm.upsert.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.commons.Utils;
-import elasta.core.promise.intfs.Promise;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.core.columnmapping.*;
@@ -22,14 +21,11 @@ import java.util.stream.Collectors;
  * Created by Jango on 2017-01-21.
  */
 public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
-    private final EntityMappingHelper helper;
-    private final IdGenerator idGenerator;
+    final EntityMappingHelper helper;
 
-    public UpsertFunctionBuilderImpl(EntityMappingHelper entityMappingHelper, IdGenerator idGenerator) {
+    public UpsertFunctionBuilderImpl(EntityMappingHelper entityMappingHelper) {
         Objects.requireNonNull(entityMappingHelper);
-        Objects.requireNonNull(idGenerator);
         this.helper = entityMappingHelper;
-        this.idGenerator = idGenerator;
     }
 
     @Override
@@ -121,12 +117,10 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
             return new UpsertFunctionImpl(
                 entity,
-                helper.getPrimaryKey(entity),
                 tableDataPopulator,
                 directDependencies.toArray(new DirectDependency[directDependencies.size()]),
                 indirectDependencies.toArray(new IndirectDependency[indirectDependencies.size()]),
-                belongsTos.toArray(new BelongsTo[belongsTos.size()]),
-                idGenerator
+                belongsTos.toArray(new BelongsTo[belongsTos.size()])
             );
         }
 
@@ -206,7 +200,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         }
 
         @Override
-        public Promise<TableData> upsert(JsonObject jsonObject, UpsertContext upsertContext) {
+        public TableData upsert(JsonObject jsonObject, UpsertContext upsertContext) {
             return functionMap.get(referencingEntity).upsert(jsonObject, upsertContext);
         }
     }

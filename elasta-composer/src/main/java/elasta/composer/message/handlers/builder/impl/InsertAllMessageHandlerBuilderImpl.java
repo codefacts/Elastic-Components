@@ -35,7 +35,6 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
     final AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder;
     final String entity;
     final String primaryKey;
-    final IdGenerator idGenerator;
     final JsonObjectValidatorAsync jsonObjectValidatorAsync;
     final ValidationErrorModelBuilder validationErrorModelBuilder;
     final ValidationSuccessModelBuilder validationSuccessModelBuilder;
@@ -46,7 +45,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
     final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
     final SqlDB sqlDB;
 
-    public InsertAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, IdGenerator idGenerator, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToMessageHandlerConverter flowToMessageHandlerConverter, SqlDB sqlDB) {
+    public InsertAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToMessageHandlerConverter flowToMessageHandlerConverter, SqlDB sqlDB) {
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
@@ -54,7 +53,6 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         Objects.requireNonNull(authorizationSuccessModelBuilder);
         Objects.requireNonNull(entity);
         Objects.requireNonNull(primaryKey);
-        Objects.requireNonNull(idGenerator);
         Objects.requireNonNull(jsonObjectValidatorAsync);
         Objects.requireNonNull(validationErrorModelBuilder);
         Objects.requireNonNull(validationSuccessModelBuilder);
@@ -71,7 +69,6 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         this.authorizationSuccessModelBuilder = authorizationSuccessModelBuilder;
         this.entity = entity;
         this.primaryKey = primaryKey;
-        this.idGenerator = idGenerator;
         this.jsonObjectValidatorAsync = jsonObjectValidatorAsync;
         this.validationErrorModelBuilder = validationErrorModelBuilder;
         this.validationSuccessModelBuilder = validationSuccessModelBuilder;
@@ -89,7 +86,6 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         Flow flow = new AddAllFlowBuilderImpl(
             startHandler(),
             authorizeAllHandler(),
-            idGenerationHandler(),
             validateAllHandler(),
             insertAllHandler(),
             broadcastAllHandler(),
@@ -131,14 +127,6 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
             jsonObjectValidatorAsync,
             validationErrorModelBuilder,
             validationSuccessModelBuilder
-        ).build();
-    }
-
-    private MsgEnterEventHandlerP idGenerationHandler() {
-        return new IdGenerationStateHandlerBuilderImpl(
-            entity,
-            primaryKey,
-            idGenerator
         ).build();
     }
 

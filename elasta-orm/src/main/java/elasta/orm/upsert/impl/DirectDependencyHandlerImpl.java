@@ -1,11 +1,6 @@
 package elasta.orm.upsert.impl;
 
-import elasta.core.promise.intfs.Promise;
-import elasta.orm.upsert.DirectDependencyHandler;
-import elasta.orm.upsert.TableData;
-import elasta.orm.upsert.UpsertContext;
-import elasta.orm.upsert.UpsertFunction;
-import io.vertx.core.json.JsonObject;
+import elasta.orm.upsert.DirectDependencyHandler;import elasta.orm.upsert.TableData;import elasta.orm.upsert.UpsertContext;import elasta.orm.upsert.UpsertFunction;import io.vertx.core.json.JsonObject;
 
 import java.util.Objects;
 
@@ -21,7 +16,7 @@ final public class DirectDependencyHandlerImpl implements DirectDependencyHandle
     }
 
     @Override
-    public Promise<TableData> requireUpsert(JsonObject entity, UpsertContext upsertContext) {
+    public TableData requireUpsert(JsonObject entity, UpsertContext upsertContext) {
         return upsertFunction.upsert(entity, upsertContext);
     }
 }

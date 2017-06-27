@@ -19,27 +19,25 @@ final public class BelongToHandlerImpl implements BelongToHandler {
     }
 
     @Override
-    public Promise<TableData> pushUpsert(JsonObject entity, JsonObject dependencyColumnValues, UpsertContext upsertContext) {
+    public TableData pushUpsert(JsonObject entity, JsonObject dependencyColumnValues, UpsertContext upsertContext) {
 
         Objects.requireNonNull(entity);
         Objects.requireNonNull(dependencyColumnValues);
         Objects.requireNonNull(upsertContext);
 
-        return upsertFunction.upsert(entity, upsertContext)
-            .map(tableData -> {
-                tableData = tableData.addValues(
-                    dependencyColumnValues.getMap()
-                );
+        TableData tableData = upsertFunction.upsert(entity, upsertContext);
 
-                upsertContext.putOrMerge(
-                    UpsertUtils.toTableAndPrimaryColumnsKey(
-                        tableData.getTable(), tableData.getPrimaryColumns(), tableData.getValues()
-                    ),
-                    tableData
-                );
+        tableData = tableData.addValues(
+            dependencyColumnValues.getMap()
+        );
 
-                return tableData;
-            })
-            ;
+        upsertContext.putOrMerge(
+            UpsertUtils.toTableAndPrimaryColumnsKey(
+                tableData.getTable(), tableData.getPrimaryColumns(), tableData.getValues()
+            ),
+            tableData
+        );
+
+        return tableData;
     }
 }

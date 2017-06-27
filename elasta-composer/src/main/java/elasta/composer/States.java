@@ -7,7 +7,7 @@ public interface States {
     String start = "start";
     String authorize = "authorize";
     String validate = "validate";
-    String insert = "insert";
+    String add = "add";
     String update = "update";
     String delete = "delete";
     String end = "end";
