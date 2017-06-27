@@ -117,7 +117,8 @@ final public class UpsertFunctionImpl implements UpsertFunction {
             return new TableData(
                 tableData.getTable(),
                 tableData.getPrimaryColumns(),
-                new JsonObject(ImmutableMap.copyOf(tableValues.getMap()))
+                new JsonObject(ImmutableMap.copyOf(tableValues.getMap())),
+                tableData.isNew()
             );
         }
 

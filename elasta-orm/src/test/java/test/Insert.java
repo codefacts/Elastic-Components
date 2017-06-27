@@ -35,33 +35,43 @@ public interface Insert {
             .build());
 
         final JsonObject employee = new JsonObject(
-            ImmutableMap.of(
-                "eid", 6565655,
-                "ename", "Sohan",
-                "salary", 56565.6565,
-                "department", ImmutableMap.of(
-                    "id", 656656,
-                    "name", "ICT",
-                    "department", ImmutableMap.of(
-                        "id", 656365,
-                        "name", "DCP",
-                        "department", ImmutableMap.of(
-                            "id", 8721568,
-                            "name", "TCP"
-                        )
-                    )
-                ),
-                "departments", ImmutableList.of(
+            ImmutableMap.<String, Object>builder()
+                .put("$isNew", true)
+                .putAll(
                     ImmutableMap.of(
-                        "id", 683216789865L,
-                        "name", "JCP",
+                        "eid", 6565655,
+                        "ename", "Sohan",
+                        "salary", 56565.6565,
                         "department", ImmutableMap.of(
-                            "id", 56982165,
-                            "name", "MKV"
+                            "$isNew", true,
+                            "id", 656656,
+                            "name", "ICT",
+                            "department", ImmutableMap.of(
+                                "$isNew", true,
+                                "id", 656365,
+                                "name", "DCP",
+                                "department", ImmutableMap.of(
+                                    "$isNew", true,
+                                    "id", 8721568,
+                                    "name", "TCP"
+                                )
+                            )
+                        ),
+                        "departments", ImmutableList.of(
+                            ImmutableMap.of(
+                                "$isNew", true,
+                                "id", 683216789865L,
+                                "name", "JCP",
+                                "department", ImmutableMap.of(
+                                    "$isNew", true,
+                                    "id", 56982165,
+                                    "name", "MKV"
+                                )
+                            )
                         )
                     )
                 )
-            )
+                .build()
         );
 
         baseOrm.upsert(
