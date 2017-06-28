@@ -13,15 +13,8 @@ import io.vertx.ext.jdbc.JDBCClient;
  */
 public interface Delete22 {
     static void main(String[] asdfasd) {
-        JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
-            .setWorkerPoolSize(1)
-            .setEventLoopPoolSize(1)
-        ));
 
-        BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
-            .entities(Employees.entities())
-            .jdbcClient(jdbcClient)
-            .build());
+        BaseOrm baseOrm = Test.baseOrm();
 
         JsonObject department = new JsonObject(
             ImmutableMap.of(
@@ -35,7 +28,7 @@ public interface Delete22 {
                 .entity("department")
                 .jsonObject(department)
                 .build()
-        ).mapP(Test.sqlDB(jdbcClient)::update).then(jsonObject -> {
+        ).mapP(Test.sqlDB()::update).then(jsonObject -> {
             System.out.println("ppp888888888888888888888888888888888888888888888888888888888888888888888");
         }).err(Throwable::printStackTrace);
     }

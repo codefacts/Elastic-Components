@@ -5,6 +5,7 @@ import elasta.module.ModuleProvider;
 import elasta.module.ex.ModuleSystemException;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Created by sohan on 5/14/2017.
@@ -22,26 +23,22 @@ final public class ModuleProviderImpl implements ModuleProvider {
     }
 
     @Override
-    public <T> T get() {
+    public <T> Optional<T> get() {
 
         if (exportedModule == null) {
 
-            return cast(exportedModule = executeScript());
+            executeScript().ifPresent(newModule -> exportedModule = newModule);
         }
 
-        return cast(exportedModule);
+        return Optional.ofNullable((T) exportedModule);
     }
 
-    private <T> T cast(Object exportedModule) {
-        return (T) exportedModule;
-    }
+    private <T> Optional<T> executeScript() {
 
-    private <T> T executeScript() {
         final ImmutableModuleImpl<T> immutableModule = new ImmutableModuleImpl<>(moduleMapProxy.getMap());
 
         exportScript.run(immutableModule);
 
-        return immutableModule.getExportedModule()
-            .orElseThrow(() -> new ModuleSystemException("No module was exported during export script execution"));
+        return immutableModule.getExportedModule();
     }
 }

@@ -190,28 +190,6 @@ public interface OrmTest {
     }
 
     static Orm orm() {
-        final Orm orm;
-        {
-            final JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
-                .setWorkerPoolSize(1)
-                .setEventLoopPoolSize(1)
-                .setBlockedThreadCheckInterval(10_000_000)
-                .setInternalBlockingPoolSize(1)
-            ));
-
-            final BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
-                .entities(Employees.entities())
-                .jdbcClient(jdbcClient)
-                .build());
-
-            orm = new OrmImpl(
-                Test.helper(Employees.entities()),
-                baseOrm,
-                new QueryDataLoaderImpl(
-                    baseOrm, Test.helper(Employees.entities())
-                )
-            );
-        }
-        return orm;
+        return Test.orm();
     }
 }

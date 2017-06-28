@@ -19,28 +19,10 @@ import java.util.stream.Collectors;
  * Created by sohan on 3/22/2017.
  */
 public interface Read {
-    Vertx vertx = Vertx.vertx(
-        new VertxOptions()
-            .setEventLoopPoolSize(1)
-            .setWorkerPoolSize(1)
-            .setInternalBlockingPoolSize(1)
-            .setBlockedThreadCheckInterval(10_000_000)
-    );
 
     static void main(String[] asdfasd) {
-        JDBCClient jdbcClient = Test.jdbcClient("jpadb", vertx);
 
-        BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
-            .entities(Employees.entities())
-            .jdbcClient(jdbcClient)
-            .dbInterceptors(new DbInterceptorsImpl(
-                ImmutableList.of(),
-                ImmutableList.of(sqlQuery -> {
-                    System.out.println(sqlQuery);
-                    return Promises.of(sqlQuery);
-                })
-            ))
-            .build());
+        BaseOrm baseOrm = Test.baseOrm();
 
         baseOrm.query(
             QueryExecutor.QueryParams.builder()

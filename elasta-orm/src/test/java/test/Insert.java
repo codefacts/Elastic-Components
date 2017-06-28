@@ -21,18 +21,7 @@ public interface Insert {
             .setEventLoopPoolSize(1)
         ));
 
-        BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
-            .entities(Employees.entities())
-            .jdbcClient(jdbcClient)
-            .dbInterceptors(new DbInterceptorsImpl(
-                ImmutableList.of(updateTpl -> {
-
-                    System.out.println("====>>>> " + updateTpl);
-                    return Promises.of(updateTpl);
-                }),
-                ImmutableList.of()
-            ))
-            .build());
+        BaseOrm baseOrm = Test.baseOrm();
 
         final JsonObject employee = new JsonObject(
             ImmutableMap.<String, Object>builder()
@@ -79,7 +68,7 @@ public interface Insert {
                 .entity("employee")
                 .jsonObject(employee)
                 .build()
-        ).mapP(Test.sqlDB(jdbcClient)::update).then(jsonObject -> {
+        ).mapP(Test.sqlDB()::update).then(jsonObject -> {
             System.out.println("ppp888888888888888888888888888888888888888888888888888888888888888888888");
         }).err(Throwable::printStackTrace);
     }

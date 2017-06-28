@@ -12,7 +12,7 @@ public interface EventProcessorTest {
     static void main(String[] asdf) {
 
         EventProcessorBuilderImpl builder = new EventProcessorBuilderImpl(
-            Test.helper(Employees.entities())
+            Test.helper()
         );
 
         EventProcessor processor = builder

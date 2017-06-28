@@ -65,8 +65,12 @@ final public class ModuleSystemImpl implements ModuleSystem {
 
     private <T> Optional<T> get(TypeAndNamePair typeAndNamePair) {
         Objects.requireNonNull(typeAndNamePair);
-        ModuleProvider moduleProvider = typeAndNamePairToModuleHolderMap.get(typeAndNamePair);
-        return Optional.ofNullable(moduleProvider).map(ModuleProvider::get);
+
+        return Optional.ofNullable(typeAndNamePairToModuleHolderMap.get(typeAndNamePair))
+            .map(
+                moduleProvider -> moduleProvider.<T>get()
+                    .orElseThrow(() -> new ModuleSystemException("No module was exported during script execution for module '" + typeAndNamePair + "'"))
+            );
     }
 
     @Value
@@ -83,6 +87,11 @@ final public class ModuleSystemImpl implements ModuleSystem {
 
         public Optional<String> getName() {
             return Optional.ofNullable(name);
+        }
+
+        @Override
+        public String toString() {
+            return "(type=" + type + getName().map(nm -> ", name=" + nm).orElse("") + ")";
         }
     }
 

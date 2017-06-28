@@ -12,15 +12,8 @@ import io.vertx.ext.jdbc.JDBCClient;
  */
 public interface Delete44 {
     static void main(String[] asdfasd) {
-        JDBCClient jdbcClient = Test.jdbcClient("jpadb", Vertx.vertx(new VertxOptions()
-            .setWorkerPoolSize(1)
-            .setEventLoopPoolSize(1)
-        ));
 
-        BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
-            .entities(Employees.entities())
-            .jdbcClient(jdbcClient)
-            .build());
+        BaseOrm baseOrm = Test.baseOrm();
 
         final JsonObject employee = new JsonObject(
             ImmutableMap.copyOf(
@@ -35,7 +28,7 @@ public interface Delete44 {
                 .entity("employee")
                 .jsonObject(employee)
                 .build()
-        ).mapP(Test.sqlDB(jdbcClient)::update).then(jsonObject -> {
+        ).mapP(Test.sqlDB()::update).then(jsonObject -> {
             System.out.println("ppp888888888888888888888888888888888888888888888888888888888888888888888");
         }).err(Throwable::printStackTrace);
     }

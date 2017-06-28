@@ -3,6 +3,7 @@ package test;
 import com.google.common.collect.ImmutableList;
 import elasta.core.promise.impl.Promises;
 import elasta.orm.BaseOrm;
+import elasta.orm.QueryDataLoader;
 import elasta.sql.dbaction.impl.DbInterceptorsImpl;
 import elasta.orm.impl.QueryDataLoaderImpl;
 import elasta.orm.query.QueryExecutor;
@@ -29,21 +30,8 @@ public interface QueryDataLoaderTest {
     );
 
     static void main(String[] asfd) {
-        JDBCClient jdbcClient = Test.jdbcClient("jpadb", vertx);
 
-        BaseOrm baseOrm = Test.baseOrm(Test.Params.builder()
-            .entities(Employees.entities())
-            .jdbcClient(jdbcClient)
-            .dbInterceptors(new DbInterceptorsImpl(
-                ImmutableList.of(),
-                ImmutableList.of(sqlQuery -> {
-                    System.out.println(sqlQuery);
-                    return Promises.of(sqlQuery);
-                })
-            ))
-            .build());
-
-        QueryDataLoaderImpl queryDataLoader = new QueryDataLoaderImpl(baseOrm, Test.helper(Employees.entities()));
+        QueryDataLoader queryDataLoader = Test.require(QueryDataLoader.class);
 
         queryDataLoader.query(
             QueryExecutor.QueryParams.builder()
