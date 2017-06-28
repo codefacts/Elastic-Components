@@ -16,6 +16,7 @@ import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
 import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
+import elasta.orm.idgenerator.ObjectIdGenerator;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
 import io.vertx.core.json.JsonObject;
 
@@ -40,8 +41,9 @@ final public class UpdateAllMessageHandlerBuilderImpl implements UpdateAllMessag
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
     final AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder;
     final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
+    final ObjectIdGenerator<Object> objectIdGenerator;
 
-    public UpdateAllMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, String broadcastAddress, SimpleEventBus simpleEventBus, String entity, Orm orm, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, ConvertersMap convertersMap, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, FlowToMessageHandlerConverter flowToMessageHandlerConverter) {
+    public UpdateAllMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, String broadcastAddress, SimpleEventBus simpleEventBus, String entity, Orm orm, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, ConvertersMap convertersMap, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, FlowToMessageHandlerConverter flowToMessageHandlerConverter, ObjectIdGenerator<Object> objectIdGenerator) {
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(simpleEventBus);
@@ -55,6 +57,7 @@ final public class UpdateAllMessageHandlerBuilderImpl implements UpdateAllMessag
         Objects.requireNonNull(flowToMessageHandlerConverter);
         Objects.requireNonNull(authorizationSuccessModelBuilder);
         Objects.requireNonNull(validationSuccessModelBuilder);
+        Objects.requireNonNull(objectIdGenerator);
         this.responseGenerator = responseGenerator;
         this.broadcastAddress = broadcastAddress;
         this.simpleEventBus = simpleEventBus;
@@ -69,6 +72,7 @@ final public class UpdateAllMessageHandlerBuilderImpl implements UpdateAllMessag
         this.flowToMessageHandlerConverter = flowToMessageHandlerConverter;
         this.validationSuccessModelBuilder = validationSuccessModelBuilder;
         this.authorizationSuccessModelBuilder = authorizationSuccessModelBuilder;
+        this.objectIdGenerator = objectIdGenerator;
     }
 
     @Override
@@ -77,6 +81,7 @@ final public class UpdateAllMessageHandlerBuilderImpl implements UpdateAllMessag
         Flow flow = new UpdateFlowBuilderImpl(
             startHandler(),
             authorizeAllHandler(),
+            generateIdsAllHandler(),
             validateAllHandler(),
             updateAllHandler(),
             broadcastAllHandler(),
@@ -85,6 +90,12 @@ final public class UpdateAllMessageHandlerBuilderImpl implements UpdateAllMessag
         ).build();
 
         return flowToMessageHandlerConverter.convert(flow);
+    }
+
+    private MsgEnterEventHandlerP generateIdsAllHandler() {
+        return new GenerateIdsAllStateHandlerBuilderImpl(
+            entity, objectIdGenerator
+        ).build();
     }
 
     private MsgEnterEventHandlerP endHandler() {

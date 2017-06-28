@@ -14,15 +14,17 @@ import java.util.Objects;
 final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
     final MsgEnterEventHandlerP startHandler;
     final MsgEnterEventHandlerP authorizeHandler;
+    final MsgEnterEventHandlerP generateIdHandler;
     final MsgEnterEventHandlerP validateHandler;
     final MsgEnterEventHandlerP updateHandler;
     final MsgEnterEventHandlerP broadcastHandler;
     final MsgEnterEventHandlerP generateResponseHandler;
     final MsgEnterEventHandlerP endHandler;
 
-    public UpdateFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP updateHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public UpdateFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP generateIdHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP updateHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
+        Objects.requireNonNull(generateIdHandler);
         Objects.requireNonNull(validateHandler);
         Objects.requireNonNull(updateHandler);
         Objects.requireNonNull(broadcastHandler);
@@ -30,6 +32,7 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
         Objects.requireNonNull(endHandler);
         this.startHandler = startHandler;
         this.authorizeHandler = authorizeHandler;
+        this.generateIdHandler = generateIdHandler;
         this.validateHandler = validateHandler;
         this.updateHandler = updateHandler;
         this.broadcastHandler = broadcastHandler;
@@ -43,9 +46,10 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
             .when(States.start, Flow.on(Events.next, States.authorize))
             .when(
                 States.authorize,
-                Flow.on(Events.next, States.validate),
+                Flow.on(Events.next, States.generateId),
                 Flow.on(Events.authorizationError, States.end)
             )
+            .when(States.generateId, Flow.on(Events.next, States.validate))
             .when(
                 States.validate,
                 Flow.on(Events.next, States.update),
@@ -57,6 +61,7 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
             .when(States.end, Flow.end())
             .handlersP(States.start, startHandler)
             .handlersP(States.authorize, authorizeHandler)
+            .handlersP(States.generateId, generateIdHandler)
             .handlersP(States.validate, validateHandler)
             .handlersP(States.update, updateHandler)
             .handlersP(States.broadcast, broadcastHandler)

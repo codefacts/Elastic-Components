@@ -14,22 +14,26 @@ import java.util.Objects;
 final public class AddFlowBuilderImpl implements AddFlowBuilder {
     final MsgEnterEventHandlerP startHandler;
     final MsgEnterEventHandlerP authorizeHandler;
+    final MsgEnterEventHandlerP generateIdHandler;
     final MsgEnterEventHandlerP validateHandler;
     final MsgEnterEventHandlerP insertHandler;
     final MsgEnterEventHandlerP broadcastHandler;
     final MsgEnterEventHandlerP generateResponseHandler;
     final MsgEnterEventHandlerP endHandler;
 
-    public AddFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP insertHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public AddFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP generateIdHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP insertHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
+        Objects.requireNonNull(generateIdHandler);
         Objects.requireNonNull(validateHandler);
         Objects.requireNonNull(insertHandler);
         Objects.requireNonNull(broadcastHandler);
         Objects.requireNonNull(generateResponseHandler);
         Objects.requireNonNull(endHandler);
+
         this.startHandler = startHandler;
         this.authorizeHandler = authorizeHandler;
+        this.generateIdHandler = generateIdHandler;
         this.validateHandler = validateHandler;
         this.insertHandler = insertHandler;
         this.broadcastHandler = broadcastHandler;
@@ -43,9 +47,10 @@ final public class AddFlowBuilderImpl implements AddFlowBuilder {
             .when(States.start, Flow.on(Events.next, States.authorize))
             .when(
                 States.authorize,
-                Flow.on(Events.next, States.validate),
+                Flow.on(Events.next, States.generateId),
                 Flow.on(Events.authorizationError, States.end)
             )
+            .when(States.generateId, Flow.on(Events.next, States.validate))
             .when(
                 States.validate,
                 Flow.on(Events.next, States.add),
@@ -57,6 +62,7 @@ final public class AddFlowBuilderImpl implements AddFlowBuilder {
             .when(States.end, Flow.end())
             .handlersP(States.start, startHandler)
             .handlersP(States.authorize, authorizeHandler)
+            .handlersP(States.generateId, generateIdHandler)
             .handlersP(States.validate, validateHandler)
             .handlersP(States.add, insertHandler)
             .handlersP(States.broadcast, broadcastHandler)

@@ -7,7 +7,9 @@ import elasta.core.flow.Flow;
 import elasta.orm.Orm;
 import elasta.sql.SqlDB;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -30,8 +32,11 @@ final public class DeleteAllStateHandlerBuilderImpl implements DeleteAllStateHan
     @Override
     public MsgEnterEventHandlerP<JsonArray, JsonArray> build() {
 
-        return msg -> orm.deleteAll(entity, msg.body().getList())
-            .map(sqlDB::update)
-            .map(objectList -> Flow.trigger(Events.next, msg));
+        return msg -> {
+            List<JsonObject> list = msg.body().getList();
+            return orm.deleteAll(entity, list)
+                .map(sqlDB::update)
+                .map(objectList -> Flow.trigger(Events.next, msg));
+        };
     }
 }

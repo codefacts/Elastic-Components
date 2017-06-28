@@ -50,6 +50,10 @@ final public class ObjectIdGeneratorImpl<T> implements ObjectIdGenerator<T> {
 
                 ImmutableMap<String, Object> immutableMap = toImmutableMap(simpleImmutableEntries, entity, jsonObject);
 
+                if (immutableMap.isEmpty()) {
+                    return jsonObject;
+                }
+
                 ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
                 jsonObject.getMap().forEach((key, value) -> builder.put(

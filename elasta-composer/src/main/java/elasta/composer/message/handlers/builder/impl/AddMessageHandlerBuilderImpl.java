@@ -14,6 +14,7 @@ import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
 import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
+import elasta.orm.idgenerator.ObjectIdGenerator;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
 
 import java.util.Objects;
@@ -35,8 +36,9 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
     final String broadcastAddress;
     final ResponseGenerator responseGenerator;
     final FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter;
+    final ObjectIdGenerator objectIdGenerator;
 
-    public AddMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter) {
+    public AddMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter, ObjectIdGenerator objectIdGenerator) {
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
@@ -50,6 +52,7 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(flowToJsonObjectMessageHandlerConverter);
+        Objects.requireNonNull(objectIdGenerator);
         this.authorizer = authorizer;
         this.convertersMap = convertersMap;
         this.action = action;
@@ -63,6 +66,7 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
         this.broadcastAddress = broadcastAddress;
         this.responseGenerator = responseGenerator;
         this.flowToJsonObjectMessageHandlerConverter = flowToJsonObjectMessageHandlerConverter;
+        this.objectIdGenerator = objectIdGenerator;
     }
 
     @Override
@@ -71,6 +75,7 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
         Flow flow = new AddFlowBuilderImpl(
             startHandler(),
             authorizeHandler(),
+            generateIdHandler(),
             validateHandler(),
             insertHandler(),
             broadcastHandler(),
@@ -79,6 +84,13 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
         ).build();
 
         return flowToJsonObjectMessageHandlerConverter.convert(flow);
+    }
+
+    private MsgEnterEventHandlerP generateIdHandler() {
+        return new GenerateIdStateHandlerBuilderImpl(
+            entity,
+            objectIdGenerator
+        ).build();
     }
 
     private MsgEnterEventHandlerP endHandler() {
@@ -99,7 +111,7 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
     }
 
     private MsgEnterEventHandlerP insertHandler() {
-        return new InsertStateHandlerBuilderImpl(
+        return new AddStateHandlerBuilderImpl(
             entity,
             orm
         ).build();

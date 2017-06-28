@@ -14,15 +14,17 @@ import java.util.Objects;
 final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
     final MsgEnterEventHandlerP startHandler;
     final MsgEnterEventHandlerP authorizeAllHandler;
+    final MsgEnterEventHandlerP generateIdsAllHandler;
     final MsgEnterEventHandlerP validateAllHandler;
     final MsgEnterEventHandlerP insertAllHandler;
     final MsgEnterEventHandlerP broadcastAllHandler;
     final MsgEnterEventHandlerP generateResponseHandler;
     final MsgEnterEventHandlerP endHandler;
 
-    public AddAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP insertAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public AddAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP generateIdsAllHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP insertAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeAllHandler);
+        Objects.requireNonNull(generateIdsAllHandler);
         Objects.requireNonNull(validateAllHandler);
         Objects.requireNonNull(insertAllHandler);
         Objects.requireNonNull(broadcastAllHandler);
@@ -30,6 +32,7 @@ final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
         Objects.requireNonNull(endHandler);
         this.startHandler = startHandler;
         this.authorizeAllHandler = authorizeAllHandler;
+        this.generateIdsAllHandler = generateIdsAllHandler;
         this.validateAllHandler = validateAllHandler;
         this.insertAllHandler = insertAllHandler;
         this.broadcastAllHandler = broadcastAllHandler;
@@ -43,9 +46,10 @@ final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
             .when(States.start, Flow.on(Events.next, States.authorizeAll))
             .when(
                 States.authorizeAll,
-                Flow.on(Events.next, States.validateAll),
+                Flow.on(Events.next, States.generateIdsAll),
                 Flow.on(Events.authorizationError, States.end)
             )
+            .when(States.generateIdsAll, Flow.on(Events.next, States.validateAll))
             .when(
                 States.validateAll,
                 Flow.on(Events.next, States.insertAll),
@@ -57,6 +61,7 @@ final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
             .when(States.end, Flow.end())
             .handlersP(States.start, startHandler)
             .handlersP(States.authorizeAll, authorizeAllHandler)
+            .handlersP(States.generateIdsAll, generateIdsAllHandler)
             .handlersP(States.validateAll, validateAllHandler)
             .handlersP(States.insertAll, insertAllHandler)
             .handlersP(States.broadcastAll, broadcastAllHandler)

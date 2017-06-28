@@ -11,7 +11,7 @@ public interface States {
     String update = "update";
     String delete = "delete";
     String end = "end";
-    String idGeneration = "idGeneration";
+    String generateId = "generateId";
     String conversionToCriteria = "conversionToCriteria";
     String findOne = "findOne";
     String findAll = "findAll";
@@ -24,4 +24,5 @@ public interface States {
     String updateAll = "updateAll";
     String broadcastAll = "broadcastAll";
     String loadParent = "loadParent";
+    String generateIdsAll = "generateIdsAll";
 }

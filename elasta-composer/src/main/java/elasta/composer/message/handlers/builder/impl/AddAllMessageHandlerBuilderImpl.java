@@ -16,6 +16,7 @@ import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
 import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
+import elasta.orm.idgenerator.ObjectIdGenerator;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
 import elasta.sql.SqlDB;
 import io.vertx.core.json.JsonObject;
@@ -26,7 +27,7 @@ import java.util.Objects;
 /**
  * Created by sohan on 5/21/2017.
  */
-final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessageHandlerBuilder {
+final public class AddAllMessageHandlerBuilderImpl implements InsertAllMessageHandlerBuilder {
     final Authorizer authorizer;
     final ConvertersMap convertersMap;
     final String action;
@@ -43,8 +44,9 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
     final ResponseGenerator responseGenerator;
     final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
     final SqlDB sqlDB;
+    final ObjectIdGenerator<Object> objectIdGenerator;
 
-    public InsertAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToMessageHandlerConverter flowToMessageHandlerConverter, SqlDB sqlDB) {
+    public AddAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToMessageHandlerConverter flowToMessageHandlerConverter, SqlDB sqlDB, ObjectIdGenerator<Object> objectIdGenerator) {
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
@@ -61,6 +63,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(flowToMessageHandlerConverter);
         Objects.requireNonNull(sqlDB);
+        Objects.requireNonNull(objectIdGenerator);
         this.authorizer = authorizer;
         this.convertersMap = convertersMap;
         this.action = action;
@@ -77,6 +80,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         this.responseGenerator = responseGenerator;
         this.flowToMessageHandlerConverter = flowToMessageHandlerConverter;
         this.sqlDB = sqlDB;
+        this.objectIdGenerator = objectIdGenerator;
     }
 
     @Override
@@ -85,6 +89,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         Flow flow = new AddAllFlowBuilderImpl(
             startHandler(),
             authorizeAllHandler(),
+            generateIdsAllHandler(),
             validateAllHandler(),
             insertAllHandler(),
             broadcastAllHandler(),
@@ -93,6 +98,13 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
         ).build();
 
         return flowToMessageHandlerConverter.convert(flow);
+    }
+
+    private MsgEnterEventHandlerP generateIdsAllHandler() {
+
+        return new GenerateIdsAllStateHandlerBuilderImpl(
+            entity, objectIdGenerator
+        ).build();
     }
 
     private MsgEnterEventHandlerP endHandler() {
@@ -113,7 +125,7 @@ final public class InsertAllMessageHandlerBuilderImpl implements InsertAllMessag
     }
 
     private MsgEnterEventHandlerP insertAllHandler() {
-        return new InsertAllStateHandlerBuilderImpl(
+        return new AddAllStateHandlerBuilderImpl(
             entity,
             sqlDB,
             orm

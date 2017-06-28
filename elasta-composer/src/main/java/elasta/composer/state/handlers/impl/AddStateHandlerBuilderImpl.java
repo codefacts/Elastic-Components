@@ -14,11 +14,11 @@ import java.util.Objects;
 /**
  * Created by sohan on 5/12/2017.
  */
-final public class InsertStateHandlerBuilderImpl implements InsertStateHandlerBuilder {
+final public class AddStateHandlerBuilderImpl implements InsertStateHandlerBuilder {
     final String entity;
     final Orm orm;
 
-    public InsertStateHandlerBuilderImpl(String entity, Orm orm) {
+    public AddStateHandlerBuilderImpl(String entity, Orm orm) {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(orm);
         this.entity = entity;
