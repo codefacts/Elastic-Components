@@ -22,7 +22,7 @@ final public class RelationTableUpserFunctionImpl implements RelationTableUpserF
         Objects.requireNonNull(dstTableData);
         Objects.requireNonNull(upsertContext);
 
-        final TableData tableData = relationTableDataPopulator.populate(srcTableData, dstTableData);
+        final TableData tableData = relationTableDataPopulator.populate(srcTableData, dstTableData).withIsNew(true);
 
         upsertContext.putOrMerge(
             UpsertUtils.toTableAndPrimaryColumnsKey(
