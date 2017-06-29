@@ -16,11 +16,19 @@ final public class MessageBundleImpl implements MessageBundle {
     private static final Pattern pattern = Pattern.compile("\\$\\{[a-zA-Z]\\w*?\\}");
 
     public MessageBundleImpl(String str) {
-        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        new JsonObject(str).getMap().forEach((k, v) -> {
-            builder.put(k, v.toString());
-        });
-        bundle = builder.build();
+        this(toMap(new JsonObject(str)));
+    }
+
+    private static Map<String, String> toMap(JsonObject jsonObject) {
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+
+        jsonObject.getMap().forEach((key, value) -> builder.put(key, ((String) value)));
+
+        return builder.build();
+    }
+
+    public MessageBundleImpl(Map<String, String> bundle) {
+        this.bundle = bundle;
     }
 
     @Override

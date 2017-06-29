@@ -1,5 +1,6 @@
 package elasta.orm.idgenerator.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
@@ -46,23 +47,32 @@ final public class ObjectIdGeneratorImpl<T> implements ObjectIdGenerator<T> {
             }).collect(Collectors.toList());
 
         return Promises.when(promises)
-            .map(simpleImmutableEntries -> {
-
-                ImmutableMap<String, Object> immutableMap = toImmutableMap(simpleImmutableEntries, entity, jsonObject);
+            .mapP(simpleImmutableEntries -> toImmutableMap(simpleImmutableEntries, entity, jsonObject))
+            .map(immutableMap -> {
 
                 if (immutableMap.isEmpty()) {
                     return jsonObject;
                 }
 
-                ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-
-                jsonObject.getMap().forEach((key, value) -> builder.put(
-                    key,
-                    immutableMap.containsKey(key) ? immutableMap.get(key) : value
-                ));
-
-                return new JsonObject(builder.build());
+                return new JsonObject(
+                    ImmutableMap.<String, Object>builder()
+                        .putAll(minus(jsonObject.getMap(), immutableMap))
+                        .putAll(immutableMap).build()
+                );
             });
+    }
+
+    private Map<String, Object> minus(Map<String, Object> map1, Map<String, Object> map2) {
+
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+
+        map1.entrySet().stream()
+            .filter(entry -> !map2.containsKey(entry.getKey()))
+            .forEach(entry -> {
+                builder.put(entry.getKey(), entry.getValue());
+            });
+
+        return builder.build();
     }
 
     private Promise<Object> processValue(String referencingEntity, Object value) {
@@ -90,7 +100,8 @@ final public class ObjectIdGeneratorImpl<T> implements ObjectIdGenerator<T> {
         }
     }
 
-    private ImmutableMap<String, Object> toImmutableMap(List<AbstractMap.SimpleImmutableEntry<String, Object>> simpleImmutableEntries, String entity, JsonObject jsonObject) {
+    private Promise<Map<String, Object>> toImmutableMap(List<AbstractMap.SimpleImmutableEntry<String, Object>> simpleImmutableEntries, String entity, JsonObject jsonObject) {
+
         final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
 
         final String primaryKey = helper.getPrimaryKey(entity);
@@ -101,11 +112,17 @@ final public class ObjectIdGeneratorImpl<T> implements ObjectIdGenerator<T> {
                 throw new ObjectIdGeneratorException("IsNewKey '" + isNewKey + "' already exists");
             }
 
-            builder.put(primaryKey, idGenerator.nextId(entity));
             builder.put(isNewKey, true);
+            return idGenerator.nextId(entity)
+                .map(newId -> {
+                    builder.put(primaryKey, newId);
+                    return builder.putAll(simpleImmutableEntries).build();
+                });
         }
 
-        return builder.putAll(simpleImmutableEntries).build();
+        return Promises.of(
+            builder.putAll(simpleImmutableEntries).build()
+        );
     }
 
     private Promise<Object> traverseObject(String entity, JsonObject jsonObject) {

@@ -2,7 +2,7 @@ package elasta.composer.model.response.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.composer.Cnsts;
+import elasta.composer.ComposerCnsts;
 import elasta.composer.model.response.ValidationErrorModel;
 import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
 import elasta.composer.model.response.builder.ValidationResultModelBuilder;
@@ -37,7 +37,7 @@ final public class ValidationErrorModelBuilderImpl implements ValidationErrorMod
             ImmutableMap.of(
                 ValidationErrorModel.statusCode, statusCode,
                 ValidationErrorModel.message, messageBundle.translate(statusCode, new JsonObject(
-                    ImmutableMap.of(Cnsts.entity, params.getEntity())
+                    ImmutableMap.of(ComposerCnsts.entity, params.getEntity())
                 )),
                 ValidationErrorModel.validationErrors, toValidationErrors(params.getValidationErrors())
             )

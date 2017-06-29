@@ -208,6 +208,6 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
 
     @Override
     public List<RelationMapping> getRelationMappings(String entity) {
-        return Arrays.asList(getDbMappingByTable(entity).getRelationMappings());
+        return Arrays.asList(getDbMapping(entity).getRelationMappings());
     }
 }

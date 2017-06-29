@@ -46,7 +46,7 @@ final public class NestedLoadParentStateHandlerBuilderImpl implements NestedLoad
             NestedResourcePathTranslator.QueryParamsAndFullPath paramsAndFullPath = nestedResourcePathTranslator.translate(
                 rootEntity,
                 rootAlias,
-                msg.headers().get(Cnsts.resourcePath).get()
+                msg.headers().get(ComposerCnsts.resourcePath).get()
             );
 
             return baseOrm

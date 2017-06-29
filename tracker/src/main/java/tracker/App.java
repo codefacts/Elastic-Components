@@ -1,8 +1,11 @@
 package tracker;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -17,37 +20,24 @@ public interface App {
     @Value
     @Builder
     final class Config {
-        final DB db;
+        final JsonObject db;
+        final Map<String, String> messageBundle;
+        final Vertx vertx;
 
-        public Config(DB db) {
+        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx) {
             Objects.requireNonNull(db);
+            Objects.requireNonNull(messageBundle);
+            Objects.requireNonNull(vertx);
             this.db = db;
+            this.messageBundle = messageBundle;
+            this.vertx = vertx;
         }
     }
 
-    @Value
-    @Builder
-    final class DB {
-        final String user;
-        final String password;
-        final String database;
-        final String host;
-        final String port;
-        final String driverClassName;
-
-        public DB(String user, String password, String database, String host, String port, String driverClassName) {
-            Objects.requireNonNull(user);
-            Objects.requireNonNull(password);
-            Objects.requireNonNull(database);
-            Objects.requireNonNull(host);
-            Objects.requireNonNull(port);
-            Objects.requireNonNull(driverClassName);
-            this.user = user;
-            this.password = password;
-            this.database = database;
-            this.host = host;
-            this.port = port;
-            this.driverClassName = driverClassName;
-        }
+    static void main(String[] asdf) {
+        String prettily = new JsonObject(
+            "{\"id\":\"1\",\"user_id\":\"admin-1\",\"username\":\"admin\",\"email\":\"admin@admin\",\"phone\":\"01951883412\",\"created_by\":\"1\",\"updated_by\":\"1\",\"create_date\":\"2017-06-07 00:00:00\",\"update_date\":\"2017-06-22 00:00:00\"}"
+        ).encodePrettily();
+        System.out.println(prettily);
     }
 }

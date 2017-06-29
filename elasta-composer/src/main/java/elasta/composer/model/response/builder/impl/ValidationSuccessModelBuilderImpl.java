@@ -2,7 +2,7 @@ package elasta.composer.model.response.builder.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.ComposerUtils;
-import elasta.composer.ResponseCodes;
+import elasta.composer.StatusCodes;
 import elasta.composer.model.response.ValidationSuccessModel;
 import elasta.composer.model.response.builder.ValidationSuccessModelBuilder;
 import elasta.pipeline.MessageBundle;
@@ -25,8 +25,8 @@ final public class ValidationSuccessModelBuilderImpl implements ValidationSucces
     public JsonObject build(BuildParams params) {
         return new JsonObject(
             ImmutableMap.of(
-                ValidationSuccessModel.statusCode, ResponseCodes.validateSuccess,
-                ValidationSuccessModel.message, messageBundle.translate(ResponseCodes.validateSuccess, ComposerUtils.emptyJsonObject())
+                ValidationSuccessModel.statusCode, StatusCodes.validateSuccess,
+                ValidationSuccessModel.message, messageBundle.translate(StatusCodes.validateSuccess, ComposerUtils.emptyJsonObject())
             )
         );
     }

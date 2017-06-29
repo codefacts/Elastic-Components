@@ -2,6 +2,7 @@ package elasta.composer.message.handlers.builder.impl;
 
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
+import elasta.composer.MessageBus;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.AddFlowBuilderImpl;
@@ -12,10 +13,10 @@ import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
-import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
 import elasta.orm.idgenerator.ObjectIdGenerator;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
+import elasta.sql.SqlDB;
 
 import java.util.Objects;
 
@@ -32,13 +33,14 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
     final JsonObjectValidatorAsync jsonObjectValidatorAsync;
     final ValidationErrorModelBuilder validationErrorModelBuilder;
     final Orm orm;
-    final SimpleEventBus simpleEventBus;
+    final MessageBus messageBus;
     final String broadcastAddress;
     final ResponseGenerator responseGenerator;
     final FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter;
     final ObjectIdGenerator objectIdGenerator;
+    final SqlDB sqlDB;
 
-    public AddMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter, ObjectIdGenerator objectIdGenerator) {
+    public AddMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, Orm orm, MessageBus messageBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToJsonObjectMessageHandlerConverter flowToJsonObjectMessageHandlerConverter, ObjectIdGenerator objectIdGenerator, SqlDB sqlDB) {
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
@@ -48,11 +50,12 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
         Objects.requireNonNull(jsonObjectValidatorAsync);
         Objects.requireNonNull(validationErrorModelBuilder);
         Objects.requireNonNull(orm);
-        Objects.requireNonNull(simpleEventBus);
+        Objects.requireNonNull(messageBus);
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(responseGenerator);
         Objects.requireNonNull(flowToJsonObjectMessageHandlerConverter);
         Objects.requireNonNull(objectIdGenerator);
+        Objects.requireNonNull(sqlDB);
         this.authorizer = authorizer;
         this.convertersMap = convertersMap;
         this.action = action;
@@ -62,11 +65,12 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
         this.jsonObjectValidatorAsync = jsonObjectValidatorAsync;
         this.validationErrorModelBuilder = validationErrorModelBuilder;
         this.orm = orm;
-        this.simpleEventBus = simpleEventBus;
+        this.messageBus = messageBus;
         this.broadcastAddress = broadcastAddress;
         this.responseGenerator = responseGenerator;
         this.flowToJsonObjectMessageHandlerConverter = flowToJsonObjectMessageHandlerConverter;
         this.objectIdGenerator = objectIdGenerator;
+        this.sqlDB = sqlDB;
     }
 
     @Override
@@ -105,7 +109,7 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
 
     private MsgEnterEventHandlerP broadcastHandler() {
         return new BroadcastStateHandlerBuilderImpl(
-            simpleEventBus,
+            messageBus,
             broadcastAddress
         ).build();
     }
@@ -113,7 +117,8 @@ final public class AddMessageHandlerBuilderImpl implements AddMessageHandlerBuil
     private MsgEnterEventHandlerP insertHandler() {
         return new AddStateHandlerBuilderImpl(
             entity,
-            orm
+            orm,
+            sqlDB
         ).build();
     }
 

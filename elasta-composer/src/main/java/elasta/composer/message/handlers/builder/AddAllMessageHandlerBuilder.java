@@ -1,5 +1,7 @@
 package elasta.composer.message.handlers.builder;
 
+import elasta.composer.message.handlers.JsonArrayMessageHandler;
+import elasta.composer.message.handlers.JsonArrayMessageHandlerBuilder;
 import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.MessageHandler;
 import io.vertx.core.json.JsonObject;
@@ -9,7 +11,8 @@ import java.util.List;
 /**
  * Created by sohan on 5/21/2017.
  */
-public interface InsertAllMessageHandlerBuilder {
+public interface AddAllMessageHandlerBuilder extends JsonArrayMessageHandlerBuilder {
 
-    MessageHandler<List<JsonObject>> build();
+    @Override
+    JsonArrayMessageHandler build();
 }

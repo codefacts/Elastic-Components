@@ -2,20 +2,19 @@ package elasta.composer.message.handlers.builder.impl;
 
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
+import elasta.composer.MessageBus;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.converter.FlowToJsonArrayMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.DeleteAllFlowBuilderImpl;
-import elasta.composer.message.handlers.MessageHandler;
+import elasta.composer.message.handlers.JsonArrayMessageHandler;
 import elasta.composer.message.handlers.builder.DeleteAllMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.model.response.builder.AuthorizationSuccessModelBuilder;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
-import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
 import elasta.sql.SqlDB;
-import io.vertx.core.json.JsonArray;
 
 import java.util.Objects;
 
@@ -24,7 +23,7 @@ import java.util.Objects;
  */
 final public class DeleteAllMessageHandlerBuilderImpl implements DeleteAllMessageHandlerBuilder {
     final ResponseGenerator responseGenerator;
-    final SimpleEventBus simpleEventBus;
+    final MessageBus messageBus;
     final String broadcastAddress;
     final Orm orm;
     final String entity;
@@ -36,9 +35,9 @@ final public class DeleteAllMessageHandlerBuilderImpl implements DeleteAllMessag
     final FlowToJsonArrayMessageHandlerConverter flowToJsonArrayMessageHandlerConverter;
     final SqlDB sqlDB;
 
-    public DeleteAllMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, SimpleEventBus simpleEventBus, String broadcastAddress, Orm orm, String entity, String action, Authorizer authorizer, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, ConvertersMap convertersMap, FlowToJsonArrayMessageHandlerConverter flowToJsonArrayMessageHandlerConverter, SqlDB sqlDB) {
+    public DeleteAllMessageHandlerBuilderImpl(ResponseGenerator responseGenerator, MessageBus messageBus, String broadcastAddress, Orm orm, String entity, String action, Authorizer authorizer, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, ConvertersMap convertersMap, FlowToJsonArrayMessageHandlerConverter flowToJsonArrayMessageHandlerConverter, SqlDB sqlDB) {
         Objects.requireNonNull(responseGenerator);
-        Objects.requireNonNull(simpleEventBus);
+        Objects.requireNonNull(messageBus);
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(orm);
         Objects.requireNonNull(entity);
@@ -50,7 +49,7 @@ final public class DeleteAllMessageHandlerBuilderImpl implements DeleteAllMessag
         Objects.requireNonNull(flowToJsonArrayMessageHandlerConverter);
         Objects.requireNonNull(sqlDB);
         this.responseGenerator = responseGenerator;
-        this.simpleEventBus = simpleEventBus;
+        this.messageBus = messageBus;
         this.broadcastAddress = broadcastAddress;
         this.orm = orm;
         this.entity = entity;
@@ -64,7 +63,7 @@ final public class DeleteAllMessageHandlerBuilderImpl implements DeleteAllMessag
     }
 
     @Override
-    public MessageHandler<JsonArray> build() {
+    public JsonArrayMessageHandler build() {
 
         Flow flow = new DeleteAllFlowBuilderImpl(
             startHandler(),
@@ -90,7 +89,7 @@ final public class DeleteAllMessageHandlerBuilderImpl implements DeleteAllMessag
 
     private MsgEnterEventHandlerP broadcastAllHandler() {
         return new BroadcastAllStateHandlerBuilderImpl(
-            simpleEventBus,
+            messageBus,
             broadcastAddress
         ).build();
     }

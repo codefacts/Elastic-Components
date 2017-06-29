@@ -4,26 +4,36 @@ import elasta.core.promise.intfs.Promise;
 import io.vertx.core.eventbus.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.Builder;
+import lombok.Value;
+
+import java.util.Objects;
 
 public interface SimpleEventBus {
 
-    SimpleEventBus send(String address, Object message);
+    SimpleEventBus send(Params params);
 
-    SimpleEventBus send(String address, Object message, DeliveryOptions options);
+    <T> Promise<Message<T>> sendAndReceive(Params params);
 
-    <T> Promise<Message<T>> sendAndReceive(String address, Object message);
+    Promise<Message<JsonObject>> sendAndReceiveJsonObject(Params params);
 
-    <T> Promise<Message<T>> sendAndReceive(String address, Object message, DeliveryOptions options);
+    Promise<Message<JsonArray>> sendAndReceiveJsonArray(Params params);
 
-    Promise<Message<JsonObject>> sendAndReceiveJsonObject(String address, Object message);
+    SimpleEventBus publish(Params params);
 
-    Promise<Message<JsonObject>> sendAndReceiveJsonObject(String address, Object message, DeliveryOptions options);
+    @Value
+    @Builder
+    public final class Params {
+        final String address;
+        final Object message;
+        final DeliveryOptions options;
 
-    Promise<Message<JsonArray>> sendAndReceiveJsonArray(String address, Object message);
-
-    Promise<Message<JsonArray>> sendAndReceiveJsonArray(String address, Object message, DeliveryOptions options);
-
-    SimpleEventBus publish(String address, Object message);
-
-    SimpleEventBus publish(String address, Object message, DeliveryOptions options);
+        public Params(String address, Object message, DeliveryOptions options) {
+            Objects.requireNonNull(address);
+            Objects.requireNonNull(message);
+            this.address = address;
+            this.message = message;
+            this.options = (options == null) ? new DeliveryOptions() : options;
+        }
+    }
 }

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.authorization.Authorizer;
 import elasta.commons.Utils;
-import elasta.composer.Cnsts;
+import elasta.composer.ComposerCnsts;
 import elasta.composer.Events;
 import elasta.composer.Msg;
 import elasta.composer.MsgEnterEventHandlerP;
@@ -108,7 +108,7 @@ final public class AuthorizeAllStateHandlerBuilderImpl implements AuthorizeAllSt
                                             AuthorizationErrorModelBuilder.BuildParams.builder().build()
                                         )
                                     )
-                                    .put(Cnsts.data, builder.build())
+                                    .put(ComposerCnsts.data, builder.build())
                                     .build()
                             )
                         )

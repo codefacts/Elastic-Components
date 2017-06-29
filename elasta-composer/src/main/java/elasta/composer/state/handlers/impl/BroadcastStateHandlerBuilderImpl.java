@@ -4,7 +4,6 @@ import elasta.composer.*;
 import elasta.composer.state.handlers.BroadcastStateHandlerBuilder;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
-import elasta.eventbus.SimpleEventBus;
 import io.vertx.core.eventbus.DeliveryOptions;
 
 import java.util.Objects;
@@ -13,30 +12,35 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class BroadcastStateHandlerBuilderImpl implements BroadcastStateHandlerBuilder {
-    final SimpleEventBus simpleEventBus;
+    final MessageBus messageBus;
     final String eventAddress;
 
-    public BroadcastStateHandlerBuilderImpl(SimpleEventBus simpleEventBus, String broadcastAddress) {
-        Objects.requireNonNull(simpleEventBus);
+    public BroadcastStateHandlerBuilderImpl(MessageBus messageBus, String broadcastAddress) {
+        Objects.requireNonNull(messageBus);
         Objects.requireNonNull(broadcastAddress);
-        this.simpleEventBus = simpleEventBus;
+        this.messageBus = messageBus;
         this.eventAddress = broadcastAddress;
     }
 
     @Override
     public MsgEnterEventHandlerP<Object, Object> build() {
-        return request -> {
+        return msg -> {
 
-            simpleEventBus.publish(
-                eventAddress, request.body(),
-                new DeliveryOptions()
-                    .setHeaders(
-                        ComposerUtils.toVertxMultimap(request.headers().getMultimap())
+            messageBus.publish(
+                MessageBus.Params.builder()
+                    .address(eventAddress)
+                    .message(msg.body())
+                    .options(
+                        new DeliveryOptions()
+                            .setHeaders(
+                                ComposerUtils.toVertxMultimap(msg.headers().getMultimap())
+                            )
                     )
+                    .build()
             );
 
             return Promises.of(
-                Flow.trigger(Events.next, request)
+                Flow.trigger(Events.next, msg)
             );
         };
     }

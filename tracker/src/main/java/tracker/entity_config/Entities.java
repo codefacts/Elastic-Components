@@ -14,9 +14,11 @@ import java.util.Optional;
  * Created by sohan on 6/25/2017.
  */
 public interface Entities {
+    String USER = "User";
+
     static Collection<Entity> entities() {
-        Entity user = new Entity(
-            "user",
+        Entity User = new Entity(
+            USER,
             "id",
             new Field[]{
                 new Field("id", JavaType.LONG),
@@ -27,10 +29,10 @@ public interface Entities {
                 new Field("createDate", JavaType.STRING),
                 new Field("updateDate", JavaType.STRING),
                 new Field("createdBy", JavaType.OBJECT, Optional.of(new Relationship(
-                    Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, "user"
+                    Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER
                 ))),
                 new Field("updatedBy", JavaType.OBJECT, Optional.of(new Relationship(
-                    Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, "user"
+                    Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER
                 )))
             },
             new DbMapping(
@@ -48,7 +50,7 @@ public interface Entities {
                 new RelationMapping[]{
                     new DirectRelationMappingImpl(
                         "users",
-                        "user",
+                        USER,
                         ImmutableList.of(
                             new ForeignColumnMapping("created_by", "id")
                         ),
@@ -62,7 +64,7 @@ public interface Entities {
                     ),
                     new DirectRelationMappingImpl(
                         "users",
-                        "user",
+                        USER,
                         ImmutableList.of(
                             new ForeignColumnMapping("updated_by", "id")
                         ),
@@ -78,6 +80,6 @@ public interface Entities {
             )
         );
 
-        return ImmutableList.of(user);
+        return ImmutableList.of(User);
     }
 }

@@ -19,7 +19,7 @@ import java.util.Objects;
 /**
  * Created by sohan on 5/14/2017.
  */
-final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHandlerBuilder {
+final public class FindOneMessageHandlerBuilderImpl<T> implements FindOneMessageHandlerBuilder<T> {
     final String alias;
     final String entity;
     final FieldExpression findOneByFieldExpression;
@@ -29,9 +29,9 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
     final String action;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
     final ConvertersMap convertersMap;
-    final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
+    final FlowToMessageHandlerConverter<T> flowToMessageHandlerConverter;
 
-    public FindOneMessageHandlerBuilderImpl(String alias, String entity, FieldExpression findOneByFieldExpression, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToMessageHandlerConverter flowToMessageHandlerConverter) {
+    public FindOneMessageHandlerBuilderImpl(String alias, String entity, FieldExpression findOneByFieldExpression, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToMessageHandlerConverter<T> flowToMessageHandlerConverter) {
         Objects.requireNonNull(alias);
         Objects.requireNonNull(entity);
         Objects.requireNonNull(findOneByFieldExpression);
@@ -55,7 +55,7 @@ final public class FindOneMessageHandlerBuilderImpl implements FindOneMessageHan
     }
 
     @Override
-    public MessageHandler<Object> build() {
+    public MessageHandler<T> build() {
 
         Flow flow = new FindOneFlowBuilderImpl(
             startHandler(),

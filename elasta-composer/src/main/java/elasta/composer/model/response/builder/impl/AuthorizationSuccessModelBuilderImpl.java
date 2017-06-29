@@ -2,7 +2,7 @@ package elasta.composer.model.response.builder.impl;
 
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.ComposerUtils;
-import elasta.composer.ResponseCodes;
+import elasta.composer.StatusCodes;
 import elasta.composer.model.response.AuthorizationSuccessModel;
 import elasta.composer.model.response.builder.AuthorizationSuccessModelBuilder;
 import elasta.pipeline.MessageBundle;
@@ -25,9 +25,9 @@ final public class AuthorizationSuccessModelBuilderImpl implements Authorization
     public JsonObject build(BuildParams params) {
         return new JsonObject(
             ImmutableMap.of(
-                AuthorizationSuccessModel.statusCode, ResponseCodes.authorizeSuccess,
+                AuthorizationSuccessModel.statusCode, StatusCodes.authorizeSuccess,
                 AuthorizationSuccessModel.message, messageBundle.translate(
-                    ResponseCodes.authorizeSuccess,
+                    StatusCodes.authorizeSuccess,
                     ComposerUtils.emptyJsonObject()
                 )
             )

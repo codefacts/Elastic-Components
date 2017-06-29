@@ -2,11 +2,12 @@ package elasta.composer.message.handlers.builder.impl;
 
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
+import elasta.composer.MessageBus;
 import elasta.composer.MsgEnterEventHandlerP;
-import elasta.composer.converter.FlowToMessageHandlerConverter;
+import elasta.composer.converter.FlowToJsonArrayMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.AddAllFlowBuilderImpl;
-import elasta.composer.message.handlers.MessageHandler;
-import elasta.composer.message.handlers.builder.InsertAllMessageHandlerBuilder;
+import elasta.composer.message.handlers.JsonArrayMessageHandler;
+import elasta.composer.message.handlers.builder.AddAllMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
 import elasta.composer.model.response.builder.AuthorizationSuccessModelBuilder;
 import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
@@ -14,20 +15,17 @@ import elasta.composer.model.response.builder.ValidationSuccessModelBuilder;
 import elasta.composer.state.handlers.impl.*;
 import elasta.composer.state.handlers.response.generator.ResponseGenerator;
 import elasta.core.flow.Flow;
-import elasta.eventbus.SimpleEventBus;
 import elasta.orm.Orm;
 import elasta.orm.idgenerator.ObjectIdGenerator;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
 import elasta.sql.SqlDB;
-import io.vertx.core.json.JsonObject;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Created by sohan on 5/21/2017.
  */
-final public class AddAllMessageHandlerBuilderImpl implements InsertAllMessageHandlerBuilder {
+final public class AddAllMessageHandlerBuilderImpl implements AddAllMessageHandlerBuilder {
     final Authorizer authorizer;
     final ConvertersMap convertersMap;
     final String action;
@@ -39,14 +37,14 @@ final public class AddAllMessageHandlerBuilderImpl implements InsertAllMessageHa
     final ValidationErrorModelBuilder validationErrorModelBuilder;
     final ValidationSuccessModelBuilder validationSuccessModelBuilder;
     final Orm orm;
-    final SimpleEventBus simpleEventBus;
+    final MessageBus messageBus;
     final String broadcastAddress;
     final ResponseGenerator responseGenerator;
-    final FlowToMessageHandlerConverter flowToMessageHandlerConverter;
+    final FlowToJsonArrayMessageHandlerConverter flowToJsonArrayMessageHandlerConverter;
     final SqlDB sqlDB;
     final ObjectIdGenerator<Object> objectIdGenerator;
 
-    public AddAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, SimpleEventBus simpleEventBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToMessageHandlerConverter flowToMessageHandlerConverter, SqlDB sqlDB, ObjectIdGenerator<Object> objectIdGenerator) {
+    public AddAllMessageHandlerBuilderImpl(Authorizer authorizer, ConvertersMap convertersMap, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, AuthorizationSuccessModelBuilder authorizationSuccessModelBuilder, String entity, String primaryKey, JsonObjectValidatorAsync jsonObjectValidatorAsync, ValidationErrorModelBuilder validationErrorModelBuilder, ValidationSuccessModelBuilder validationSuccessModelBuilder, Orm orm, MessageBus messageBus, String broadcastAddress, ResponseGenerator responseGenerator, FlowToJsonArrayMessageHandlerConverter flowToJsonArrayMessageHandlerConverter, SqlDB sqlDB, ObjectIdGenerator<Object> objectIdGenerator) {
         Objects.requireNonNull(authorizer);
         Objects.requireNonNull(convertersMap);
         Objects.requireNonNull(action);
@@ -58,10 +56,10 @@ final public class AddAllMessageHandlerBuilderImpl implements InsertAllMessageHa
         Objects.requireNonNull(validationErrorModelBuilder);
         Objects.requireNonNull(validationSuccessModelBuilder);
         Objects.requireNonNull(orm);
-        Objects.requireNonNull(simpleEventBus);
+        Objects.requireNonNull(messageBus);
         Objects.requireNonNull(broadcastAddress);
         Objects.requireNonNull(responseGenerator);
-        Objects.requireNonNull(flowToMessageHandlerConverter);
+        Objects.requireNonNull(flowToJsonArrayMessageHandlerConverter);
         Objects.requireNonNull(sqlDB);
         Objects.requireNonNull(objectIdGenerator);
         this.authorizer = authorizer;
@@ -75,16 +73,16 @@ final public class AddAllMessageHandlerBuilderImpl implements InsertAllMessageHa
         this.validationErrorModelBuilder = validationErrorModelBuilder;
         this.validationSuccessModelBuilder = validationSuccessModelBuilder;
         this.orm = orm;
-        this.simpleEventBus = simpleEventBus;
+        this.messageBus = messageBus;
         this.broadcastAddress = broadcastAddress;
         this.responseGenerator = responseGenerator;
-        this.flowToMessageHandlerConverter = flowToMessageHandlerConverter;
+        this.flowToJsonArrayMessageHandlerConverter = flowToJsonArrayMessageHandlerConverter;
         this.sqlDB = sqlDB;
         this.objectIdGenerator = objectIdGenerator;
     }
 
     @Override
-    public MessageHandler<List<JsonObject>> build() {
+    public JsonArrayMessageHandler build() {
 
         Flow flow = new AddAllFlowBuilderImpl(
             startHandler(),
@@ -97,7 +95,7 @@ final public class AddAllMessageHandlerBuilderImpl implements InsertAllMessageHa
             endHandler()
         ).build();
 
-        return flowToMessageHandlerConverter.convert(flow);
+        return flowToJsonArrayMessageHandlerConverter.convert(flow);
     }
 
     private MsgEnterEventHandlerP generateIdsAllHandler() {
@@ -119,7 +117,7 @@ final public class AddAllMessageHandlerBuilderImpl implements InsertAllMessageHa
 
     private MsgEnterEventHandlerP broadcastAllHandler() {
         return new BroadcastAllStateHandlerBuilderImpl(
-            simpleEventBus,
+            messageBus,
             broadcastAddress
         ).build();
     }

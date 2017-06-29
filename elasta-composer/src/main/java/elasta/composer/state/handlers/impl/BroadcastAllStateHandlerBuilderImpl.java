@@ -2,28 +2,27 @@ package elasta.composer.state.handlers.impl;
 
 import elasta.composer.ComposerUtils;
 import elasta.composer.Events;
+import elasta.composer.MessageBus;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.BroadcastAllStateHandlerBuilder;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
-import elasta.eventbus.SimpleEventBus;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Created by sohan on 5/21/2017.
  */
 final public class BroadcastAllStateHandlerBuilderImpl implements BroadcastAllStateHandlerBuilder {
-    final SimpleEventBus simpleEventBus;
+    final MessageBus messageBus;
     final String eventAddress;
 
-    public BroadcastAllStateHandlerBuilderImpl(SimpleEventBus simpleEventBus, String broadcastAddress) {
-        Objects.requireNonNull(simpleEventBus);
+    public BroadcastAllStateHandlerBuilderImpl(MessageBus messageBus, String broadcastAddress) {
+        Objects.requireNonNull(messageBus);
         Objects.requireNonNull(broadcastAddress);
-        this.simpleEventBus = simpleEventBus;
+        this.messageBus = messageBus;
         this.eventAddress = broadcastAddress;
     }
 
@@ -32,12 +31,17 @@ final public class BroadcastAllStateHandlerBuilderImpl implements BroadcastAllSt
         return msg -> {
 
             msg.body().forEach(
-                obj -> simpleEventBus.publish(
-                    eventAddress, obj,
-                    new DeliveryOptions()
-                        .setHeaders(
-                            ComposerUtils.toVertxMultimap(msg.headers().getMultimap())
+                obj -> messageBus.publish(
+                    MessageBus.Params.builder()
+                        .address(eventAddress)
+                        .message(obj)
+                        .options(
+                            new DeliveryOptions()
+                                .setHeaders(
+                                    ComposerUtils.toVertxMultimap(msg.headers().getMultimap())
+                                )
                         )
+                        .build()
                 )
             );
 

@@ -50,4 +50,13 @@ public interface ComposerUtils {
             .userId(userId)
             .build();
     }
+
+    static ImmutableListMultimap<String, String> toListMultimap(MultiMap headers) {
+        
+        ImmutableListMultimap.Builder<String, String> builder = ImmutableListMultimap.builder();
+
+        headers.forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
+
+        return builder.build();
+    }
 }

@@ -10,6 +10,8 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.Objects;
 
@@ -25,51 +27,28 @@ final public class SimpleEventBusImpl implements SimpleEventBus {
         this.eventBus = eventBus;
     }
 
-    public SimpleEventBus send(String address, Object message) {
-        eventBus.send(address, message);
+    public SimpleEventBus send(Params params) {
+        eventBus.send(params.getAddress(), params.getMessage(), params.getOptions());
         return this;
     }
 
-    public SimpleEventBus send(String address, Object message, DeliveryOptions options) {
-        eventBus.send(address, message, options);
-        return this;
-    }
-
-    public <T> Promise<Message<T>> sendAndReceive(String address, Object message) {
-        return Promises.exec(messageDefer -> eventBus.<T>send(address, message, deferred(messageDefer, message)));
-    }
-
-    public <T> Promise<Message<T>> sendAndReceive(String address, Object message, DeliveryOptions options) {
-        return Promises.exec(messageDefer -> eventBus.send(address, message, options, deferred(messageDefer, message)));
+    public <T> Promise<Message<T>> sendAndReceive(Params params) {
+        final Object message = params.getMessage();
+        return Promises.exec(messageDefer -> eventBus.send(params.getAddress(), message, params.getOptions(), deferred(messageDefer, message)));
     }
 
     @Override
-    public Promise<Message<JsonObject>> sendAndReceiveJsonObject(String address, Object message) {
-        return sendAndReceive(address, message);
+    public Promise<Message<JsonObject>> sendAndReceiveJsonObject(Params params) {
+        return sendAndReceive(params);
     }
 
     @Override
-    public Promise<Message<JsonObject>> sendAndReceiveJsonObject(String address, Object message, DeliveryOptions options) {
-        return sendAndReceive(address, message, options);
+    public Promise<Message<JsonArray>> sendAndReceiveJsonArray(Params params) {
+        return sendAndReceive(params);
     }
 
-    @Override
-    public Promise<Message<JsonArray>> sendAndReceiveJsonArray(String address, Object message) {
-        return sendAndReceive(address, message);
-    }
-
-    @Override
-    public Promise<Message<JsonArray>> sendAndReceiveJsonArray(String address, Object message, DeliveryOptions options) {
-        return sendAndReceive(address, message, options);
-    }
-
-    public SimpleEventBus publish(String address, Object message) {
-        eventBus.publish(address, message);
-        return this;
-    }
-
-    public SimpleEventBus publish(String address, Object message, DeliveryOptions options) {
-        eventBus.publish(address, message, options);
+    public SimpleEventBus publish(Params params) {
+        eventBus.publish(params.getAddress(), params.getMessage(), params.getOptions());
         return this;
     }
 
