@@ -4,6 +4,7 @@ import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.flow.builder.AddFlowBuilder;
 import elasta.composer.States;
+import elasta.composer.state.handlers.*;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,21 +13,28 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class AddFlowBuilderImpl implements AddFlowBuilder {
-    final MsgEnterEventHandlerP startHandler;
-    final MsgEnterEventHandlerP authorizeHandler;
-    final MsgEnterEventHandlerP generateIdHandler;
-    final MsgEnterEventHandlerP validateHandler;
-    final MsgEnterEventHandlerP insertHandler;
-    final MsgEnterEventHandlerP broadcastHandler;
-    final MsgEnterEventHandlerP generateResponseHandler;
-    final MsgEnterEventHandlerP endHandler;
+    final StartStateHandler startHandler;
+    final AuthorizeStateHandler authorizeHandler;
+    final GenerateIdStateHandler generateIdHandler;
+    final ValidateStateHandler validateHandler;
+    final AddStateHandler addHandler;
+    final BroadcastStateHandler broadcastHandler;
+    final GenerateResponseStateHandler generateResponseHandler;
+    final EndStateHandler endHandler;
 
-    public AddFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP generateIdHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP insertHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public AddFlowBuilderImpl(StartStateHandler startHandler,
+                              AuthorizeStateHandler authorizeHandler,
+                              GenerateIdStateHandler generateIdHandler,
+                              ValidateStateHandler validateHandler,
+                              AddStateHandler addHandler,
+                              BroadcastStateHandler broadcastHandler,
+                              GenerateResponseStateHandler generateResponseHandler,
+                              EndStateHandler endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
         Objects.requireNonNull(generateIdHandler);
         Objects.requireNonNull(validateHandler);
-        Objects.requireNonNull(insertHandler);
+        Objects.requireNonNull(addHandler);
         Objects.requireNonNull(broadcastHandler);
         Objects.requireNonNull(generateResponseHandler);
         Objects.requireNonNull(endHandler);
@@ -35,7 +43,7 @@ final public class AddFlowBuilderImpl implements AddFlowBuilder {
         this.authorizeHandler = authorizeHandler;
         this.generateIdHandler = generateIdHandler;
         this.validateHandler = validateHandler;
-        this.insertHandler = insertHandler;
+        this.addHandler = addHandler;
         this.broadcastHandler = broadcastHandler;
         this.generateResponseHandler = generateResponseHandler;
         this.endHandler = endHandler;
@@ -64,7 +72,7 @@ final public class AddFlowBuilderImpl implements AddFlowBuilder {
             .handlersP(States.authorize, authorizeHandler)
             .handlersP(States.generateId, generateIdHandler)
             .handlersP(States.validate, validateHandler)
-            .handlersP(States.add, insertHandler)
+            .handlersP(States.add, addHandler)
             .handlersP(States.broadcast, broadcastHandler)
             .handlersP(States.generateResponse, generateResponseHandler)
             .handlersP(States.end, endHandler)

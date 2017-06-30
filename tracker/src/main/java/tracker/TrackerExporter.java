@@ -1,27 +1,26 @@
 package tracker;
 
-import com.google.common.collect.ImmutableList;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MessageBus;
 import elasta.composer.MessageProcessingErrorHandler;
 import elasta.composer.builder.impl.ConvertersMapBuilderImpl;
-import elasta.composer.converter.FlowToJsonArrayMessageHandlerConverter;
-import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
-import elasta.composer.converter.FlowToMessageHandlerConverter;
-import elasta.composer.converter.impl.FlowToJsonArrayMessageHandlerConverterImpl;
-import elasta.composer.converter.impl.FlowToJsonObjectMessageHandlerConverterImpl;
-import elasta.composer.converter.impl.FlowToMessageHandlerConverterImpl;
+import elasta.composer.converter.*;
+import elasta.composer.converter.impl.*;
 import elasta.composer.impl.MessageBusImpl;
-import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
-import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
-import elasta.composer.model.response.builder.ValidationResultModelBuilder;
-import elasta.composer.model.response.builder.impl.AuthorizationErrorModelBuilderImpl;
-import elasta.composer.model.response.builder.impl.ValidationErrorModelBuilderImpl;
-import elasta.composer.model.response.builder.impl.ValidationResultModelBuilderImpl;
-import elasta.composer.state.handlers.UserIdConverter;
-import elasta.composer.state.handlers.response.generator.JsonArrayResponseGenerator;
-import elasta.composer.state.handlers.response.generator.JsonObjectResponseGenerator;
+import elasta.composer.model.response.builder.*;
+import elasta.composer.model.response.builder.impl.*;
+import elasta.composer.converter.UserIdConverter;
+import elasta.composer.respose.generator.JsonArrayResponseGenerator;
+import elasta.composer.respose.generator.JsonObjectResponseGenerator;
+import elasta.composer.respose.generator.ResponseGenerator;
+import elasta.composer.respose.generator.impl.JsonArrayResponseGeneratorImpl;
+import elasta.composer.respose.generator.impl.JsonObjectResponseGeneratorImpl;
+import elasta.composer.respose.generator.impl.ResponseGeneratorImpl;
+import elasta.composer.state.handlers.*;
+import elasta.composer.state.handlers.impl.ConversionToCriteriaStateHandlerImpl;
+import elasta.composer.state.handlers.impl.EndStateHandlerImpl;
+import elasta.composer.state.handlers.impl.StartStateHandlerImpl;
 import elasta.core.promise.impl.Promises;
 import elasta.eventbus.SimpleEventBus;
 import elasta.eventbus.impl.SimpleEventBusImpl;
@@ -35,16 +34,14 @@ import elasta.orm.idgenerator.impl.LongIdGeneratorImpl;
 import elasta.orm.idgenerator.impl.LongObjectIdGeneratorImpl;
 import elasta.pipeline.MessageBundle;
 import elasta.pipeline.util.MessageBundleImpl;
-import elasta.pipeline.validator.JsonObjectValidatorAsync;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import lombok.Builder;
 import lombok.Value;
 import tracker.entity_config.Entities;
 import tracker.impl.AppHelpersImpl;
+import tracker.impl.FlowBuilderHelperImpl;
 import tracker.impl.MessageHandlersBuilderImpl;
 import tracker.impl.UserIdConverterImpl;
 
@@ -83,17 +80,27 @@ public interface TrackerExporter extends ModuleExporter {
     static void exportExtraComponents(ModuleSystemBuilder builder, App.Config config) {
 
         builder.export(MessageHandlersBuilder.class, module -> {
-            module.export(new MessageHandlersBuilderImpl());
+            module.export(new MessageHandlersBuilderImpl(
+                module.require(FlowBuilderHelper.class)
+            ));
         });
+
+        builder.export(FlowBuilderHelper.class, module -> module.export(
+            new FlowBuilderHelperImpl()
+        ));
 
         builder.export(AppHelpers.class, module -> {
             module.export(new AppHelpersImpl(
-                module.require(EntityMappingHelper.class)
+                module.require(App.Config.class).getRootAlias(), module.require(EntityMappingHelper.class)
             ));
         });
     }
 
     static ModuleSystemBuilder exportAppComponents(ModuleSystemBuilder builder, App.Config config) {
+
+        exportStartStateHandler(builder, config);
+
+        exportEndStateHandler(builder, config);
 
         exportAuthorizer(builder);
 
@@ -108,11 +115,27 @@ public interface TrackerExporter extends ModuleExporter {
             ));
         });
 
+        builder.export(AuthorizationSuccessModelBuilder.class, module -> module.export(
+            new AuthorizationSuccessModelBuilderImpl(
+                StatusCodes.authorizeSuccess, module.require(MessageBundle.class)
+            )
+        ));
+
+        exportValidationSuccessModelBuilder(builder, config);
+
         exportValidationErrorModelBuilder(builder, config);
+
+        builder.export(ConversionToCriteriaStateHandler.class, module -> module.export(
+            new ConversionToCriteriaStateHandlerImpl(
+                module.require(App.Config.class).getRootAlias()
+            )
+        ));
 
         builder.export(MessageBus.class, module -> module.export(new MessageBusImpl(
             module.require(SimpleEventBus.class)
         )));
+
+        exportResponseGenerator(builder, config);
 
         exportJsonObjectResponseGenerator(builder, config);
 
@@ -142,6 +165,21 @@ public interface TrackerExporter extends ModuleExporter {
             ));
         });
 
+        builder.export(JsonObjectToPageRequestConverter.class, module -> module.export(
+            new JsonObjectToPageRequestConverterImpl(
+                config.getDefaultPage(),
+                config.getDefaultPageSize()
+            )
+        ));
+
+        builder.export(JsonObjectToQueryParamsConverter.class, module -> module.export(
+            new JsonObjectToQueryParamsConverterImpl()
+        ));
+
+        builder.export(PageModelBuilder.class, module -> module.export(
+            new PageModelBuilderImpl()
+        ));
+
         exportObjectIdGenerator(builder);
 
         exportSimpleEventBus(builder);
@@ -157,6 +195,30 @@ public interface TrackerExporter extends ModuleExporter {
         builder.export(UserIdConverter.class, module -> module.export(new UserIdConverterImpl()));
 
         return builder;
+    }
+
+    static void exportValidationSuccessModelBuilder(ModuleSystemBuilder builder, App.Config config) {
+        builder.export(ValidationSuccessModelBuilder.class, module -> module.export(
+            new ValidationSuccessModelBuilderImpl(
+                module.require(MessageBundle.class)
+            )
+        ));
+    }
+
+    static void exportResponseGenerator(ModuleSystemBuilder builder, App.Config config) {
+        builder.export(ResponseGenerator.class, module -> module.export(
+            new ResponseGeneratorImpl()
+        ));
+    }
+
+    static void exportEndStateHandler(ModuleSystemBuilder builder, App.Config config) {
+        builder.export(EndStateHandler.class, module -> module.export(
+            new EndStateHandlerImpl()
+        ));
+    }
+
+    static void exportStartStateHandler(ModuleSystemBuilder builder, App.Config config) {
+        builder.export(StartStateHandler.class, module -> module.export(new StartStateHandlerImpl()));
     }
 
     static ModuleSystemBuilder exportObjectIdGenerator(ModuleSystemBuilder builder) {
@@ -177,7 +239,7 @@ public interface TrackerExporter extends ModuleExporter {
     static ModuleSystemBuilder exportJsonArrayResponseGenerator(ModuleSystemBuilder builder, App.Config config) {
 
         builder.export(JsonArrayResponseGenerator.class, module -> {
-            module.export(o -> ((JsonArray) o));
+            module.export(new JsonArrayResponseGeneratorImpl());
         });
 
         return builder;
@@ -186,7 +248,7 @@ public interface TrackerExporter extends ModuleExporter {
     static ModuleSystemBuilder exportJsonObjectResponseGenerator(ModuleSystemBuilder builder, App.Config config) {
 
         builder.export(JsonObjectResponseGenerator.class, module -> {
-            module.export(o -> ((JsonObject) o));
+            module.export(new JsonObjectResponseGeneratorImpl());
         });
 
         return builder;

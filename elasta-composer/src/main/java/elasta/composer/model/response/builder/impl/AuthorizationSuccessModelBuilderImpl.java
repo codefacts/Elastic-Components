@@ -14,10 +14,13 @@ import java.util.Objects;
  * Created by sohan on 5/21/2017.
  */
 final public class AuthorizationSuccessModelBuilderImpl implements AuthorizationSuccessModelBuilder {
+    final String statusCode;
     final MessageBundle messageBundle;
 
-    public AuthorizationSuccessModelBuilderImpl(MessageBundle messageBundle) {
+    public AuthorizationSuccessModelBuilderImpl(String statusCode, MessageBundle messageBundle) {
+        Objects.requireNonNull(statusCode);
         Objects.requireNonNull(messageBundle);
+        this.statusCode = statusCode;
         this.messageBundle = messageBundle;
     }
 
@@ -27,7 +30,7 @@ final public class AuthorizationSuccessModelBuilderImpl implements Authorization
             ImmutableMap.of(
                 AuthorizationSuccessModel.statusCode, StatusCodes.authorizeSuccess,
                 AuthorizationSuccessModel.message, messageBundle.translate(
-                    StatusCodes.authorizeSuccess,
+                    statusCode,
                     ComposerUtils.emptyJsonObject()
                 )
             )

@@ -4,6 +4,7 @@ import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.FindOneFlowBuilder;
+import elasta.composer.state.handlers.*;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,13 +13,17 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class FindOneFlowBuilderImpl implements FindOneFlowBuilder {
-    final MsgEnterEventHandlerP startHandler;
-    final MsgEnterEventHandlerP authorizeHandler;
-    final MsgEnterEventHandlerP conversionToCriteriaHandler;
-    final MsgEnterEventHandlerP findOneHandler;
-    final MsgEnterEventHandlerP endHandler;
+    final StartStateHandler startHandler;
+    final AuthorizeStateHandler authorizeHandler;
+    final ConversionToCriteriaStateHandler conversionToCriteriaHandler;
+    final FindOneStateHandler findOneHandler;
+    final EndStateHandler endHandler;
 
-    public FindOneFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP conversionToCriteriaHandler, MsgEnterEventHandlerP findOneHandler, MsgEnterEventHandlerP endHandler) {
+    public FindOneFlowBuilderImpl(StartStateHandler startHandler,
+                                  AuthorizeStateHandler authorizeHandler,
+                                  ConversionToCriteriaStateHandler conversionToCriteriaHandler,
+                                  FindOneStateHandler findOneHandler,
+                                  EndStateHandler endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
         Objects.requireNonNull(conversionToCriteriaHandler);

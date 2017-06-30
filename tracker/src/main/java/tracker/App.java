@@ -23,14 +23,22 @@ public interface App {
         final JsonObject db;
         final Map<String, String> messageBundle;
         final Vertx vertx;
+        final long defaultPage;
+        final int defaultPageSize;
+        final String rootAlias;
 
-        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx) {
+        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx, long defaultPage, int defaultPageSize, String rootAlias) {
             Objects.requireNonNull(db);
             Objects.requireNonNull(messageBundle);
             Objects.requireNonNull(vertx);
+            Objects.requireNonNull(rootAlias);
             this.db = db;
             this.messageBundle = messageBundle;
             this.vertx = vertx;
+            //ValueTypes
+            this.defaultPage = defaultPage;
+            this.defaultPageSize = defaultPageSize;
+            this.rootAlias = rootAlias;
         }
     }
 

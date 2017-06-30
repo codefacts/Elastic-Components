@@ -1,6 +1,6 @@
 package tracker.impl;
 
-import elasta.composer.state.handlers.UserIdConverter;
+import elasta.composer.converter.UserIdConverter;
 
 /**
  * Created by sohan on 6/29/2017.

@@ -1,12 +1,9 @@
 package elasta.composer.state.handlers;
 
 import elasta.composer.MsgEnterEventHandlerP;
-import elasta.core.flow.EnterEventHandlerP;
 
 /**
- * Created by sohan on 5/12/2017.
+ * Created by sohan on 6/30/2017.
  */
-public interface GenerateResponseStateHandler extends StateHandlerBuilder {
-    @Override
-    MsgEnterEventHandlerP build();
+public interface GenerateResponseStateHandler<T, R> extends MsgEnterEventHandlerP<T, R> {
 }

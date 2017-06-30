@@ -4,6 +4,7 @@ import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.AddAllFlowBuilder;
+import elasta.composer.state.handlers.*;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,21 +13,23 @@ import java.util.Objects;
  * Created by sohan on 5/20/2017.
  */
 final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
-    final MsgEnterEventHandlerP startHandler;
-    final MsgEnterEventHandlerP authorizeAllHandler;
-    final MsgEnterEventHandlerP generateIdsAllHandler;
-    final MsgEnterEventHandlerP validateAllHandler;
-    final MsgEnterEventHandlerP insertAllHandler;
-    final MsgEnterEventHandlerP broadcastAllHandler;
-    final MsgEnterEventHandlerP generateResponseHandler;
-    final MsgEnterEventHandlerP endHandler;
+    final StartStateHandler startHandler;
+    final AuthorizeAllStateHandler authorizeAllHandler;
+    final GenerateIdsAllStateHandler generateIdsAllHandler;
+    final ValidateAllStateHandler validateAllHandler;
+    final AddAllStateHandler addAllHandler;
+    final BroadcastAllStateHandler broadcastAllHandler;
+    final GenerateResponseStateHandler generateResponseHandler;
+    final EndStateHandler endHandler;
 
-    public AddAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP generateIdsAllHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP insertAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public AddAllFlowBuilderImpl(StartStateHandler startHandler, AuthorizeAllStateHandler authorizeAllHandler, GenerateIdsAllStateHandler generateIdsAllHandler,
+                                 ValidateAllStateHandler validateAllHandler, AddAllStateHandler addAllHandler,
+                                 BroadcastAllStateHandler broadcastAllHandler, GenerateResponseStateHandler generateResponseHandler, EndStateHandler endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeAllHandler);
         Objects.requireNonNull(generateIdsAllHandler);
         Objects.requireNonNull(validateAllHandler);
-        Objects.requireNonNull(insertAllHandler);
+        Objects.requireNonNull(addAllHandler);
         Objects.requireNonNull(broadcastAllHandler);
         Objects.requireNonNull(generateResponseHandler);
         Objects.requireNonNull(endHandler);
@@ -34,7 +37,7 @@ final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
         this.authorizeAllHandler = authorizeAllHandler;
         this.generateIdsAllHandler = generateIdsAllHandler;
         this.validateAllHandler = validateAllHandler;
-        this.insertAllHandler = insertAllHandler;
+        this.addAllHandler = addAllHandler;
         this.broadcastAllHandler = broadcastAllHandler;
         this.generateResponseHandler = generateResponseHandler;
         this.endHandler = endHandler;
@@ -63,7 +66,7 @@ final public class AddAllFlowBuilderImpl implements AddAllFlowBuilder {
             .handlersP(States.authorizeAll, authorizeAllHandler)
             .handlersP(States.generateIdsAll, generateIdsAllHandler)
             .handlersP(States.validateAll, validateAllHandler)
-            .handlersP(States.insertAll, insertAllHandler)
+            .handlersP(States.insertAll, addAllHandler)
             .handlersP(States.broadcastAll, broadcastAllHandler)
             .handlersP(States.generateResponse, generateResponseHandler)
             .handlersP(States.end, endHandler)

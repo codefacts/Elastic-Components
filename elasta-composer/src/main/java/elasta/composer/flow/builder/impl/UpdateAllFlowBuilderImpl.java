@@ -4,6 +4,7 @@ import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.UpdateAllFlowBuilder;
+import elasta.composer.state.handlers.*;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,16 +13,23 @@ import java.util.Objects;
  * Created by sohan on 5/20/2017.
  */
 final public class UpdateAllFlowBuilderImpl implements UpdateAllFlowBuilder {
-    final MsgEnterEventHandlerP startHandler;
-    final MsgEnterEventHandlerP authorizeAllHandler;
-    final MsgEnterEventHandlerP generateIdsHandler;
-    final MsgEnterEventHandlerP validateAllHandler;
-    final MsgEnterEventHandlerP updateAllHandler;
-    final MsgEnterEventHandlerP broadcastAllHandler;
-    final MsgEnterEventHandlerP generateResponseHandler;
-    final MsgEnterEventHandlerP endHandler;
+    final StartStateHandler startHandler;
+    final AuthorizeAllStateHandler authorizeAllHandler;
+    final GenerateIdsAllStateHandler generateIdsHandler;
+    final ValidateAllStateHandler validateAllHandler;
+    final UpdateAllStateHandler updateAllHandler;
+    final BroadcastAllStateHandler broadcastAllHandler;
+    final GenerateResponseStateHandler generateResponseHandler;
+    final EndStateHandler endHandler;
 
-    public UpdateAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeAllHandler, MsgEnterEventHandlerP generateIdsHandler, MsgEnterEventHandlerP validateAllHandler, MsgEnterEventHandlerP updateAllHandler, MsgEnterEventHandlerP broadcastAllHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public UpdateAllFlowBuilderImpl(StartStateHandler startHandler,
+                                    AuthorizeAllStateHandler authorizeAllHandler,
+                                    GenerateIdsAllStateHandler generateIdsHandler,
+                                    ValidateAllStateHandler validateAllHandler,
+                                    UpdateAllStateHandler updateAllHandler,
+                                    BroadcastAllStateHandler broadcastAllHandler,
+                                    GenerateResponseStateHandler generateResponseHandler,
+                                    EndStateHandler endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeAllHandler);
         Objects.requireNonNull(generateIdsHandler);

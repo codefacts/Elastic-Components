@@ -1,45 +1,38 @@
 package tracker.impl;
 
 import com.google.common.collect.ImmutableList;
-import elasta.authorization.Authorizer;
-import elasta.composer.ConvertersMap;
-import elasta.composer.MessageBus;
+import elasta.composer.converter.FlowToJsonArrayMessageHandlerConverter;
 import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
 import elasta.composer.converter.FlowToMessageHandlerConverter;
+import elasta.composer.flow.holder.*;
 import elasta.composer.message.handlers.MessageHandler;
-import elasta.composer.message.handlers.builder.impl.AddMessageHandlerBuilderImpl;
-import elasta.composer.message.handlers.builder.impl.FindOneMessageHandlerBuilderImpl;
-import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
-import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
-import elasta.composer.state.handlers.response.generator.JsonObjectResponseGenerator;
-import elasta.core.promise.impl.Promises;
+import elasta.composer.message.handlers.builder.impl.*;
 import elasta.module.ModuleSystem;
-import elasta.orm.Orm;
-import elasta.orm.idgenerator.ObjectIdGenerator;
-import elasta.orm.query.expression.FieldExpression;
-import elasta.orm.query.expression.impl.FieldExpressionImpl;
-import elasta.pipeline.validator.JsonObjectValidatorAsync;
-import elasta.sql.SqlDB;
-import tracker.Addresses;
-import tracker.AppHelpers;
-import tracker.AppUtils;
-import tracker.MessageHandlersBuilder;
+import tracker.*;
 import tracker.entity_config.Entities;
-import tracker.model.UserModel;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Created by sohan on 6/30/2017.
  */
 final public class MessageHandlersBuilderImpl implements MessageHandlersBuilder {
-    @Override
-    public List<AddressAndHandler> build(ModuleSystem module) {
+    final FlowBuilderHelper flowBuilderHelper;
 
-        return new IIBuilder(module).build();
+    public MessageHandlersBuilderImpl(FlowBuilderHelper flowBuilderHelper) {
+        Objects.requireNonNull(flowBuilderHelper);
+        this.flowBuilderHelper = flowBuilderHelper;
     }
 
+    @Override
+    public List<AddressAndHandler> build(BuildParams params) {
+
+        Objects.requireNonNull(params);
+
+        return new IIBuilder(params.getModule()).build(params.getFlowParamss());
+    }
 
     private final class IIBuilder {
         final ModuleSystem module;
@@ -49,71 +42,234 @@ final public class MessageHandlersBuilderImpl implements MessageHandlersBuilder 
             this.module = module;
         }
 
-        public List<AddressAndHandler> build() {
+        public List<AddressAndHandler> build(Collection<FlowParams> flowParamss) {
 
-            consumer(
-                Addresses.userCreate,
-                new AddMessageHandlerBuilderImpl(
-                    module.require(Authorizer.class),
-                    module.require(ConvertersMap.class),
-                    Addresses.userCreate,
-                    module.require(AuthorizationErrorModelBuilder.class),
-                    Entities.USER,
-                    UserModel.id,
-                    asyncUserValidator(),
-                    module.require(ValidationErrorModelBuilder.class),
-                    module.require(Orm.class),
-                    module.require(MessageBus.class),
-                    Addresses.post(Addresses.userCreate),
-                    module.require(JsonObjectResponseGenerator.class),
-                    module.require(FlowToJsonObjectMessageHandlerConverter.class),
-                    module.require(ObjectIdGenerator.class),
-                    module.require(SqlDB.class)
-                ).build()
-            );
+            flowParamss.forEach(flowParams -> {
 
-            {
-                final String rootAlias = "r";
-
-                consumer(
-                    Addresses.userFindOne,
-                    new FindOneMessageHandlerBuilderImpl<Long>(
-                        rootAlias,
-                        Entities.USER,
-                        fieldSelections(Entities.USER, rootAlias),
-                        module.require(Orm.class),
-                        module.require(Authorizer.class),
-                        Addresses.userFindOne,
-                        module.require(AuthorizationErrorModelBuilder.class),
-                        module.require(ConvertersMap.class),
-                        module.require(FlowToJsonObjectMessageHandlerConverter.class)
-                    ).build()
+                addressAndHandlerBuilder.add(
+                    addMessageHandler(flowParams)
                 );
 
-            }
+                addressAndHandlerBuilder.add(
+                    addAllMessageHandler(flowParams)
+                );
+
+                addressAndHandlerBuilder.add(
+                    updateMessageHandler(flowParams)
+                );
+
+                addressAndHandlerBuilder.add(
+                    updateAllMessageHandler(flowParams)
+                );
+
+                addressAndHandlerBuilder.add(
+                    deleteMessageHandler(flowParams)
+                );
+
+                addressAndHandlerBuilder.add(
+                    deleteAllMessageHandler(flowParams)
+                );
+
+                addressAndHandlerBuilder.add(
+                    findOneMessageHandler(flowParams)
+                );
+
+                addressAndHandlerBuilder.add(
+                    findAllMessageHandler(flowParams)
+                );
+
+            });
 
             return addressAndHandlerBuilder.build();
         }
 
-        private List<FieldExpression> fieldSelections(String entity, String rootAlias) {
-            return ImmutableList.copyOf(
-                module.require(AppHelpers.class).findOneFields(entity)
-                    .stream()
-                    .map(field -> new FieldExpressionImpl(rootAlias + "." + field))
-                    .collect(Collectors.toList())
+        private AddressAndHandler findAllMessageHandler(FlowParams flowParams) {
+            String findAll = Addresses.findAll(flowParams.getEntity());
+            return consumer(
+                findAll,
+                new FindAllMessageHandlerBuilderImpl(
+                    flowBuilderHelper.findAllFlowHolder(
+                        FlowBuilderHelper.FindAllParams.builder()
+                            .module(module)
+                            .entity(flowParams.getEntity())
+                            .action(findAll)
+                            .paginationKey(flowParams.getPaginationKey())
+                            .build()
+                    ),
+                    module.require(FlowToJsonObjectMessageHandlerConverter.class)
+                ).build()
             );
         }
 
-        private void consumer(String address, MessageHandler messageHandler) {
-            addressAndHandlerBuilder.add(
-                new AddressAndHandler(
-                    address, messageHandler
+        private AddressAndHandler findOneMessageHandler(FlowParams flowParams) {
+            String findOne = Addresses.findOne(flowParams.getEntity());
+            return consumer(
+                findOne,
+                new FindOneMessageHandlerBuilderImpl<>(
+                    flowBuilderHelper.findOneFlowHolder(
+                        FlowBuilderHelper.FindOneParams.builder()
+                            .module(module)
+                            .entity(flowParams.getEntity())
+                            .action(findOne)
+                            .build()
+                    ),
+                    module.require(FlowToJsonObjectMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        private AddressAndHandler deleteAllMessageHandler(FlowParams flowParams) {
+            String deleteAll = Addresses.deleteAll(flowParams.getEntity());
+            return consumer(
+                deleteAll,
+                new DeleteAllMessageHandlerBuilderImpl(
+                    flowBuilderHelper.deleteAllFlowHolder(
+                        FlowBuilderHelper.DeleteAllParams.builder()
+                            .module(module)
+                            .entity(flowParams.getEntity())
+                            .action(deleteAll)
+                            .broadcastAddress(Addresses.post(deleteAll))
+                            .build()
+                    ),
+                    module.require(FlowToJsonArrayMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        private AddressAndHandler deleteMessageHandler(FlowParams flowParams) {
+            String delete = Addresses.delete(flowParams.getEntity());
+            return consumer(
+                delete,
+                new DeleteMessageHandlerBuilderImpl<>(
+                    flowBuilderHelper.deleteFlowHolder(
+                        FlowBuilderHelper.DeleteParams.builder()
+                            .module(module)
+                            .entity(flowParams.getEntity())
+                            .action(delete)
+                            .broadcastAddress(Addresses.post(delete))
+                            .build()
+                    ),
+                    module.require(FlowToMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        private AddressAndHandler updateAllMessageHandler(FlowParams flowParams) {
+            String updateAll = Addresses.updateAll(flowParams.getEntity());
+            return consumer(
+                updateAll,
+                new UpdateAllMessageHandlerBuilderImpl(
+                    flowBuilderHelper.updateAllFlowHolder(
+                        FlowBuilderHelper.UpdateAllParams.builder()
+                            .module(module)
+                            .entity(flowParams.getEntity())
+                            .action(updateAll)
+                            .broadcastAddress(Addresses.post(flowParams.getEntity()))
+                            .build()
+                    ),
+                    module.require(FlowToJsonArrayMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        private AddressAndHandler updateMessageHandler(FlowParams flowParams) {
+            String update = Addresses.update(flowParams.getEntity());
+            return consumer(
+                update,
+                new UpdateMessageHandlerBuilderImpl(
+                    flowBuilderHelper.updateFlowHolder(
+                        FlowBuilderHelper.UpdateParams.builder()
+                            .module(module)
+                            .entity(flowParams.getEntity())
+                            .action(update)
+                            .broadcastAddress(Addresses.post(update))
+                            .build()
+                    ),
+                    module.require(FlowToJsonObjectMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        private AddressAndHandler addAllMessageHandler(FlowParams flowParams) {
+
+            final String addAllAddress = Addresses.addAll(flowParams.getEntity());
+
+            return addAllHandler(
+                addAllAddress,
+                flowBuilderHelper.addAllFlowHolder(
+                    FlowBuilderHelper.AddAllParams.builder()
+                        .module(module)
+                        .entity(flowParams.getEntity())
+                        .action(addAllAddress)
+                        .broadcastAddress(Addresses.post(addAllAddress))
+                        .build()
                 )
             );
         }
 
-        private JsonObjectValidatorAsync asyncUserValidator() {
-            return val -> Promises.of(ImmutableList.of());
+        private AddressAndHandler addMessageHandler(FlowParams flowParams) {
+
+            String addAddress = Addresses.add(flowParams.getEntity());
+
+            return addHandler(
+                addAddress,
+                flowBuilderHelper.addFlowHolder(
+                    FlowBuilderHelper.AddParams.builder()
+                        .module(module)
+                        .entity(flowParams.getEntity())
+                        .action(addAddress)
+                        .broadcastAddress(Addresses.post(addAddress))
+                        .build()
+                )
+            );
+        }
+
+        private AddressAndHandler addAllHandler(String messageAddress, AddAllFlowHolder addAllFlowHolder) {
+            return consumer(
+                messageAddress,
+                new AddAllMessageHandlerBuilderImpl(
+                    addAllFlowHolder,
+                    module.require(FlowToJsonArrayMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        private AddressAndHandler findAllHandler(FindAllFlowHolder findAllFlowHolder) {
+            return consumer(
+                Addresses.findAll(Entities.USER),
+                new FindAllMessageHandlerBuilderImpl(
+                    findAllFlowHolder,
+                    module.require(FlowToJsonObjectMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        private AddressAndHandler findOneHandler(FindOneFlowHolder findOneFlowHolder) {
+
+            return consumer(
+                Addresses.findOne(Entities.USER),
+                new FindOneMessageHandlerBuilderImpl<Long>(
+                    findOneFlowHolder,
+                    module.require(FlowToJsonObjectMessageHandlerConverter.class)
+                ).build()
+            );
+
+        }
+
+        private AddressAndHandler addHandler(String messageAddress, AddFlowHolder addFlowHolder) {
+            return consumer(
+                messageAddress,
+                new AddMessageHandlerBuilderImpl(
+                    addFlowHolder,
+                    module.require(FlowToJsonObjectMessageHandlerConverter.class)
+                ).build()
+            );
+        }
+
+        AddressAndHandler consumer(String address, MessageHandler messageHandler) {
+            return new AddressAndHandler(
+                address, messageHandler
+            );
         }
     }
 }

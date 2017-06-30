@@ -1,5 +1,8 @@
 package tracker;
 
+import elasta.orm.query.expression.FieldExpression;
+
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -7,5 +10,7 @@ import java.util.List;
  */
 public interface AppHelpers {
 
-    List<String> findOneFields(String entity);
+    List<FieldExpression> findOneFields(String entity);
+
+    List<FieldExpression> findAllFields(String entity);
 }

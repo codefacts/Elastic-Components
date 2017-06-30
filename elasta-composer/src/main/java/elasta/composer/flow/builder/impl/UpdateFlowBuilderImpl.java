@@ -4,6 +4,7 @@ import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.UpdateFlowBuilder;
+import elasta.composer.state.handlers.*;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,16 +13,23 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
-    final MsgEnterEventHandlerP startHandler;
-    final MsgEnterEventHandlerP authorizeHandler;
-    final MsgEnterEventHandlerP generateIdHandler;
-    final MsgEnterEventHandlerP validateHandler;
-    final MsgEnterEventHandlerP updateHandler;
-    final MsgEnterEventHandlerP broadcastHandler;
-    final MsgEnterEventHandlerP generateResponseHandler;
-    final MsgEnterEventHandlerP endHandler;
+    final StartStateHandler startHandler;
+    final AuthorizeStateHandler authorizeHandler;
+    final GenerateIdStateHandler generateIdHandler;
+    final ValidateStateHandler validateHandler;
+    final UpdateStateHandler updateHandler;
+    final BroadcastStateHandler broadcastHandler;
+    final GenerateResponseStateHandler generateResponseHandler;
+    final EndStateHandler endHandler;
 
-    public UpdateFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP generateIdHandler, MsgEnterEventHandlerP validateHandler, MsgEnterEventHandlerP updateHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public UpdateFlowBuilderImpl(StartStateHandler startHandler,
+                                 AuthorizeStateHandler authorizeHandler,
+                                 GenerateIdStateHandler generateIdHandler,
+                                 ValidateStateHandler validateHandler,
+                                 UpdateStateHandler updateHandler,
+                                 BroadcastStateHandler broadcastHandler,
+                                 GenerateResponseStateHandler generateResponseHandler,
+                                 EndStateHandler endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
         Objects.requireNonNull(generateIdHandler);

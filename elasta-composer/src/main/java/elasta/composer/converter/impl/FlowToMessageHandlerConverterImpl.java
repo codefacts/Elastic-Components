@@ -11,7 +11,7 @@ import elasta.composer.impl.HeadersImpl;
 import elasta.composer.impl.VertxMultiMap;
 import elasta.composer.message.handlers.MessageHandler;
 import elasta.composer.model.request.UserModel;
-import elasta.composer.state.handlers.UserIdConverter;
+import elasta.composer.converter.UserIdConverter;
 import elasta.core.flow.Flow;
 import io.vertx.core.eventbus.DeliveryOptions;
 

@@ -4,6 +4,7 @@ import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.flow.builder.DeleteFlowBuilder;
 import elasta.composer.Events;
 import elasta.composer.States;
+import elasta.composer.state.handlers.*;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,14 +13,19 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class DeleteFlowBuilderImpl implements DeleteFlowBuilder {
-    final MsgEnterEventHandlerP startHandler;
-    final MsgEnterEventHandlerP authorizeHandler;
-    final MsgEnterEventHandlerP deleteHandler;
-    final MsgEnterEventHandlerP broadcastHandler;
-    final MsgEnterEventHandlerP generateResponseHandler;
-    final MsgEnterEventHandlerP endHandler;
+    final StartStateHandler startHandler;
+    final AuthorizeStateHandler authorizeHandler;
+    final DeleteStateHandler deleteHandler;
+    final BroadcastStateHandler broadcastHandler;
+    final GenerateResponseStateHandler generateResponseHandler;
+    final EndStateHandler endHandler;
 
-    public DeleteFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP deleteHandler, MsgEnterEventHandlerP broadcastHandler, MsgEnterEventHandlerP generateResponseHandler, MsgEnterEventHandlerP endHandler) {
+    public DeleteFlowBuilderImpl(StartStateHandler startHandler,
+                                 AuthorizeStateHandler authorizeHandler,
+                                 DeleteStateHandler deleteHandler,
+                                 BroadcastStateHandler broadcastHandler,
+                                 GenerateResponseStateHandler generateResponseHandler,
+                                 EndStateHandler endHandler) {
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
         Objects.requireNonNull(deleteHandler);

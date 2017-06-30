@@ -4,6 +4,10 @@ import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.FindAllFlowBuilder;
+import elasta.composer.state.handlers.AuthorizeStateHandler;
+import elasta.composer.state.handlers.EndStateHandler;
+import elasta.composer.state.handlers.FindAllStateHandler;
+import elasta.composer.state.handlers.StartStateHandler;
 import elasta.core.flow.Flow;
 
 import java.util.Objects;
@@ -12,12 +16,17 @@ import java.util.Objects;
  * Created by sohan on 5/12/2017.
  */
 final public class FindAllFlowBuilderImpl implements FindAllFlowBuilder {
-    final MsgEnterEventHandlerP startHandler;
-    final MsgEnterEventHandlerP authorizeHandler;
-    final MsgEnterEventHandlerP findAllHandler;
-    final MsgEnterEventHandlerP endHandler;
+    final StartStateHandler startHandler;
+    final AuthorizeStateHandler authorizeHandler;
+    final FindAllStateHandler findAllHandler;
+    final EndStateHandler endHandler;
 
-    public FindAllFlowBuilderImpl(MsgEnterEventHandlerP startHandler, MsgEnterEventHandlerP authorizeHandler, MsgEnterEventHandlerP findAllHandler, MsgEnterEventHandlerP endHandler) {
+    public FindAllFlowBuilderImpl(
+        StartStateHandler startHandler,
+        AuthorizeStateHandler authorizeHandler,
+        FindAllStateHandler findAllHandler,
+        EndStateHandler endHandler) {
+
         Objects.requireNonNull(startHandler);
         Objects.requireNonNull(authorizeHandler);
         Objects.requireNonNull(findAllHandler);

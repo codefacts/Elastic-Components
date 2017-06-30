@@ -2,25 +2,10 @@ package tracker.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.authorization.Authorizer;
-import elasta.composer.ConvertersMap;
 import elasta.composer.MessageBus;
-import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
-import elasta.composer.converter.FlowToMessageHandlerConverter;
-import elasta.composer.message.handlers.builder.impl.AddMessageHandlerBuilderImpl;
-import elasta.composer.message.handlers.builder.impl.FindOneMessageHandlerBuilderImpl;
-import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
-import elasta.composer.model.response.builder.ValidationErrorModelBuilder;
-import elasta.composer.state.handlers.response.generator.JsonObjectResponseGenerator;
-import elasta.core.promise.impl.Promises;
 import elasta.module.ModuleSystem;
 import elasta.module.ModuleSystemBuilder;
-import elasta.orm.Orm;
-import elasta.orm.idgenerator.ObjectIdGenerator;
-import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
-import elasta.pipeline.validator.JsonObjectValidatorAsync;
-import elasta.sql.SqlDB;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -28,10 +13,7 @@ import tracker.*;
 import tracker.entity_config.Entities;
 import tracker.model.UserModel;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Created by sohan on 6/25/2017.
@@ -64,7 +46,19 @@ final public class AppImpl implements App {
 
         EventBus eventBus = module.require(EventBus.class);
 
-        module.require(MessageHandlersBuilder.class).build(module).forEach(addressAndHandler -> {
+        module.require(MessageHandlersBuilder.class).build(
+            MessageHandlersBuilder.BuildParams.builder()
+                .module(module)
+                .flowParamss(ImmutableList.of(
+                    new MessageHandlersBuilder.FlowParams(
+                        Entities.USER,
+                        new FieldExpressionImpl(
+                            "r." + UserModel.id
+                        )
+                    )
+                ))
+                .build()
+        ).forEach(addressAndHandler -> {
             eventBus.consumer(addressAndHandler.getAddress(), addressAndHandler.getMessageHandler());
         });
 
@@ -88,7 +82,10 @@ final public class AppImpl implements App {
                     )
                 ),
                 ImmutableMap.of(),
-                Vertx.vertx()
+                Vertx.vertx(),
+                1,
+                10,
+                "r"
             )
         );
     }

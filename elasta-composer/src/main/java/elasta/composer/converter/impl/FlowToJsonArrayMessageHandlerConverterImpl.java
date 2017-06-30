@@ -5,7 +5,7 @@ import elasta.composer.MessageProcessingErrorHandler;
 import elasta.composer.converter.FlowToJsonArrayMessageHandlerConverter;
 import elasta.composer.converter.FlowToMessageHandlerConverter;
 import elasta.composer.message.handlers.JsonArrayMessageHandler;
-import elasta.composer.state.handlers.UserIdConverter;
+import elasta.composer.converter.UserIdConverter;
 import elasta.core.flow.Flow;
 import io.vertx.core.json.JsonArray;
 

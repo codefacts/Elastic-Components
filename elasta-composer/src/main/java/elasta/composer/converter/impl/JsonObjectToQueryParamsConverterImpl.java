@@ -1,6 +1,7 @@
 package elasta.composer.converter.impl;
 
 import com.google.common.collect.ImmutableList;
+import elasta.composer.ComposerUtils;
 import elasta.composer.converter.JsonObjectToQueryParamsConverter;
 import elasta.composer.model.request.JoinParamsModel;
 import elasta.composer.model.request.OrderByModel;
@@ -31,16 +32,16 @@ final public class JsonObjectToQueryParamsConverterImpl implements JsonObjectToQ
         Objects.requireNonNull(params);
 
         final JsonObject query = params.getQuery();
-        
+
         return QueryExecutor.QueryParams.builder()
             .entity(params.getEntity())
-            .alias(query.getString(QueryModel.alias))
-            .joinParams(toJoinParams(query.getJsonArray(QueryModel.joinParams)))
-            .selections(toSelections(query.getJsonArray(QueryModel.selections)))
-            .criteria(query.getJsonObject(QueryModel.criteria))
-            .having(query.getJsonObject(QueryModel.having))
-            .groupBy(toGroupBy(query.getJsonArray(QueryModel.groupBy)))
-            .orderBy(toOrderBy(query.getJsonArray(QueryModel.orderBy)))
+            .alias(params.getAlias())
+            .joinParams(toJoinParams(query.getJsonArray(QueryModel.joinParams, ComposerUtils.emptyJsonArray())))
+            .selections(toSelections(query.getJsonArray(QueryModel.selections, ComposerUtils.emptyJsonArray()), params.getSelections()))
+            .criteria(query.getJsonObject(QueryModel.criteria, ComposerUtils.emptyJsonObject()))
+            .having(query.getJsonObject(QueryModel.having, ComposerUtils.emptyJsonObject()))
+            .groupBy(toGroupBy(query.getJsonArray(QueryModel.groupBy, ComposerUtils.emptyJsonArray())))
+            .orderBy(toOrderBy(query.getJsonArray(QueryModel.orderBy, ComposerUtils.emptyJsonArray())))
             .pagination(toPagination(params.getPageRequest(), params.getPaginationKey()))
             .build();
     }
@@ -112,7 +113,12 @@ final public class JsonObjectToQueryParamsConverterImpl implements JsonObjectToQ
         return builder.build();
     }
 
-    private Collection<FieldExpression> toSelections(JsonArray jsonArray) {
+    private Collection<FieldExpression> toSelections(JsonArray jsonArray, Collection<FieldExpression> selections) {
+
+        if (jsonArray.isEmpty()) {
+            return selections;
+        }
+
         ImmutableList.Builder<FieldExpression> selectionsBuilder = ImmutableList.builder();
         for (int i = 0; i < jsonArray.size(); i++) {
             selectionsBuilder.add(

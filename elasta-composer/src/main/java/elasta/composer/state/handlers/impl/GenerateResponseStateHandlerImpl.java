@@ -1,19 +1,20 @@
 package elasta.composer.state.handlers.impl;
 
 import elasta.composer.Events;
-import elasta.composer.MsgEnterEventHandlerP;
+import elasta.composer.Msg;
+import elasta.composer.respose.generator.ResponseGenerator;
 import elasta.composer.state.handlers.GenerateResponseStateHandler;
-import elasta.composer.state.handlers.response.generator.ResponseGenerator;
-import elasta.core.flow.EnterEventHandlerP;
 import elasta.core.flow.Flow;
+import elasta.core.flow.StateTrigger;
 import elasta.core.promise.impl.Promises;
+import elasta.core.promise.intfs.Promise;
 
 import java.util.Objects;
 
 /**
- * Created by sohan on 5/12/2017.
+ * Created by sohan on 6/30/2017.
  */
-final public class GenerateResponseStateHandlerImpl implements GenerateResponseStateHandler {
+final public class GenerateResponseStateHandlerImpl implements GenerateResponseStateHandler<Object, Object> {
     final ResponseGenerator<Object, Object> responseGenerator;
 
     public GenerateResponseStateHandlerImpl(ResponseGenerator responseGenerator) {
@@ -22,14 +23,12 @@ final public class GenerateResponseStateHandlerImpl implements GenerateResponseS
     }
 
     @Override
-    public MsgEnterEventHandlerP<Object, Object> build() {
-        return msg -> {
+    public Promise<StateTrigger<Msg<Object>>> handle(Msg<Object> msg) throws Throwable {
 
-            Object response = responseGenerator.apply(msg.body());
+        Object response = responseGenerator.apply(msg.body());
 
-            return Promises.of(
-                Flow.trigger(Events.next, msg.withBody(response))
-            );
-        };
+        return Promises.of(
+            Flow.trigger(Events.next, msg.withBody(response))
+        );
     }
 }
