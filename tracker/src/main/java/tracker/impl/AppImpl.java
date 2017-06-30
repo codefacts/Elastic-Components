@@ -57,39 +57,6 @@ final public class AppImpl implements App {
 
         MessageBus messageBus = module.require(MessageBus.class);
 
-//        messageBus.sendAndReceive(
-//            MessageBus.Params.builder()
-//                .address(Addresses.userCreate)
-//                .message(
-//                    new JsonObject(
-//                        "{\n" +
-//                            "  \"userId\" : \"admin-5\",\n" +
-//                            "  \"username\" : \"fakmin5\",\n" +
-//                            "  \"email\" : \"fakmin@fakmin5\",\n" +
-//                            "  \"phone\" : \"01951883417\"\n" +
-//                            "}"
-//                    )
-//                )
-//                .userId("admin-1")
-//                .build()
-//        ).then(objectMessage -> {
-//            System.out.println(objectMessage.body());
-//            System.out.println(objectMessage.headers());
-//        });
-
-        messageBus.sendAndReceiveJsonObject(
-            MessageBus.Params.builder()
-                .userId("admin-1")
-                .address(Addresses.userFindOne)
-                .message(new JsonObject(
-                    ImmutableMap.of(
-                        "userId", "admin-2"
-                    )
-                ))
-                .build()
-        ).then(message -> System.out.println(message.body()))
-            .err(Throwable::printStackTrace);
-
         return this;
     }
 
