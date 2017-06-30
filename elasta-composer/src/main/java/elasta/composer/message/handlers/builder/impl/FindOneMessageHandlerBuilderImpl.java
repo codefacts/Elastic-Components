@@ -3,8 +3,10 @@ package elasta.composer.message.handlers.builder.impl;
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
 import elasta.composer.MsgEnterEventHandlerP;
+import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
 import elasta.composer.converter.FlowToMessageHandlerConverter;
 import elasta.composer.flow.builder.impl.FindOneFlowBuilderImpl;
+import elasta.composer.message.handlers.JsonObjectMessageHandler;
 import elasta.composer.message.handlers.MessageHandler;
 import elasta.composer.message.handlers.builder.FindOneMessageHandlerBuilder;
 import elasta.composer.model.response.builder.AuthorizationErrorModelBuilder;
@@ -19,22 +21,20 @@ import java.util.Objects;
 /**
  * Created by sohan on 5/14/2017.
  */
-final public class FindOneMessageHandlerBuilderImpl<T> implements FindOneMessageHandlerBuilder<T> {
+final public class FindOneMessageHandlerBuilderImpl<T> implements FindOneMessageHandlerBuilder {
     final String alias;
     final String entity;
-    final FieldExpression findOneByFieldExpression;
     final Collection<FieldExpression> selections;
     final Orm orm;
     final Authorizer authorizer;
     final String action;
     final AuthorizationErrorModelBuilder authorizationErrorModelBuilder;
     final ConvertersMap convertersMap;
-    final FlowToMessageHandlerConverter<T> flowToMessageHandlerConverter;
+    final FlowToJsonObjectMessageHandlerConverter flowToMessageHandlerConverter;
 
-    public FindOneMessageHandlerBuilderImpl(String alias, String entity, FieldExpression findOneByFieldExpression, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToMessageHandlerConverter<T> flowToMessageHandlerConverter) {
+    public FindOneMessageHandlerBuilderImpl(String alias, String entity, Collection<FieldExpression> selections, Orm orm, Authorizer authorizer, String action, AuthorizationErrorModelBuilder authorizationErrorModelBuilder, ConvertersMap convertersMap, FlowToJsonObjectMessageHandlerConverter flowToMessageHandlerConverter) {
         Objects.requireNonNull(alias);
         Objects.requireNonNull(entity);
-        Objects.requireNonNull(findOneByFieldExpression);
         Objects.requireNonNull(selections);
         Objects.requireNonNull(orm);
         Objects.requireNonNull(authorizer);
@@ -44,7 +44,6 @@ final public class FindOneMessageHandlerBuilderImpl<T> implements FindOneMessage
         Objects.requireNonNull(flowToMessageHandlerConverter);
         this.alias = alias;
         this.entity = entity;
-        this.findOneByFieldExpression = findOneByFieldExpression;
         this.selections = selections;
         this.orm = orm;
         this.authorizer = authorizer;
@@ -55,7 +54,7 @@ final public class FindOneMessageHandlerBuilderImpl<T> implements FindOneMessage
     }
 
     @Override
-    public MessageHandler<T> build() {
+    public JsonObjectMessageHandler build() {
 
         Flow flow = new FindOneFlowBuilderImpl(
             startHandler(),

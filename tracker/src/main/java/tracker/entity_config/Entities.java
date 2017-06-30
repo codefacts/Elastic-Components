@@ -6,6 +6,8 @@ import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.entity.core.columnmapping.impl.ColumnMappingImpl;
 import elasta.orm.entity.core.columnmapping.impl.DirectRelationMappingImpl;
 import elasta.orm.entity.core.columnmapping.impl.DirectRelationMappingOptionsImpl;
+import tracker.model.UserModel;
+import tracker.model.UserTable;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -15,46 +17,47 @@ import java.util.Optional;
  */
 public interface Entities {
     String USER = "User";
+    String USER_TABLE = "users";
 
     static Collection<Entity> entities() {
         Entity User = new Entity(
             USER,
-            "id",
+            UserModel.id,
             new Field[]{
-                new Field("id", JavaType.LONG),
-                new Field("userId", JavaType.STRING),
-                new Field("username", JavaType.STRING),
-                new Field("email", JavaType.STRING),
-                new Field("phone", JavaType.STRING),
-                new Field("createDate", JavaType.STRING),
-                new Field("updateDate", JavaType.STRING),
-                new Field("createdBy", JavaType.OBJECT, Optional.of(new Relationship(
+                new Field(UserModel.id, JavaType.LONG),
+                new Field(UserModel.userId, JavaType.STRING),
+                new Field(UserModel.username, JavaType.STRING),
+                new Field(UserModel.email, JavaType.STRING),
+                new Field(UserModel.phone, JavaType.STRING),
+                new Field(UserModel.createDate, JavaType.STRING),
+                new Field(UserModel.updateDate, JavaType.STRING),
+                new Field(UserModel.createdBy, JavaType.OBJECT, Optional.of(new Relationship(
                     Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER
                 ))),
-                new Field("updatedBy", JavaType.OBJECT, Optional.of(new Relationship(
+                new Field(UserModel.updatedBy, JavaType.OBJECT, Optional.of(new Relationship(
                     Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER
                 )))
             },
             new DbMapping(
-                "users",
-                "id",
+                USER_TABLE,
+                UserTable.id,
                 new ColumnMapping[]{
-                    new ColumnMappingImpl("id", "id", DbType.NUMBER),
-                    new ColumnMappingImpl("userId", "user_id", DbType.VARCHAR),
-                    new ColumnMappingImpl("username", "username", DbType.VARCHAR),
-                    new ColumnMappingImpl("email", "email", DbType.VARCHAR),
-                    new ColumnMappingImpl("phone", "phone", DbType.VARCHAR),
-                    new ColumnMappingImpl("createDate", "create_date", DbType.DATETIME),
-                    new ColumnMappingImpl("updateDate", "update_date", DbType.DATETIME),
+                    new ColumnMappingImpl(UserModel.id, UserTable.id, DbType.NUMBER),
+                    new ColumnMappingImpl(UserModel.userId, UserTable.user_id, DbType.VARCHAR),
+                    new ColumnMappingImpl(UserModel.username, UserTable.username, DbType.VARCHAR),
+                    new ColumnMappingImpl(UserModel.email, UserTable.email, DbType.VARCHAR),
+                    new ColumnMappingImpl(UserModel.phone, UserTable.phone, DbType.VARCHAR),
+                    new ColumnMappingImpl(UserModel.createDate, UserTable.create_date, DbType.DATETIME),
+                    new ColumnMappingImpl(UserModel.updateDate, UserTable.update_date, DbType.DATETIME),
                 },
                 new RelationMapping[]{
                     new DirectRelationMappingImpl(
-                        "users",
+                        USER_TABLE,
                         USER,
                         ImmutableList.of(
-                            new ForeignColumnMapping("created_by", "id")
+                            new ForeignColumnMapping(UserTable.created_by, UserTable.id)
                         ),
-                        "createdBy",
+                        UserModel.createdBy,
                         new DirectRelationMappingOptionsImpl(
                             RelationMappingOptions.CascadeUpsert.NO,
                             RelationMappingOptions.CascadeDelete.NO,
@@ -63,12 +66,12 @@ public interface Entities {
                         )
                     ),
                     new DirectRelationMappingImpl(
-                        "users",
+                        USER_TABLE,
                         USER,
                         ImmutableList.of(
-                            new ForeignColumnMapping("updated_by", "id")
+                            new ForeignColumnMapping(UserTable.updated_by, UserTable.id)
                         ),
-                        "updatedBy",
+                        UserModel.updatedBy,
                         new DirectRelationMappingOptionsImpl(
                             RelationMappingOptions.CascadeUpsert.NO,
                             RelationMappingOptions.CascadeDelete.NO,

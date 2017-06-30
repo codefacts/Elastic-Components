@@ -4,11 +4,13 @@ import com.google.common.collect.ImmutableList;
 import elasta.composer.Events;
 import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.state.handlers.ConversionToCriteriaStateHandlerBuilder;
+import elasta.composer.state.handlers.ex.ConversionToCriteriaStateHandlerException;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
 import elasta.sql.SqlOps;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,6 +48,16 @@ final public class ConversionToCriteriaStateHandlerBuilderImpl implements Conver
             );
         });
 
-        return SqlOps.and(criteriaListBuilder.build());
+        List<JsonObject> jsonObjects = criteriaListBuilder.build();
+
+        if (jsonObjects.isEmpty()) {
+            throw new ConversionToCriteriaStateHandlerException("No criteria was provided for find one request");
+        }
+
+        if (jsonObjects.size() == 1) {
+            return jsonObjects.get(0);
+        }
+
+        return SqlOps.and(jsonObjects);
     }
 }
