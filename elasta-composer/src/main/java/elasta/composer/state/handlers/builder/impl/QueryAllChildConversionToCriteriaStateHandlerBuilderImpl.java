@@ -8,7 +8,7 @@ import elasta.composer.model.request.QueryChildModel;
 import elasta.composer.state.handlers.builder.QueryAllChildConversionToCriteriaStateHandlerBuilder;
 import elasta.core.flow.Flow;
 import elasta.core.promise.impl.Promises;
-import elasta.sql.SqlOps;
+import elasta.sql.JsonOps;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import io.vertx.core.json.JsonArray;
@@ -50,9 +50,9 @@ final public class QueryAllChildConversionToCriteriaStateHandlerBuilderImpl impl
                 Flow.trigger(
                     Events.next,
                     msg.withBody(
-                        SqlOps.and(
+                        JsonOps.and(
                             ImmutableList.of(
-                                SqlOps.eq(parentPrimaryKeyExpStr, parentId),
+                                JsonOps.eq(parentPrimaryKeyExpStr, parentId),
                                 replaceFieldRecursive(criteria)
                             )
                         )
@@ -64,11 +64,11 @@ final public class QueryAllChildConversionToCriteriaStateHandlerBuilderImpl impl
 
     private JsonObject replaceFieldRecursive(JsonObject criteria) {
 
-        final String op = criteria.getString(SqlOps.op);
+        final String op = criteria.getString(JsonOps.op);
 
-        if (Objects.equals(op, SqlOps.field)) {
-            String fieldExp = criteria.getString(SqlOps.arg);
-            return SqlOps.field(
+        if (Objects.equals(op, JsonOps.field)) {
+            String fieldExp = criteria.getString(JsonOps.arg);
+            return JsonOps.field(
                 PathExpression.parseAndCreate(parentToChildPathExpStr)
                     .concat(
                         new FieldExpressionImpl(fieldExp).toPathExpression().subPath(1)

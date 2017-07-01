@@ -110,7 +110,7 @@ public interface TrackerExporter extends ModuleExporter {
 
         builder.export(AuthorizationErrorModelBuilder.class, module -> {
             module.export(new AuthorizationErrorModelBuilderImpl(
-                StatusCodes.AUTHORIZATION_ERROR,
+                StatusCodes.authorizeSuccess,
                 module.require(MessageBundle.class)
             ));
         });
@@ -267,7 +267,7 @@ public interface TrackerExporter extends ModuleExporter {
 
         builder.export(ValidationErrorModelBuilder.class, module -> {
             module.export(new ValidationErrorModelBuilderImpl(
-                StatusCodes.VALIDATION_ERROR,
+                StatusCodes.validationError,
                 module.require(MessageBundle.class),
                 module.require(ValidationResultModelBuilder.class)
             ));

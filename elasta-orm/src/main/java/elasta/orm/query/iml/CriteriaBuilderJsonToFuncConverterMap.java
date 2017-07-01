@@ -1,11 +1,10 @@
 package elasta.orm.query.iml;
 
-import com.google.common.collect.ImmutableMap;
 import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.criteria.json.mapping.Mp;
 import elasta.orm.query.expression.builder.impl.QueryBuilderImpl;
-import elasta.sql.SqlOps;
+import elasta.sql.JsonOps;
 
 import java.util.Map;
 import java.util.Objects;
@@ -14,7 +13,7 @@ import java.util.Objects;
  * Created by sohan on 3/21/2017.
  */
 final public class CriteriaBuilderJsonToFuncConverterMap implements JsonToFuncConverterMap {
-    static final String FIELD = SqlOps.field;
+    static final String FIELD = JsonOps.field;
     final JsonToFuncConverterMap jsonToFuncConverterMap;
     final QueryBuilderImpl qb;
 

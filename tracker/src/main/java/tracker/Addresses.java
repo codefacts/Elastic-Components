@@ -7,6 +7,8 @@ import java.util.Objects;
  */
 public interface Addresses {
 
+    String authenticate = "authenticate";
+
     static String post(String address) {
         Objects.requireNonNull(address);
         return "post." + address;

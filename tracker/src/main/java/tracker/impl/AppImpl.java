@@ -3,14 +3,18 @@ package tracker.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.MessageBus;
+import elasta.composer.MessageProcessingErrorHandler;
 import elasta.module.ModuleSystem;
 import elasta.module.ModuleSystemBuilder;
+import elasta.orm.Orm;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import tracker.*;
 import tracker.entity_config.Entities;
+import tracker.message.handlers.impl.AuthenticateMessageHandlerImpl;
+import tracker.message.handlers.impl.DelegatingMessageHandlerImpl;
 import tracker.model.UserModel;
 
 import java.util.Objects;
@@ -19,9 +23,11 @@ import java.util.Objects;
  * Created by sohan on 6/25/2017.
  */
 final public class AppImpl implements App {
+    final ModuleSystem module;
+    final EventBus eventBus;
 
-    @Override
-    public App start(Config config) {
+    public AppImpl(Config config) {
+
         Objects.requireNonNull(config);
 
         final ModuleSystemBuilder builder = ModuleSystem.builder();
@@ -33,18 +39,15 @@ final public class AppImpl implements App {
                 .build()
         );
 
-        ModuleSystem module = builder.build();
+        module = builder.build();
+        eventBus = module.require(EventBus.class);
 
         createMessageHandlers(module);
 
         MessageBus messageBus = module.require(MessageBus.class);
-
-        return this;
     }
 
     private ModuleSystem createMessageHandlers(ModuleSystem module) {
-
-        EventBus eventBus = module.require(EventBus.class);
 
         module.require(MessageHandlersBuilder.class).build(
             MessageHandlersBuilder.BuildParams.builder()
@@ -58,20 +61,45 @@ final public class AppImpl implements App {
                     )
                 ))
                 .build()
-        ).forEach(addressAndHandler -> {
-            eventBus.consumer(addressAndHandler.getAddress(), addressAndHandler.getMessageHandler());
-        });
+        ).forEach(this::addMessageHandler);
+
+        addMessageHandler(
+            createAuthMessageHandlers(module)
+        );
 
         return module;
     }
 
+    private void addMessageHandler(MessageHandlersBuilder.AddressAndHandler addressAndHandler) {
+        eventBus.consumer(
+            addressAndHandler.getAddress(),
+            new DelegatingMessageHandlerImpl(
+                addressAndHandler.getMessageHandler(),
+                module.require(MessageProcessingErrorHandler.class)
+            )
+        );
+    }
+
+    private MessageHandlersBuilder.AddressAndHandler createAuthMessageHandlers(ModuleSystem module) {
+
+        return new MessageHandlersBuilder.AddressAndHandler(
+            Addresses.authenticate,
+            new AuthenticateMessageHandlerImpl(module.require(Orm.class))
+        );
+    }
+
     @Override
-    public App stop() {
+    public App close() {
         return this;
     }
 
+    @Override
+    public MessageBus mesageBus() {
+        return module.require(MessageBus.class);
+    }
+
     public static void main(String[] asfd) {
-        new AppImpl().start(
+        new AppImpl(
             new Config(
                 new JsonObject(
                     ImmutableMap.of(

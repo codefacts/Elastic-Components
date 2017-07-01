@@ -7,4 +7,5 @@ public interface UserModel extends BaseModel, elasta.composer.model.request.User
     String username = "username";
     String email = "email";
     String phone = "phone";
+    String password = "password";
 }

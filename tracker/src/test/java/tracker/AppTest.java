@@ -11,59 +11,55 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import tracker.entity_config.Entities;
+import tracker.impl.AppImpl;
+import tracker.model.UserModel;
 
 /**
  * Created by sohan on 6/29/2017.
  */
 final public class AppTest {
-    public static void main(String[] asfd) {
 
-        ModuleSystemBuilder builder = ModuleSystem.builder();
+    public static void main(String[] asdf) {
 
-        TrackerExporter.exportTo(
-            TrackerExporter.ExportToParams.builder()
-                .builder(builder)
-                .config(
-                    new App.Config(
-                        new JsonObject(
-                            ImmutableMap.of(
-                                "user", "root",
-                                "password", "",
-                                "driver_class", "com.mysql.jdbc.Driver",
-                                "url", "jdbc:mysql://localhost/tracker_db"
-                            )
-                        ),
-                        ImmutableMap.of(),
-                        Vertx.vertx(),
-                        1,
-                        10,
-                        "r"
+        MessageBus messageBus = new AppImpl(
+            new App.Config(
+                new JsonObject(
+                    ImmutableMap.of(
+                        "user", "root",
+                        "password", "",
+                        "driver_class", "com.mysql.jdbc.Driver",
+                        "url", "jdbc:mysql://localhost/tracker_db"
+                    )
+                ),
+                ImmutableMap.of(),
+                Vertx.vertx(),
+                1,
+                10,
+                "r"
+            )
+        ).mesageBus();
+
+        authTest(messageBus);
+
+    }
+
+    private static void authTest(MessageBus messageBus) {
+        messageBus.sendAndReceiveJsonObject(
+            MessageBus.Params.builder()
+                .address(Addresses.authenticate)
+                .message(
+                    new JsonObject(
+                        ImmutableMap.of(
+                            UserModel.username, "fakmin11",
+                            UserModel.password, "5151"
+                        )
                     )
                 )
+                .userId(AppUtils.anonymous)
                 .build()
-        );
-
-        ModuleSystem module = builder.build();
-
-        createMessageHandlers(module);
-
-        final MessageBus messageBus = module.require(MessageBus.class);
-
-//        create(module, messageBus);
-//
-//        findOne(module, messageBus);
-
-//        findAll(module, messageBus);
-
-//        update(module, messageBus);
-
-//        delete(messageBus);
-
-//        createAll(messageBus);
-
-//        updateAll(messageBus);
-
-//        deleteAll(messageBus);
+        ).then(message -> {
+            System.out.println(message.body());
+        }).err(Throwable::printStackTrace);
     }
 
     private static void deleteAll(MessageBus messageBus) {

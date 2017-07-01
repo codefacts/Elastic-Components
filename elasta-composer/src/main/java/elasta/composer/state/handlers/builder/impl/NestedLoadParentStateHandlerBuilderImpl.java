@@ -11,7 +11,7 @@ import elasta.composer.state.handlers.builder.ex.ParentDoesNotExistsException;
 import elasta.core.flow.Flow;
 import elasta.core.touple.immutable.Tpls;
 import elasta.orm.BaseOrm;
-import elasta.sql.SqlOps;
+import elasta.sql.JsonOps;
 import elasta.orm.query.QueryExecutor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -110,11 +110,11 @@ final public class NestedLoadParentStateHandlerBuilderImpl implements NestedLoad
 
         criterias.forEach(pathAndValue -> {
             builder.add(
-                SqlOps.eq(pathAndValue.getPathExpression().toString(), pathAndValue.getValue())
+                JsonOps.eq(pathAndValue.getPathExpression().toString(), pathAndValue.getValue())
             );
         });
 
-        return SqlOps.and(
+        return JsonOps.and(
             builder.build()
         );
     }

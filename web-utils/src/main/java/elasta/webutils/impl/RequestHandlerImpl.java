@@ -48,7 +48,12 @@ final public class RequestHandlerImpl implements RequestHandler {
 
             final Object value = requestConverter.apply(context);
 
-            eventBus.<JsonObject>sendAndReceiveJsonObject(eventAddress, value)
+            eventBus.<JsonObject>sendAndReceiveJsonObject(
+                SimpleEventBus.Params.builder()
+                    .address(eventAddress)
+                    .message(value)
+                    .build()
+            )
                 .then(message -> responseGenerator.reply(message, context))
                 .err(context::fail)
             ;

@@ -15,4 +15,5 @@ include 'elasta-criteria'
 include 'elasta-eventbus'
 include 'elasta-authorization'
 include 'tracker'
+include 'tracker-server'
 

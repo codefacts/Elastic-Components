@@ -1,0 +1,15 @@
+{
+  "profile": "dev",
+  "dev": {
+    "port": 152,
+    "defaultPageSize": 20,
+    "db": {
+      "user": "root",
+      "password": "",
+      "driver_class": "com.mysql.jdbc.Driver",
+      "url": "jdbc:mysql://localhost/tracker_db"
+    }
+  },
+  "prod": {
+  }
+}

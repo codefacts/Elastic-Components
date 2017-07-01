@@ -9,7 +9,7 @@ import elasta.core.flow.Flow;
 import elasta.core.flow.StateTrigger;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
-import elasta.sql.SqlOps;
+import elasta.sql.JsonOps;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -43,7 +43,7 @@ final public class ConversionToCriteriaStateHandlerImpl implements ConversionToC
 
         criteria.getMap().forEach((fieldName, value) -> {
             criteriaListBuilder.add(
-                SqlOps.eq(alias + "." + fieldName, value)
+                JsonOps.eq(alias + "." + fieldName, value)
             );
         });
 
@@ -57,6 +57,6 @@ final public class ConversionToCriteriaStateHandlerImpl implements ConversionToC
             return jsonObjects.get(0);
         }
 
-        return SqlOps.and(jsonObjects);
+        return JsonOps.and(jsonObjects);
     }
 }

@@ -13,5 +13,7 @@ import java.util.List;
 public interface AppUtils {
 
     String isNewKey = "$isNew";
-    
+
+    int failureCode = 500;
+    String anonymous = "anonymous";
 }

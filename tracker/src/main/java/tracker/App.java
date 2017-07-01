@@ -1,5 +1,6 @@
 package tracker;
 
+import elasta.composer.MessageBus;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
@@ -13,9 +14,9 @@ import java.util.Objects;
  */
 public interface App {
 
-    App start(Config config);
+    App close();
 
-    App stop();
+    MessageBus mesageBus();
 
     @Value
     @Builder

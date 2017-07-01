@@ -8,4 +8,5 @@ public interface UserTable extends BaseTable {
     String username = "username";
     String email = "email";
     String phone = "phone";
+    String password = "password";
 }

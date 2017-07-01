@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by sohan on 5/8/2017.
  */
-public interface SqlOps {
+public interface JsonOps {
 
     String op = "op";
     String arg = "arg";
@@ -23,7 +23,7 @@ public interface SqlOps {
     static JsonObject field(String fieldExpStr) {
         return new JsonObject(
             ImmutableMap.of(
-                SqlOps.op, field,
+                JsonOps.op, field,
                 "arg", fieldExpStr
             )
         );

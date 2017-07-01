@@ -1,13 +1,11 @@
 package elasta.orm.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import elasta.commons.Utils;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.core.touple.immutable.Tpls;
-import elasta.criteria.json.mapping.OpNames;
 import elasta.orm.BaseOrm;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.ex.QueryDataLoaderException;
@@ -16,7 +14,7 @@ import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
-import elasta.sql.SqlOps;
+import elasta.sql.JsonOps;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -190,7 +188,7 @@ final class DataLoader {
                             .build()
                     )
                     .criteria(
-                        SqlOps.eq(
+                        JsonOps.eq(
                             (pathExpression.root() + "." + primaryKey),
                             jsonObject.getValue(primaryKey)
                         )
