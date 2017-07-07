@@ -1,10 +1,5 @@
 package elasta.orm.entity.core.columnmapping;
 
-import elasta.orm.entity.core.columnmapping.RelationMappingOptions;
-import lombok.Value;
-
-import java.util.Objects;
-
 /**
  * Created by sohan on 4/18/2017.
  */
@@ -16,9 +11,9 @@ public interface DirectRelationMappingOptions extends RelationMappingOptions {
     @Override
     CascadeDelete getCascadeDelete();
 
-    LoadAndDeleteParent getLoadAndDeleteParent();
+    LoadAndDelete getLoadAndDelete();
 
-    enum LoadAndDeleteParent {
+    enum LoadAndDelete {
         LOAD_AND_DELETE, SET_TO_NULL, NO_OPERATION
     }
 }

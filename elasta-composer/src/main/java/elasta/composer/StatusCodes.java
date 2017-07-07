@@ -5,9 +5,9 @@ package elasta.composer;
  */
 public interface StatusCodes {
     String success = "success";
-    String validateSuccess = "validate.success";
-    String authorizeSuccess = "authorize.success";
+    String validationSuccess = "validation.success";
+    String authorizationSuccess = "authorization.success";
 
-    String validationError = "validate.error";
-    String authorizationError = "authorize.error";
+    String validationError = "validation.error";
+    String authorizationError = "authorization.error";
 }

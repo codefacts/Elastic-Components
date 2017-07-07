@@ -2,7 +2,7 @@ package tracker.message.handlers.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.commons.Utils;
+import com.google.common.collect.ImmutableSet;
 import elasta.composer.model.response.ErrorModel;
 import elasta.orm.Orm;
 import elasta.orm.query.expression.PathExpression;
@@ -10,28 +10,39 @@ import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import elasta.sql.JsonOps;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import tracker.AppUtils;
 import tracker.StatusCodes;
 import tracker.entity_config.Entities;
 import tracker.message.handlers.AuthenticateMessageHandler;
 import tracker.message.handlers.ex.AuthenticateMessageHandlerException;
-import tracker.model.AuthenticationSuccessModel;
+import tracker.model.AuthSuccessModel;
 import tracker.model.UserModel;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static elasta.commons.Utils.not;
 
 /**
  * Created by sohan on 7/1/2017.
  */
 final public class AuthenticateMessageHandlerImpl implements AuthenticateMessageHandler {
     final Orm orm;
+    final Set<String> loginFields;
+    final String userKey;
+    final String passwordKey;
 
-    public AuthenticateMessageHandlerImpl(Orm orm) {
+    public AuthenticateMessageHandlerImpl(Orm orm, Set<String> loginFields, String userKey, String passwordKey) {
         Objects.requireNonNull(orm);
+        Objects.requireNonNull(loginFields);
+        Objects.requireNonNull(userKey);
+        Objects.requireNonNull(passwordKey);
         this.orm = orm;
+        this.loginFields = ImmutableSet.copyOf(loginFields);
+        this.userKey = userKey;
+        this.passwordKey = passwordKey;
+        if (loginFields.isEmpty()) {
+            throw new AuthenticateMessageHandlerException("LoginFields can not be empty");
+        }
     }
 
     @Override
@@ -39,25 +50,34 @@ final public class AuthenticateMessageHandlerImpl implements AuthenticateMessage
 
         JsonObject user = message.body();
 
-        final String password = user.getString(UserModel.password);
+        Objects.requireNonNull(user);
 
-        HashMap<String, Object> map = new HashMap<>(user.getMap());
+        final String username = user.getString(userKey);
+        final String password = user.getString(passwordKey);
 
-        map.remove(UserModel.password);
+        Objects.requireNonNull(username);
+        Objects.requireNonNull(password);
 
-        final List<JsonObject> conditions = map.entrySet().stream()
-            .map(entry -> JsonOps.eq("r." + entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList());
+        final JsonObject criteria;
+        {
+            if (loginFields.size() == 1) {
 
-        if (conditions.isEmpty()) {
-            throw new AuthenticateMessageHandlerException("Request Body does not contains enough data");
+                criteria = JsonOps.eq("r." + loginFields.stream().findAny().get(), username);
+
+            } else {
+
+                criteria = JsonOps.or(
+                    loginFields.stream().map(field -> JsonOps.eq("r." + field, username)).collect(Collectors.toList())
+                );
+
+            }
         }
 
         orm
             .findOne(
                 Entities.USER,
                 "r",
-                conditions.size() == 1 ? conditions.get(0) : JsonOps.and(conditions),
+                criteria,
                 ImmutableList.of(
                     new FieldExpressionImpl(PathExpression.create("r", UserModel.userId)),
                     new FieldExpressionImpl(PathExpression.create("r", UserModel.username)),
@@ -66,7 +86,7 @@ final public class AuthenticateMessageHandlerImpl implements AuthenticateMessage
             )
             .then(foundUser -> {
 
-                if (Utils.not(Objects.equals(foundUser.getString(UserModel.password), password))) {
+                if (not(Objects.equals(foundUser.getString(UserModel.password), password))) {
                     message.reply(
                         error(StatusCodes.passwordMismatchError, "Password does not match")
                     );
@@ -75,8 +95,8 @@ final public class AuthenticateMessageHandlerImpl implements AuthenticateMessage
                 message.reply(
                     new JsonObject(
                         ImmutableMap.of(
-                            AuthenticationSuccessModel.userId, foundUser.getString(UserModel.userId),
-                            AuthenticationSuccessModel.username, foundUser.getString(UserModel.username)
+                            AuthSuccessModel.userId, foundUser.getString(UserModel.userId),
+                            AuthSuccessModel.username, foundUser.getString(UserModel.username)
                         )
                     )
                 );

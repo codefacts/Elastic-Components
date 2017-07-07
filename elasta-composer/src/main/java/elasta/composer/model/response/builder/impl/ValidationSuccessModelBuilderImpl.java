@@ -25,8 +25,8 @@ final public class ValidationSuccessModelBuilderImpl implements ValidationSucces
     public JsonObject build(BuildParams params) {
         return new JsonObject(
             ImmutableMap.of(
-                ValidationSuccessModel.statusCode, StatusCodes.validateSuccess,
-                ValidationSuccessModel.message, messageBundle.translate(StatusCodes.validateSuccess, ComposerUtils.emptyJsonObject())
+                ValidationSuccessModel.statusCode, StatusCodes.validationSuccess,
+                ValidationSuccessModel.message, messageBundle.translate(StatusCodes.validationSuccess, ComposerUtils.emptyJsonObject())
             )
         );
     }

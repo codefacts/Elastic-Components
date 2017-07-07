@@ -5,7 +5,12 @@ package tracker.model;
  */
 public interface UserModel extends BaseModel, elasta.composer.model.request.UserModel {
     String username = "username";
+    String password = "password";
+    String firstName = "firstName";
+    String lastName = "lastName";
     String email = "email";
     String phone = "phone";
-    String password = "password";
+    String dateOfBirth = "dateOfBirth";
+    String gender = "gender";
+    String registrationSource = "registrationSource";
 }

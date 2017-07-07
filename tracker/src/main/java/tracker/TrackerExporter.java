@@ -8,6 +8,7 @@ import elasta.composer.builder.impl.ConvertersMapBuilderImpl;
 import elasta.composer.converter.*;
 import elasta.composer.converter.impl.*;
 import elasta.composer.impl.MessageBusImpl;
+import elasta.composer.impl.MessageProcessingErrorHandlerImpl;
 import elasta.composer.model.response.builder.*;
 import elasta.composer.model.response.builder.impl.*;
 import elasta.composer.converter.UserIdConverter;
@@ -110,14 +111,14 @@ public interface TrackerExporter extends ModuleExporter {
 
         builder.export(AuthorizationErrorModelBuilder.class, module -> {
             module.export(new AuthorizationErrorModelBuilderImpl(
-                StatusCodes.authorizeSuccess,
+                StatusCodes.authorizationSuccess,
                 module.require(MessageBundle.class)
             ));
         });
 
         builder.export(AuthorizationSuccessModelBuilder.class, module -> module.export(
             new AuthorizationSuccessModelBuilderImpl(
-                StatusCodes.authorizeSuccess, module.require(MessageBundle.class)
+                StatusCodes.authorizationSuccess, module.require(MessageBundle.class)
             )
         ));
 
@@ -189,7 +190,9 @@ public interface TrackerExporter extends ModuleExporter {
         )));
 
         builder.export(MessageProcessingErrorHandler.class, module -> module.export(
-            params -> params.getEx().printStackTrace()
+            new MessageProcessingErrorHandlerImpl(
+                AppUtils.failureCode, StatusCodes.badRequestError
+            )
         ));
 
         builder.export(UserIdConverter.class, module -> module.export(new UserIdConverterImpl()));

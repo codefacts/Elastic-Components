@@ -7,4 +7,5 @@ public interface StatusCodes extends elasta.composer.StatusCodes {
     String authenticationError = "authentication.error";
     String userNotFoundError = "user.not.found.error";
     String passwordMismatchError = "password.mismatch.error";
+    String badRequestError = "bad.request.error";
 }

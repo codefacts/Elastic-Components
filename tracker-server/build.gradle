@@ -17,7 +17,6 @@ dependencies {
     compile project(':vertx-utils')
     compile project(':elasta-module')
     compile project(':elasta-eventbus')
-    compile project(':web-utils')
     compile project(':tracker')
 
     compile group: 'io.vertx', name: 'vertx-core', version: '3.3.3'

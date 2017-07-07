@@ -62,6 +62,10 @@ public interface JsonOps {
     }
 
     static JsonObject and(List<JsonObject> criterias) {
+        return and(new JsonArray(criterias));
+    }
+
+    static JsonObject and(JsonArray criterias) {
         return new JsonObject(
             ImmutableMap.of(
                 op, "and",
@@ -70,10 +74,10 @@ public interface JsonOps {
         );
     }
 
-    static JsonObject and(JsonArray criterias) {
+    static JsonObject or(List<JsonObject> criterias) {
         return new JsonObject(
             ImmutableMap.of(
-                op, "and",
+                op, "or",
                 "args", criterias
             )
         );

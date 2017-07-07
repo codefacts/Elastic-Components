@@ -67,15 +67,7 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
         private UpsertFunction buildUpsertFunction(String entity) {
             DbMapping dbMapping = helper.getDbMapping(entity);
 
-            List<FieldToColumnMapping> list = Arrays.stream(dbMapping.getColumnMappings())
-                .map(dbColumnMapping -> new FieldToColumnMapping(dbColumnMapping.getField(), Utils.<ColumnMapping>cast(dbColumnMapping).getColumn()))
-                .collect(Collectors.toList());
-
-            TableDataPopulatorImpl tableDataPopulator = new TableDataPopulatorImpl(
-                dbMapping.getTable(),
-                dbMapping.getPrimaryColumn(),
-                list.toArray(new FieldToColumnMapping[list.size()])
-            );
+            TableDataPopulatorImpl tableDataPopulator = createTableDataPopulator(dbMapping);
 
             ImmutableList.Builder<DirectDependency> directDependencyBuilder = ImmutableList.builder();
             ImmutableList.Builder<IndirectDependency> indirectDependencyBuilder = ImmutableList.builder();
@@ -85,11 +77,24 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
 
                 switch (dbColumnMapping.getColumnType()) {
                     case DIRECT: {
+
+                        if (dbColumnMapping.getOptions().getCascadeUpsert() == RelationMappingOptions.CascadeUpsert.NO) {
+
+                            directDependencyBuilder.add(
+                                makeTableDataPopulatingDirectMapping(
+                                    (DirectRelationMapping) dbColumnMapping
+                                )
+                            );
+
+                            return;
+                        }
+
                         directDependencyBuilder.add(
                             makeDirectMapping(
                                 (DirectRelationMapping) dbColumnMapping
                             )
                         );
+
                         return;
                     }
                     case INDIRECT: {
@@ -125,6 +130,38 @@ public class UpsertFunctionBuilderImpl implements UpsertFunctionBuilder {
                 directDependencies.toArray(new DirectDependency[directDependencies.size()]),
                 indirectDependencies.toArray(new IndirectDependency[indirectDependencies.size()]),
                 belongsTos.toArray(new BelongsTo[belongsTos.size()])
+            );
+        }
+
+        private TableDataPopulatorImpl createTableDataPopulator(DbMapping dbMapping) {
+
+            List<FieldToColumnMapping> list = Arrays.stream(dbMapping.getColumnMappings())
+                .map(dbColumnMapping -> new FieldToColumnMapping(dbColumnMapping.getField(), Utils.<ColumnMapping>cast(dbColumnMapping).getColumn()))
+                .collect(Collectors.toList());
+
+            return new TableDataPopulatorImpl(
+                dbMapping.getTable(),
+                dbMapping.getPrimaryColumn(),
+                list.toArray(new FieldToColumnMapping[list.size()])
+            );
+        }
+
+        private DirectDependency makeTableDataPopulatingDirectMapping(DirectRelationMapping mapping) {
+
+            List<ForeignColumnMapping> foreignColumnMappings = mapping.getForeignColumnMappingList().stream()
+                .map(foreignColumnMapping -> new ForeignColumnMapping(
+                    foreignColumnMapping.getSrcColumn(),
+                    foreignColumnMapping.getDstColumn()
+                )).collect(Collectors.toList());
+
+            return new DirectDependency(
+                mapping.getField(),
+                new TableDataPopulatingDirectDependencyHandlerImpl(
+                    createTableDataPopulator(helper.getDbMapping(mapping.getReferencingEntity()))
+                ),
+                new DependencyColumnValuePopulatorImpl(
+                    foreignColumnMappings.toArray(new ForeignColumnMapping[foreignColumnMappings.size()])
+                )
             );
         }
 

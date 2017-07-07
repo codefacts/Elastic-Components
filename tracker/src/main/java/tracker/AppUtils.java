@@ -14,6 +14,6 @@ public interface AppUtils {
 
     String isNewKey = "$isNew";
 
-    int failureCode = 500;
+    int failureCode = 400;
     String anonymous = "anonymous";
 }

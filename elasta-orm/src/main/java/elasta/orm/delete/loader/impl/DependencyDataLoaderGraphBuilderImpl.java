@@ -11,7 +11,6 @@ import elasta.orm.delete.loader.DependencyDataLoaderGraphBuilder;
 import elasta.orm.entity.core.RelationType;
 import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
 import elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions;
-import elasta.orm.entity.core.columnmapping.RelationMapping;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,7 +49,7 @@ final public class DependencyDataLoaderGraphBuilderImpl implements DependencyDat
             .filter(dependencyInfo -> {
                 if (dependencyInfo.getRelationMapping().getColumnType() == RelationType.DIRECT) {
                     DirectRelationMapping mapping = (DirectRelationMapping) dependencyInfo.getRelationMapping();
-                    return mapping.getOptions().getLoadAndDeleteParent() == DirectRelationMappingOptions.LoadAndDeleteParent.LOAD_AND_DELETE;
+                    return mapping.getOptions().getLoadAndDelete() == DirectRelationMappingOptions.LoadAndDelete.LOAD_AND_DELETE;
                 }
                 return false;
             })

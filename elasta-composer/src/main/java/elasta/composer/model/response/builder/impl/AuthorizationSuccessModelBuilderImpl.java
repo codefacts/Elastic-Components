@@ -28,7 +28,7 @@ final public class AuthorizationSuccessModelBuilderImpl implements Authorization
     public JsonObject build(BuildParams params) {
         return new JsonObject(
             ImmutableMap.of(
-                AuthorizationSuccessModel.statusCode, StatusCodes.authorizeSuccess,
+                AuthorizationSuccessModel.statusCode, StatusCodes.authorizationSuccess,
                 AuthorizationSuccessModel.message, messageBundle.translate(
                     statusCode,
                     ComposerUtils.emptyJsonObject()

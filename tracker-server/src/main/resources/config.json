@@ -2,7 +2,8 @@
   "profile": "dev",
   "dev": {
     "port": 152,
-    "defaultPageSize": 20,
+    "default_page_size": 20,
+    "public_content_directory": "/D:/NetBeansProjects/tracker-web-panel/build",
     "db": {
       "user": "root",
       "password": "",

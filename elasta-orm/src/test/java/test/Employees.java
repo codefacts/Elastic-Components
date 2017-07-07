@@ -100,7 +100,7 @@ public interface Employees {
                             new DirectRelationMappingOptionsImpl(
                                 RelationMappingOptions.CascadeUpsert.YES,
                                 RelationMappingOptions.CascadeDelete.YES,
-                                false, DirectRelationMappingOptions.LoadAndDeleteParent.LOAD_AND_DELETE
+                                false, DirectRelationMappingOptions.LoadAndDelete.LOAD_AND_DELETE
                             )
                         ),
                         new DirectRelationMappingImpl(
@@ -115,7 +115,7 @@ public interface Employees {
                             new DirectRelationMappingOptionsImpl(
                                 RelationMappingOptions.CascadeUpsert.YES,
                                 RelationMappingOptions.CascadeDelete.YES,
-                                false, DirectRelationMappingOptions.LoadAndDeleteParent.LOAD_AND_DELETE
+                                false, DirectRelationMappingOptions.LoadAndDelete.LOAD_AND_DELETE
                             )
                         ),
                         new IndirectRelationMappingImpl(
@@ -136,7 +136,7 @@ public interface Employees {
                             new DirectRelationMappingOptionsImpl(
                                 RelationMappingOptions.CascadeUpsert.YES,
                                 RelationMappingOptions.CascadeDelete.YES,
-                                false, DirectRelationMappingOptions.LoadAndDeleteParent.LOAD_AND_DELETE
+                                false, DirectRelationMappingOptions.LoadAndDelete.LOAD_AND_DELETE
                             )
                         )
                     })
@@ -199,7 +199,7 @@ public interface Employees {
                         new DirectRelationMappingOptionsImpl(
                             RelationMappingOptions.CascadeUpsert.YES,
                             RelationMappingOptions.CascadeDelete.YES,
-                            false, DirectRelationMappingOptions.LoadAndDeleteParent.LOAD_AND_DELETE
+                            false, DirectRelationMappingOptions.LoadAndDelete.LOAD_AND_DELETE
                         )
                     ),
                     new DirectRelationMappingImpl(
@@ -214,7 +214,7 @@ public interface Employees {
                         new DirectRelationMappingOptionsImpl(
                             RelationMappingOptions.CascadeUpsert.YES,
                             RelationMappingOptions.CascadeDelete.YES,
-                            false, DirectRelationMappingOptions.LoadAndDeleteParent.LOAD_AND_DELETE
+                            false, DirectRelationMappingOptions.LoadAndDelete.LOAD_AND_DELETE
                         )
                     )
                 }

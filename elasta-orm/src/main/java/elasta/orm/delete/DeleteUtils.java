@@ -11,7 +11,6 @@ import elasta.orm.delete.impl.ColumnValuePair;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -45,7 +44,7 @@ public interface DeleteUtils {
                 switch (relationMapping.getColumnType()) {
                     case DIRECT: {
                         DirectRelationMapping mapping = (DirectRelationMapping) relationMapping;
-                        return mapping.getOptions().getLoadAndDeleteParent() != DirectRelationMappingOptions.LoadAndDeleteParent.NO_OPERATION;
+                        return mapping.getOptions().getLoadAndDelete() != DirectRelationMappingOptions.LoadAndDelete.NO_OPERATION;
                     }
                 }
                 return false;

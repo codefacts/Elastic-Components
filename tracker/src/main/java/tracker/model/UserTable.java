@@ -9,4 +9,9 @@ public interface UserTable extends BaseTable {
     String email = "email";
     String phone = "phone";
     String password = "password";
+    String date_of_birth = "date_of_birth";
+    String first_name = "first_name";
+    String last_name = "last_name";
+    String registration_source = "registration_src";
+    String gender = "gender";
 }

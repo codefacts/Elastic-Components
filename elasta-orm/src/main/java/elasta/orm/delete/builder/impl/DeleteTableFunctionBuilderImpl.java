@@ -70,7 +70,7 @@ final public class DeleteTableFunctionBuilderImpl implements DeleteTableFunction
                 switch (relationMapping.getColumnType()) {
                     case DIRECT: {
                         DirectRelationMapping mapping = (DirectRelationMapping) relationMapping;
-                        switch (mapping.getOptions().getLoadAndDeleteParent()) {
+                        switch (mapping.getOptions().getLoadAndDelete()) {
                             case LOAD_AND_DELETE: {
                                 directListBuilder.add(
                                     directDependencyDeleteHandler(mapping, dependencyInfo, context, tableToTableDependenciesMap)

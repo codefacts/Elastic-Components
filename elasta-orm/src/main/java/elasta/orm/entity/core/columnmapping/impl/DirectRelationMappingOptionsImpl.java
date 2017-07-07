@@ -11,16 +11,16 @@ final public class DirectRelationMappingOptionsImpl implements DirectRelationMap
     final CascadeUpsert cascadeUpsert;
     final CascadeDelete cascadeDelete;
     final boolean mandatory;
-    final elasta.orm.entity.core.columnmapping.DirectRelationMappingOptions.LoadAndDeleteParent loadAndDeleteParent;
+    final LoadAndDelete loadAndDelete;
 
-    public DirectRelationMappingOptionsImpl(CascadeUpsert cascadeUpsert, CascadeDelete cascadeDelete, boolean mandatory, LoadAndDeleteParent loadAndDeleteParent) {
+    public DirectRelationMappingOptionsImpl(CascadeUpsert cascadeUpsert, CascadeDelete cascadeDelete, boolean mandatory, LoadAndDelete loadAndDelete) {
         Objects.requireNonNull(cascadeUpsert);
         Objects.requireNonNull(cascadeDelete);
-        Objects.requireNonNull(loadAndDeleteParent);
+        Objects.requireNonNull(loadAndDelete);
         this.cascadeUpsert = cascadeUpsert;
         this.cascadeDelete = cascadeDelete;
         this.mandatory = mandatory;
-        this.loadAndDeleteParent = loadAndDeleteParent;
+        this.loadAndDelete = loadAndDelete;
     }
 
     @Override
@@ -38,8 +38,7 @@ final public class DirectRelationMappingOptionsImpl implements DirectRelationMap
         return mandatory;
     }
 
-    @Override
-    public DirectRelationMappingOptions.LoadAndDeleteParent getLoadAndDeleteParent() {
-        return loadAndDeleteParent;
+    public LoadAndDelete getLoadAndDelete() {
+        return loadAndDelete;
     }
 }

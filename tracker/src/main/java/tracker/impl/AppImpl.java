@@ -2,6 +2,7 @@ package tracker.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import elasta.composer.MessageBus;
 import elasta.composer.MessageProcessingErrorHandler;
 import elasta.module.ModuleSystem;
@@ -15,6 +16,8 @@ import tracker.*;
 import tracker.entity_config.Entities;
 import tracker.message.handlers.impl.AuthenticateMessageHandlerImpl;
 import tracker.message.handlers.impl.DelegatingMessageHandlerImpl;
+import tracker.model.AuthRequestModel;
+import tracker.model.BaseModel;
 import tracker.model.UserModel;
 
 import java.util.Objects;
@@ -56,7 +59,19 @@ final public class AppImpl implements App {
                     new MessageHandlersBuilder.FlowParams(
                         Entities.USER,
                         new FieldExpressionImpl(
-                            "r." + UserModel.id
+                            "r." + BaseModel.id
+                        )
+                    ),
+                    new MessageHandlersBuilder.FlowParams(
+                        Entities.DEVICE,
+                        new FieldExpressionImpl(
+                            "r." + BaseModel.id
+                        )
+                    ),
+                    new MessageHandlersBuilder.FlowParams(
+                        Entities.POSITION,
+                        new FieldExpressionImpl(
+                            "r." + BaseModel.id
                         )
                     )
                 ))
@@ -84,7 +99,12 @@ final public class AppImpl implements App {
 
         return new MessageHandlersBuilder.AddressAndHandler(
             Addresses.authenticate,
-            new AuthenticateMessageHandlerImpl(module.require(Orm.class))
+            new AuthenticateMessageHandlerImpl(module.require(Orm.class), ImmutableSet.of(
+                UserModel.userId,
+                UserModel.username,
+                UserModel.email,
+                UserModel.phone
+            ), AuthRequestModel.user, AuthRequestModel.password)
         );
     }
 

@@ -1,6 +1,8 @@
 package elasta.orm.upsert;
 
 import elasta.orm.entity.core.DbMapping;
+import elasta.orm.entity.core.RelationType;
+import elasta.orm.entity.core.columnmapping.DirectRelationMapping;
 import elasta.orm.entity.core.columnmapping.RelationMapping;
 import elasta.orm.entity.core.columnmapping.RelationMappingOptions;
 import io.vertx.core.json.JsonObject;
@@ -25,6 +27,11 @@ public interface UpsertUtils {
 
     static Stream<RelationMapping> getRelationMappingsForUpsert(DbMapping dbMapping) {
         return Arrays.stream(dbMapping.getRelationMappings())
-            .filter(relationMapping -> relationMapping.getOptions().getCascadeUpsert() == RelationMappingOptions.CascadeUpsert.YES);
+            .filter(relationMapping -> {
+                if (relationMapping.getColumnType() == RelationType.DIRECT) {
+                    return true;
+                }
+                return relationMapping.getOptions().getCascadeUpsert() == RelationMappingOptions.CascadeUpsert.YES;
+            });
     }
 }
