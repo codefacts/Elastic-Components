@@ -17,6 +17,7 @@ import java.sql.SQLDataException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Created by Jango on 9/25/2016.
@@ -99,7 +100,7 @@ final public class SqlDBImpl implements SqlDB {
     public Promise<Void> insertJo(String table, JsonObject jsonObject) {
 
         return exeUpdate(
-            ImmutableList.of(
+            Stream.of(
                 sqlBuilderUtils.toInsertUpdateTpl(table, jsonObject)
             )
         );
@@ -108,20 +109,21 @@ final public class SqlDBImpl implements SqlDB {
     @Override
     public Promise<Void> insertJo(String table, Collection<JsonObject> jsonObjects) {
         return exeUpdate(
-            sqlBuilderUtils.toInsertUpdateTpls(table, jsonObjects)
+            sqlBuilderUtils.toInsertUpdateTpls(table, jsonObjects).stream()
         );
     }
 
     @Override
     public Promise<Void> update(Collection<UpdateTpl> updateTpls) {
-        return exeUpdate(updateTpls);
+        return exeUpdate(updateTpls.stream());
     }
 
-    private Promise<Void> exeUpdate(Collection<UpdateTpl> updateTpls) {
+    @Override
+    public Promise<Void> update(Stream<UpdateTpl> updateTplStream) {
+        return exeUpdate(updateTplStream);
+    }
 
-        if (updateTpls.isEmpty()) {
-            throw new SqlDbException("UpdateTpls can not be empty");
-        }
+    private Promise<Void> exeUpdate(Stream<UpdateTpl> updateTpls) {
 
         ImmutableList.Builder<UpdateTpl> builder = ImmutableList.builder();
 
@@ -141,7 +143,7 @@ final public class SqlDBImpl implements SqlDB {
 
     @Override
     public Promise<Void> delete(String table, JsonObject where) {
-        return exeUpdate(ImmutableList.of(
+        return exeUpdate(Stream.of(
             sqlBuilderUtils.toDeleteUpdateTpl(table, where)
         ));
     }

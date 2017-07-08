@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import elasta.composer.Events;
 import elasta.composer.Msg;
 import elasta.composer.state.handlers.ConversionToCriteriaStateHandler;
-import elasta.composer.state.handlers.builder.ex.ConversionToCriteriaStateHandlerException;
+import elasta.composer.state.handlers.ex.ConversionToCriteriaStateHandlerException;
 import elasta.core.flow.Flow;
 import elasta.core.flow.StateTrigger;
 import elasta.core.promise.impl.Promises;

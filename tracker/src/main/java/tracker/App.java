@@ -27,19 +27,26 @@ public interface App {
         final long defaultPage;
         final int defaultPageSize;
         final String rootAlias;
+        final String androidDeviceToken;
 
-        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx, long defaultPage, int defaultPageSize, String rootAlias) {
+        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx, long defaultPage, int defaultPageSize, String rootAlias, String androidDeviceToken) {
             Objects.requireNonNull(db);
             Objects.requireNonNull(messageBundle);
             Objects.requireNonNull(vertx);
             Objects.requireNonNull(rootAlias);
+            Objects.requireNonNull(androidDeviceToken);
             this.db = db;
             this.messageBundle = messageBundle;
             this.vertx = vertx;
+            this.androidDeviceToken = androidDeviceToken;
             //ValueTypes
             this.defaultPage = defaultPage;
             this.defaultPageSize = defaultPageSize;
             this.rootAlias = rootAlias;
+        }
+
+        public Object getAndroidDeviceToken() {
+            return androidDeviceToken;
         }
     }
 

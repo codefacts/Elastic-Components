@@ -1,6 +1,7 @@
 package elasta.sql.impl;
 
 import com.google.common.collect.ImmutableList;
+import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import elasta.sql.BaseSqlDB;
 import elasta.sql.SqlExecutor;
@@ -42,6 +43,10 @@ final public class BaseSqlDBImpl implements BaseSqlDB {
     public Promise<Void> update(Collection<UpdateTpl> updateTpls) {
 
         Objects.requireNonNull(updateTpls);
+
+        if (updateTpls.isEmpty()) {
+            return Promises.empty();
+        }
 
         ImmutableList.Builder<String> sqlListBuilder = ImmutableList.builder();
         ImmutableList.Builder<JsonArray> paramsListBuilder = ImmutableList.builder();

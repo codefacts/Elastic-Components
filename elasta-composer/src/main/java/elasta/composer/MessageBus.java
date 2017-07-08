@@ -1,5 +1,6 @@
 package elasta.composer;
 
+import elasta.composer.ex.MessageBusException;
 import elasta.composer.model.request.UserModel;
 import elasta.core.promise.intfs.Promise;
 import io.vertx.core.MultiMap;

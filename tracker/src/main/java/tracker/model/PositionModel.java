@@ -12,4 +12,5 @@ public interface PositionModel extends BaseModel {
     String speed = "speed";
     String provider = "provider";
     String batteryLevel = "batteryLevel";
+    String deviceId = "deviceId";
 }

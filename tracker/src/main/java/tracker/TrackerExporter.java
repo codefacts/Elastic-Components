@@ -2,6 +2,7 @@ package tracker;
 
 import elasta.authorization.Authorizer;
 import elasta.composer.ConvertersMap;
+import elasta.composer.EntityToStateHandlersMap;
 import elasta.composer.MessageBus;
 import elasta.composer.MessageProcessingErrorHandler;
 import elasta.composer.builder.impl.ConvertersMapBuilderImpl;
@@ -9,6 +10,8 @@ import elasta.composer.converter.*;
 import elasta.composer.converter.impl.*;
 import elasta.composer.impl.MessageBusImpl;
 import elasta.composer.impl.MessageProcessingErrorHandlerImpl;
+import elasta.composer.interceptor.DbOperationInterceptor;
+import elasta.composer.interceptor.impl.DbOperationInterceptorImpl;
 import elasta.composer.model.response.builder.*;
 import elasta.composer.model.response.builder.impl.*;
 import elasta.composer.converter.UserIdConverter;
@@ -19,9 +22,7 @@ import elasta.composer.respose.generator.impl.JsonArrayResponseGeneratorImpl;
 import elasta.composer.respose.generator.impl.JsonObjectResponseGeneratorImpl;
 import elasta.composer.respose.generator.impl.ResponseGeneratorImpl;
 import elasta.composer.state.handlers.*;
-import elasta.composer.state.handlers.impl.ConversionToCriteriaStateHandlerImpl;
-import elasta.composer.state.handlers.impl.EndStateHandlerImpl;
-import elasta.composer.state.handlers.impl.StartStateHandlerImpl;
+import elasta.composer.state.handlers.impl.*;
 import elasta.core.promise.impl.Promises;
 import elasta.eventbus.SimpleEventBus;
 import elasta.eventbus.impl.SimpleEventBusImpl;
@@ -45,6 +46,8 @@ import tracker.impl.AppHelpersImpl;
 import tracker.impl.FlowBuilderHelperImpl;
 import tracker.impl.MessageHandlersBuilderImpl;
 import tracker.impl.UserIdConverterImpl;
+import tracker.model.BaseModel;
+import tracker.model.BaseTable;
 
 import java.util.Objects;
 
@@ -75,6 +78,8 @@ public interface TrackerExporter extends ModuleExporter {
 
         exportExtraComponents(builder, config);
 
+        EntityToStateHandlersMapExporter.exportTo(builder);
+
         return builder;
     }
 
@@ -87,7 +92,7 @@ public interface TrackerExporter extends ModuleExporter {
         });
 
         builder.export(FlowBuilderHelper.class, module -> module.export(
-            new FlowBuilderHelperImpl()
+            new FlowBuilderHelperImpl(module.require(EntityToStateHandlersMap.class))
         ));
 
         builder.export(AppHelpers.class, module -> {
@@ -104,6 +109,14 @@ public interface TrackerExporter extends ModuleExporter {
         exportEndStateHandler(builder, config);
 
         exportAuthorizer(builder);
+
+        builder.export(BeforeAddStateHandler.class, module -> module.export(new BeforeAddStateHandlerImpl()));
+
+        builder.export(BeforeAddAllStateHandler.class, module -> module.export(new BeforeAddAllStateHandlerImpl()));
+
+        builder.export(BeforeUpdateStateHandler.class, module -> module.export(new BeforeUpdateStateHandlerImpl()));
+
+        builder.export(BeforeUpdateAllStateHandler.class, module -> module.export(new BeforeUpdateAllStateHandlerImpl()));
 
         builder.export(ConvertersMap.class, module -> {
             module.export(new ConvertersMapBuilderImpl().build());
@@ -191,11 +204,20 @@ public interface TrackerExporter extends ModuleExporter {
 
         builder.export(MessageProcessingErrorHandler.class, module -> module.export(
             new MessageProcessingErrorHandlerImpl(
-                AppUtils.failureCode, StatusCodes.badRequestError
+                TrackerUtils.failureCode, StatusCodes.badRequestError
             )
         ));
 
         builder.export(UserIdConverter.class, module -> module.export(new UserIdConverterImpl()));
+
+        builder.export(DbOperationInterceptor.class, module -> module.export(
+            new DbOperationInterceptorImpl(
+                BaseTable.created_by,
+                BaseTable.updated_by,
+                BaseTable.create_date,
+                BaseTable.update_date
+            )
+        ));
 
         return builder;
     }
@@ -230,7 +252,7 @@ public interface TrackerExporter extends ModuleExporter {
             new LongObjectIdGeneratorImpl(
                 module.require(EntityMappingHelper.class),
                 module.require(LongIdGenerator.class),
-                AppUtils.isNewKey
+                TrackerUtils.isNewKey
             )
         ));
 
@@ -297,7 +319,7 @@ public interface TrackerExporter extends ModuleExporter {
                 .entities(Entities.entities())
                 .moduleSystemBuilder(builder)
                 .jdbcClient(jdbcClient)
-                .isNewKey(AppUtils.isNewKey)
+                .isNewKey(TrackerUtils.isNewKey)
                 .build()
         );
     }

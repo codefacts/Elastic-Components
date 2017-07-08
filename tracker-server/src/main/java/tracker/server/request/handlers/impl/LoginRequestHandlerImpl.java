@@ -9,7 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import tracker.Addresses;
-import tracker.AppUtils;
+import tracker.TrackerUtils;
 import tracker.server.request.handlers.LoginRequestHandler;
 import tracker.server.request.handlers.RequestProcessingErrorHandler;
 import tracker.server.component.AuthTokenGenerator;
@@ -54,7 +54,7 @@ final public class LoginRequestHandlerImpl implements LoginRequestHandler {
                 MessageBus.Params.builder()
                     .address(Addresses.authenticate)
                     .message(req)
-                    .userId(AppUtils.anonymous)
+                    .userId(TrackerUtils.anonymous)
                     .build()
             )
             .mapP(message -> {

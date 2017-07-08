@@ -5,4 +5,5 @@ package tracker.model;
  */
 public interface DeviceTable extends BaseTable {
     String device_id = "device_id";
+    String type = "type";
 }

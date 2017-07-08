@@ -1,6 +1,9 @@
 package elasta.orm.query;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import elasta.core.promise.intfs.Promise;
+import elasta.orm.OrmUtils;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
 import elasta.sql.core.Order;
@@ -42,20 +45,15 @@ public interface QueryExecutor {
         QueryArrayParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<JsonObject> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having, Pagination pagination) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
-            Objects.requireNonNull(joinParams);
-            Objects.requireNonNull(criteria);
             Objects.requireNonNull(selections);
-            Objects.requireNonNull(orderBy);
-            Objects.requireNonNull(groupBy);
-            Objects.requireNonNull(having);
             this.entity = entity;
             this.alias = alias;
-            this.joinParams = joinParams;
-            this.criteria = criteria;
             this.selections = selections;
-            this.orderBy = orderBy;
-            this.groupBy = groupBy;
-            this.having = having;
+            this.joinParams = joinParams == null ? ImmutableList.of() : joinParams;
+            this.criteria = criteria == null ? OrmUtils.emptyJsonObject() : criteria;
+            this.orderBy = orderBy == null ? ImmutableList.of() : orderBy;
+            this.groupBy = groupBy == null ? ImmutableList.of() : groupBy;
+            this.having = having == null ? OrmUtils.emptyJsonObject() : having;
             this.pagination = (pagination == null) ? null : pagination;
         }
 
@@ -80,20 +78,15 @@ public interface QueryExecutor {
         QueryParams(String entity, String alias, Collection<JoinParam> joinParams, JsonObject criteria, Collection<FieldExpression> selections, Collection<OrderTpl> orderBy, Collection<FieldExpression> groupBy, JsonObject having, Pagination pagination) {
             Objects.requireNonNull(entity);
             Objects.requireNonNull(alias);
-            Objects.requireNonNull(joinParams);
-            Objects.requireNonNull(criteria);
             Objects.requireNonNull(selections);
-            Objects.requireNonNull(orderBy);
-            Objects.requireNonNull(groupBy);
-            Objects.requireNonNull(having);
             this.entity = entity;
             this.alias = alias;
-            this.joinParams = joinParams;
-            this.criteria = criteria;
             this.selections = selections;
-            this.orderBy = orderBy;
-            this.groupBy = groupBy;
-            this.having = having;
+            this.joinParams = joinParams == null ? ImmutableList.of() : joinParams;
+            this.criteria = criteria == null ? OrmUtils.emptyJsonObject() : criteria;
+            this.orderBy = orderBy == null ? ImmutableList.of() : orderBy;
+            this.groupBy = groupBy == null ? ImmutableList.of() : groupBy;
+            this.having = having == null ? OrmUtils.emptyJsonObject() : having;
             this.pagination = (pagination == null) ? null : pagination;
         }
 

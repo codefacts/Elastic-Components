@@ -12,4 +12,5 @@ public interface PositionTable extends BaseTable {
     String speed = "speed";
     String provider = "provider";
     String battery_level = "battery_level";
+    String device_id = "device_id";
 }

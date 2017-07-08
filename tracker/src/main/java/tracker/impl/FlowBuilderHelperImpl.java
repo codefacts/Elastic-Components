@@ -2,11 +2,13 @@ package tracker.impl;
 
 import com.google.common.collect.ImmutableList;
 import elasta.authorization.Authorizer;
+import elasta.composer.EntityToStateHandlersMap;
 import elasta.composer.MessageBus;
 import elasta.composer.converter.JsonObjectToPageRequestConverter;
 import elasta.composer.converter.JsonObjectToQueryParamsConverter;
 import elasta.composer.flow.builder.impl.*;
 import elasta.composer.flow.holder.*;
+import elasta.composer.interceptor.DbOperationInterceptor;
 import elasta.composer.model.response.builder.*;
 import elasta.composer.respose.generator.ResponseGenerator;
 import elasta.composer.state.handlers.*;
@@ -16,7 +18,6 @@ import elasta.module.ModuleSystem;
 import elasta.orm.Orm;
 import elasta.orm.idgenerator.ObjectIdGenerator;
 import elasta.orm.query.expression.FieldExpression;
-import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
 import elasta.sql.SqlDB;
 import tracker.App;
@@ -24,12 +25,18 @@ import tracker.AppHelpers;
 import tracker.FlowBuilderHelper;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Created by sohan on 6/30/2017.
  */
 final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
+    final EntityToStateHandlersMap entityToStateHandlersMap;
+
+    public FlowBuilderHelperImpl(EntityToStateHandlersMap entityToStateHandlersMap) {
+        Objects.requireNonNull(entityToStateHandlersMap);
+        this.entityToStateHandlersMap = entityToStateHandlersMap;
+    }
 
     @Override
     public AddFlowHolder addFlowHolder(AddParams params) {
@@ -42,7 +49,7 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
                 ),
                 generateIdStateHandler(module, params.getEntity()),
                 validateStateHandler(module, params.getEntity()),
-                addStateHandler(module, params.getEntity()),
+                befoeAddStateHandler(module, params.getEntity()), addStateHandler(module, params.getEntity()),
                 broadcastStateHandler(module.require(MessageBus.class), params.getBroadcastAddress()),
                 generateResponseStateHandler(module),
                 endStateHandler(module)
@@ -59,7 +66,7 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
                 authorizeAllStateHandler(module, params.getAction()),
                 generateIdsAllStateHandler(module, params.getEntity()),
                 validateAllStateHandler(module, params.getEntity()),
-                addAllStateHandler(module, params.getEntity()),
+                beforeAddAllStateHandler(module, params.getEntity()), addAllStateHandler(module, params.getEntity()),
                 broadcastAllStateHandler(module, params.getBroadcastAddress()),
                 generateResponseStateHandler(module),
                 endStateHandler(module)
@@ -78,7 +85,7 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
                 ),
                 generateIdStateHandler(module, params.getEntity()),
                 validateStateHandler(module, params.getEntity()),
-                updateStateHandler(module, params.getEntity()),
+                beforeUpdateStateHandler(module, params.getEntity()), updateStateHandler(module, params.getEntity()),
                 broadcastStateHandler(module.require(MessageBus.class), params.getBroadcastAddress()),
                 generateResponseStateHandler(module),
                 endStateHandler(module)
@@ -95,7 +102,7 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
                 authorizeAllStateHandler(module, params.getAction()),
                 generateIdsAllStateHandler(module, params.getEntity()),
                 validateAllStateHandler(module, params.getEntity()),
-                updateAllStateHandler(module, params.getEntity()),
+                beforeUpdateAllStateHandler(module, params.getEntity()), updateAllStateHandler(module, params.getEntity()),
                 broadcastAllStateHandler(module, params.getBroadcastAddress()),
                 generateResponseStateHandler(module),
                 endStateHandler(module)
@@ -154,11 +161,36 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
         );
     }
 
+    private BeforeAddStateHandler befoeAddStateHandler(ModuleSystem module, String entity) {
+        return entityToStateHandlersMap.get(entity)
+            .flatMap(stateHandlersMap -> stateHandlersMap.get(BeforeAddStateHandler.class))
+            .orElse(module.require(BeforeAddStateHandler.class));
+    }
+
+    private BeforeAddAllStateHandler beforeAddAllStateHandler(ModuleSystem module, String entity) {
+        return entityToStateHandlersMap.get(entity)
+            .flatMap(stateHandlersMap -> stateHandlersMap.get(BeforeAddAllStateHandler.class))
+            .orElse(module.require(BeforeAddAllStateHandler.class));
+    }
+
+    private BeforeUpdateStateHandler beforeUpdateStateHandler(ModuleSystem module, String entity) {
+        return entityToStateHandlersMap.get(entity)
+            .flatMap(stateHandlersMap -> stateHandlersMap.get(BeforeUpdateStateHandler.class))
+            .orElse(module.require(BeforeUpdateStateHandler.class));
+    }
+
+    private BeforeUpdateAllStateHandler beforeUpdateAllStateHandler(ModuleSystem module, String entity) {
+        return entityToStateHandlersMap.get(entity)
+            .flatMap(stateHandlersMap -> stateHandlersMap.get(BeforeUpdateAllStateHandler.class))
+            .orElse(module.require(BeforeUpdateAllStateHandler.class));
+    }
+
     private AddStateHandler addStateHandler(ModuleSystem module, String entity) {
         return new AddStateHandlerImpl(
             entity,
             module.require(Orm.class),
-            module.require(SqlDB.class)
+            module.require(SqlDB.class),
+            module.require(DbOperationInterceptor.class)
         );
     }
 
@@ -205,7 +237,8 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
         return new DeleteAllStateHandlerImpl(
             module.require(Orm.class),
             module.require(SqlDB.class),
-            entity
+            entity,
+            module.require(DbOperationInterceptor.class)
         );
     }
 
@@ -213,7 +246,8 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
         return new DeleteStateHandlerImpl(
             module.require(Orm.class),
             module.require(SqlDB.class),
-            entity
+            entity,
+            module.require(DbOperationInterceptor.class)
         );
     }
 
@@ -221,13 +255,15 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
         return new UpdateAllStateHandlerImpl(
             entity,
             module.require(Orm.class),
-            module.require(SqlDB.class)
+            module.require(SqlDB.class),
+            module.require(DbOperationInterceptor.class)
         );
     }
 
     private UpdateStateHandler updateStateHandler(ModuleSystem module, String entity) {
         return new UpdateStateHandlerImpl(
-            entity, module.require(Orm.class), module.require(SqlDB.class)
+            entity, module.require(Orm.class), module.require(SqlDB.class),
+            module.require(DbOperationInterceptor.class)
         );
     }
 
@@ -240,7 +276,8 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
 
     private AddAllStateHandler addAllStateHandler(ModuleSystem module, String entity) {
         return new AddAllStateHandlerImpl(
-            entity, module.require(SqlDB.class), module.require(Orm.class)
+            entity, module.require(SqlDB.class), module.require(Orm.class),
+            module.require(DbOperationInterceptor.class)
         );
     }
 

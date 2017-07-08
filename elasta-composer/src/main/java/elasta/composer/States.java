@@ -20,9 +20,13 @@ public interface States {
     String authorizeAll = "authorizeAll";
     String deleteAll = "deleteAll";
     String validateAll = "validateAll";
-    String insertAll = "insertAll";
+    String addAll = "addAll";
     String updateAll = "updateAll";
     String broadcastAll = "broadcastAll";
     String loadParent = "loadParent";
     String generateIdsAll = "generateIdsAll";
+    String beforeAddAll = "beforeAddAll";
+    String beforeAdd = "beforeAdd";
+    String beforeUpdate = "beforeUpdate";
+    String beforeUpdateAll = "beforeUpdateAll";
 }

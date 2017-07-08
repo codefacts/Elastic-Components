@@ -1,7 +1,6 @@
 package elasta.composer.flow.builder.impl;
 
 import elasta.composer.Events;
-import elasta.composer.MsgEnterEventHandlerP;
 import elasta.composer.States;
 import elasta.composer.flow.builder.UpdateFlowBuilder;
 import elasta.composer.state.handlers.*;
@@ -17,6 +16,7 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
     final AuthorizeStateHandler authorizeHandler;
     final GenerateIdStateHandler generateIdHandler;
     final ValidateStateHandler validateHandler;
+    final BeforeUpdateStateHandler beforeUpdateStateHandler;
     final UpdateStateHandler updateHandler;
     final BroadcastStateHandler broadcastHandler;
     final GenerateResponseStateHandler generateResponseHandler;
@@ -26,6 +26,7 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
                                  AuthorizeStateHandler authorizeHandler,
                                  GenerateIdStateHandler generateIdHandler,
                                  ValidateStateHandler validateHandler,
+                                 BeforeUpdateStateHandler beforeUpdateStateHandler,
                                  UpdateStateHandler updateHandler,
                                  BroadcastStateHandler broadcastHandler,
                                  GenerateResponseStateHandler generateResponseHandler,
@@ -34,6 +35,7 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
         Objects.requireNonNull(authorizeHandler);
         Objects.requireNonNull(generateIdHandler);
         Objects.requireNonNull(validateHandler);
+        Objects.requireNonNull(beforeUpdateStateHandler);
         Objects.requireNonNull(updateHandler);
         Objects.requireNonNull(broadcastHandler);
         Objects.requireNonNull(generateResponseHandler);
@@ -42,6 +44,7 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
         this.authorizeHandler = authorizeHandler;
         this.generateIdHandler = generateIdHandler;
         this.validateHandler = validateHandler;
+        this.beforeUpdateStateHandler = beforeUpdateStateHandler;
         this.updateHandler = updateHandler;
         this.broadcastHandler = broadcastHandler;
         this.generateResponseHandler = generateResponseHandler;
@@ -60,9 +63,10 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
             .when(States.generateId, Flow.on(Events.next, States.validate))
             .when(
                 States.validate,
-                Flow.on(Events.next, States.update),
+                Flow.on(Events.next, States.beforeUpdate),
                 Flow.on(Events.validationError, States.end)
             )
+            .when(States.beforeUpdate, Flow.on(Events.next, States.update))
             .when(States.update, Flow.on(Events.next, States.broadcast))
             .when(States.broadcast, Flow.on(Events.next, States.generateResponse))
             .when(States.generateResponse, Flow.on(Events.next, States.end))
@@ -71,6 +75,7 @@ final public class UpdateFlowBuilderImpl implements UpdateFlowBuilder {
             .handlersP(States.authorize, authorizeHandler)
             .handlersP(States.generateId, generateIdHandler)
             .handlersP(States.validate, validateHandler)
+            .handlersP(States.beforeUpdate, beforeUpdateStateHandler)
             .handlersP(States.update, updateHandler)
             .handlersP(States.broadcast, broadcastHandler)
             .handlersP(States.generateResponse, generateResponseHandler)

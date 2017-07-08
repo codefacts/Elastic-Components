@@ -96,7 +96,7 @@ public interface TrackerServer {
             final String uri = api(Uris.deviceUri);
             final String singularUri = singularUri(uri);
 
-            router.post(uri).handler(addHandler(Entities.DEVICE, ImmutableList.of(DeviceModel.id, DeviceModel.deviceId)));
+            router.post(uri).handler(addHandler(Entities.DEVICE, ImmutableList.of(DeviceModel.id, DeviceModel.deviceId, DeviceModel.type)));
 
             router.get(singularUri).handler(findOneHandler(Entities.DEVICE));
 
@@ -278,7 +278,8 @@ public interface TrackerServer {
                 vertx,
                 1,
                 10,
-                "r"
+                "r",
+                "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd"
             )
         ).mesageBus();
     }

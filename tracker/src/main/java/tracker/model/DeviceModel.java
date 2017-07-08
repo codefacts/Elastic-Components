@@ -5,4 +5,5 @@ package tracker.model;
  */
 public interface DeviceModel extends BaseModel {
     String deviceId = "deviceId";
+    String type = "type";
 }

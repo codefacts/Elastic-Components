@@ -2,6 +2,7 @@ package elasta.composer.state.handlers.impl;
 
 import elasta.composer.Events;
 import elasta.composer.Msg;
+import elasta.composer.interceptor.DbOperationInterceptor;
 import elasta.composer.state.handlers.AddStateHandler;
 import elasta.core.flow.Flow;
 import elasta.core.flow.StateTrigger;
@@ -19,20 +20,24 @@ final public class AddStateHandlerImpl implements AddStateHandler<JsonObject, Js
     final String entity;
     final Orm orm;
     final SqlDB sqlDB;
+    final DbOperationInterceptor dbOperationInterceptor;
 
-    public AddStateHandlerImpl(String entity, Orm orm, SqlDB sqlDB) {
+    public AddStateHandlerImpl(String entity, Orm orm, SqlDB sqlDB, DbOperationInterceptor dbOperationInterceptor) {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(orm);
         Objects.requireNonNull(sqlDB);
+        Objects.requireNonNull(dbOperationInterceptor);
         this.entity = entity;
         this.orm = orm;
         this.sqlDB = sqlDB;
+        this.dbOperationInterceptor = dbOperationInterceptor;
     }
 
     @Override
     public Promise<StateTrigger<Msg<JsonObject>>> handle(Msg<JsonObject> msg) throws Throwable {
         return orm
             .upsert(entity, msg.body())
+            .map(updateTplList -> updateTplList.stream().map(updateTpl -> dbOperationInterceptor.intercept(updateTpl, msg)))
             .mapP(sqlDB::update)
             .map(jo -> Flow.trigger(Events.next, msg));
     }

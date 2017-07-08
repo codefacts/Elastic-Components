@@ -82,4 +82,14 @@ public interface JsonOps {
             )
         );
     }
+
+    static JsonObject like(String fieldExpStr, String username) {
+        return new JsonObject(
+            ImmutableMap.of(
+                op, "like",
+                arg1, field(fieldExpStr),
+                arg2, username
+            )
+        );
+    }
 }

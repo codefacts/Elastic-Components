@@ -42,7 +42,8 @@ public interface Entities {
                     new Field(PositionModel.altitude, JavaType.DOUBLE),
                     new Field(PositionModel.speed, JavaType.STRING),
                     new Field(PositionModel.provider, JavaType.STRING),
-                    new Field(PositionModel.batteryLevel, JavaType.DOUBLE)
+                    new Field(PositionModel.batteryLevel, JavaType.DOUBLE),
+                    new Field(PositionModel.deviceId, JavaType.DOUBLE)
                 ))
                 .addAll(baseFields())
                 .build(toFieldsArray()),
@@ -58,7 +59,8 @@ public interface Entities {
                         new ColumnMappingImpl(PositionModel.altitude, PositionTable.altitude, DbType.DATETIME),
                         new ColumnMappingImpl(PositionModel.speed, PositionTable.speed, DbType.DATETIME),
                         new ColumnMappingImpl(PositionModel.provider, PositionTable.provider, DbType.DATETIME),
-                        new ColumnMappingImpl(PositionModel.batteryLevel, PositionTable.battery_level, DbType.DATETIME)
+                        new ColumnMappingImpl(PositionModel.batteryLevel, PositionTable.battery_level, DbType.DATETIME),
+                        new ColumnMappingImpl(PositionModel.deviceId, PositionTable.device_id, DbType.DATETIME)
                     ))
                     .addAll(baseColumns())
                     .build(toColumnsArray()),
@@ -84,7 +86,7 @@ public interface Entities {
 
                     new Field(UserModel.dateOfBirth, JavaType.STRING),
                     new Field(UserModel.gender, JavaType.STRING),
-                    new Field(UserModel.registrationSource, JavaType.STRING)
+                    new Field(UserModel.registrationDeviceType, JavaType.STRING)
                 ))
                 .addAll(baseFields())
                 .build(list -> list.toArray(new Field[list.size()])),
@@ -104,7 +106,7 @@ public interface Entities {
 
                         new ColumnMappingImpl(UserModel.dateOfBirth, UserTable.date_of_birth, DbType.VARCHAR),
                         new ColumnMappingImpl(UserModel.gender, UserTable.gender, DbType.VARCHAR),
-                        new ColumnMappingImpl(UserModel.registrationSource, UserTable.registration_source, DbType.VARCHAR)
+                        new ColumnMappingImpl(UserModel.registrationDeviceType, UserTable.registration_device_type, DbType.VARCHAR)
                     ))
                     .addAll(baseColumns())
                     .build(list -> list.toArray(new ColumnMapping[list.size()])),
@@ -119,6 +121,7 @@ public interface Entities {
             DeviceModel.id,
             new ArrayBuilderImpl<Field>()
                 .add(new Field(DeviceModel.deviceId, JavaType.STRING))
+                .add(new Field(DeviceModel.type, JavaType.DOUBLE))
                 .addAll(baseFields())
                 .build(toFieldsArray()),
             new DbMapping(
@@ -126,6 +129,7 @@ public interface Entities {
                 DeviceTable.id,
                 ArrayBuilder.<ColumnMapping>create()
                     .add(new ColumnMappingImpl(DeviceModel.deviceId, DeviceTable.device_id, DbType.VARCHAR))
+                    .add(new ColumnMappingImpl(DeviceModel.type, DeviceTable.type, DbType.VARCHAR))
                     .addAll(baseColumns())
                     .build(toColumnsArray()),
                 baseRelationMappingsArray()

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import elasta.composer.MessageBus;
 import elasta.module.ModuleSystem;
-import elasta.module.ModuleSystemBuilder;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -35,8 +34,8 @@ final public class AppTest {
                 Vertx.vertx(),
                 1,
                 10,
-                "r"
-            )
+                "r",
+                androidDeviceToken)
         ).mesageBus();
 
         authTest(messageBus);
@@ -55,7 +54,7 @@ final public class AppTest {
                         )
                     )
                 )
-                .userId(AppUtils.anonymous)
+                .userId(TrackerUtils.anonymous)
                 .build()
         ).then(message -> {
             System.out.println(message.body());

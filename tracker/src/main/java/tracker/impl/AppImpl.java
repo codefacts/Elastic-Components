@@ -133,7 +133,8 @@ final public class AppImpl implements App {
                 Vertx.vertx(),
                 1,
                 10,
-                "r"
+                "r",
+                "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd"
             )
         );
     }
