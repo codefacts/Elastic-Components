@@ -1,12 +1,14 @@
 package elasta.composer.interceptor.impl;
 
 import com.google.common.collect.ImmutableMap;
+import elasta.composer.AppDateTimeFormatter;
 import elasta.composer.Msg;
 import elasta.composer.interceptor.DbOperationInterceptor;
 import elasta.sql.core.UpdateTpl;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -15,16 +17,19 @@ import java.util.Objects;
  * Created by sohan on 7/8/2017.
  */
 final public class DbOperationInterceptorImpl implements DbOperationInterceptor {
+    final AppDateTimeFormatter appDateTimeFormatter;
     final String createdByColumn;
     final String updatedByColumn;
     final String createDateColumn;
     final String updateDateColumn;
 
-    public DbOperationInterceptorImpl(String createdByColumn, String updatedByColumn, String createDateColumn, String updateDateColumn) {
+    public DbOperationInterceptorImpl(AppDateTimeFormatter appDateTimeFormatter, String createdByColumn, String updatedByColumn, String createDateColumn, String updateDateColumn) {
+        Objects.requireNonNull(appDateTimeFormatter);
         Objects.requireNonNull(createdByColumn);
         Objects.requireNonNull(createDateColumn);
         Objects.requireNonNull(updatedByColumn);
         Objects.requireNonNull(updateDateColumn);
+        this.appDateTimeFormatter = appDateTimeFormatter;
         this.createdByColumn = createdByColumn;
         this.updatedByColumn = updatedByColumn;
         this.createDateColumn = createDateColumn;
@@ -44,7 +49,7 @@ final public class DbOperationInterceptorImpl implements DbOperationInterceptor 
                         updateTpl.getData().getMap(),
                         ImmutableMap.of(
                             createdByColumn, msg.userId(),
-                            createDateColumn, new Date()
+                            createDateColumn, now()
                         )
                     ),
                     updateTpl.getSqlConditions()
@@ -56,7 +61,7 @@ final public class DbOperationInterceptorImpl implements DbOperationInterceptor 
                     updateTpl.getTable(),
                     with(updateTpl.getData().getMap(), ImmutableMap.of(
                         updatedByColumn, msg.userId(),
-                        updateDateColumn, new Date()
+                        updateDateColumn, now()
                     )),
                     updateTpl.getSqlConditions()
                 );
@@ -64,6 +69,10 @@ final public class DbOperationInterceptorImpl implements DbOperationInterceptor 
         }
 
         return updateTpl;
+    }
+
+    private String now() {
+        return appDateTimeFormatter.format(Instant.now());
     }
 
     private JsonObject with(Map<String, Object> map1, Map<String, Object> map2) {

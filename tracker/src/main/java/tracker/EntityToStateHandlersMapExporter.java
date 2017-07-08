@@ -1,6 +1,7 @@
 package tracker;
 
 import com.google.common.collect.ImmutableMap;
+import elasta.composer.AppDateTimeFormatter;
 import elasta.composer.EntityToStateHandlersMap;
 import elasta.composer.StateHandlersMap;
 import elasta.composer.impl.EntityToStateHandlersMapImpl;
@@ -41,7 +42,7 @@ public interface EntityToStateHandlersMapExporter extends ModuleExporter {
 
             addUpdatePreprocessor(mapBuilder, Entities.DEVICE, new DevicePreprocessorImpl(module.require(App.Config.class)));
 
-            addUpdatePreprocessor(mapBuilder, Entities.POSITION, new PositionPreprocessorImpl());
+            addUpdatePreprocessor(mapBuilder, Entities.POSITION, new PositionPreprocessorImpl(module.require(AppDateTimeFormatter.class)));
 
             module.export(
                 new EntityToStateHandlersMapImpl(mapBuilder.build())
