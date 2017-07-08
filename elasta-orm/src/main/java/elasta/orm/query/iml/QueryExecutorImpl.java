@@ -2,7 +2,6 @@ package elasta.orm.query.iml;
 
 import elasta.core.promise.intfs.Promise;
 import elasta.criteria.json.mapping.GenericJsonToFuncConverter;
-import elasta.criteria.json.mapping.JsonToFuncConverter;
 import elasta.criteria.json.mapping.JsonToFuncConverterMap;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.query.QueryExecutor;
@@ -64,7 +63,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
 
         return prepareAndExecute(
             qb,
-            new CriteriaBuilderJsonToFuncConverterMap(jsonToFuncConverterMap, qb),
+            jsonToFuncConverterMap,
             Params.builder()
                 .entity(params.getEntity())
                 .alias(params.getAlias())
@@ -88,7 +87,7 @@ final public class QueryExecutorImpl implements QueryExecutor {
             pagination.isPresent() ? pagination.get() : null
         );
 
-        final CriteriaBuilderJsonToFuncConverterMap converterMap = new CriteriaBuilderJsonToFuncConverterMap(jsonToFuncConverterMap, qb);
+        final CriteriaBuilderJsonToFuncConverterMap converterMap = new CriteriaBuilderJsonToFuncConverterMap(jsonToFuncConverterMap, qb::select);
 
         params.getSelections().forEach(
             jsonObject -> qb.selectBuilder().add(
@@ -111,7 +110,9 @@ final public class QueryExecutorImpl implements QueryExecutor {
         ).executeArray();
     }
 
-    private Query prepareAndExecute(QueryBuilderImpl qb, CriteriaBuilderJsonToFuncConverterMap converterMap, Params params) {
+    private Query prepareAndExecute(QueryBuilderImpl qb, JsonToFuncConverterMap jsonToFuncConverterMap, Params params) {
+
+        final CriteriaBuilderJsonToFuncConverterMap converterMap = new CriteriaBuilderJsonToFuncConverterMap(jsonToFuncConverterMap, qb::field);
 
         qb.fromBuilder().root(params.getEntity(), params.getAlias());
 

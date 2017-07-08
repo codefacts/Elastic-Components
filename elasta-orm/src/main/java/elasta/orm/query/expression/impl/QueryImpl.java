@@ -2,6 +2,7 @@ package elasta.orm.query.expression.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import elasta.commons.Utils;
 import elasta.core.promise.intfs.Promise;
 import elasta.criteria.Func;
 import elasta.orm.entity.EntityMappingHelper;
@@ -153,7 +154,9 @@ final public class QueryImpl implements Query {
 
             final Map<FieldExpression, AliasAndColumn> fieldExpressionToAliasAndColumnMap = ImmutableMap.<FieldExpression, AliasAndColumn>builder()
                 .putAll(
-                    tpl3.getSelectFieldExpressionToAliasAndColumnMap()
+                    tpl3.getSelectFieldExpressionToAliasAndColumnMap().entrySet().stream()
+                        .filter(entry -> Utils.not(tpl3.getFieldExpToAliasAndColumnMap().containsKey(entry.getKey())))
+                        .collect(Collectors.toList())
                 )
                 .putAll(
                     tpl3.getFieldExpToAliasAndColumnMap()

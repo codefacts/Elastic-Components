@@ -17,4 +17,5 @@ public interface OpNames {
     String count = "count";
     String distinct = "distinct";
     String in = "in";
+    String like = "like";
 }

@@ -42,6 +42,8 @@ final public class JsonToFuncConverterMapBuilderImpl implements JsonToFuncConver
         builder.put(OpNames.count, jsonToFuncConverterHelper.op1(Ops::count));
         builder.put(OpNames.distinct, jsonToFuncConverterHelper.op1(Ops::distinct));
 
+        builder.put(OpNames.like, jsonToFuncConverterHelper.op2(Ops::like));
+
         builder.put(OpNames.in, (jsonObject, converterMap) -> Ops.in(
             jsonToFuncConverterBuilderHelper.toFunc(
                 jsonObject.getValue("arg1"),

@@ -97,5 +97,15 @@ public interface Ops {
         };
     }
 
+    static Func like(Func func1, Func func2) {
+        return paramsBuilder -> {
+
+            String field = func1.get(paramsBuilder);
+
+            String value = func2.get(paramsBuilder);
+
+            return FnCnst.LP + field + " like " + value + FnCnst.RP;
+        };
+    }
 
 }
