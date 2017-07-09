@@ -21,6 +21,7 @@ public interface ServerUtils {
     JsonObject EMPTY_JSON_OBJECT = new JsonObject(ImmutableMap.of());
     JsonArray EMPTY_JSON_ARRAY = new JsonArray(ImmutableList.of());
     String TEXT_PLAIN = "text/plain";
+    String CUSTOM_HEADER_PREFIX = "XX-";
 
     static JsonObject emptyJsonObject() {
         return EMPTY_JSON_OBJECT;

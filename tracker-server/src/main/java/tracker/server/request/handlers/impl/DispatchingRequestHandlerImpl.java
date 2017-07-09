@@ -5,10 +5,13 @@ import elasta.composer.MessageBus;
 import elasta.composer.model.response.ErrorModel;
 import elasta.core.promise.impl.Promises;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.vertx.core.MultiMap;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import tracker.model.UserModel;
+import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.ServerUtils;
 import tracker.server.StatusCodes;
 import tracker.server.ex.RequestException;
@@ -24,24 +27,27 @@ import java.util.Objects;
  */
 final public class DispatchingRequestHandlerImpl implements DispatchingRequestHandler {
     final MessageBodyGenerator messageBodyGenerator;
+    final MessageHeaderGenerator messageHeaderGenerator;
     final HttpResponseGenerator httpResponseGenerator;
     final RequestProcessingErrorHandler requestProcessingErrorHandler;
     final MessageBus messageBus;
     final String messageAddress;
     final String expectedContentTypeStartsWith;
 
-    public DispatchingRequestHandlerImpl(MessageBodyGenerator messageBodyGenerator, HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress) {
-        this(messageBodyGenerator, httpResponseGenerator, requestProcessingErrorHandler, messageBus, messageAddress, "");
+    public DispatchingRequestHandlerImpl(MessageBodyGenerator messageBodyGenerator, MessageHeaderGenerator messageHeaderGenerator, HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress) {
+        this(messageBodyGenerator, messageHeaderGenerator, httpResponseGenerator, requestProcessingErrorHandler, messageBus, messageAddress, "");
     }
 
-    public DispatchingRequestHandlerImpl(MessageBodyGenerator messageBodyGenerator, HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress, String expectedContentTypeStartsWith) {
+    public DispatchingRequestHandlerImpl(MessageBodyGenerator messageBodyGenerator, MessageHeaderGenerator messageHeaderGenerator, HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress, String expectedContentTypeStartsWith) {
         Objects.requireNonNull(messageBodyGenerator);
+        Objects.requireNonNull(messageHeaderGenerator);
         Objects.requireNonNull(httpResponseGenerator);
         Objects.requireNonNull(requestProcessingErrorHandler);
         Objects.requireNonNull(messageBus);
         Objects.requireNonNull(messageAddress);
         Objects.requireNonNull(expectedContentTypeStartsWith);
         this.messageBodyGenerator = messageBodyGenerator;
+        this.messageHeaderGenerator = messageHeaderGenerator;
         this.httpResponseGenerator = httpResponseGenerator;
         this.requestProcessingErrorHandler = requestProcessingErrorHandler;
         this.messageBus = messageBus;
@@ -75,13 +81,17 @@ final public class DispatchingRequestHandlerImpl implements DispatchingRequestHa
 
         final Object reqBody = messageBodyGenerator.generate(ctx);
 
+        final MultiMap headers = messageHeaderGenerator.generate(ctx);
+
         Objects.requireNonNull(reqBody);
+        Objects.requireNonNull(headers);
 
         messageBus.sendAndReceive(
             MessageBus.Params.builder()
                 .address(messageAddress)
                 .message(reqBody)
                 .userId(ctx.<JsonObject>get(ServerUtils.CURRENT_USER).getString(UserModel.userId))
+                .options(new DeliveryOptions().setHeaders(headers))
                 .build()
         ).thenP(message -> {
 

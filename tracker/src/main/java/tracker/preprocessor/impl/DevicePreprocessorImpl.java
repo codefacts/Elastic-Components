@@ -29,7 +29,11 @@ final public class DevicePreprocessorImpl<T> implements DevicePreprocessor<T> {
     @Override
     public Promise<JsonObject> apply(Msg<T> msg, JsonObject device) {
 
-        final String deviceType = Objects.equals(device.getString(TrackerUtils.KEY_ANDROID_DEVICE_TOKEN), config.getAndroidDeviceToken()) ? DeviceTypes.android : DeviceTypes.web;
+        String deviceToken = device.getString(TrackerUtils.KEY_ANDROID_DEVICE_TOKEN);
+
+        Objects.requireNonNull(deviceToken);
+
+        final String deviceType = Objects.equals(deviceToken, config.getAndroidDeviceToken()) ? DeviceTypes.android : DeviceTypes.web;
 
         final String deviceId = generateNewDeviceId(device.getString(DeviceModel.deviceId));
 

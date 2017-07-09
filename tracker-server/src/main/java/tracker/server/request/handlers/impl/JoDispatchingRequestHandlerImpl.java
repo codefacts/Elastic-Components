@@ -3,7 +3,7 @@ package tracker.server.request.handlers.impl;
 import elasta.composer.MessageBus;
 import io.vertx.ext.web.RoutingContext;
 import tracker.server.ServerUtils;
-import tracker.server.generators.request.MessageBodyGenerator;
+import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.request.handlers.DispatchingRequestHandler;
 import tracker.server.generators.response.HttpResponseGenerator;
 import tracker.server.request.handlers.JoDispatchingRequestHandler;
@@ -15,9 +15,10 @@ import tracker.server.request.handlers.RequestProcessingErrorHandler;
 final public class JoDispatchingRequestHandlerImpl implements JoDispatchingRequestHandler {
     final DispatchingRequestHandler dispatchingRequestHandler;
 
-    public JoDispatchingRequestHandlerImpl(HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress) {
+    public JoDispatchingRequestHandlerImpl(MessageHeaderGenerator messageHeaderGenerator, HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress) {
         dispatchingRequestHandler = new DispatchingRequestHandlerImpl(
             RoutingContext::getBodyAsJson,
+            messageHeaderGenerator,
             httpResponseGenerator,
             requestProcessingErrorHandler,
             messageBus,

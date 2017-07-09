@@ -3,6 +3,7 @@ package tracker.server.request.handlers.impl;
 import elasta.composer.MessageBus;
 import io.vertx.ext.web.RoutingContext;
 import tracker.server.ServerUtils;
+import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.request.handlers.DispatchingRequestHandler;
 import tracker.server.request.handlers.ObjectDispatchingRequestHandler;
 import tracker.server.request.handlers.RequestProcessingErrorHandler;
@@ -18,9 +19,10 @@ final public class LongDispatchingRequestHandlerImpl implements ObjectDispatchin
     final DispatchingRequestHandler dispatchingRequestHandler;
     final String pathParameterName;
 
-    public LongDispatchingRequestHandlerImpl(HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress, String pathParameterName) {
+    public LongDispatchingRequestHandlerImpl(MessageHeaderGenerator messageHeaderGenerator, HttpResponseGenerator httpResponseGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, MessageBus messageBus, String messageAddress, String pathParameterName) {
         this.dispatchingRequestHandler = new DispatchingRequestHandlerImpl(
             parseLong(),
+            messageHeaderGenerator,
             httpResponseGenerator,
             requestProcessingErrorHandler,
             messageBus,

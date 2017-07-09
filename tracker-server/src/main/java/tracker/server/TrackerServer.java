@@ -27,6 +27,7 @@ import tracker.model.BaseModel;
 import tracker.model.DeviceModel;
 import tracker.model.UserModel;
 import tracker.server.ex.ConfigLoaderException;
+import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.AddHttpResponseGeneratorImpl;
 import tracker.server.interceptors.AuthInterceptor;
@@ -128,6 +129,7 @@ public interface TrackerServer {
 
                     return new JsonObject(jsonCriteriaStr);
                 },
+                module.require(MessageHeaderGenerator.class),
                 module.require(FindAllHttpResponseGenerator.class),
                 module.require(RequestProcessingErrorHandler.class),
                 messageBus,
@@ -144,6 +146,7 @@ public interface TrackerServer {
                         BaseModel.id, Long.parseLong(ctx.pathParam(PathParams.id))
                     )
                 ),
+                module.require(MessageHeaderGenerator.class),
                 module.require(FindOneHttpResponseGenerator.class),
                 module.require(RequestProcessingErrorHandler.class),
                 messageBus,
@@ -155,6 +158,7 @@ public interface TrackerServer {
     static Handler<RoutingContext> deleteHandler(String entity) {
         return reqHanlder(
             new LongDispatchingRequestHandlerImpl(
+                module.require(MessageHeaderGenerator.class),
                 module.require(DeleteHttpResponseGenerator.class),
                 module.require(RequestProcessingErrorHandler.class),
                 messageBus,
@@ -171,6 +175,7 @@ public interface TrackerServer {
                     long id = Long.parseLong(ctx.pathParam(PathParams.id));
                     return ctx.getBodyAsJson().put(BaseModel.id, id);
                 },
+                module.require(MessageHeaderGenerator.class),
                 module.require(UpdateHttpResponseGenerator.class),
                 module.require(RequestProcessingErrorHandler.class),
                 messageBus,
@@ -187,6 +192,7 @@ public interface TrackerServer {
     static RequestHandler addHandler(String entity, Collection<String> fields) {
         return reqHanlder(
             new JoDispatchingRequestHandlerImpl(
+                module.require(MessageHeaderGenerator.class),
                 new AddHttpResponseGeneratorImpl(fields),
                 module.require(RequestProcessingErrorHandler.class),
                 messageBus,
@@ -252,6 +258,21 @@ public interface TrackerServer {
         router.route(api("/*")).handler(reqHanlder(
             module.require(AuthInterceptor.class)
         ));
+
+        try {
+
+            FileLogger fileLogger = new FileLogger(
+                new File(new File("").getAbsolutePath(), "tracker-log.txt")
+            );
+
+            router.route().handler(event -> {
+                fileLogger.log(event.request().uri(), event.request().method().name(), event.getBodyAsString());
+                event.next();
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     static Router createRouter() {

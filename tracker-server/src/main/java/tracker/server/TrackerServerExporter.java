@@ -8,11 +8,14 @@ import elasta.module.ModuleSystemBuilder;
 import elasta.sql.SqlExecutor;
 import elasta.sql.impl.SqlExecutorImpl;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.jdbc.JDBCClient;
 import lombok.Builder;
 import lombok.Value;
 import tracker.server.component.AuthTokenGenerator;
 import tracker.server.component.impl.AuthTokenGeneratorImpl;
+import tracker.server.generators.request.MessageHeaderGenerator;
+import tracker.server.generators.request.impl.MessageHeaderGeneratorImpl;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.*;
 import tracker.server.interceptors.impl.AuthInterceptorImpl;
@@ -52,10 +55,17 @@ public interface TrackerServerExporter extends ModuleExporter {
         builder.export(AuthInterceptor.class, module -> module.export(new AuthInterceptorImpl(
             module.require(AuthTokenGenerator.class),
             module.require(RequestProcessingErrorHandler.class),
-            ImmutableSet.of(api(Uris.loginUri))
+            ImmutableSet.of(
+                new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.loginUri)),
+                new AuthInterceptor.MethodAndUri(HttpMethod.GET, api(Uris.logoutUri)),
+                new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.deviceUri)),
+                new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.userUri))
+            )
         )));
 
         exportResponseGenerators(builder);
+
+        builder.export(MessageHeaderGenerator.class, module -> module.export(new MessageHeaderGeneratorImpl(ServerUtils.CUSTOM_HEADER_PREFIX)));
 
         builder.export(RequestProcessingErrorHandler.class, module -> module.export(new RequestProcessingErrorHandlerImpl()));
 

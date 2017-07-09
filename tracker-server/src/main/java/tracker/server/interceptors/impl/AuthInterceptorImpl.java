@@ -22,9 +22,9 @@ import java.util.Set;
 final public class AuthInterceptorImpl implements AuthInterceptor {
     final AuthTokenGenerator authTokenGenerator;
     final RequestProcessingErrorHandler requestProcessingErrorHandler;
-    final Set<String> excludeUris;
+    final Set<MethodAndUri> excludeUris;
 
-    public AuthInterceptorImpl(AuthTokenGenerator authTokenGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, Set<String> excludeUris) {
+    public AuthInterceptorImpl(AuthTokenGenerator authTokenGenerator, RequestProcessingErrorHandler requestProcessingErrorHandler, Set<MethodAndUri> excludeUris) {
         this.excludeUris = excludeUris;
         Objects.requireNonNull(authTokenGenerator);
         Objects.requireNonNull(requestProcessingErrorHandler);
@@ -37,14 +37,14 @@ final public class AuthInterceptorImpl implements AuthInterceptor {
 
         System.out.println("Auth Interceptor");
 
-        if (isInExcludeUris(ctx.request().uri())) {
+        if (isInExcludeUris(new MethodAndUri(ctx.request().method(), ctx.request().uri()))) {
 
             ctx.put(ServerUtils.CURRENT_USER, new JsonObject(ImmutableMap.of(
                 UserModel.userId, ServerUtils.ANONYMOUS
             )));
 
             ctx.next();
-            
+
             return;
         }
 
@@ -59,8 +59,8 @@ final public class AuthInterceptorImpl implements AuthInterceptor {
         }).err(throwable -> requestProcessingErrorHandler.handleError(throwable, ctx));
     }
 
-    private boolean isInExcludeUris(String uri) {
-        return excludeUris.stream().anyMatch(uri::endsWith);
+    private boolean isInExcludeUris(MethodAndUri methodAndUri) {
+        return excludeUris.stream().anyMatch(mu -> mu.getHttpMethod() == methodAndUri.getHttpMethod() && methodAndUri.getUri().endsWith(mu.getUri()));
     }
 
     private String parseToken(String header) {
