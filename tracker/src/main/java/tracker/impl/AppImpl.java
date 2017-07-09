@@ -14,6 +14,7 @@ import elasta.module.ModuleSystem;
 import elasta.module.ModuleSystemBuilder;
 import elasta.orm.Orm;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
+import elasta.sql.SqlExecutor;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -25,6 +26,7 @@ import tracker.model.AuthRequestModel;
 import tracker.model.BaseModel;
 import tracker.model.PositionModel;
 import tracker.model.UserModel;
+import tracker.state.handlers.FindAllLatestPositionsGroupByUserId;
 
 import java.util.Objects;
 
@@ -114,7 +116,7 @@ final public class AppImpl implements App {
                                 )
                                 .build()
                         ).getFlow()
-                    ).handlersP(States.beforeFindAll, new BeforeFindAllPositionsGroupByUserIdStateHandlerImpl()).build()
+                    ).handlersP(States.findAll, new FindAllLatestPositionsGroupByUserId(module.require(SqlExecutor.class))).build()
                 ),
                 module.require(FlowToJsonObjectMessageHandlerConverter.class)
             ).build()
