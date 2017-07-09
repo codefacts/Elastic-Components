@@ -1,5 +1,7 @@
 package tracker;
 
+import tracker.entity_config.Entities;
+
 import java.util.Objects;
 
 /**
@@ -8,6 +10,7 @@ import java.util.Objects;
 public interface Addresses {
 
     String authenticate = "authenticate";
+    String findAllPositionsGroupByUserId = findAll(Entities.POSITION) + ".group-by-user-id";
 
     static String post(String address) {
         Objects.requireNonNull(address);

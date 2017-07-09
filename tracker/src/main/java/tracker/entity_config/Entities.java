@@ -169,7 +169,7 @@ public interface Entities {
             USER_TABLE,
             USER,
             ImmutableList.of(
-                new ForeignColumnMapping(UserTable.updated_by, UserTable.id)
+                new ForeignColumnMapping(UserTable.updated_by, UserTable.user_id)
             ),
             UserModel.updatedBy,
             new DirectRelationMappingOptionsImpl(
@@ -186,7 +186,7 @@ public interface Entities {
             USER_TABLE,
             USER,
             ImmutableList.of(
-                new ForeignColumnMapping(UserTable.created_by, UserTable.id)
+                new ForeignColumnMapping(UserTable.created_by, UserTable.user_id)
             ),
             UserModel.createdBy,
             new DirectRelationMappingOptionsImpl(

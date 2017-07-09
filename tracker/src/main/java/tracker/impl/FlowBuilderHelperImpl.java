@@ -214,6 +214,7 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
             new FindAllFlowBuilderImpl(
                 startStateHandler(module),
                 authorizeStateHandler(module, params.getAction()),
+                module.require(BeforeFindAllStateHandler.class),
                 findAllStateHandler(module, params.getEntity(), params.getPaginationKey()),
                 endStateHandler(module)
             ).build()

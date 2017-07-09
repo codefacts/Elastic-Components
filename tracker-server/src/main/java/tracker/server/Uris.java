@@ -9,6 +9,7 @@ public interface Uris {
     String userUri = "/users";
     String deviceUri = "/devices";
     String positionUri = "/positions";
+    String groupByUserId = "/group-by-user-id";
 
     static String api(String uriPart) {
         return "/api" + uriPart;

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
+import elasta.commons.Utils;
 import elasta.composer.MessageBus;
 import elasta.module.ModuleSystem;
 import io.vertx.core.Handler;
@@ -107,6 +108,15 @@ public interface TrackerServer {
         {
             final String uri = api(Uris.positionUri);
             final String singularUri = singularUri(uri);
+
+            router.get(uri + Uris.groupByUserId).handler(reqHanlder(new DispatchingRequestHandlerImpl(
+                ctx -> Utils.or(ctx.getBodyAsJson(), ServerUtils.emptyJsonObject()),
+                module.require(MessageHeaderGenerator.class),
+                module.require(FindAllHttpResponseGenerator.class),
+                module.require(RequestProcessingErrorHandler.class),
+                messageBus,
+                Addresses.findAllPositionsGroupByUserId
+            )));
 
             router.post(uri).handler(addHandler(Entities.POSITION, ImmutableList.of(BaseModel.id)));
 

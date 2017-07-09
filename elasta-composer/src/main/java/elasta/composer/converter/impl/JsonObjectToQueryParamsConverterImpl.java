@@ -42,16 +42,18 @@ final public class JsonObjectToQueryParamsConverterImpl implements JsonObjectToQ
             .having(query.getJsonObject(QueryModel.having, ComposerUtils.emptyJsonObject()))
             .groupBy(toGroupBy(query.getJsonArray(QueryModel.groupBy, ComposerUtils.emptyJsonArray())))
             .orderBy(toOrderBy(query.getJsonArray(QueryModel.orderBy, ComposerUtils.emptyJsonArray())))
-            .pagination(toPagination(params.getPageRequest(), params.getPaginationKey()))
+            .pagination(
+                toPagination(params.getPageRequest(), query.getString(QueryModel.paginationKey), params.getPaginationKey())
+            )
             .build();
     }
 
-    private QueryExecutor.Pagination toPagination(PageRequest pageRequest, FieldExpression paginationKey) {
+    private QueryExecutor.Pagination toPagination(PageRequest pageRequest, String queryPaginationKey, FieldExpression paginationKey) {
 
         int size = pageRequest.getPageSize();
 
         return QueryExecutor.Pagination.builder()
-            .fieldExpression(paginationKey)
+            .fieldExpression((queryPaginationKey != null) ? new FieldExpressionImpl(queryPaginationKey) : paginationKey)
             .offset(offset(pageRequest.getPage(), size))
             .size(size)
             .build();

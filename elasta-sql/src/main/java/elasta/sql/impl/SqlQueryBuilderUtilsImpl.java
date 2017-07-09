@@ -109,7 +109,7 @@ final public class SqlQueryBuilderUtilsImpl implements SqlQueryBuilderUtils {
 
     private String toOrderBySqlStr(List<OrderByData> orderByDatas) {
         return orderByDatas.stream()
-            .map(orderByData -> column(orderByData.getColumn(), orderByData.getAlias()) + " " + orderByData.getOrder())
+            .map(orderByData -> column(orderByData.getColumn(), orderByData.getAlias()) + " " + orderByData.getOrder().getVal())
             .collect(Collectors.joining(Cqr.COMMA));
     }
 

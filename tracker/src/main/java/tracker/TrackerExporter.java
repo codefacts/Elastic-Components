@@ -107,6 +107,8 @@ public interface TrackerExporter extends ModuleExporter {
 
         exportAuthorizer(builder);
 
+        builder.export(BeforeFindAllStateHandler.class, module -> module.export(new BeforeFindAllStateHandlerImpl()));
+
         builder.export(BeforeAddStateHandler.class, module -> module.export(new BeforeAddStateHandlerImpl()));
 
         builder.export(BeforeAddAllStateHandler.class, module -> module.export(new BeforeAddAllStateHandlerImpl()));

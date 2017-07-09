@@ -29,4 +29,5 @@ public interface States {
     String beforeAdd = "beforeAdd";
     String beforeUpdate = "beforeUpdate";
     String beforeUpdateAll = "beforeUpdateAll";
+    String beforeFindAll = "beforeFindAll";
 }

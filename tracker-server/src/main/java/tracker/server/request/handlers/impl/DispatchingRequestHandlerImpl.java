@@ -58,22 +58,28 @@ final public class DispatchingRequestHandlerImpl implements DispatchingRequestHa
     @Override
     public void handle(RoutingContext ctx) {
 
-        String contentTypeHeader = ctx.request().getHeader(HttpHeaderNames.CONTENT_TYPE);
+        try {
 
-        if (ctx.request().method() == HttpMethod.GET) {
+            String contentTypeHeader = ctx.request().getHeader(HttpHeaderNames.CONTENT_TYPE);
+
+            if (ctx.request().method() == HttpMethod.GET) {
+                processRequest(ctx);
+                return;
+            }
+
+            if (contentTypeHeader == null || contentTypeHeader.isEmpty()) {
+                throw new RequestException(StatusCodes.contentTypeMissingError, "Content Type is missing");
+            }
+
+            if (Utils.not(contentTypeHeader.startsWith(expectedContentTypeStartsWith))) {
+                throw new RequestException(StatusCodes.contentTypeMissingError, "Invalid content type header '" + contentTypeHeader + "'");
+            }
+
             processRequest(ctx);
-            return;
-        }
 
-        if (contentTypeHeader == null || contentTypeHeader.isEmpty()) {
-            throw new RequestException(StatusCodes.contentTypeMissingError, "Content Type is missing");
+        } catch (Exception ex) {
+            requestProcessingErrorHandler.handleError(ex, ctx);
         }
-
-        if (Utils.not(contentTypeHeader.startsWith(expectedContentTypeStartsWith))) {
-            throw new RequestException(StatusCodes.contentTypeMissingError, "Invalid content type header '" + contentTypeHeader + "'");
-        }
-
-        processRequest(ctx);
 
     }
 

@@ -5,6 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import elasta.composer.MessageBus;
 import elasta.composer.MessageProcessingErrorHandler;
+import elasta.composer.States;
+import elasta.composer.converter.FlowToJsonObjectMessageHandlerConverter;
+import elasta.composer.flow.holder.FindAllFlowHolder;
+import elasta.composer.message.handlers.builder.impl.FindAllMessageHandlerBuilderImpl;
+import elasta.core.flow.Flow;
 import elasta.module.ModuleSystem;
 import elasta.module.ModuleSystemBuilder;
 import elasta.orm.Orm;
@@ -18,6 +23,7 @@ import tracker.message.handlers.impl.AuthenticateMessageHandlerImpl;
 import tracker.message.handlers.impl.DelegatingMessageHandlerImpl;
 import tracker.model.AuthRequestModel;
 import tracker.model.BaseModel;
+import tracker.model.PositionModel;
 import tracker.model.UserModel;
 
 import java.util.Objects;
@@ -82,7 +88,37 @@ final public class AppImpl implements App {
             createAuthMessageHandlers(module)
         );
 
+        addMessageHandler(
+            createFindAllPositionsGroupByUserId()
+        );
+
         return module;
+    }
+
+    private MessageHandlersBuilder.AddressAndHandler createFindAllPositionsGroupByUserId() {
+
+        return new MessageHandlersBuilder.AddressAndHandler(
+            Addresses.findAllPositionsGroupByUserId,
+            new FindAllMessageHandlerBuilderImpl(
+                new FindAllFlowHolder(
+                    Flow.builder(
+                        module.require(FlowBuilderHelper.class).findAllFlowHolder(
+                            FlowBuilderHelper.FindAllParams.builder()
+                                .module(module)
+                                .entity(Entities.POSITION)
+                                .action(Addresses.findAllPositionsGroupByUserId)
+                                .paginationKey(
+                                    new FieldExpressionImpl(
+                                        "r." + PositionModel.id
+                                    )
+                                )
+                                .build()
+                        ).getFlow()
+                    ).handlersP(States.beforeFindAll, new BeforeFindAllPositionsGroupByUserIdStateHandlerImpl()).build()
+                ),
+                module.require(FlowToJsonObjectMessageHandlerConverter.class)
+            ).build()
+        );
     }
 
     private void addMessageHandler(MessageHandlersBuilder.AddressAndHandler addressAndHandler) {

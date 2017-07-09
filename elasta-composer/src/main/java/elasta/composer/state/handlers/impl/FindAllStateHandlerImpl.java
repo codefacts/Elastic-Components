@@ -73,6 +73,7 @@ final public class FindAllStateHandlerImpl implements FindAllStateHandler<JsonOb
             orm.findAll(params),
             orm.countDistinct(
                 Orm.CountDistinctParams.builder()
+                    .countingKey(paginationKey(params))
                     .alias(params.getAlias())
                     .entity(params.getEntity())
                     .joinParams(params.getJoinParams())
@@ -90,5 +91,9 @@ final public class FindAllStateHandlerImpl implements FindAllStateHandler<JsonOb
                     .build()
             )
         ))));
+    }
+
+    private FieldExpression paginationKey(QueryExecutor.QueryParams params) {
+        return params.getPagination().isPresent() ? params.getPagination().get().getFieldExpression() : paginationKey;
     }
 }

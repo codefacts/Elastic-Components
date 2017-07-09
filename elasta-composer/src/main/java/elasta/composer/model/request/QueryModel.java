@@ -18,4 +18,5 @@ public interface QueryModel {
     String having = "having";
     String page = "page";
     String pageSize = "pageSize";
+    String paginationKey = "paginationKey";
 }
