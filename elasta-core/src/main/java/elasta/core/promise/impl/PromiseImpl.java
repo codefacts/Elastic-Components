@@ -32,113 +32,113 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
     @Override
     public Promise<T> filter(FilterHandler<T> filterHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.filterExecutor(filterHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.filterExecutor(filterHandler))
+        );
     }
 
     @Override
     public Promise<T> filterP(FilterPHandler<T> filterPHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.deferredFilterExecutor(filterPHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.deferredFilterExecutor(filterPHandler))
+        );
     }
 
     @Override
     public <R> Promise<R> map(MapHandler<T, R> mapHandler) {
 
-        PromiseImpl<R> promise = createPromise(Executors.mapExecutor(mapHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.mapExecutor(mapHandler))
+        );
     }
 
     @Override
     public <R> Promise<R> mapP(MapPHandler<T, R> mapPHandler) {
 
-        PromiseImpl<R> promise = createPromise(Executors.deferredMapExecutor(mapPHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.deferredMapExecutor(mapPHandler))
+        );
     }
 
     @Override
     public Promise<T> then(ThenHandler<T> thenHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.thenExecutor(thenHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.thenExecutor(thenHandler))
+        );
     }
 
     @Override
     public Promise<T> thenP(ThenPHandler<T> thenPHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.deferredThenExecutor(thenPHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.deferredThenExecutor(thenPHandler))
+        );
     }
 
     @Override
     public Promise<T> err(ErrorHandler errorHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.errorExecutor(errorHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.errorExecutor(errorHandler))
+        );
     }
 
     @Override
     public Promise<T> err2(Error2Handler errorHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.errorExecutor(errorHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.errorExecutor(errorHandler))
+        );
     }
 
     @Override
     public Promise<T> errP(ErrorPHandler errorPHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(errorPHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.deferredErrorExecutor(errorPHandler))
+        );
     }
 
     @Override
     public Promise<T> err2P(Error2PHandler errorHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(errorHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.deferredErrorExecutor(errorHandler))
+        );
     }
 
     @Override
     public <P> Promise<T> errd(DoOnErrorHandler<P, T> doOnErrorHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.errorExecutor(doOnErrorHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.errorExecutor(doOnErrorHandler))
+        );
     }
 
     @Override
     public <P> Promise<T> errdP(DoOnErrorPHandler<P, T> doOnErrorHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.deferredErrorExecutor(doOnErrorHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.deferredErrorExecutor(doOnErrorHandler))
+        );
     }
 
     @Override
     public Promise<T> cmp(CompleteHandler<T> completeHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.completeExecutor(completeHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.completeExecutor(completeHandler))
+        );
     }
 
     @Override
     public Promise<T> cmpP(CompletePHandler<T> completePHandler) {
 
-        PromiseImpl<T> promise = createPromise(Executors.deferredCompleteExecutor(completePHandler));
-
-        return executeOrSchedule(promise);
+        return executeOrSchedule(
+            createPromise(Executors.deferredCompleteExecutor(completePHandler))
+        );
     }
 
     @Override
@@ -198,6 +198,7 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
         }
 
         execute(promise.next, promise.signal = signal);
+        promise.next = null;
     }
 
     private static <T> void execute(PromiseImpl promise, SignalImpl<T> signal) {
@@ -212,7 +213,9 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
 
                 signal = promise.signal = (SignalImpl) promise.executor.execute(signal);
 
+                final PromiseImpl pp = promise;
                 promise = promise.next;
+                pp.next = null;
 
             } else {
 
@@ -238,20 +241,19 @@ final public class PromiseImpl<T> implements Promise<T>, Defer<T> {
             return promise;
 
         } else {
+
+            this.next = promise;
+
             return promise;
         }
     }
 
     private <TT, RR> PromiseImpl<RR> createPromise(InstantExecutor<TT, RR> ttInstantExecutor) {
-        PromiseImpl<RR> promise = new PromiseImpl<>(ttInstantExecutor);
-        this.next = promise;
-        return promise;
+        return new PromiseImpl<>(ttInstantExecutor);
     }
 
     private <TT, RR> PromiseImpl<RR> createPromise(DeferredExecutor<TT, RR> ttDeferredExecutor) {
-        PromiseImpl<RR> promise = new PromiseImpl<>(ttDeferredExecutor);
-        this.next = promise;
-        return promise;
+        return new PromiseImpl<>(ttDeferredExecutor);
     }
 
     @Override
