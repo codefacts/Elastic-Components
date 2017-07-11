@@ -5,13 +5,18 @@ import com.google.common.collect.ImmutableSet;
 import elasta.composer.MessageBus;
 import elasta.module.ModuleExporter;
 import elasta.module.ModuleSystemBuilder;
+import elasta.orm.Orm;
+import elasta.orm.OrmExporter;
 import elasta.sql.SqlExecutor;
 import elasta.sql.impl.SqlExecutorImpl;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.jdbc.JDBCClient;
 import lombok.Builder;
 import lombok.Value;
+import tracker.TrackerUtils;
+import tracker.entity_config.Entities;
 import tracker.server.component.AuthTokenGenerator;
 import tracker.server.component.impl.AuthTokenGeneratorImpl;
 import tracker.server.generators.request.MessageHeaderGenerator;
@@ -19,6 +24,8 @@ import tracker.server.generators.request.impl.MessageHeaderGeneratorImpl;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.*;
 import tracker.server.interceptors.impl.AuthInterceptorImpl;
+import tracker.server.listeners.AddPositionListener;
+import tracker.server.listeners.AddPositionListenerImpl;
 import tracker.server.request.handlers.impl.LoginRequestHandlerImpl;
 import tracker.server.request.handlers.impl.RequestProcessingErrorHandlerImpl;
 import tracker.server.impl.StorageMapImpl;
@@ -42,6 +49,8 @@ public interface TrackerServerExporter extends ModuleExporter {
         Vertx vertx = params.getVertx();
         MessageBus messageBus = params.getMessageBus();
         JDBCClient jdbcClient = params.getJdbcClient();
+
+        exportListeners(builder, vertx, jdbcClient, messageBus);
 
         builder.export(LoginRequestHandler.class, module -> {
             module.export(new LoginRequestHandlerImpl(
@@ -85,7 +94,26 @@ public interface TrackerServerExporter extends ModuleExporter {
             jdbcClient
         )));
 
+        OrmExporter.exportTo(
+            OrmExporter.ExportToParams.builder()
+                .isNewKey(TrackerUtils.isNewKey)
+                .entities(Entities.entities())
+                .moduleSystemBuilder(builder)
+                .jdbcClient(jdbcClient)
+                .build()
+        );
+
+        builder.export(EventBus.class, module -> module.export(vertx.eventBus()));
+
         return builder;
+    }
+
+    static void exportListeners(ModuleSystemBuilder builder, Vertx vertx, JDBCClient jdbcClient, MessageBus messageBus) {
+
+        builder.export(AddPositionListener.class, module -> module.export(new AddPositionListenerImpl(
+            module.require(Orm.class),
+            module.require(EventBus.class)
+        )));
     }
 
     static void exportResponseGenerators(ModuleSystemBuilder builder) {

@@ -9,6 +9,7 @@ import elasta.composer.MessageBus;
 import elasta.module.ModuleSystem;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
@@ -18,6 +19,9 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.handler.sockjs.BridgeOptions;
+import io.vertx.ext.web.handler.sockjs.PermittedOptions;
+import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.sstore.SessionStore;
 import tracker.Addresses;
@@ -32,6 +36,8 @@ import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.AddHttpResponseGeneratorImpl;
 import tracker.server.interceptors.AuthInterceptor;
+import tracker.server.listeners.AddPositionListener;
+import tracker.server.listeners.AddPositionListenerImpl;
 import tracker.server.request.handlers.LoginRequestHandler;
 import tracker.server.request.handlers.RequestHandler;
 import tracker.server.request.handlers.RequestProcessingErrorHandler;
@@ -59,11 +65,20 @@ public interface TrackerServer {
 
     static void main(String[] asfd) {
 
+        addEventHandlers();
+
         HttpServer server = createWebServer();
 
         server.listen(config.getInteger("port", DEFAULT_PORT));
 
         System.out.println("SERVER STARTED AT PORT: " + config.getInteger("port", DEFAULT_PORT));
+    }
+
+    static void addEventHandlers() {
+        final EventBus eb = vertx.eventBus();
+
+        eb.consumer(Addresses.post(Addresses.add(Entities.POSITION)), module.require(AddPositionListener.class));
+
     }
 
     static void addHandlers(Router router) {
@@ -288,6 +303,21 @@ public interface TrackerServer {
     static Router createRouter() {
 
         Router router = Router.router(vertx);
+
+        SockJSHandler sockJSHandler = SockJSHandler.create(vertx);
+
+        BridgeOptions options = new BridgeOptions();
+
+        options.setOutboundPermitted(ImmutableList.of(
+            new PermittedOptions().setAddress(BrowserEvents.userPositionTracking)
+        ));
+        options.setInboundPermitted(ImmutableList.of(
+            new PermittedOptions().setAddress(BrowserEvents.userPositionTracking)
+        ));
+
+        sockJSHandler.bridge(options);
+
+        router.route("/eventbus/*").handler(sockJSHandler);
 
         router.route().handler(CookieHandler.create());
 
