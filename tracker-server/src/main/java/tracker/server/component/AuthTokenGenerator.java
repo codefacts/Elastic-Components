@@ -17,6 +17,8 @@ public interface AuthTokenGenerator {
 
     Promise<JsonObject> getData(String token);
 
+    Promise<Void> invalidate(String authToken);
+
     @Value
     @Builder
     final class AuthToken {

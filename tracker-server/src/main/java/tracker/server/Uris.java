@@ -18,4 +18,8 @@ public interface Uris {
     static String singularUri(String uri) {
         return uri + "/:" + PathParams.id;
     }
+
+    static String bulkUri(String uri) {
+        return uri + "/bulk";
+    }
 }

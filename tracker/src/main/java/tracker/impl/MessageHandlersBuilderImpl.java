@@ -128,7 +128,13 @@ final public class MessageHandlersBuilderImpl implements MessageHandlersBuilder 
                             .module(module)
                             .entity(flowParams.getEntity())
                             .action(deleteAll)
-                            .broadcastAddress(Addresses.post(deleteAll))
+                            .broadcastAddress(
+                                Addresses.post(
+                                    Addresses.delete(
+                                        flowParams.getEntity()
+                                    )
+                                )
+                            )
                             .build()
                     ),
                     module.require(FlowToJsonArrayMessageHandlerConverter.class)
@@ -164,7 +170,7 @@ final public class MessageHandlersBuilderImpl implements MessageHandlersBuilder 
                             .module(module)
                             .entity(flowParams.getEntity())
                             .action(updateAll)
-                            .broadcastAddress(Addresses.post(flowParams.getEntity()))
+                            .broadcastAddress(Addresses.post(Addresses.update(flowParams.getEntity())))
                             .build()
                     ),
                     module.require(FlowToJsonArrayMessageHandlerConverter.class)
@@ -201,7 +207,7 @@ final public class MessageHandlersBuilderImpl implements MessageHandlersBuilder 
                         .module(module)
                         .entity(flowParams.getEntity())
                         .action(addAllAddress)
-                        .broadcastAddress(Addresses.post(addAllAddress))
+                        .broadcastAddress(Addresses.post(Addresses.add(flowParams.getEntity())))
                         .build()
                 )
             );

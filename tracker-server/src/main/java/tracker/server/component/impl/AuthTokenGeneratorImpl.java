@@ -33,16 +33,23 @@ final public class AuthTokenGeneratorImpl implements AuthTokenGenerator {
 
         String token = UUID.randomUUID().toString();
 
-        return storageMap.put(token, user, expireTime())
+        Date expireTime = expireTime();
+
+        return storageMap.put(token, user, expireTime)
             .map(aVoid -> new AuthToken(
                 token,
-                expireTime()
+                expireTime
             ));
     }
 
     @Override
     public Promise<JsonObject> getData(String token) {
         return storageMap.getJsonObject(token).map(entries -> entries.orElseThrow(() -> new AuthTokenGeneratorException("Token '" + token + "' is not valid")));
+    }
+
+    @Override
+    public Promise<Void> invalidate(String authToken) {
+        return storageMap.remove(authToken);
     }
 
     private Date expireTime() {

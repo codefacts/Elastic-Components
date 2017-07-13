@@ -9,7 +9,8 @@
       "password": "",
       "driver_class": "com.mysql.jdbc.Driver",
       "url": "jdbc:mysql://localhost/tracker_db"
-    }
+    },
+    "auth_token_expire_time": 12
   },
   "prod": {
   }

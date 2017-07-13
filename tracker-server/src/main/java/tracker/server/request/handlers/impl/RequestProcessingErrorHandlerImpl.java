@@ -2,6 +2,7 @@ package tracker.server.request.handlers.impl;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
+import tracker.server.component.ex.AuthTokenGeneratorException;
 import tracker.server.request.handlers.RequestProcessingErrorHandler;
 import tracker.server.ex.RequestException;
 
@@ -20,6 +21,12 @@ final public class RequestProcessingErrorHandlerImpl implements RequestProcessin
 
             ctx.response().setStatusCode(requestException.getHttpStatusCode());
             ctx.response().end(requestException.toJsonResponse().encode());
+            return;
+
+        } else if (ex instanceof AuthTokenGeneratorException) {
+
+            ctx.response().setStatusCode(HttpResponseStatus.UNAUTHORIZED.code());
+            ctx.response().end("Auth Token is not valid");
             return;
         }
 

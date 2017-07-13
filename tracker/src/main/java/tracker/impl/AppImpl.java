@@ -172,7 +172,8 @@ final public class AppImpl implements App {
                 1,
                 10,
                 "r",
-                "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd"
+                "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd",
+                12
             )
         );
     }

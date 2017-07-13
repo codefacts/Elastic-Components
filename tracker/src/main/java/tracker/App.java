@@ -28,8 +28,9 @@ public interface App {
         final int defaultPageSize;
         final String rootAlias;
         final String androidDeviceToken;
+        final long authTokenExpireTime;
 
-        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx, long defaultPage, int defaultPageSize, String rootAlias, String androidDeviceToken) {
+        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx, long defaultPage, int defaultPageSize, String rootAlias, String androidDeviceToken, long authTokenExpireTime) {
             Objects.requireNonNull(db);
             Objects.requireNonNull(messageBundle);
             Objects.requireNonNull(vertx);
@@ -43,10 +44,15 @@ public interface App {
             this.defaultPage = defaultPage;
             this.defaultPageSize = defaultPageSize;
             this.rootAlias = rootAlias;
+            this.authTokenExpireTime = authTokenExpireTime;
         }
 
         public Object getAndroidDeviceToken() {
             return androidDeviceToken;
+        }
+
+        public long getAuthTokenExpireTime() {
+            return authTokenExpireTime;
         }
     }
 

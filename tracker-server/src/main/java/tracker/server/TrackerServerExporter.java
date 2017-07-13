@@ -24,9 +24,10 @@ import tracker.server.generators.request.impl.MessageHeaderGeneratorImpl;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.*;
 import tracker.server.interceptors.impl.AuthInterceptorImpl;
-import tracker.server.listeners.AddPositionListener;
-import tracker.server.listeners.AddPositionListenerImpl;
+import tracker.server.listeners.*;
+import tracker.server.request.handlers.LogoutRequestHandler;
 import tracker.server.request.handlers.impl.LoginRequestHandlerImpl;
+import tracker.server.request.handlers.impl.LogoutRequestHandlerImpl;
 import tracker.server.request.handlers.impl.RequestProcessingErrorHandlerImpl;
 import tracker.server.impl.StorageMapImpl;
 import tracker.server.interceptors.AuthInterceptor;
@@ -61,6 +62,11 @@ public interface TrackerServerExporter extends ModuleExporter {
             ));
         });
 
+        builder.export(LogoutRequestHandler.class, module -> module.export(new LogoutRequestHandlerImpl(
+            module.require(AuthTokenGenerator.class),
+            module.require(RequestProcessingErrorHandler.class)
+        )));
+
         builder.export(AuthInterceptor.class, module -> module.export(new AuthInterceptorImpl(
             module.require(AuthTokenGenerator.class),
             module.require(RequestProcessingErrorHandler.class),
@@ -68,7 +74,11 @@ public interface TrackerServerExporter extends ModuleExporter {
                 new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.loginUri)),
                 new AuthInterceptor.MethodAndUri(HttpMethod.GET, api(Uris.logoutUri)),
                 new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.deviceUri)),
-                new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.userUri))
+                new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.userUri)),
+                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.loginUri)),
+                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.logoutUri)),
+                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.deviceUri)),
+                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.userUri))
             )
         )));
 
@@ -80,7 +90,7 @@ public interface TrackerServerExporter extends ModuleExporter {
 
         builder.export(AuthTokenGenerator.class, module -> module.export(new AuthTokenGeneratorImpl(
             module.require(StorageMap.class),
-            12, TimeUnit.HOURS
+            params.getAuthTokenExpireTime(), TimeUnit.HOURS
         )));
 
         builder.export(StorageMap.class, module -> module.export(new StorageMapImpl(
@@ -111,6 +121,10 @@ public interface TrackerServerExporter extends ModuleExporter {
     static void exportListeners(ModuleSystemBuilder builder, Vertx vertx, JDBCClient jdbcClient, MessageBus messageBus) {
 
         builder.export(AddPositionListener.class, module -> module.export(new AddPositionListenerImpl(
+            module.require(NewPositionListener.class)
+        )));
+
+        builder.export(NewPositionListener.class, module -> module.export(new NewPositionListenerImpl(
             module.require(Orm.class),
             module.require(EventBus.class)
         )));
@@ -145,8 +159,9 @@ public interface TrackerServerExporter extends ModuleExporter {
         final ModuleSystemBuilder builder;
         final JDBCClient jdbcClient;
         final MessageBus messageBus;
+        final int authTokenExpireTime;
 
-        public ExportToParams(Vertx vertx, ModuleSystemBuilder builder, JDBCClient jdbcClient, MessageBus messageBus) {
+        public ExportToParams(Vertx vertx, ModuleSystemBuilder builder, JDBCClient jdbcClient, MessageBus messageBus, int authTokenExpireTime) {
             Objects.requireNonNull(vertx);
             Objects.requireNonNull(builder);
             Objects.requireNonNull(jdbcClient);
@@ -155,6 +170,7 @@ public interface TrackerServerExporter extends ModuleExporter {
             this.builder = builder;
             this.jdbcClient = jdbcClient;
             this.messageBus = messageBus;
+            this.authTokenExpireTime = authTokenExpireTime;
         }
     }
 }

@@ -96,7 +96,7 @@ final public class UserPreprocessorImpl<T> implements UserPreprocessor<T> {
                     .build()
             )
             .map(jsonArrays -> jsonArrays.get(0).getLong(0))
-            .map(count -> username + "-" + (count + 1 + new Random().nextInt(100)))
+            .map(count -> username + "-" + (count + 1 + new Random().nextInt(20)))
             ;
     }
 

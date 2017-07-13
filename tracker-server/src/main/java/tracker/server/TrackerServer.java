@@ -34,14 +34,16 @@ import tracker.model.UserModel;
 import tracker.server.ex.ConfigLoaderException;
 import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.generators.response.*;
+import tracker.server.generators.response.impl.AddAllHttpResponseGeneratorImpl;
 import tracker.server.generators.response.impl.AddHttpResponseGeneratorImpl;
 import tracker.server.interceptors.AuthInterceptor;
 import tracker.server.listeners.AddPositionListener;
-import tracker.server.listeners.AddPositionListenerImpl;
 import tracker.server.request.handlers.LoginRequestHandler;
+import tracker.server.request.handlers.LogoutRequestHandler;
 import tracker.server.request.handlers.RequestHandler;
 import tracker.server.request.handlers.RequestProcessingErrorHandler;
 import tracker.server.request.handlers.impl.DispatchingRequestHandlerImpl;
+import tracker.server.request.handlers.impl.JaDispatchingRequestHandlerImpl;
 import tracker.server.request.handlers.impl.JoDispatchingRequestHandlerImpl;
 import tracker.server.request.handlers.impl.LongDispatchingRequestHandlerImpl;
 
@@ -51,12 +53,14 @@ import java.util.Collection;
 import java.util.Objects;
 
 import static tracker.server.Uris.api;
+import static tracker.server.Uris.bulkUri;
 import static tracker.server.Uris.singularUri;
 
 /**
  * Created by sohan on 7/1/2017.
  */
 public interface TrackerServer {
+    String KEY_AUTH_TOKEN_EXPIRE_TIME = "auth_token_expire_time";
     JsonObject config = loadConfig("config.json");
     int DEFAULT_PORT = 152;
     Vertx vertx = Vertx.vertx();
@@ -78,7 +82,6 @@ public interface TrackerServer {
         final EventBus eb = vertx.eventBus();
 
         eb.consumer(Addresses.post(Addresses.add(Entities.POSITION)), module.require(AddPositionListener.class));
-
     }
 
     static void addHandlers(Router router) {
@@ -90,6 +93,16 @@ public interface TrackerServer {
                 .handler(
                     reqHanlder(
                         module.require(LoginRequestHandler.class)
+                    )
+                );
+        }
+
+        {
+            final String logoutApi = api(Uris.logoutUri);
+            router.get(logoutApi)
+                .handler(
+                    reqHanlder(
+                        module.require(LogoutRequestHandler.class)
                     )
                 );
         }
@@ -134,6 +147,8 @@ public interface TrackerServer {
             )));
 
             router.post(uri).handler(addHandler(Entities.POSITION, ImmutableList.of(BaseModel.id)));
+
+            router.post(bulkUri(uri)).handler(addAllHandler(Entities.POSITION, ImmutableList.of(BaseModel.id)));
 
             router.get(singularUri).handler(findOneHandler(Entities.POSITION));
 
@@ -222,6 +237,20 @@ public interface TrackerServer {
                 module.require(RequestProcessingErrorHandler.class),
                 messageBus,
                 Addresses.add(entity)
+            )
+        );
+    }
+
+    static RequestHandler addAllHandler(String entity, ImmutableList<String> fields) {
+        return reqHanlder(
+            new JaDispatchingRequestHandlerImpl(
+                module.require(MessageHeaderGenerator.class),
+                new AddAllHttpResponseGeneratorImpl(
+                    fields
+                ),
+                module.require(RequestProcessingErrorHandler.class),
+                messageBus,
+                Addresses.addAll(entity)
             )
         );
     }
@@ -340,9 +369,14 @@ public interface TrackerServer {
                 1,
                 10,
                 "r",
-                "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd"
+                "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd",
+                authTokenExpireTime()
             )
         ).mesageBus();
+    }
+
+    static int authTokenExpireTime() {
+        return config.getInteger(KEY_AUTH_TOKEN_EXPIRE_TIME);
     }
 
     static ModuleSystem createModule(Vertx vertx, MessageBus messageBus) {
@@ -352,6 +386,7 @@ public interface TrackerServer {
                 .jdbcClient(JDBCClient.createShared(vertx, getDbConfig()))
                 .messageBus(messageBus)
                 .vertx(vertx)
+                .authTokenExpireTime(authTokenExpireTime())
                 .build()
         ).build();
     }

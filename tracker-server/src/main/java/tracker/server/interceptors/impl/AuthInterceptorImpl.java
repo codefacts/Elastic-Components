@@ -63,7 +63,7 @@ final public class AuthInterceptorImpl implements AuthInterceptor {
         return excludeUris.stream().anyMatch(mu -> mu.getHttpMethod() == methodAndUri.getHttpMethod() && methodAndUri.getUri().endsWith(mu.getUri()));
     }
 
-    private String parseToken(String header) {
+    public static String parseToken(String header) {
         if (header == null) {
             throw new RequestException(HttpResponseStatus.UNAUTHORIZED.code(), StatusCodes.authorizationError, "Unauthorized access, Please login to authenticate");
         }

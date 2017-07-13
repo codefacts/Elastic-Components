@@ -35,7 +35,8 @@ final public class AppTest {
                 1,
                 10,
                 "r",
-                androidDeviceToken)
+                "",
+                12)
         ).mesageBus();
 
         authTest(messageBus);
