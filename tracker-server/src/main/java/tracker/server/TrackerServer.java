@@ -302,7 +302,7 @@ public interface TrackerServer {
         router.route().handler(reqHanlder(
             ctx -> {
                 ctx.response().putHeader("Access-Control-Allow-Origin", "*");
-                ctx.response().putHeader("Access-Control-Allow-Methods", "*");
+                ctx.response().putHeader("Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE, HEAD");
                 ctx.response().putHeader("Access-Control-Allow-Headers", "*");
                 ctx.response().putHeader("Access-Control-Max-Age", "86400");
                 ctx.next();

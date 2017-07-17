@@ -11,6 +11,14 @@ final public class Field {
     final JavaType javaType;
     final Optional<Relationship> relationship;
 
+    public Field(String name) {
+        this(name, JavaType.DOUBLE, Optional.empty());
+    }
+
+    public Field(String name, Relationship relationship) {
+        this(name, JavaType.DOUBLE, Optional.of(relationship));
+    }
+
     public Field(String name, JavaType javaType) {
         this(name, javaType, Optional.empty());
     }

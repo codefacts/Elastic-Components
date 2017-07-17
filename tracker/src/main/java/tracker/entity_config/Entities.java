@@ -3,10 +3,9 @@ package tracker.entity_config;
 import com.google.common.collect.ImmutableList;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.columnmapping.*;
-import elasta.orm.entity.core.columnmapping.impl.ColumnMappingImpl;
-import elasta.orm.entity.core.columnmapping.impl.DirectRelationMappingImpl;
-import elasta.orm.entity.core.columnmapping.impl.DirectRelationMappingOptionsImpl;
+import elasta.orm.entity.core.columnmapping.impl.*;
 import tracker.model.*;
+import tracker.model.merchandiser.LocationTable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,16 +16,61 @@ import java.util.Optional;
  * Created by sohan on 6/25/2017.
  */
 public interface Entities {
+    //Entities
     String USER = "User";
     String DEVICE = "Device";
     String POSITION = "Position";
+    String OUTLET_ENTITY = "Outlet";
+    String LOCATION_ENTITY = "Location";
+    String OUTLET_IMAGE_ENTITY = "OutletImage";
+    //Tables
     String USER_TABLE = "users";
     String DEVICE_TABLE = "devices";
     String POSITION_TABLE = "positions";
+    String OUTLET_TABLE = "outlets";
+    String LOCATION_TABLE = "locations";
+    String OUTLET_IMAGE_TABLE = "outlet_images";
 
     static Collection<Entity> entities() {
 
-        return ImmutableList.of(userEntity(), deviceEntity(), positionEntity());
+        return ImmutableList.of(
+            userEntity(), deviceEntity(), positionEntity(),
+            MerchandiserEntities.outletEntity(),
+            MerchandiserEntities.locationEntity(),
+            MerchandiserEntities.outletImageEntity()
+        );
+    }
+
+    static DirectRelationMappingImpl locationMapping(String field, String column) {
+        return new DirectRelationMappingImpl(
+            LOCATION_TABLE,
+            LOCATION_ENTITY,
+            ImmutableList.of(
+                new ForeignColumnMapping(
+                    column,
+                    LocationTable.id
+                )
+            ),
+            field,
+            new DirectRelationMappingOptionsImpl(
+                RelationMappingOptions.CascadeUpsert.YES,
+                RelationMappingOptions.CascadeDelete.YES,
+                true,
+                DirectRelationMappingOptions.LoadAndDelete.NO_OPERATION
+            )
+        );
+    }
+
+    static ColumnMapping column(String field, String column) {
+        return new ColumnMappingImpl(field, column, DbType.NUMBER);
+    }
+
+    static Field field(String name) {
+        return new Field(name);
+    }
+
+    static Field field(String name, Relationship relationship) {
+        return new Field(name, relationship);
     }
 
     static Entity positionEntity() {
