@@ -65,19 +65,25 @@ final public class AppImpl implements App {
                 .module(module)
                 .flowParamss(ImmutableList.of(
                     new MessageHandlersBuilder.FlowParams(
-                        Entities.USER,
+                        Entities.USER_ENTITY,
                         new FieldExpressionImpl(
                             "r." + BaseModel.id
                         )
                     ),
                     new MessageHandlersBuilder.FlowParams(
-                        Entities.DEVICE,
+                        Entities.DEVICE_ENTITY,
                         new FieldExpressionImpl(
                             "r." + BaseModel.id
                         )
                     ),
                     new MessageHandlersBuilder.FlowParams(
-                        Entities.POSITION,
+                        Entities.POSITION_ENTITY,
+                        new FieldExpressionImpl(
+                            "r." + BaseModel.id
+                        )
+                    ),
+                    new MessageHandlersBuilder.FlowParams(
+                        Entities.OUTLET_ENTITY,
                         new FieldExpressionImpl(
                             "r." + BaseModel.id
                         )
@@ -107,7 +113,7 @@ final public class AppImpl implements App {
                         module.require(FlowBuilderHelper.class).findAllFlowHolder(
                             FlowBuilderHelper.FindAllParams.builder()
                                 .module(module)
-                                .entity(Entities.POSITION)
+                                .entity(Entities.POSITION_ENTITY)
                                 .action(Addresses.findAllPositionsGroupByUserId)
                                 .paginationKey(
                                     new FieldExpressionImpl(

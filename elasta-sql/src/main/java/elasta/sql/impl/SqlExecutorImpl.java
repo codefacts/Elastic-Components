@@ -81,9 +81,10 @@ final public class SqlExecutorImpl implements SqlExecutor {
         System.out.println("Queries => " + "[\n" + sqlList.stream().map(s -> s + " Params: " + paramsList.get(simpleCounter.value++).encode()).collect(Collectors.joining("\n")) + "\n]");
         SimpleCounter counter = new SimpleCounter(0);
         return execAndCommit(
-            con -> Promises.when(sqlList.stream()
-                .map(sql -> Promises.exec(dfr -> con.updateWithParams(sql, paramsList.get(counter.value++), VertxUtils.deferred(dfr))))
-                .collect(Collectors.toList())
+            con -> Promises.when(
+                sqlList.stream()
+                    .map(sql -> Promises.exec(dfr -> con.updateWithParams(sql, paramsList.get(counter.value++), VertxUtils.deferred(dfr))))
+                    .collect(Collectors.toList())
             ).map(objects -> (Void) null));
     }
 

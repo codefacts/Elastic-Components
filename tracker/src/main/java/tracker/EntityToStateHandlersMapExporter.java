@@ -14,7 +14,6 @@ import elasta.core.intfs.Fun2Async;
 import elasta.module.ModuleExporter;
 import elasta.module.ModuleSystemBuilder;
 import elasta.orm.query.QueryExecutor;
-import org.eclipse.persistence.mappings.foundation.AbstractTransformationMapping;
 import tracker.entity_config.Entities;
 import tracker.preprocessor.impl.DevicePreprocessorImpl;
 import tracker.preprocessor.impl.PositionPreprocessorImpl;
@@ -35,14 +34,14 @@ public interface EntityToStateHandlersMapExporter extends ModuleExporter {
 
             ImmutableMap.Builder<String, StateHandlersMap> mapBuilder = ImmutableMap.builder();
 
-            addUpdatePreprocessor(mapBuilder, Entities.USER, new UserPreprocessorImpl(
+            addUpdatePreprocessor(mapBuilder, Entities.USER_ENTITY, new UserPreprocessorImpl(
                 module.require(QueryExecutor.class),
                 module.require(App.Config.class)
             ));
 
-            addUpdatePreprocessor(mapBuilder, Entities.DEVICE, new DevicePreprocessorImpl(module.require(App.Config.class)));
+            addUpdatePreprocessor(mapBuilder, Entities.DEVICE_ENTITY, new DevicePreprocessorImpl(module.require(App.Config.class)));
 
-            addUpdatePreprocessor(mapBuilder, Entities.POSITION, new PositionPreprocessorImpl(module.require(AppDateTimeFormatter.class)));
+            addUpdatePreprocessor(mapBuilder, Entities.POSITION_ENTITY, new PositionPreprocessorImpl(module.require(AppDateTimeFormatter.class)));
 
             module.export(
                 new EntityToStateHandlersMapImpl(mapBuilder.build())

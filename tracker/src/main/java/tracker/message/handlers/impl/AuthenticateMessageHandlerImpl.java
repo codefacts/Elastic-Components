@@ -75,7 +75,7 @@ final public class AuthenticateMessageHandlerImpl implements AuthenticateMessage
 
         orm
             .findOne(
-                Entities.USER,
+                Entities.USER_ENTITY,
                 "r",
                 criteria,
                 ImmutableList.of(

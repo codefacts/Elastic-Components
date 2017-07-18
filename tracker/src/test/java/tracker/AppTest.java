@@ -65,7 +65,7 @@ final public class AppTest {
     private static void deleteAll(MessageBus messageBus) {
         messageBus.sendAndReceive(
             MessageBus.Params.builder()
-                .address(Addresses.deleteAll(Entities.USER))
+                .address(Addresses.deleteAll(Entities.USER_ENTITY))
                 .message(new JsonArray(
                     ImmutableList.of(
                         5640228953490447124L,
@@ -81,7 +81,7 @@ final public class AppTest {
     private static void updateAll(MessageBus messageBus) {
         messageBus.sendAndReceive(
             MessageBus.Params.builder()
-                .address(Addresses.updateAll(Entities.USER))
+                .address(Addresses.updateAll(Entities.USER_ENTITY))
                 .message(new JsonArray(ImmutableList.of(
                     new JsonObject(
                         "{\n" +
@@ -111,7 +111,7 @@ final public class AppTest {
     private static void createAll(MessageBus messageBus) {
         messageBus.sendAndReceive(
             MessageBus.Params.builder()
-                .address(Addresses.addAll(Entities.USER))
+                .address(Addresses.addAll(Entities.USER_ENTITY))
                 .message(new JsonArray(ImmutableList.of(
                     new JsonObject(
                         "{\n" +
@@ -139,7 +139,7 @@ final public class AppTest {
     private static void delete(MessageBus messageBus) {
         messageBus.sendAndReceive(
             MessageBus.Params.builder()
-                .address(Addresses.delete(Entities.USER))
+                .address(Addresses.delete(Entities.USER_ENTITY))
                 .message(6788965377253291803L)
                 .userId("admin-55")
                 .build()
@@ -150,7 +150,7 @@ final public class AppTest {
     private static void update(ModuleSystem module, MessageBus messageBus) {
         messageBus.sendAndReceive(
             MessageBus.Params.builder()
-                .address(Addresses.update(Entities.USER))
+                .address(Addresses.update(Entities.USER_ENTITY))
                 .message(
                     new JsonObject(
                         "{\n" +
@@ -173,7 +173,7 @@ final public class AppTest {
     private static void findAll(ModuleSystem module, MessageBus messageBus) {
         messageBus.sendAndReceiveJsonObject(
             MessageBus.Params.builder()
-                .address(Addresses.findAll(Entities.USER))
+                .address(Addresses.findAll(Entities.USER_ENTITY))
                 .message(new JsonObject())
                 .userId("admin-1")
                 .build()
@@ -184,7 +184,7 @@ final public class AppTest {
     private static void create(ModuleSystem module, MessageBus messageBus) {
         messageBus.sendAndReceive(
             MessageBus.Params.builder()
-                .address(Addresses.add(Entities.USER))
+                .address(Addresses.add(Entities.USER_ENTITY))
                 .message(
                     new JsonObject(
                         "{\n" +
@@ -207,7 +207,7 @@ final public class AppTest {
         messageBus.sendAndReceiveJsonObject(
             MessageBus.Params.builder()
                 .userId("admin-1")
-                .address(Addresses.findOne(Entities.USER))
+                .address(Addresses.findOne(Entities.USER_ENTITY))
                 .message(new JsonObject(
                     ImmutableMap.of(
                         "userId", "admin-2"
@@ -227,7 +227,7 @@ final public class AppTest {
                 .module(module)
                 .flowParamss(ImmutableList.of(
                     new MessageHandlersBuilder.FlowParams(
-                        Entities.USER,
+                        Entities.USER_ENTITY,
                         new FieldExpressionImpl(
                             "r.id"
                         )

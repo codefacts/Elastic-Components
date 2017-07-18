@@ -242,7 +242,7 @@ final public class MessageHandlersBuilderImpl implements MessageHandlersBuilder 
 
         private AddressAndHandler findAllHandler(FindAllFlowHolder findAllFlowHolder) {
             return consumer(
-                Addresses.findAll(Entities.USER),
+                Addresses.findAll(Entities.USER_ENTITY),
                 new FindAllMessageHandlerBuilderImpl(
                     findAllFlowHolder,
                     module.require(FlowToJsonObjectMessageHandlerConverter.class)
@@ -253,7 +253,7 @@ final public class MessageHandlersBuilderImpl implements MessageHandlersBuilder 
         private AddressAndHandler findOneHandler(FindOneFlowHolder findOneFlowHolder) {
 
             return consumer(
-                Addresses.findOne(Entities.USER),
+                Addresses.findOne(Entities.USER_ENTITY),
                 new FindOneMessageHandlerBuilderImpl<Long>(
                     findOneFlowHolder,
                     module.require(FlowToJsonObjectMessageHandlerConverter.class)

@@ -10,7 +10,7 @@ import java.util.Objects;
 public interface Addresses {
 
     String authenticate = "authenticate";
-    String findAllPositionsGroupByUserId = findAll(Entities.POSITION) + ".group-by-user-id";
+    String findAllPositionsGroupByUserId = findAll(Entities.POSITION_ENTITY) + ".group-by-user-id";
 
     static String post(String address) {
         Objects.requireNonNull(address);

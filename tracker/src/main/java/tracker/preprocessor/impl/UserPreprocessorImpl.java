@@ -90,7 +90,7 @@ final public class UserPreprocessorImpl<T> implements UserPreprocessor<T> {
                     .selections(ImmutableList.of(
                         JsonOps.countDistinct("r." + UserModel.username)
                     ))
-                    .entity(Entities.USER)
+                    .entity(Entities.USER_ENTITY)
                     .alias("r")
                     .criteria(JsonOps.like("r." + UserModel.username, username + "-%"))
                     .build()
@@ -107,7 +107,7 @@ final public class UserPreprocessorImpl<T> implements UserPreprocessor<T> {
                     .selections(ImmutableList.of(
                         JsonOps.countDistinct("r." + UserModel.id)
                     ))
-                    .entity(Entities.USER)
+                    .entity(Entities.USER_ENTITY)
                     .alias("r")
                     .build()
             )

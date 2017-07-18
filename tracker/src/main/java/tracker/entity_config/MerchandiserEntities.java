@@ -102,7 +102,9 @@ public interface MerchandiserEntities {
             OutletImageModel.id,
             ArrayBuilder.<Field>create()
                 .addAll(ImmutableList.of(
-                    field(OutletImageModel.url),
+                    field(OutletImageModel.title),
+                    field(OutletImageModel.description),
+                    field(OutletImageModel.uri),
                     field(OutletImageModel.file),
                     field(OutletImageModel.fileName),
                     field(OutletImageModel.height),
@@ -116,7 +118,9 @@ public interface MerchandiserEntities {
                 OutletImageTable.id,
                 ArrayBuilder.<ColumnMapping>create()
                     .addAll(ImmutableList.of(
-                        column(OutletImageModel.url, OutletImageTable.url),
+                        column(OutletImageModel.title, OutletImageTable.title),
+                        column(OutletImageModel.description, OutletImageTable.description),
+                        column(OutletImageModel.uri, OutletImageTable.uri),
                         column(OutletImageModel.file, OutletImageTable.file),
                         column(OutletImageModel.fileName, OutletImageTable.file_name),
                         column(OutletImageModel.height, OutletImageTable.height),
@@ -129,7 +133,12 @@ public interface MerchandiserEntities {
                         new DirectRelationMappingImpl(
                             OUTLET_TABLE,
                             OUTLET_ENTITY,
-                            ImmutableList.of(),
+                            ImmutableList.of(
+                                new ForeignColumnMapping(
+                                    OutletImageTable.outlet_id,
+                                    OutletTable.id
+                                )
+                            ),
                             OutletImageModel.outlet,
                             new DirectRelationMappingOptionsImpl(
                                 RelationMappingOptions.CascadeUpsert.NO,

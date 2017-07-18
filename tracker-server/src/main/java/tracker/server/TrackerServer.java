@@ -81,7 +81,7 @@ public interface TrackerServer {
     static void addEventHandlers() {
         final EventBus eb = vertx.eventBus();
 
-        eb.consumer(Addresses.post(Addresses.add(Entities.POSITION)), module.require(AddPositionListener.class));
+        eb.consumer(Addresses.post(Addresses.add(Entities.POSITION_ENTITY)), module.require(AddPositionListener.class));
     }
 
     static void addHandlers(Router router) {
@@ -111,26 +111,26 @@ public interface TrackerServer {
             final String uri = api(Uris.userUri);
             final String singularUri = singularUri(uri);
 
-            router.post(uri).handler(addHandler(Entities.USER, ImmutableList.of(UserModel.id, UserModel.userId, UserModel.username)));
+            router.post(uri).handler(addHandler(Entities.USER_ENTITY, ImmutableList.of(UserModel.id, UserModel.userId, UserModel.username)));
 
-            router.patch(singularUri).handler(updateHandler(Entities.USER));
+            router.patch(singularUri).handler(updateHandler(Entities.USER_ENTITY));
 
-            router.delete(singularUri).handler(deleteHandler(Entities.USER));
+            router.delete(singularUri).handler(deleteHandler(Entities.USER_ENTITY));
 
-            router.get(singularUri).handler(findOneHandler(Entities.USER));
+            router.get(singularUri).handler(findOneHandler(Entities.USER_ENTITY));
 
-            router.get(uri).handler(findAllHandler(Entities.USER));
+            router.get(uri).handler(findAllHandler(Entities.USER_ENTITY));
         }
 
         {
             final String uri = api(Uris.deviceUri);
             final String singularUri = singularUri(uri);
 
-            router.post(uri).handler(addHandler(Entities.DEVICE, ImmutableList.of(DeviceModel.id, DeviceModel.deviceId, DeviceModel.type)));
+            router.post(uri).handler(addHandler(Entities.DEVICE_ENTITY, ImmutableList.of(DeviceModel.id, DeviceModel.deviceId, DeviceModel.type)));
 
-            router.get(singularUri).handler(findOneHandler(Entities.DEVICE));
+            router.get(singularUri).handler(findOneHandler(Entities.DEVICE_ENTITY));
 
-            router.get(uri).handler(findAllHandler(Entities.DEVICE));
+            router.get(uri).handler(findAllHandler(Entities.DEVICE_ENTITY));
         }
 
         {
@@ -146,13 +146,26 @@ public interface TrackerServer {
                 Addresses.findAllPositionsGroupByUserId
             )));
 
-            router.post(uri).handler(addHandler(Entities.POSITION, ImmutableList.of(BaseModel.id)));
+            router.post(uri).handler(addHandler(Entities.POSITION_ENTITY, ImmutableList.of(BaseModel.id)));
 
-            router.post(bulkUri(uri)).handler(addAllHandler(Entities.POSITION, ImmutableList.of(BaseModel.id)));
+            router.post(bulkUri(uri)).handler(addAllHandler(Entities.POSITION_ENTITY, ImmutableList.of(BaseModel.id)));
 
-            router.get(singularUri).handler(findOneHandler(Entities.POSITION));
+            router.get(singularUri).handler(findOneHandler(Entities.POSITION_ENTITY));
 
-            router.get(uri).handler(findAllHandler(Entities.POSITION));
+            router.get(uri).handler(findAllHandler(Entities.POSITION_ENTITY));
+        }
+
+        {
+            final String uri = api(Uris.outletUri);
+            final String singularUri = singularUri(uri);
+
+            router.post(uri).handler(addHandler(Entities.OUTLET_ENTITY, ImmutableList.of(BaseModel.id)));
+
+            router.post(bulkUri(uri)).handler(addAllHandler(Entities.OUTLET_ENTITY, ImmutableList.of(BaseModel.id)));
+
+            router.get(singularUri).handler(findOneHandler(Entities.OUTLET_ENTITY));
+
+            router.get(uri).handler(findAllHandler(Entities.OUTLET_ENTITY));
         }
     }
 

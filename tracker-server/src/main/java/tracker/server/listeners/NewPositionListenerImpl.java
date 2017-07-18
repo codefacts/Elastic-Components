@@ -2,7 +2,6 @@ package tracker.server.listeners;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import elasta.composer.Msg;
 import elasta.composer.model.request.UserModel;
 import elasta.orm.Orm;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
@@ -33,7 +32,7 @@ final public class NewPositionListenerImpl implements NewPositionListener {
     @Override
     public void listenTo(JsonObject position, Message msg) {
         orm
-            .findOne(Entities.USER, "r",
+            .findOne(Entities.USER_ENTITY, "r",
                 JsonOps.eq("r." + UserModel.userId, msg.headers().get(UserModel.userId)),
                 ImmutableList.of(
                     new FieldExpressionImpl("r." + tracker.model.UserModel.id),

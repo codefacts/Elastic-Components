@@ -17,9 +17,9 @@ import java.util.Optional;
  */
 public interface Entities {
     //Entities
-    String USER = "User";
-    String DEVICE = "Device";
-    String POSITION = "Position";
+    String USER_ENTITY = "User";
+    String DEVICE_ENTITY = "Device";
+    String POSITION_ENTITY = "Position";
     String OUTLET_ENTITY = "Outlet";
     String LOCATION_ENTITY = "Location";
     String OUTLET_IMAGE_ENTITY = "OutletImage";
@@ -75,7 +75,7 @@ public interface Entities {
 
     static Entity positionEntity() {
         return new Entity(
-            POSITION,
+            POSITION_ENTITY,
             PositionModel.id,
             ArrayBuilder.<Field>create()
                 .addAll(Arrays.asList(
@@ -115,7 +115,7 @@ public interface Entities {
 
     static Entity userEntity() {
         return new Entity(
-            USER,
+            USER_ENTITY,
             UserModel.id,
             new ArrayBuilderImpl<Field>()
                 .addAll(Arrays.asList(
@@ -161,7 +161,7 @@ public interface Entities {
 
     static Entity deviceEntity() {
         return new Entity(
-            DEVICE,
+            DEVICE_ENTITY,
             DeviceModel.id,
             new ArrayBuilderImpl<Field>()
                 .add(new Field(DeviceModel.deviceId, JavaType.STRING))
@@ -198,20 +198,20 @@ public interface Entities {
 
     static Field updatedByField() {
         return new Field(UserModel.updatedBy, JavaType.OBJECT, Optional.of(new Relationship(
-            Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER
+            Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER_ENTITY
         )));
     }
 
     static Field createdByField() {
         return new Field(UserModel.createdBy, JavaType.OBJECT, Optional.of(new Relationship(
-            Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER
+            Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER_ENTITY
         )));
     }
 
     static RelationMapping updatedBy() {
         return new DirectRelationMappingImpl(
             USER_TABLE,
-            USER,
+            USER_ENTITY,
             ImmutableList.of(
                 new ForeignColumnMapping(UserTable.updated_by, UserTable.user_id)
             ),
@@ -228,7 +228,7 @@ public interface Entities {
     static RelationMapping createdBy() {
         return new DirectRelationMappingImpl(
             USER_TABLE,
-            USER,
+            USER_ENTITY,
             ImmutableList.of(
                 new ForeignColumnMapping(UserTable.created_by, UserTable.user_id)
             ),
