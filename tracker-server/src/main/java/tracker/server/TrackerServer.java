@@ -9,6 +9,7 @@ import elasta.composer.MessageBus;
 import elasta.module.ModuleSystem;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
@@ -63,7 +64,12 @@ public interface TrackerServer {
     String KEY_AUTH_TOKEN_EXPIRE_TIME = "auth_token_expire_time";
     JsonObject config = loadConfig("config.json");
     int DEFAULT_PORT = 152;
-    Vertx vertx = Vertx.vertx();
+    Vertx vertx = Vertx.vertx(
+        new VertxOptions()
+            .setEventLoopPoolSize(1)
+            .setWorkerPoolSize(1)
+            .setInternalBlockingPoolSize(1)
+    );
     MessageBus messageBus = messageBus(vertx);
     ModuleSystem module = createModule(vertx, messageBus);
 

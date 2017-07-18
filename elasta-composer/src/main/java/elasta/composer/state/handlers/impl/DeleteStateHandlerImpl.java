@@ -36,7 +36,7 @@ final public class DeleteStateHandlerImpl implements DeleteStateHandler<Object, 
     public Promise<StateTrigger<Msg<Object>>> handle(Msg<Object> msg) throws Throwable {
         return orm.delete(entity, msg.body())
             .map(updateTplList -> updateTplList.stream().map(updateTpl -> dbOperationInterceptor.intercept(updateTpl, msg)))
-            .map(sqlDB::update)
+            .mapP(sqlDB::update)
             .map(deletedId -> Flow.trigger(Events.next, msg));
     }
 }

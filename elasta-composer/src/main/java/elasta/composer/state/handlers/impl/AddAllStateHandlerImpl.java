@@ -40,7 +40,7 @@ final public class AddAllStateHandlerImpl implements AddAllStateHandler<JsonArra
         List<JsonObject> list = msg.body().getList();
         return orm.upsertAll(entity, list)
             .map(updateTplList -> updateTplList.stream().map(updateTpl -> dbOperationInterceptor.intercept(updateTpl, msg)))
-            .map(sqlDB::update)
+            .mapP(sqlDB::update)
             .map(jo -> Flow.trigger(Events.next, msg));
     }
 }

@@ -40,7 +40,7 @@ final public class DeleteAllStateHandlerImpl implements DeleteAllStateHandler<Js
         List<JsonObject> list = msg.body().getList();
         return orm.deleteAll(entity, list)
             .map(updateTplList -> updateTplList.stream().map(updateTpl -> dbOperationInterceptor.intercept(updateTpl, msg)))
-            .map(sqlDB::update)
+            .mapP(sqlDB::update)
             .map(objectList -> Flow.trigger(Events.next, msg));
     }
 }
