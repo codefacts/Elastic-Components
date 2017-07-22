@@ -130,7 +130,8 @@ public interface Entities {
 
                     new Field(UserModel.dateOfBirth, JavaType.STRING),
                     new Field(UserModel.gender, JavaType.STRING),
-                    new Field(UserModel.registrationDeviceType, JavaType.STRING)
+                    new Field(UserModel.registrationDeviceType, JavaType.STRING),
+                    field(UserModel.pictureUri)
                 ))
                 .addAll(baseFields())
                 .build(list -> list.toArray(new Field[list.size()])),
@@ -150,7 +151,8 @@ public interface Entities {
 
                         new ColumnMappingImpl(UserModel.dateOfBirth, UserTable.date_of_birth, DbType.VARCHAR),
                         new ColumnMappingImpl(UserModel.gender, UserTable.gender, DbType.VARCHAR),
-                        new ColumnMappingImpl(UserModel.registrationDeviceType, UserTable.registration_device_type, DbType.VARCHAR)
+                        new ColumnMappingImpl(UserModel.registrationDeviceType, UserTable.registration_device_type, DbType.VARCHAR),
+                        column(UserModel.pictureUri, UserTable.picture_uri)
                     ))
                     .addAll(baseColumns())
                     .build(list -> list.toArray(new ColumnMapping[list.size()])),

@@ -11,6 +11,9 @@ public interface Uris {
     String positionUri = "/positions";
     String groupByUserId = "/group-by-user-id";
     String outletUri = "/outlets";
+    String uploadUri = "/uploads";
+    String androidUsersPictureUploadUri = "/uploads/android-users/pictures";
+    String outletPicturesUploadUri = "/uploads/outlets/pictures";
 
     static String api(String uriPart) {
         return "/api" + uriPart;

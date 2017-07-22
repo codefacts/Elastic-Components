@@ -14,4 +14,5 @@ public interface UserTable extends BaseTable {
     String last_name = "last_name";
     String registration_device_type = "reg_dev_type";
     String gender = "gender";
+    String picture_uri = "picture_uri";
 }

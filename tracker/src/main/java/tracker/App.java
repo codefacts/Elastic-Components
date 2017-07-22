@@ -29,13 +29,15 @@ public interface App {
         final String rootAlias;
         final String androidDeviceToken;
         final long authTokenExpireTime;
+        final String uploadDirectory;
 
-        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx, long defaultPage, int defaultPageSize, String rootAlias, String androidDeviceToken, long authTokenExpireTime) {
+        public Config(JsonObject db, Map<String, String> messageBundle, Vertx vertx, long defaultPage, int defaultPageSize, String rootAlias, String androidDeviceToken, long authTokenExpireTime, String uploadDirectory) {
             Objects.requireNonNull(db);
             Objects.requireNonNull(messageBundle);
             Objects.requireNonNull(vertx);
             Objects.requireNonNull(rootAlias);
             Objects.requireNonNull(androidDeviceToken);
+            Objects.requireNonNull(uploadDirectory);
             this.db = db;
             this.messageBundle = messageBundle;
             this.vertx = vertx;
@@ -45,9 +47,10 @@ public interface App {
             this.defaultPageSize = defaultPageSize;
             this.rootAlias = rootAlias;
             this.authTokenExpireTime = authTokenExpireTime;
+            this.uploadDirectory = uploadDirectory;
         }
 
-        public Object getAndroidDeviceToken() {
+        public String getAndroidDeviceToken() {
             return androidDeviceToken;
         }
 

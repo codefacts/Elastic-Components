@@ -8,7 +8,6 @@ import io.vertx.core.Vertx;
  */
 public interface Main {
     static void main(String[] asdf) {
-        System.out.println("ok");
-        Vertx.vertx().eventBus().consumer("", event -> {});
+        
     }
 }

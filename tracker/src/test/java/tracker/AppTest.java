@@ -13,6 +13,8 @@ import tracker.entity_config.Entities;
 import tracker.impl.AppImpl;
 import tracker.model.UserModel;
 
+import java.io.File;
+
 /**
  * Created by sohan on 6/29/2017.
  */
@@ -36,7 +38,9 @@ final public class AppTest {
                 10,
                 "r",
                 "",
-                12)
+                12,
+                new File(new File("").getAbsoluteFile(), "uploads").toString()
+            )
         ).mesageBus();
 
         authTest(messageBus);

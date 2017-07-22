@@ -13,4 +13,5 @@ public interface UserModel extends BaseModel, elasta.composer.model.request.User
     String dateOfBirth = "dateOfBirth";
     String gender = "gender";
     String registrationDeviceType = "registrationDeviceType";
+    String pictureUri = "pictureUri";
 }

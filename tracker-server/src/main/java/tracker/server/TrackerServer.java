@@ -37,6 +37,7 @@ import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.AddAllHttpResponseGeneratorImpl;
 import tracker.server.generators.response.impl.AddHttpResponseGeneratorImpl;
+import tracker.server.impl.UploadFileRequestHandlerImpl;
 import tracker.server.interceptors.AuthInterceptor;
 import tracker.server.listeners.AddPositionListener;
 import tracker.server.request.handlers.LoginRequestHandler;
@@ -60,20 +61,20 @@ import static tracker.server.Uris.singularUri;
 /**
  * Created by sohan on 7/1/2017.
  */
-public interface TrackerServer {
-    String KEY_AUTH_TOKEN_EXPIRE_TIME = "auth_token_expire_time";
-    JsonObject config = loadConfig("config.json");
-    int DEFAULT_PORT = 152;
-    Vertx vertx = Vertx.vertx(
+public class TrackerServer {
+    public static final String KEY_AUTH_TOKEN_EXPIRE_TIME = "auth_token_expire_time";
+    public static final JsonObject config = loadConfig("config.json");
+    public static final int DEFAULT_PORT = 152;
+    public static final Vertx vertx = Vertx.vertx(
         new VertxOptions()
             .setEventLoopPoolSize(1)
             .setWorkerPoolSize(1)
             .setInternalBlockingPoolSize(1)
     );
-    MessageBus messageBus = messageBus(vertx);
-    ModuleSystem module = createModule(vertx, messageBus);
+    public static final MessageBus messageBus = messageBus(vertx);
+    public static final ModuleSystem module = createModule(vertx, messageBus);
 
-    static void main(String[] asfd) {
+    public static void main(String[] asfd) {
 
         addEventHandlers();
 
@@ -291,11 +292,26 @@ public interface TrackerServer {
 
         addHandlers(router);
 
+        addMediaFileHandlers(router);
+
         addStaticFileHandlers(router);
 
         httpServer.requestHandler(router::accept);
 
         return httpServer;
+    }
+
+    static void addMediaFileHandlers(Router router) {
+        router.post(api(Uris.uploadUri))
+            .handler(reqHanlder(
+                new UploadFileRequestHandlerImpl(
+                    vertx,
+                    module.require(RequestProcessingErrorHandler.class),
+                    ImmutableMap.of(
+                        Uris.androidUsersPictureUploadUri, ""
+                    )
+                )
+            ));
     }
 
     static void addStaticFileHandlers(Router router) {
@@ -331,21 +347,6 @@ public interface TrackerServer {
         router.route(api("/*")).handler(reqHanlder(
             module.require(AuthInterceptor.class)
         ));
-
-        try {
-
-            FileLogger fileLogger = new FileLogger(
-                new File(new File("").getAbsolutePath(), "tracker-log.txt")
-            );
-
-            router.route().handler(event -> {
-                fileLogger.log(event.request().uri(), event.request().method().name(), event.getBodyAsString());
-                event.next();
-            });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     static Router createRouter() {
@@ -389,7 +390,8 @@ public interface TrackerServer {
                 10,
                 "r",
                 "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd",
-                authTokenExpireTime()
+                authTokenExpireTime(),
+                new File(new File("").getAbsoluteFile(), "uploads").toString()
             )
         ).mesageBus();
     }

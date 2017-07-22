@@ -18,6 +18,7 @@ import tracker.entity_config.Entities;
 import tracker.preprocessor.impl.DevicePreprocessorImpl;
 import tracker.preprocessor.impl.PositionPreprocessorImpl;
 import tracker.preprocessor.impl.UserPreprocessorImpl;
+import tracker.preprocessor.merchandiser.impl.OutletPreprocessorImpl;
 
 import java.util.Objects;
 
@@ -33,6 +34,8 @@ public interface EntityToStateHandlersMapExporter extends ModuleExporter {
         builder.export(EntityToStateHandlersMap.class, module -> {
 
             ImmutableMap.Builder<String, StateHandlersMap> mapBuilder = ImmutableMap.builder();
+
+            addUpdatePreprocessor(mapBuilder, Entities.OUTLET_ENTITY, new OutletPreprocessorImpl());
 
             addUpdatePreprocessor(mapBuilder, Entities.USER_ENTITY, new UserPreprocessorImpl(
                 module.require(QueryExecutor.class),
