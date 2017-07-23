@@ -180,8 +180,7 @@ final public class AppImpl implements App {
                 10,
                 "r",
                 "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd",
-                12,
-                new File(new File("").getAbsoluteFile(), "uploads").toString()
+                12
             )
         );
     }

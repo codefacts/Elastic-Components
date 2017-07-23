@@ -1,12 +1,14 @@
 package tracker.preprocessor.merchandiser.impl;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import elasta.commons.Utils;
 import elasta.composer.Msg;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;
 import tracker.ex.OutletPreprocessorException;
+import tracker.model.BaseModel;
 import tracker.model.merchandiser.OutletModel;
 import tracker.preprocessor.merchandiser.OutletPreprocessor;
 
@@ -29,11 +31,14 @@ final public class OutletPreprocessorImpl<T> implements OutletPreprocessor<T> {
             throw new OutletPreprocessorException("LocationGps and LocationNetwork both can not be null at the same time");
         }
 
+        ImmutableSet<String> filterKeys = ImmutableSet.of(BaseModel.createdBy, BaseModel.updatedBy);
+
         return Promises.of(
             new JsonObject(
                 ImmutableMap.<String, Object>builder()
                     .putAll(
                         jsonObject.getMap().entrySet().stream()
+                            .filter(entry -> Utils.not(filterKeys.contains(entry.getKey())))
                             .filter(entry -> Utils.not(Objects.equals(entry.getKey(), OutletModel.location)))
                             .collect(Collectors.toList())
                     )

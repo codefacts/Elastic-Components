@@ -4,7 +4,8 @@ import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.Promise;
 import elasta.eventbus.SimpleEventBus;
-import io.vertx.core.AsyncResultHandler;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
@@ -52,7 +53,7 @@ final public class SimpleEventBusImpl implements SimpleEventBus {
         return this;
     }
 
-    private <T> AsyncResultHandler<Message<T>> deferred(Defer<Message<T>> messageDefer, Object message) {
+    private <T> Handler<AsyncResult<Message<T>>> deferred(Defer<Message<T>> messageDefer, Object message) {
         return event -> {
             if (event.failed()) {
                 messageDefer.reject(event.cause(), message);

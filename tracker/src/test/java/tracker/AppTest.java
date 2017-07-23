@@ -38,8 +38,7 @@ final public class AppTest {
                 10,
                 "r",
                 "",
-                12,
-                new File(new File("").getAbsoluteFile(), "uploads").toString()
+                12
             )
         ).mesageBus();
 

@@ -51,6 +51,10 @@ public interface TrackerServerExporter extends ModuleExporter {
         MessageBus messageBus = params.getMessageBus();
         JDBCClient jdbcClient = params.getJdbcClient();
 
+        System.out.println(params.getServerConfig());
+
+        builder.export(ServerConfig.class, module -> module.export(params.getServerConfig()));
+
         exportListeners(builder, vertx, jdbcClient, messageBus);
 
         builder.export(LoginRequestHandler.class, module -> {
@@ -75,10 +79,7 @@ public interface TrackerServerExporter extends ModuleExporter {
                 new AuthInterceptor.MethodAndUri(HttpMethod.GET, api(Uris.logoutUri)),
                 new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.deviceUri)),
                 new AuthInterceptor.MethodAndUri(HttpMethod.POST, api(Uris.userUri)),
-                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.loginUri)),
-                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.logoutUri)),
-                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.deviceUri)),
-                new AuthInterceptor.MethodAndUri(HttpMethod.OPTIONS, api(Uris.userUri))
+                new AuthInterceptor.MethodAndUri(HttpMethod.POST, Uris.api(Uris.androidTrackersPicturesUri))
             )
         )));
 
@@ -160,17 +161,20 @@ public interface TrackerServerExporter extends ModuleExporter {
         final JDBCClient jdbcClient;
         final MessageBus messageBus;
         final int authTokenExpireTime;
+        final ServerConfig serverConfig;
 
-        public ExportToParams(Vertx vertx, ModuleSystemBuilder builder, JDBCClient jdbcClient, MessageBus messageBus, int authTokenExpireTime) {
+        public ExportToParams(Vertx vertx, ModuleSystemBuilder builder, JDBCClient jdbcClient, MessageBus messageBus, int authTokenExpireTime, ServerConfig serverConfig) {
             Objects.requireNonNull(vertx);
             Objects.requireNonNull(builder);
             Objects.requireNonNull(jdbcClient);
             Objects.requireNonNull(messageBus);
+            Objects.requireNonNull(serverConfig);
             this.vertx = vertx;
             this.builder = builder;
             this.jdbcClient = jdbcClient;
             this.messageBus = messageBus;
             this.authTokenExpireTime = authTokenExpireTime;
+            this.serverConfig = serverConfig;
         }
     }
 }

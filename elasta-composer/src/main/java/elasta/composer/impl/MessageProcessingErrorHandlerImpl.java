@@ -10,7 +10,7 @@ import java.util.Objects;
  * Created by sohan on 7/1/2017.
  */
 final public class MessageProcessingErrorHandlerImpl implements MessageProcessingErrorHandler {
-    private static final Logger LOGGER = LogManager.getLogger(MessageProcessingErrorHandlerImpl.class);
+    private static final Logger log = LogManager.getLogger(MessageProcessingErrorHandlerImpl.class);
     final int failureCode;
     final String statusCode;
 
@@ -22,9 +22,10 @@ final public class MessageProcessingErrorHandlerImpl implements MessageProcessin
 
     @Override
     public void onError(Params params) {
-        params.getEx().printStackTrace();
+        Throwable ex = params.getEx();
+        ex.printStackTrace();
+        log.error("Error processing request", ex);
         params.getMessage().fail(failureCode, statusCode);
-        LOGGER.error("Error processing request", params.getEx());
     }
 
     public static void main(String[] asf) {

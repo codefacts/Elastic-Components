@@ -12,11 +12,17 @@ public interface Uris {
     String groupByUserId = "/group-by-user-id";
     String outletUri = "/outlets";
     String uploadUri = "/uploads";
-    String androidUsersPictureUploadUri = "/uploads/android-users/pictures";
-    String outletPicturesUploadUri = "/uploads/outlets/pictures";
+    String androidTrackersPicturesUri = "/android-trackers/pictures";
+    String outletsPicturesUri = "/outlets/pictures";
+    String resourcesUri = "/resources";
+    String publicUri = "/public";
 
     static String api(String uriPart) {
         return "/api" + uriPart;
+    }
+
+    static String upload(String uriPart) {
+        return "/uploads" + uriPart;
     }
 
     static String singularUri(String uri) {

@@ -5,7 +5,6 @@ import elasta.core.intfs.Fun2Async;
 import elasta.core.intfs.Fun2Unckd;
 import elasta.core.promise.intfs.Promise;
 import io.vertx.core.json.JsonObject;
-import rx.functions.Func2;
 
 /**
  * Created by sohan on 7/7/2017.

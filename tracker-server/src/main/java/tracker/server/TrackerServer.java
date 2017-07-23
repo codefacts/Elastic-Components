@@ -37,7 +37,7 @@ import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.AddAllHttpResponseGeneratorImpl;
 import tracker.server.generators.response.impl.AddHttpResponseGeneratorImpl;
-import tracker.server.impl.UploadFileRequestHandlerImpl;
+import tracker.server.impl.FileUploadRequestHandlerImpl;
 import tracker.server.interceptors.AuthInterceptor;
 import tracker.server.listeners.AddPositionListener;
 import tracker.server.request.handlers.LoginRequestHandler;
@@ -54,9 +54,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
 
-import static tracker.server.Uris.api;
-import static tracker.server.Uris.bulkUri;
-import static tracker.server.Uris.singularUri;
+import static tracker.server.Uris.*;
 
 /**
  * Created by sohan on 7/1/2017.
@@ -94,7 +92,7 @@ public class TrackerServer {
     static void addHandlers(Router router) {
 
         {
-            final String loginApi = api(Uris.loginUri);
+            final String loginApi = api(loginUri);
 
             router.post(loginApi)
                 .handler(
@@ -105,7 +103,7 @@ public class TrackerServer {
         }
 
         {
-            final String logoutApi = api(Uris.logoutUri);
+            final String logoutApi = api(logoutUri);
             router.get(logoutApi)
                 .handler(
                     reqHanlder(
@@ -115,7 +113,7 @@ public class TrackerServer {
         }
 
         {
-            final String uri = api(Uris.userUri);
+            final String uri = api(userUri);
             final String singularUri = singularUri(uri);
 
             router.post(uri).handler(addHandler(Entities.USER_ENTITY, ImmutableList.of(UserModel.id, UserModel.userId, UserModel.username)));
@@ -130,7 +128,7 @@ public class TrackerServer {
         }
 
         {
-            final String uri = api(Uris.deviceUri);
+            final String uri = api(deviceUri);
             final String singularUri = singularUri(uri);
 
             router.post(uri).handler(addHandler(Entities.DEVICE_ENTITY, ImmutableList.of(DeviceModel.id, DeviceModel.deviceId, DeviceModel.type)));
@@ -141,10 +139,10 @@ public class TrackerServer {
         }
 
         {
-            final String uri = api(Uris.positionUri);
+            final String uri = api(positionUri);
             final String singularUri = singularUri(uri);
 
-            router.get(uri + Uris.groupByUserId).handler(reqHanlder(new DispatchingRequestHandlerImpl(
+            router.get(uri + groupByUserId).handler(reqHanlder(new DispatchingRequestHandlerImpl(
                 ctx -> Utils.or(ctx.getBodyAsJson(), ServerUtils.emptyJsonObject()),
                 module.require(MessageHeaderGenerator.class),
                 module.require(FindAllHttpResponseGenerator.class),
@@ -163,7 +161,7 @@ public class TrackerServer {
         }
 
         {
-            final String uri = api(Uris.outletUri);
+            final String uri = api(outletUri);
             final String singularUri = singularUri(uri);
 
             router.post(uri).handler(addHandler(Entities.OUTLET_ENTITY, ImmutableList.of(BaseModel.id)));
@@ -302,37 +300,50 @@ public class TrackerServer {
     }
 
     static void addMediaFileHandlers(Router router) {
-        router.post(api(Uris.uploadUri))
+
+        router.post(upload("/*"))
+            .handler(BodyHandler.create());
+
+        router.post(upload("/*"))
             .handler(reqHanlder(
-                new UploadFileRequestHandlerImpl(
+                new FileUploadRequestHandlerImpl(
                     vertx,
                     module.require(RequestProcessingErrorHandler.class),
                     ImmutableMap.of(
-                        Uris.androidUsersPictureUploadUri, ""
-                    )
+                        upload(androidTrackersPicturesUri), module.require(ServerConfig.class).getUploadDir() + "/android-trackers/pictures",
+                        upload(outletsPicturesUri), module.require(ServerConfig.class).getUploadDir() + "/outlets/pictures"
+                    ),
+                    module.require(ServerConfig.class).getUploadDir(),
+                    Uris.resourcesUri
                 )
             ));
     }
 
     static void addStaticFileHandlers(Router router) {
 
-        String public_content_directory = config.getString("public_content_directory");
+        router.get(Uris.resourcesUri + "/*").handler(
+            StaticHandler
+                .create(
+                    "/" + module.require(ServerConfig.class).getUploadDir()
+                )
+                .setDirectoryListing(true)
+        );
 
-        if (public_content_directory == null || public_content_directory.trim().isEmpty()) {
-            public_content_directory = new File("").getAbsolutePath();
-        }
-
-        router.get("/public/*").handler(
-            StaticHandler.create(public_content_directory).setDirectoryListing(true)
+        router.get(Uris.publicUri + "/*").handler(
+            StaticHandler
+                .create(
+                    "/" + module.require(ServerConfig.class).getPublicDir()
+                )
+                .setDirectoryListing(true)
         );
     }
 
     static void addInterceptors(Router router) {
 
-        router.post().handler(BodyHandler.create());
-        router.put().handler(BodyHandler.create());
-        router.patch().handler(BodyHandler.create());
-        router.delete().handler(BodyHandler.create());
+        router.post("/api/*").handler(BodyHandler.create());
+        router.put("/api/*").handler(BodyHandler.create());
+        router.patch("/api/*").handler(BodyHandler.create());
+        router.delete("/api/*").handler(BodyHandler.create());
 
         router.route().handler(reqHanlder(
             ctx -> {
@@ -390,8 +401,7 @@ public class TrackerServer {
                 10,
                 "r",
                 "kdheofdsys;fhrvtwo38rpcmbgbhdiig-b7wngy9gir993,vh9dte-46to3nf8gyd",
-                authTokenExpireTime(),
-                new File(new File("").getAbsoluteFile(), "uploads").toString()
+                authTokenExpireTime()
             )
         ).mesageBus();
     }
@@ -408,8 +418,18 @@ public class TrackerServer {
                 .messageBus(messageBus)
                 .vertx(vertx)
                 .authTokenExpireTime(authTokenExpireTime())
+                .serverConfig(
+                    ServerConfig.builder()
+                        .uploadDir(config.getString("upload_directory", new File(baseDir(), "/uploads").getAbsolutePath()))
+                        .publicDir(config.getString("public_content_directory", new File(baseDir(), "/public").getAbsolutePath()))
+                        .build()
+                )
                 .build()
         ).build();
+    }
+
+    private static File baseDir() {
+        return new File("").getAbsoluteFile();
     }
 
     static JsonObject getDbConfig() {

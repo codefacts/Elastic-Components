@@ -19,7 +19,7 @@ dependencies {
     compile project(':elasta-sql')
     compile project(':elasta-criteria')
 
-    compile group: 'io.vertx', name: 'vertx-core', version: '3.3.3'
+    compile group: 'io.vertx', name: 'vertx-core', version: '3.4.2'
 
     compileOnly "org.projectlombok:lombok:1.16.14"
 
