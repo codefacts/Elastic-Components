@@ -1,11 +1,8 @@
 package tracker;
 
 import com.google.common.collect.ImmutableMap;
-import elasta.orm.entity.EntityMappingHelper;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.functions.Consumer;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +16,8 @@ public interface TrackerUtils {
     String anonymous = "anonymous";
     String KEY_DEVICE_ID = "deviceId";
     String KEY_ANDROID_DEVICE_TOKEN = "androidDeviceToken";
+    Consumer NOOPS_DO_ON_NEXT = t -> {
+    };
 
     static Map<String, Object> copyValues(Map<String, Object> srcMap, Map<String, String> keyMapping) {
 
@@ -36,5 +35,9 @@ public interface TrackerUtils {
         });
 
         return mapBuilder.build();
+    }
+
+    static <T> Consumer<T> noopsDoOnNext() {
+        return NOOPS_DO_ON_NEXT;
     }
 }

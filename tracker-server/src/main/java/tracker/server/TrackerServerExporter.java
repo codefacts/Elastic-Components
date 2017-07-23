@@ -3,6 +3,8 @@ package tracker.server;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import elasta.composer.MessageBus;
+import elasta.composer.MessageProcessingErrorHandler;
+import elasta.composer.impl.MessageProcessingErrorHandlerImpl;
 import elasta.module.ModuleExporter;
 import elasta.module.ModuleSystemBuilder;
 import elasta.orm.Orm;
@@ -15,7 +17,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.jdbc.JDBCClient;
 import lombok.Builder;
 import lombok.Value;
-import tracker.TrackerUtils;
+import tracker.*;
+import tracker.StatusCodes;
 import tracker.entity_config.Entities;
 import tracker.server.component.AuthTokenGenerator;
 import tracker.server.component.impl.AuthTokenGeneratorImpl;
@@ -23,6 +26,7 @@ import tracker.server.generators.request.MessageHeaderGenerator;
 import tracker.server.generators.request.impl.MessageHeaderGeneratorImpl;
 import tracker.server.generators.response.*;
 import tracker.server.generators.response.impl.*;
+import tracker.server.impl.ErrorHandlerImpl;
 import tracker.server.interceptors.impl.AuthInterceptorImpl;
 import tracker.server.listeners.*;
 import tracker.server.request.handlers.LogoutRequestHandler;
@@ -87,7 +91,7 @@ public interface TrackerServerExporter extends ModuleExporter {
 
         builder.export(MessageHeaderGenerator.class, module -> module.export(new MessageHeaderGeneratorImpl(ServerUtils.CUSTOM_HEADER_PREFIX)));
 
-        builder.export(RequestProcessingErrorHandler.class, module -> module.export(new RequestProcessingErrorHandlerImpl()));
+        exportErrorHandlers(builder);
 
         builder.export(AuthTokenGenerator.class, module -> module.export(new AuthTokenGeneratorImpl(
             module.require(StorageMap.class),
@@ -119,6 +123,15 @@ public interface TrackerServerExporter extends ModuleExporter {
         return builder;
     }
 
+    static void exportErrorHandlers(ModuleSystemBuilder builder) {
+
+        builder.export(RequestProcessingErrorHandler.class, module -> module.export(new RequestProcessingErrorHandlerImpl()));
+        builder.export(ErrorHandler.class, module -> module.export(new ErrorHandlerImpl()));
+        builder.export(MessageProcessingErrorHandler.class, module -> module.export(new MessageProcessingErrorHandlerImpl(
+            50, StatusCodes.unexpectedError
+        )));
+    }
+
     static void exportListeners(ModuleSystemBuilder builder, Vertx vertx, JDBCClient jdbcClient, MessageBus messageBus) {
 
         builder.export(AddPositionListener.class, module -> module.export(new AddPositionListenerImpl(
@@ -127,7 +140,9 @@ public interface TrackerServerExporter extends ModuleExporter {
 
         builder.export(NewPositionListener.class, module -> module.export(new NewPositionListenerImpl(
             module.require(Orm.class),
-            module.require(EventBus.class)
+            module.require(EventBus.class),
+            module.require(MessageProcessingErrorHandler.class),
+            module.require(ErrorHandler.class)
         )));
     }
 

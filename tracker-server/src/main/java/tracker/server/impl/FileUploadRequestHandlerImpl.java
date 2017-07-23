@@ -1,17 +1,13 @@
 package tracker.server.impl;
 
-import com.google.common.collect.ImmutableMap;
-import elasta.composer.model.response.ErrorModel;
 import elasta.core.promise.impl.Promises;
 import elasta.core.promise.intfs.Defer;
 import elasta.core.promise.intfs.Promise;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

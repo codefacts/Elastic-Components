@@ -27,12 +27,7 @@ final public class DelegatingMessageHandlerImpl implements MessageHandler<Object
             messageHandler.handle(message);
 
         } catch (Exception ex) {
-            messageProcessingErrorHandler.onError(
-                MessageProcessingErrorHandler.Params.builder()
-                    .ex(ex)
-                    .message(message)
-                    .build()
-            );
+            messageProcessingErrorHandler.handleError(ex, message);
         }
     }
 }

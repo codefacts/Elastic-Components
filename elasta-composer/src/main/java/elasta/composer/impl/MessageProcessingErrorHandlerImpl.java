@@ -1,6 +1,7 @@
 package elasta.composer.impl;
 
 import elasta.composer.MessageProcessingErrorHandler;
+import io.vertx.core.eventbus.Message;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,11 +22,9 @@ final public class MessageProcessingErrorHandlerImpl implements MessageProcessin
     }
 
     @Override
-    public void onError(Params params) {
-        Throwable ex = params.getEx();
-        ex.printStackTrace();
-        log.error("Error processing request", ex);
-        params.getMessage().fail(failureCode, statusCode);
+    public void handleError(Throwable throwable, Message message) {
+        log.error("Error processing request", throwable);
+        message.fail(failureCode, statusCode);
     }
 
     public static void main(String[] asf) {

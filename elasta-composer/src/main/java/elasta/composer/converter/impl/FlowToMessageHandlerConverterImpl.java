@@ -37,7 +37,7 @@ final public class FlowToMessageHandlerConverterImpl<T> implements FlowToMessage
     @Override
     public MessageHandler<T> convert(Flow flow) {
 
-        return tMessage -> {
+        return message -> {
 
             try {
 
@@ -45,30 +45,18 @@ final public class FlowToMessageHandlerConverterImpl<T> implements FlowToMessage
                     Msg.<T>builder()
                         .context(new ContextImpl(ImmutableMap.of()))
                         .headers(new HeadersImpl(
-                            ComposerUtils.toListMultimap(tMessage.headers()),
+                            ComposerUtils.toListMultimap(message.headers()),
                             convertersMap.getMap()
                         ))
-                        .userId(userIdConverter.convert(tMessage.headers().get(UserModel.userId)))
-                        .body(tMessage.body())
+                        .userId(userIdConverter.convert(message.headers().get(UserModel.userId)))
+                        .body(message.body())
                         .build())
-                    .then(msg -> tMessage.reply(msg.body(), new DeliveryOptions().setHeaders(new VertxMultiMap(msg.headers().getMultimap()))))
-                    .err(throwable -> {
-                        messageProcessingErrorHandler.onError(
-                            new MessageProcessingErrorHandler.Params(
-                                throwable,
-                                tMessage
-                            )
-                        );
-                    });
+                    .then(msg -> message.reply(msg.body(), new DeliveryOptions().setHeaders(new VertxMultiMap(msg.headers().getMultimap()))))
+                    .err(throwable -> messageProcessingErrorHandler.handleError(throwable, message));
 
             } catch (Exception ex) {
 
-                messageProcessingErrorHandler.onError(
-                    new MessageProcessingErrorHandler.Params(
-                        ex,
-                        tMessage
-                    )
-                );
+                messageProcessingErrorHandler.handleError(ex, message);
             }
         };
     }

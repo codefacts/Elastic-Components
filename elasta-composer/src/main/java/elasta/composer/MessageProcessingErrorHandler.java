@@ -11,23 +11,5 @@ import java.util.Objects;
  */
 public interface MessageProcessingErrorHandler {
 
-    void onError(Params params);
-
-    @Value
-    @Builder
-    final class Params {
-        final Throwable ex;
-        final Message message;
-
-        public Params(Throwable ex, Message message) {
-            Objects.requireNonNull(ex);
-            Objects.requireNonNull(message);
-            this.ex = ex;
-            this.message = message;
-        }
-
-        public <T> Message<T> getMessage() {
-            return message;
-        }
-    }
+    void handleError(Throwable throwable, Message message);
 }
