@@ -30,8 +30,9 @@ import elasta.orm.OrmExporter;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.idgenerator.LongIdGenerator;
 import elasta.orm.idgenerator.ObjectIdGenerator;
-import elasta.orm.idgenerator.impl.LongIdGeneratorImpl;
+import elasta.orm.idgenerator.impl.RandomLongIdGeneratorImpl;
 import elasta.orm.idgenerator.impl.LongObjectIdGeneratorImpl;
+import elasta.orm.idgenerator.impl.TimestampBasedLongIdGenerator;
 import elasta.pipeline.MessageBundle;
 import elasta.pipeline.util.MessageBundleImpl;
 import io.vertx.core.Vertx;
@@ -258,7 +259,7 @@ public interface TrackerExporter extends ModuleExporter {
             )
         ));
 
-        builder.export(LongIdGenerator.class, module -> module.export(new LongIdGeneratorImpl()));
+        builder.export(LongIdGenerator.class, module -> module.export(new TimestampBasedLongIdGenerator()));
 
         return builder;
     }

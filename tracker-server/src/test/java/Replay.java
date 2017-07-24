@@ -43,7 +43,7 @@ public interface Replay {
 
         publishSubject
             .delay(0, TimeUnit.SECONDS)
-            .filter(positionAndUserId -> positionAndUserId.getFloat(PositionModel.accuracy) < 38)
+//            .filter(positionAndUserId -> positionAndUserId.getFloat(PositionModel.accuracy) < 38)
             .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
             .doOnNext(jsonObject -> {
 

@@ -1,6 +1,6 @@
 package test;
 
-import elasta.orm.idgenerator.impl.LongIdGeneratorImpl;
+import elasta.orm.idgenerator.impl.RandomLongIdGeneratorImpl;
 
 import java.util.HashSet;
 
@@ -9,7 +9,7 @@ import java.util.HashSet;
  */
 public interface IdGeneratorTest {
     static void main(String[] asdf) {
-        LongIdGeneratorImpl longIdGenerator = new LongIdGeneratorImpl();
+        RandomLongIdGeneratorImpl longIdGenerator = new RandomLongIdGeneratorImpl();
 
         int count = 100000000;
 

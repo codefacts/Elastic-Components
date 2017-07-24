@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * Created by sohan on 5/15/2017.
  */
-final public class LongIdGeneratorImpl implements LongIdGenerator {
+final public class RandomLongIdGeneratorImpl implements LongIdGenerator {
 
     @Override
     public Promise<Long> nextId(String entity) {
