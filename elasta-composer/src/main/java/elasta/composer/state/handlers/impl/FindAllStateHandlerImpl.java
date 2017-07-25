@@ -26,16 +26,18 @@ final public class FindAllStateHandlerImpl implements FindAllStateHandler<JsonOb
     final String entity;
     final String alias;
     final Collection<FieldExpression> selections;
+    final Collection<QueryExecutor.JoinParam> joinParams;
     final FieldExpression paginationKey;
     final Orm orm;
     final JsonObjectToPageRequestConverter jsonObjectToPageRequestConverter;
     final JsonObjectToQueryParamsConverter jsonObjectToQueryParamsConverter;
     final PageModelBuilder pageModelBuilder;
 
-    public FindAllStateHandlerImpl(String entity, String alias, Collection<FieldExpression> selections, FieldExpression paginationKey, Orm orm, JsonObjectToPageRequestConverter jsonObjectToPageRequestConverter, JsonObjectToQueryParamsConverter jsonObjectToQueryParamsConverter, PageModelBuilder pageModelBuilder) {
+    public FindAllStateHandlerImpl(String entity, String alias, Collection<FieldExpression> selections, Collection<QueryExecutor.JoinParam> joinParams, FieldExpression paginationKey, Orm orm, JsonObjectToPageRequestConverter jsonObjectToPageRequestConverter, JsonObjectToQueryParamsConverter jsonObjectToQueryParamsConverter, PageModelBuilder pageModelBuilder) {
         Objects.requireNonNull(entity);
         Objects.requireNonNull(alias);
         Objects.requireNonNull(selections);
+        Objects.requireNonNull(joinParams);
         Objects.requireNonNull(paginationKey);
         Objects.requireNonNull(orm);
         Objects.requireNonNull(jsonObjectToPageRequestConverter);
@@ -44,6 +46,7 @@ final public class FindAllStateHandlerImpl implements FindAllStateHandler<JsonOb
         this.entity = entity;
         this.alias = alias;
         this.selections = selections;
+        this.joinParams = joinParams;
         this.paginationKey = paginationKey;
         this.orm = orm;
         this.jsonObjectToPageRequestConverter = jsonObjectToPageRequestConverter;
@@ -63,6 +66,7 @@ final public class FindAllStateHandlerImpl implements FindAllStateHandler<JsonOb
                 .entity(entity)
                 .alias(alias)
                 .selections(selections)
+                .joinParams(joinParams)
                 .query(query)
                 .paginationKey(paginationKey)
                 .pageRequest(pageRequest)

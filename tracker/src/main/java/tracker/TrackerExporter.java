@@ -1,5 +1,6 @@
 package tracker;
 
+import com.google.common.collect.ImmutableMap;
 import elasta.authorization.Authorizer;
 import elasta.composer.*;
 import elasta.composer.builder.impl.ConvertersMapBuilderImpl;
@@ -30,7 +31,6 @@ import elasta.orm.OrmExporter;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.idgenerator.LongIdGenerator;
 import elasta.orm.idgenerator.ObjectIdGenerator;
-import elasta.orm.idgenerator.impl.RandomLongIdGeneratorImpl;
 import elasta.orm.idgenerator.impl.LongObjectIdGeneratorImpl;
 import elasta.orm.idgenerator.impl.TimestampBasedLongIdGenerator;
 import elasta.pipeline.MessageBundle;
@@ -41,7 +41,7 @@ import io.vertx.ext.jdbc.JDBCClient;
 import lombok.Builder;
 import lombok.Value;
 import tracker.entity_config.Entities;
-import tracker.impl.AppHelpersImpl;
+import tracker.impl.EntityToDefaultSelectionsMapImpl;
 import tracker.impl.FlowBuilderHelperImpl;
 import tracker.impl.MessageHandlersBuilderImpl;
 import tracker.impl.UserIdConverterImpl;
@@ -93,9 +93,10 @@ public interface TrackerExporter extends ModuleExporter {
             new FlowBuilderHelperImpl(module.require(EntityToStateHandlersMap.class))
         ));
 
-        builder.export(AppHelpers.class, module -> {
-            module.export(new AppHelpersImpl(
-                module.require(App.Config.class).getRootAlias(), module.require(EntityMappingHelper.class)
+        builder.export(EntityToDefaultSelectionsMap.class, module -> {
+            module.export(new EntityToDefaultSelectionsMapImpl(
+                module.require(App.Config.class).getRootAlias(), module.require(EntityMappingHelper.class),
+                DefaultSelectionsMap.getMap()
             ));
         });
     }

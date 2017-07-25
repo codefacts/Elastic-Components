@@ -30,10 +30,10 @@ public interface MerchandiserEntities {
                     field(OutletModel.name),
                     field(OutletModel.address),
                     field(OutletModel.qrCode),
-                    field(OutletModel.location, hasOneLocation()),
-                    field(OutletModel.locationGps, hasOneLocation()),
-                    field(OutletModel.locationNetwork, hasOneLocation()),
-                    field(OutletModel.images, hasManyOutletImages())
+                    field(OutletModel.location, JavaType.OBJECT, hasOneLocation()),
+                    field(OutletModel.locationGps, JavaType.OBJECT, hasOneLocation()),
+                    field(OutletModel.locationNetwork, JavaType.OBJECT, hasOneLocation()),
+                    field(OutletModel.images, JavaType.ARRAY, hasManyOutletImages())
                 ))
                 .addAll(Entities.baseFields())
                 .build(list -> list.toArray(new Field[list.size()])),
@@ -109,10 +109,10 @@ public interface MerchandiserEntities {
                     field(OutletImageModel.fileName),
                     field(OutletImageModel.height),
                     field(OutletImageModel.width),
-                    field(OutletImageModel.outlet, hasOneOutlet())
+                    field(OutletImageModel.outlet, JavaType.OBJECT, hasOneOutlet())
                 ))
                 .addAll(Entities.baseFields())
-                .build(list -> new Field[list.size()]),
+                .build(list -> list.toArray(new Field[list.size()])),
             new DbMapping(
                 Entities.OUTLET_IMAGE_TABLE,
                 OutletImageTable.id,

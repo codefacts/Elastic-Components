@@ -1,5 +1,7 @@
-package elasta.orm.entity;
+package elasta.orm.entity.impl;
 
+import elasta.orm.entity.DependencyInfo;
+import elasta.orm.entity.DependencyTpl;
 import elasta.orm.entity.core.Entity;
 
 import java.util.*;

@@ -1,5 +1,7 @@
-package elasta.orm.entity;
+package elasta.orm.entity.impl;
 
+import elasta.orm.entity.DependencyInfo;
+import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.columnmapping.*;
@@ -7,6 +9,7 @@ import elasta.orm.entity.core.columnmapping.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by sohan on 4/14/2017.
@@ -102,6 +105,7 @@ public class TableToTableDependenyMapBuilder {
 
             final Field[] fields = entity.getFields();
             for (Field field : fields) {
+                Objects.requireNonNull(field, "Null in fields in entity '" + entityName + "'");
                 indexMap.put(field.getName(), field);
             }
         }

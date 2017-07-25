@@ -3,7 +3,6 @@ package elasta.orm.entity.impl;
 import com.google.common.collect.ImmutableList;
 import elasta.orm.entity.DependencyTpl;
 import elasta.orm.entity.EntitiesPreprocessor;
-import elasta.orm.entity.TableDependency;
 import elasta.orm.entity.core.RelationType;
 import elasta.orm.entity.core.DbMapping;
 import elasta.orm.entity.core.Entity;

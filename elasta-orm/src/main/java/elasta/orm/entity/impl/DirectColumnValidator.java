@@ -110,7 +110,7 @@ final class DirectColumnValidator {
 
         if (Utils.not(isFieldTypeOk)) {
             throw new EntityValidationException("Field '" + field.getName() + "' has an invalid type '" + field.getJavaType() + "' for dbColumnMappingType '"
-                + mapping.getColumnType() + "'");
+                + mapping.getColumnType() + "' in entity '" + entity.getName() + "'");
         }
     }
 }

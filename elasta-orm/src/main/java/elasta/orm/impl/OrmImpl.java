@@ -121,6 +121,22 @@ final public class OrmImpl implements Orm {
     }
 
     @Override
+    public <T> Promise<JsonObject> findOne(QueryExecutor.QueryParams params) {
+        return findAll(params)
+            .map(jsonObjects -> {
+                
+                if (jsonObjects.size() > 1) {
+                    throw new OrmException("Multiple results found but expected one");
+                }
+                if (jsonObjects.size() <= 0) {
+                    throw new OrmException("No result found");
+                }
+
+                return jsonObjects.get(0);
+            });
+    }
+
+    @Override
     public <T> Promise<List<JsonObject>> findAll(String entity, String alias, Collection<T> ids, Collection<FieldExpression> selections) {
         return queryDataLoader.query(
             QueryExecutor.QueryParams.builder()

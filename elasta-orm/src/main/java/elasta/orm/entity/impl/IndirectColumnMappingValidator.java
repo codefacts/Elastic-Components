@@ -3,11 +3,8 @@ package elasta.orm.entity.impl;
 import elasta.commons.Utils;
 import elasta.orm.entity.DependencyInfo;
 import elasta.orm.entity.DependencyTpl;
-import elasta.orm.entity.EntityUtils;
-import elasta.orm.entity.TableDependency;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.columnmapping.IndirectRelationMapping;
-import elasta.orm.entity.core.columnmapping.ColumnMapping;
 import elasta.orm.entity.ex.EntityValidationException;
 
 import java.util.List;

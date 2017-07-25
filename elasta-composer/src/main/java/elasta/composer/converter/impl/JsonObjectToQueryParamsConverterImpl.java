@@ -19,6 +19,8 @@ import io.vertx.core.json.JsonObject;
 import java.util.Collection;
 import java.util.Objects;
 
+import static elasta.composer.ComposerUtils.emptyJsonArray;
+
 /**
  * Created by sohan on 5/12/2017.
  */
@@ -33,15 +35,20 @@ final public class JsonObjectToQueryParamsConverterImpl implements JsonObjectToQ
 
         final JsonObject query = params.getQuery();
 
+        Collection<FieldExpression> selections = params.getSelections();
+        final Collection<FieldExpression> fieldExpressions = toSelections(query.getJsonArray(QueryModel.selections, emptyJsonArray()), selections);
+
         return QueryExecutor.QueryParams.builder()
             .entity(params.getEntity())
             .alias(params.getAlias())
-            .joinParams(toJoinParams(query.getJsonArray(QueryModel.joinParams, ComposerUtils.emptyJsonArray())))
-            .selections(toSelections(query.getJsonArray(QueryModel.selections, ComposerUtils.emptyJsonArray()), params.getSelections()))
+            .joinParams(
+                fieldExpressions == selections ? params.getJoinParams() : toJoinParams(query.getJsonArray(QueryModel.joinParams, emptyJsonArray()))
+            )
+            .selections(fieldExpressions)
             .criteria(query.getJsonObject(QueryModel.criteria, ComposerUtils.emptyJsonObject()))
             .having(query.getJsonObject(QueryModel.having, ComposerUtils.emptyJsonObject()))
-            .groupBy(toGroupBy(query.getJsonArray(QueryModel.groupBy, ComposerUtils.emptyJsonArray())))
-            .orderBy(toOrderBy(query.getJsonArray(QueryModel.orderBy, ComposerUtils.emptyJsonArray())))
+            .groupBy(toGroupBy(query.getJsonArray(QueryModel.groupBy, emptyJsonArray())))
+            .orderBy(toOrderBy(query.getJsonArray(QueryModel.orderBy, emptyJsonArray())))
             .pagination(
                 toPagination(params.getPageRequest(), query.getString(QueryModel.paginationKey), params.getPaginationKey())
             )

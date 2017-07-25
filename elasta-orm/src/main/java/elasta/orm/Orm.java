@@ -29,6 +29,8 @@ public interface Orm {
 
     <T> Promise<JsonObject> findOne(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections);
 
+    <T> Promise<JsonObject> findOne(QueryExecutor.QueryParams params);
+
     <T> Promise<List<JsonObject>> findAll(String entity, String alias, Collection<T> ids, Collection<FieldExpression> selections);
 
     Promise<List<JsonObject>> findAll(String entity, String alias, JsonObject criteria, Collection<FieldExpression> selections);

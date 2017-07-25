@@ -1,6 +1,7 @@
 package elasta.orm.entity;
 
 import elasta.orm.entity.core.Entity;
+import elasta.orm.entity.impl.TableDependency;
 import lombok.Builder;
 import lombok.Value;
 

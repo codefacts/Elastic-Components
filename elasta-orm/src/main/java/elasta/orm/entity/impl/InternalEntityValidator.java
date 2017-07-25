@@ -4,7 +4,6 @@ import elasta.commons.Utils;
 import elasta.orm.entity.DependencyTpl;
 import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.EntityValidator;
-import elasta.orm.entity.TableDependency;
 import elasta.orm.entity.core.*;
 import elasta.orm.entity.core.columnmapping.*;
 import elasta.orm.entity.ex.EntityValidationException;
@@ -196,12 +195,12 @@ final class InternalEntityValidator {
         Map<String, DependencyTpl> tableToDependencyInfoMap = tableDependency.getTableToDependencyInfoMap();
 
         DependencyTpl dependencyTpl = tableToDependencyInfoMap.get(mapping.getReferencingTable());
-        if (dependencyTpl == null) {
+        if (dependencyTpl == null && (mapping.getColumnType() == RelationType.VIRTUAL)) {
             throw new EntityValidationException(
                 "No dependency found for referencingTable '" + mapping.getReferencingTable() + "' in relationship '" + entity.getName() + "." + mapping.getField() + "' - '" + mapping.getReferencingEntity() + "'"
             );
         }
-        return Optional.of(dependencyTpl);
+        return Optional.ofNullable(dependencyTpl);
     }
 
     private void validatePrimaryKey() {

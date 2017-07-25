@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import elasta.orm.entity.core.Entity;
 import elasta.orm.entity.core.Field;
 import elasta.orm.entity.core.columnmapping.*;
+import elasta.orm.entity.impl.*;
 import lombok.Builder;
 import lombok.Value;
 
@@ -84,6 +85,34 @@ public interface EntityUtils {
             );
         }
         return mapBuilder.build();
+    }
+
+    static Collection<Entity> validateAndPreProcess(Collection<Entity> entities) {
+
+        Map<String, TableDependency> tableToTableDependencyMap = new TableToTableDependenyMapBuilder()
+            .build(entities).getTableToTableDependencyMap();
+
+        Map<String, Entity> entityMap = toEntityNameToEntityMap(entities);
+
+        new EntitiesValidatorImpl(
+            new EntityValidatorImpl()
+        ).validate(
+            EntitiesValidator.Params.builder()
+                .entities(entities)
+                .tableToTableDependencyMap(
+                    tableToTableDependencyMap
+                )
+                .entityNameToEntityMap(entityMap)
+                .build()
+        );
+
+        return new EntitiesPreprocessorImpl().process(
+            EntitiesPreprocessor.Params.builder()
+                .entityNameToEntityMap(entityMap)
+                .entities(entities)
+                .tableToTableDependencyMap(tableToTableDependencyMap)
+                .build()
+        );
     }
 
     @Value

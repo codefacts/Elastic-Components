@@ -8,7 +8,7 @@ import elasta.orm.builder.impl.OperationMapBuilder;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.entity.EntityUtils;
 import elasta.orm.entity.core.Entity;
-import elasta.orm.entity.impl.EntityMappingHelperImpl;
+import elasta.orm.entity.impl.*;
 import elasta.sql.*;
 import elasta.orm.impl.BaseOrmImpl;
 import elasta.orm.impl.OrmImpl;
@@ -47,7 +47,7 @@ public interface OrmExporter extends ModuleExporter {
 
         builder.export(EntityMappingHelper.class, module -> {
             module.export(new EntityMappingHelperImpl(
-                EntityUtils.toEntityNameToEntityMap(entities)
+                entities
             ));
         });
 

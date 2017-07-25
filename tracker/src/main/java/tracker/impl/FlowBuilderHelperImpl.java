@@ -21,10 +21,9 @@ import elasta.orm.query.expression.FieldExpression;
 import elasta.pipeline.validator.JsonObjectValidatorAsync;
 import elasta.sql.SqlDB;
 import tracker.App;
-import tracker.AppHelpers;
+import tracker.EntityToDefaultSelectionsMap;
 import tracker.FlowBuilderHelper;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -153,7 +152,7 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
                 conversionToCriteriaStateHandler(module),
                 findOneStateHandler(
                     module,
-                    params.getEntity(),
+                    params.getEntity(), params.getAction(),
                     module.require(App.Config.class).getRootAlias()
                 ),
                 endStateHandler(module)
@@ -194,9 +193,11 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
         );
     }
 
-    private FindOneStateHandler findOneStateHandler(ModuleSystem module, String entity, String rootAlias) {
+    private FindOneStateHandler findOneStateHandler(ModuleSystem module, String entity, String action, String rootAlias) {
+        EntityToDefaultSelectionsMap.SelectionsAndJoinParams selections = findOneFieldSelections(module, entity, action, rootAlias);
         return new FindOneStateHandlerImpl(
-            rootAlias, entity, fieldSelections(module, entity, rootAlias),
+            rootAlias, entity, selections.getFieldExpressions(),
+            selections.getJoinParams(),
             module.require(Orm.class)
         );
     }
@@ -215,17 +216,22 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
                 startStateHandler(module),
                 authorizeStateHandler(module, params.getAction()),
                 module.require(BeforeFindAllStateHandler.class),
-                findAllStateHandler(module, params.getEntity(), params.getPaginationKey()),
+                findAllStateHandler(module, params.getEntity(), params.getAction(), params.getPaginationKey()),
                 endStateHandler(module)
             ).build()
         );
     }
 
-    private FindAllStateHandler findAllStateHandler(ModuleSystem module, String entity, FieldExpression paginationKey) {
+    private FindAllStateHandler findAllStateHandler(ModuleSystem module, String entity, String action, FieldExpression paginationKey) {
+
+        final EntityToDefaultSelectionsMap.SelectionsAndJoinParams selectionsAndJoinParams = module.require(EntityToDefaultSelectionsMap.class)
+            .fieldSelections(new EntityToDefaultSelectionsMap.EntityAndAction(entity, action));
+
         return new FindAllStateHandlerImpl(
             entity,
             module.require(App.Config.class).getRootAlias(),
-            module.require(AppHelpers.class).findAllFields(entity),
+            selectionsAndJoinParams.getFieldExpressions(),
+            selectionsAndJoinParams.getJoinParams(),
             paginationKey,
             module.require(Orm.class),
             module.require(JsonObjectToPageRequestConverter.class),
@@ -349,10 +355,14 @@ final public class FlowBuilderHelperImpl implements FlowBuilderHelper {
         );
     }
 
-    private List<FieldExpression> fieldSelections(ModuleSystem module, String entity, String rootAlias) {
-        return ImmutableList.copyOf(
-            module.require(AppHelpers.class).findOneFields(entity)
-        );
+    private EntityToDefaultSelectionsMap.SelectionsAndJoinParams findOneFieldSelections(ModuleSystem module, String entity, String action, String rootAlias) {
+
+        return module.require(EntityToDefaultSelectionsMap.class)
+            .fieldSelections(
+                new EntityToDefaultSelectionsMap.EntityAndAction(
+                    entity, action
+                )
+            );
     }
 
     private JsonObjectValidatorAsync asyncUserValidator() {

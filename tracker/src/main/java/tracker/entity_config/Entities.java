@@ -41,26 +41,6 @@ public interface Entities {
         );
     }
 
-    static DirectRelationMappingImpl locationMapping(String field, String column) {
-        return new DirectRelationMappingImpl(
-            LOCATION_TABLE,
-            LOCATION_ENTITY,
-            ImmutableList.of(
-                new ForeignColumnMapping(
-                    column,
-                    LocationTable.id
-                )
-            ),
-            field,
-            new DirectRelationMappingOptionsImpl(
-                RelationMappingOptions.CascadeUpsert.YES,
-                RelationMappingOptions.CascadeDelete.YES,
-                true,
-                DirectRelationMappingOptions.LoadAndDelete.NO_OPERATION
-            )
-        );
-    }
-
     static ColumnMapping column(String field, String column) {
         return new ColumnMappingImpl(field, column, DbType.NUMBER);
     }
@@ -69,8 +49,8 @@ public interface Entities {
         return new Field(name);
     }
 
-    static Field field(String name, Relationship relationship) {
-        return new Field(name, relationship);
+    static Field field(String name, JavaType javaType, Relationship relationship) {
+        return new Field(name, javaType, relationship);
     }
 
     static Entity positionEntity() {
@@ -205,9 +185,31 @@ public interface Entities {
     }
 
     static Field createdByField() {
-        return new Field(UserModel.createdBy, JavaType.OBJECT, Optional.of(new Relationship(
-            Relationship.Type.MANY_TO_ONE, Relationship.Name.HAS_ONE, USER_ENTITY
-        )));
+        return new Field(
+            UserModel.createdBy, JavaType.OBJECT, Optional.of(
+            new Relationship(
+                Relationship.Type.MANY_TO_ONE,
+                Relationship.Name.HAS_ONE,
+                USER_ENTITY
+            )
+        ));
+    }
+
+    static DirectRelationMappingImpl locationMapping(String field, String column) {
+        return new DirectRelationMappingImpl(
+            LOCATION_TABLE,
+            LOCATION_ENTITY,
+            ImmutableList.of(
+                new ForeignColumnMapping(column, LocationTable.id)
+            ),
+            field,
+            new DirectRelationMappingOptionsImpl(
+                RelationMappingOptions.CascadeUpsert.YES,
+                RelationMappingOptions.CascadeDelete.YES,
+                true,
+                DirectRelationMappingOptions.LoadAndDelete.NO_OPERATION
+            )
+        );
     }
 
     static RelationMapping updatedBy() {

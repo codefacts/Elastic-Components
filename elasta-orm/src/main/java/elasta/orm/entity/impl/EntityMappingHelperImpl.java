@@ -14,7 +14,6 @@ import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -24,25 +23,11 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
     final Map<String, Entity> entityMap;
     final Map<String, Entity> tableToEntityMap;
 
-    public EntityMappingHelperImpl(Map<String, Entity> entityMap) {
-        Objects.requireNonNull(entityMap);
-        this.entityMap = entityMap;
-        this.tableToEntityMap = ImmutableMap.copyOf(
-            entityMap.entrySet().stream()
-                .collect(
-                    Collectors.toMap(
-                        e -> e.getValue().getDbMapping().getTable(),
-                        Map.Entry::getValue
-                    )
-                )
-        );
-    }
-
-    public EntityMappingHelperImpl(Map<String, Entity> entityMap, Map<String, Entity> tableToEntityMap) {
-        Objects.requireNonNull(entityMap);
-        Objects.requireNonNull(tableToEntityMap);
-        this.entityMap = entityMap;
-        this.tableToEntityMap = tableToEntityMap;
+    public EntityMappingHelperImpl(Collection<Entity> entities) {
+        Objects.requireNonNull(entities);
+        entities = EntityUtils.validateAndPreProcess(entities);
+        this.entityMap = EntityUtils.toEntityNameToEntityMap(entities);
+        this.tableToEntityMap = EntityUtils.toTableToEntityMap(entities);
     }
 
     @Override
@@ -106,8 +91,10 @@ final public class EntityMappingHelperImpl implements EntityMappingHelper {
 
     @Override
     public Field getField(String entity, String field) {
+        Objects.requireNonNull(entity);
+        Objects.requireNonNull(field);
         return Arrays.stream(getEntity(entity).getFields())
-            .filter(ff -> ff.getName().equals(field))
+            .filter(ff -> Objects.equals(ff.getName(), field))
             .findAny().orElseThrow(() -> new EntityMappingHelperExcpetion("Field '" + field + "' does not exists in '" + entity + "'"));
     }
 

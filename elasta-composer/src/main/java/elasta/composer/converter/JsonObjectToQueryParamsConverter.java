@@ -28,20 +28,23 @@ public interface JsonObjectToQueryParamsConverter extends Converter<JsonObjectTo
         final FieldExpression paginationKey;
         final PageRequest pageRequest;
         final String alias;
+        private Collection<QueryExecutor.JoinParam> joinParams;
 
-        ConvertParams(Collection<FieldExpression> selections, String entity, JsonObject query, FieldExpression paginationKey, PageRequest pageRequest, String alias) {
+        ConvertParams(Collection<FieldExpression> selections, String entity, JsonObject query, FieldExpression paginationKey, PageRequest pageRequest, String alias, Collection<QueryExecutor.JoinParam> joinParams) {
             Objects.requireNonNull(selections);
             Objects.requireNonNull(entity);
             Objects.requireNonNull(query);
             Objects.requireNonNull(paginationKey);
             Objects.requireNonNull(pageRequest);
             Objects.requireNonNull(alias);
+            Objects.requireNonNull(joinParams);
             this.selections = selections;
             this.entity = entity;
             this.query = query;
             this.paginationKey = paginationKey;
             this.pageRequest = pageRequest;
             this.alias = alias;
+            this.joinParams = joinParams;
         }
     }
 }
