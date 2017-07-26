@@ -20,6 +20,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import tracker.*;
 import tracker.entity_config.Entities;
+import tracker.message.handlers.AuthenticateMessageHandler;
 import tracker.message.handlers.impl.AuthenticateMessageHandlerImpl;
 import tracker.message.handlers.impl.DelegatingMessageHandlerImpl;
 import tracker.model.AuthRequestModel;
@@ -28,7 +29,6 @@ import tracker.model.PositionModel;
 import tracker.model.UserModel;
 import tracker.state.handlers.FindAllLatestPositionsGroupByUserId;
 
-import java.io.File;
 import java.util.Objects;
 
 /**
@@ -143,13 +143,7 @@ final public class AppImpl implements App {
     private MessageHandlersBuilder.AddressAndHandler createAuthMessageHandlers(ModuleSystem module) {
 
         return new MessageHandlersBuilder.AddressAndHandler(
-            Addresses.authenticate,
-            new AuthenticateMessageHandlerImpl(module.require(Orm.class), ImmutableSet.of(
-                UserModel.userId,
-                UserModel.username,
-                UserModel.email,
-                UserModel.phone
-            ), AuthRequestModel.user, AuthRequestModel.password)
+            Addresses.authenticate, module.require(AuthenticateMessageHandler.class)
         );
     }
 

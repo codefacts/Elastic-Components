@@ -1,4 +1,4 @@
-package elasta.orm.query.read.impl;
+package elasta.orm.query.read;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

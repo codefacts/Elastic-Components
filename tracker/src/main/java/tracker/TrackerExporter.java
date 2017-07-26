@@ -1,6 +1,7 @@
 package tracker;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import elasta.authorization.Authorizer;
 import elasta.composer.*;
 import elasta.composer.builder.impl.ConvertersMapBuilderImpl;
@@ -27,6 +28,7 @@ import elasta.eventbus.SimpleEventBus;
 import elasta.eventbus.impl.SimpleEventBusImpl;
 import elasta.module.ModuleExporter;
 import elasta.module.ModuleSystemBuilder;
+import elasta.orm.Orm;
 import elasta.orm.OrmExporter;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.idgenerator.LongIdGenerator;
@@ -45,7 +47,11 @@ import tracker.impl.EntityToDefaultSelectionsMapImpl;
 import tracker.impl.FlowBuilderHelperImpl;
 import tracker.impl.MessageHandlersBuilderImpl;
 import tracker.impl.UserIdConverterImpl;
+import tracker.message.handlers.AuthenticateMessageHandler;
+import tracker.message.handlers.impl.AuthenticateMessageHandlerImpl;
+import tracker.model.AuthRequestModel;
 import tracker.model.BaseTable;
+import tracker.model.UserModel;
 
 import java.util.Objects;
 
@@ -99,6 +105,18 @@ public interface TrackerExporter extends ModuleExporter {
                 DefaultSelectionsMap.getMap()
             ));
         });
+
+        builder.export(AuthenticateMessageHandler.class, module -> module.export(
+            new AuthenticateMessageHandlerImpl(
+                module.require(Orm.class),
+                ImmutableSet.of(
+                    UserModel.userId,
+                    UserModel.username,
+                    UserModel.email,
+                    UserModel.phone
+                ), AuthRequestModel.user, AuthRequestModel.password, module.require(MessageProcessingErrorHandler.class)
+            )
+        ));
     }
 
     static ModuleSystemBuilder exportAppComponents(ModuleSystemBuilder builder, App.Config config) {

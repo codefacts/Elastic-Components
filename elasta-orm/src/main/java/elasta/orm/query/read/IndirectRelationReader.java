@@ -1,4 +1,4 @@
-package elasta.orm.query.read.impl;
+package elasta.orm.query.read;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface IndirectRelationReader {
 
-    List<JsonObject> read(JsonArray data, List<JsonArray> dataList);
+    List<JsonObject> read(Object parentId, JsonArray data, List<JsonArray> dataList);
 }

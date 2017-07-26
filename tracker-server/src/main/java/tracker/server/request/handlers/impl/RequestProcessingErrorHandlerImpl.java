@@ -38,7 +38,7 @@ final public class RequestProcessingErrorHandlerImpl implements RequestProcessin
             ctx.response().end(new JsonObject(
                 ImmutableMap.of(
                     ErrorModel.statusCode, StatusCodes.authorizationError,
-                    ErrorModel.message, "Auth Token is not valid"
+                    ErrorModel.message, "Auth Token is not valid. Please login"
                 )
             ).encode());
             return;

@@ -1,8 +1,7 @@
-package elasta.orm.query.read.builder;
+package elasta.orm.query.read.builder.impl;
 
 import elasta.orm.entity.core.Field;
 import elasta.orm.query.expression.PathExpression;
-import elasta.orm.query.read.builder.ObjectReaderBuilderImpl.PathInfo;
 import elasta.orm.query.read.builder.ex.ObjectReaderException;
 import elasta.orm.query.read.impl.FieldAndIndexPair;
 
@@ -16,16 +15,16 @@ import static elasta.commons.Utils.not;
 /**
  * Created by sohan on 5/1/2017.
  */
-class ReaderBuilder {
+final class ReaderBuilder {
     private final ObjectReaderBuilderImpl objectReaderBuilder;
-    final Map<PathExpression, PathInfo> map = new HashMap<>();
+    final Map<PathExpression, ObjectReaderBuilderImpl.PathInfo> map = new HashMap<>();
 
     ReaderBuilder(ObjectReaderBuilderImpl objectReaderBuilder) {
         Objects.requireNonNull(objectReaderBuilder);
         this.objectReaderBuilder = objectReaderBuilder;
     }
 
-    public Map<PathExpression, PathInfo> build() {
+    public Map<PathExpression, ObjectReaderBuilderImpl.PathInfo> build() {
 
         for (int index = 0; index < objectReaderBuilder.fieldExpressions.size(); index++) {
 
@@ -47,7 +46,7 @@ class ReaderBuilder {
             String fieldName = parts.get(i);
             Field field = objectReaderBuilder.helper.getField(entity, fieldName);
 
-            final PathInfo pathInfo = getOrCreatePathInfo(pathExpression.subPath(0, i));
+            final ObjectReaderBuilderImpl.PathInfo pathInfo = getOrCreatePathInfo(pathExpression.subPath(0, i));
 
             switch (field.getJavaType()) {
                 case OBJECT: {
@@ -69,7 +68,13 @@ class ReaderBuilder {
 
         Field field = objectReaderBuilder.helper.getField(entity, pathExpression.last());
 
-        getOrCreatePathInfo(pathExpression.subPath(0, pathExpression.size() - 1))
+        ObjectReaderBuilderImpl.PathInfo pathInfo = getOrCreatePathInfo(pathExpression.subPath(0, pathExpression.size() - 1));
+
+        if (Objects.equals(objectReaderBuilder.helper.getPrimaryKey(entity), field.getName())) {
+            pathInfo.setPrimaryKeyIndex(index);
+        }
+
+        pathInfo
             .fieldAndIndexPairsBuilder
             .add(
                 new FieldAndIndexPair(field.getName(), index)
@@ -93,10 +98,10 @@ class ReaderBuilder {
         return pathExpression;
     }
 
-    private PathInfo getOrCreatePathInfo(PathExpression pathExpression) {
-        PathInfo pathInfo = map.get(pathExpression);
+    private ObjectReaderBuilderImpl.PathInfo getOrCreatePathInfo(PathExpression pathExpression) {
+        ObjectReaderBuilderImpl.PathInfo pathInfo = map.get(pathExpression);
         if (pathInfo == null) {
-            map.put(pathExpression, pathInfo = new PathInfo(objectReaderBuilder.helper, objectReaderBuilder.rootEntity));
+            map.put(pathExpression, pathInfo = new ObjectReaderBuilderImpl.PathInfo(objectReaderBuilder.helper, objectReaderBuilder.rootEntity));
         }
         return pathInfo;
     }

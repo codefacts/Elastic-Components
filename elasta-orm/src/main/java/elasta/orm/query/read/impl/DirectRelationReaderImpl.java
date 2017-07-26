@@ -1,5 +1,6 @@
 package elasta.orm.query.read.impl;
 
+import elasta.orm.query.read.DirectRelationReader;
 import elasta.orm.query.read.ObjectReader;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

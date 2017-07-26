@@ -14,7 +14,7 @@ import elasta.orm.query.expression.builder.impl.PathExpressionAndAliasPair;
 import elasta.orm.query.expression.core.*;
 import elasta.orm.query.expression.ex.QueryException;
 import elasta.orm.query.read.ObjectReader;
-import elasta.orm.query.read.builder.ObjectReaderBuilderImpl;
+import elasta.orm.query.read.builder.impl.ObjectReaderBuilderImpl;
 import elasta.sql.SqlDB;
 import elasta.orm.query.expression.builder.FieldExpressionResolverImpl;
 import elasta.sql.core.SqlQuery;
@@ -130,11 +130,34 @@ final public class QueryImpl implements Query {
             return sqlDB.query(sqlQuery)
                 .map(ResultSet::getResults)
                 .map(
-                    jsonArrays -> jsonArrays.stream()
-                        .map(jsonArray -> objectReader.read(jsonArray, jsonArrays))
-                        .collect(Collectors.toList())
+                    jsonArrays -> distinct(
+                        jsonArrays.stream()
+                            .map(jsonArray -> objectReader.read(jsonArray, jsonArrays))
+                            .collect(Collectors.toList()),
+                        helper.getPrimaryKey(rootEntity)
+                    )
                 )
                 ;
+        }
+
+        private List<JsonObject> distinct(List<JsonObject> jsonObjects, final String key) {
+            final HashSet<Object> keySet = new HashSet<>();
+            final ImmutableList.Builder<JsonObject> builder = ImmutableList.builder();
+
+            jsonObjects.forEach(jsonObject -> {
+
+                Object primaryKeyValue = jsonObject.getValue(key);
+                Objects.requireNonNull(primaryKeyValue);
+
+                if (keySet.contains(primaryKeyValue)) {
+                    return;
+                }
+
+                keySet.add(primaryKeyValue);
+                builder.add(jsonObject);
+            });
+
+            return builder.build();
         }
 
         private Map<FieldExpression, AliasAndColumn> combineAliasAndColumnMaps(Map<FieldExpression, AliasAndColumn> selectFieldExpressionToAliasAndColumnMap, Map<FieldExpression, AliasAndColumn> fieldExpToAliasedColumnMap) {

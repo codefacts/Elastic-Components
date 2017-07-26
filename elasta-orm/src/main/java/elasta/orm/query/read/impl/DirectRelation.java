@@ -1,5 +1,7 @@
 package elasta.orm.query.read.impl;
 
+import elasta.orm.query.read.DirectRelationReader;
+
 import java.util.Objects;
 
 /**

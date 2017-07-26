@@ -1,4 +1,4 @@
-package elasta.orm.query.read.builder;
+package elasta.orm.query.read.builder.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -7,6 +7,8 @@ import elasta.orm.entity.core.Field;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.read.ObjectReader;
+import elasta.orm.query.read.builder.ObjectReaderBuilder;
+import elasta.orm.query.read.builder.ex.InvalidPrimaryKeyIndexException;
 import elasta.orm.query.read.builder.ex.ObjectReaderException;
 import elasta.orm.query.read.impl.*;
 
@@ -58,6 +60,7 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
         final ImmutableSet.Builder<FieldAndIndexPair> fieldAndIndexPairsBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<PathExpression> directRelationsBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<PathExpression> indirectRelationsBuilder = ImmutableSet.builder();
+        private int primaryKeyIndex = -1;
 
         public PathInfo(EntityMappingHelper helper, String rootEntity) {
             this.helper = helper;
@@ -65,6 +68,11 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
         }
 
         public ObjectReader build(Map<PathExpression, PathInfo> map) {
+
+            if (primaryKeyIndex < 0) {
+                throw new InvalidPrimaryKeyIndexException("Invalid primary key index " + primaryKeyIndex + "");
+            }
+
             final ImmutableSet<FieldAndIndexPair> fieldAndIndexPairs = fieldAndIndexPairsBuilder.build();
             final ImmutableSet<PathExpression> directRelations = directRelationsBuilder.build();
             final ImmutableSet<PathExpression> indirectRelations = indirectRelationsBuilder.build();
@@ -102,7 +110,8 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
                         field(pathExpression),
                         new IndirectRelationReaderImpl(
                             primaryKey(pathExpression),
-                            pathInfo.build(map)
+                            pathInfo.build(map),
+                            primaryKeyIndex
                         )
                     )
                 );
@@ -111,7 +120,8 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
             return new ObjectReaderImpl(
                 ImmutableList.copyOf(fieldAndIndexPairs),
                 ImmutableList.copyOf(directBuilder.build()),
-                ImmutableList.copyOf(indirectBuilder.build())
+                ImmutableList.copyOf(indirectBuilder.build()),
+                primaryKeyIndex
             );
         }
 
@@ -132,6 +142,11 @@ final public class ObjectReaderBuilderImpl implements ObjectReaderBuilder {
             }
 
             return helper.getPrimaryKey(entity);
+        }
+
+        public PathInfo setPrimaryKeyIndex(int primaryKeyIndex) {
+            this.primaryKeyIndex = primaryKeyIndex;
+            return this;
         }
     }
 

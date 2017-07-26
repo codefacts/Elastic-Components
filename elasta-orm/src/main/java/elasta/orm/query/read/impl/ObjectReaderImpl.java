@@ -16,14 +16,16 @@ final public class ObjectReaderImpl implements ObjectReader {
     final List<FieldAndIndexPair> fieldAndIndexPairs;
     final List<DirectRelation> directRelations;
     final List<IndirectRelation> indirectRelations;
+    final int primaryKeyIndex;
 
-    public ObjectReaderImpl(List<FieldAndIndexPair> fieldAndIndexPairs, List<DirectRelation> directRelations, List<IndirectRelation> indirectRelations) {
+    public ObjectReaderImpl(List<FieldAndIndexPair> fieldAndIndexPairs, List<DirectRelation> directRelations, List<IndirectRelation> indirectRelations, int primaryKeyIndex) {
         Objects.requireNonNull(fieldAndIndexPairs);
         Objects.requireNonNull(directRelations);
         Objects.requireNonNull(indirectRelations);
         this.fieldAndIndexPairs = fieldAndIndexPairs;
         this.directRelations = directRelations;
         this.indirectRelations = indirectRelations;
+        this.primaryKeyIndex = primaryKeyIndex;
     }
 
     @Override
@@ -38,7 +40,7 @@ final public class ObjectReaderImpl implements ObjectReader {
         });
 
         indirectRelations.forEach(indirectRelation -> {
-            map.put(indirectRelation.getField(), indirectRelation.getIndirectRelationReader().read(data, dataList));
+            map.put(indirectRelation.getField(), indirectRelation.getIndirectRelationReader().read(data.getValue(primaryKeyIndex), data, dataList));
         });
 
         return new JsonObject(map);

@@ -3,8 +3,10 @@ package tracker.message.handlers.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import elasta.composer.MessageProcessingErrorHandler;
 import elasta.composer.model.response.ErrorModel;
 import elasta.orm.Orm;
+import elasta.orm.ex.OrmException;
 import elasta.orm.query.expression.PathExpression;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import elasta.sql.JsonOps;
@@ -30,16 +32,19 @@ final public class AuthenticateMessageHandlerImpl implements AuthenticateMessage
     final Set<String> loginFields;
     final String userKey;
     final String passwordKey;
+    final MessageProcessingErrorHandler messageProcessingErrorHandler;
 
-    public AuthenticateMessageHandlerImpl(Orm orm, Set<String> loginFields, String userKey, String passwordKey) {
+    public AuthenticateMessageHandlerImpl(Orm orm, Set<String> loginFields, String userKey, String passwordKey, MessageProcessingErrorHandler messageProcessingErrorHandler) {
         Objects.requireNonNull(orm);
         Objects.requireNonNull(loginFields);
         Objects.requireNonNull(userKey);
         Objects.requireNonNull(passwordKey);
+        Objects.requireNonNull(messageProcessingErrorHandler);
         this.orm = orm;
         this.loginFields = ImmutableSet.copyOf(loginFields);
         this.userKey = userKey;
         this.passwordKey = passwordKey;
+        this.messageProcessingErrorHandler = messageProcessingErrorHandler;
         if (loginFields.isEmpty()) {
             throw new AuthenticateMessageHandlerException("LoginFields can not be empty");
         }
@@ -79,6 +84,7 @@ final public class AuthenticateMessageHandlerImpl implements AuthenticateMessage
                 "r",
                 criteria,
                 ImmutableList.of(
+                    new FieldExpressionImpl(PathExpression.create("r", UserModel.id)),
                     new FieldExpressionImpl(PathExpression.create("r", UserModel.userId)),
                     new FieldExpressionImpl(PathExpression.create("r", UserModel.username)),
                     new FieldExpressionImpl(PathExpression.create("r", UserModel.password))
@@ -101,9 +107,17 @@ final public class AuthenticateMessageHandlerImpl implements AuthenticateMessage
                     )
                 );
             })
-            .err(throwable -> message.reply(
-                error(StatusCodes.userNotFoundError, "User not found")
-            ))
+            .err(throwable -> {
+
+                if (throwable instanceof OrmException) {
+                    message.reply(
+                        error(StatusCodes.userNotFoundError, "User not found")
+                    );
+                    return;
+                }
+
+                messageProcessingErrorHandler.handleError(throwable, message);
+            })
         ;
     }
 
