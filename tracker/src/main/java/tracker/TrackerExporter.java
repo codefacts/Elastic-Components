@@ -28,6 +28,7 @@ import elasta.eventbus.SimpleEventBus;
 import elasta.eventbus.impl.SimpleEventBusImpl;
 import elasta.module.ModuleExporter;
 import elasta.module.ModuleSystemBuilder;
+import elasta.orm.BaseOrm;
 import elasta.orm.Orm;
 import elasta.orm.OrmExporter;
 import elasta.orm.entity.EntityMappingHelper;
@@ -48,7 +49,9 @@ import tracker.impl.FlowBuilderHelperImpl;
 import tracker.impl.MessageHandlersBuilderImpl;
 import tracker.impl.UserIdConverterImpl;
 import tracker.message.handlers.AuthenticateMessageHandler;
+import tracker.message.handlers.ReplayMessageHandler;
 import tracker.message.handlers.impl.AuthenticateMessageHandlerImpl;
+import tracker.message.handlers.impl.ReplayMessageHandlerImpl;
 import tracker.model.AuthRequestModel;
 import tracker.model.BaseTable;
 import tracker.model.UserModel;
@@ -88,6 +91,12 @@ public interface TrackerExporter extends ModuleExporter {
     }
 
     static void exportExtraComponents(ModuleSystemBuilder builder, App.Config config) {
+
+        builder.export(ReplayMessageHandler.class, module -> module.export(new ReplayMessageHandlerImpl(
+            module.require(BaseOrm.class),
+            module.require(AppDateTimeFormatter.class),
+            module.require(MessageProcessingErrorHandler.class)
+        )));
 
         builder.export(MessageHandlersBuilder.class, module -> {
             module.export(new MessageHandlersBuilderImpl(

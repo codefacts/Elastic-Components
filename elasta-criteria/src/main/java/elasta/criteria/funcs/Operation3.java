@@ -30,14 +30,14 @@ public class Operation3 implements Func {
 
     @Override
     public String get(ParamsBuilder paramsBuilder) {
-        return FnCnst.LP +
+        return FuntionalOps.LP +
             func1.get(paramsBuilder) +
-            FnCnst.SPACE +
+            FuntionalOps.SPACE +
             operator1 +
-            FnCnst.SPACE +
+            FuntionalOps.SPACE +
             func2.get(paramsBuilder) +
-            FnCnst.SPACE +
+            FuntionalOps.SPACE +
             operator2 +
-            FnCnst.RP;
+            FuntionalOps.RP;
     }
 }

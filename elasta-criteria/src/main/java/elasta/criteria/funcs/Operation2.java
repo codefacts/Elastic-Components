@@ -24,6 +24,6 @@ final public class Operation2 implements Func {
 
     @Override
     public String get(ParamsBuilder paramsBuilder) {
-        return FnCnst.LP + func1.get(paramsBuilder) + FnCnst.SPACE + operator + FnCnst.SPACE + func2.get(paramsBuilder) + FnCnst.RP;
+        return FuntionalOps.LP + func1.get(paramsBuilder) + FuntionalOps.SPACE + operator + FuntionalOps.SPACE + func2.get(paramsBuilder) + FuntionalOps.RP;
     }
 }

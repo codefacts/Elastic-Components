@@ -1,6 +1,8 @@
 package elasta.sql;
 
 import com.google.common.collect.ImmutableMap;
+import elasta.criteria.Ops;
+import elasta.criteria.json.mapping.OpNames;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -32,7 +34,37 @@ public interface JsonOps {
     static <T> JsonObject eq(String fieldExpStr, T value) {
         return new JsonObject(
             ImmutableMap.of(
-                op, "eq",
+                op, OpNames.eq,
+                "arg1", field(fieldExpStr),
+                "arg2", value
+            )
+        );
+    }
+
+    static <T> JsonObject lt(String fieldExpStr, T value) {
+        return new JsonObject(
+            ImmutableMap.of(
+                op, OpNames.lt,
+                "arg1", field(fieldExpStr),
+                "arg2", value
+            )
+        );
+    }
+
+    static <T> JsonObject lte(String fieldExpStr, T value) {
+        return new JsonObject(
+            ImmutableMap.of(
+                op, OpNames.lte,
+                "arg1", field(fieldExpStr),
+                "arg2", value
+            )
+        );
+    }
+
+    static <T> JsonObject gte(String fieldExpStr, T value) {
+        return new JsonObject(
+            ImmutableMap.of(
+                op, OpNames.gte,
                 "arg1", field(fieldExpStr),
                 "arg2", value
             )

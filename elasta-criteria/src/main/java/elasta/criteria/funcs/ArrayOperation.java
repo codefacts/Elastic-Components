@@ -32,9 +32,9 @@ final public class ArrayOperation implements Func {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        final String _op_ = FnCnst.SPACE + operation + FnCnst.SPACE;
+        final String _op_ = FuntionalOps.SPACE + operation + FuntionalOps.SPACE;
 
-        stringBuilder.append(FnCnst.LP);
+        stringBuilder.append(FuntionalOps.LP);
 
         for (Func func : funcs) {
             stringBuilder.append(func.get(paramsBuilder)).append(_op_);
@@ -42,7 +42,7 @@ final public class ArrayOperation implements Func {
 
         stringBuilder.delete(stringBuilder.length() - _op_.length(), stringBuilder.length());
 
-        stringBuilder.append(FnCnst.RP);
+        stringBuilder.append(FuntionalOps.RP);
 
         return stringBuilder.toString();
     }

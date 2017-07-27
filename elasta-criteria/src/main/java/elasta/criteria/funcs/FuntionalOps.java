@@ -3,7 +3,7 @@ package elasta.criteria.funcs;
 /**
  * Created by Jango on 2017-01-07.
  */
-public interface FnCnst {
+public interface FuntionalOps {
     String AND = "AND";
     String _AND = " AND";
     String COMMA = ",";

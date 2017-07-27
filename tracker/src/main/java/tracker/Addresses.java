@@ -11,6 +11,7 @@ public interface Addresses {
 
     String authenticate = "authenticate";
     String findAllPositionsGroupByUserId = findAll(Entities.POSITION_ENTITY) + ".group-by-user-id";
+    String replayUserPositions = "replayUserPositions";
 
     static String post(String address) {
         Objects.requireNonNull(address);

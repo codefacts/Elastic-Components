@@ -2,6 +2,7 @@ package tracker;
 
 import com.google.common.collect.ImmutableMap;
 import io.reactivex.functions.Consumer;
+import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
 
@@ -18,6 +19,7 @@ public interface TrackerUtils {
     String KEY_ANDROID_DEVICE_TOKEN = "androidDeviceToken";
     Consumer NOOPS_DO_ON_NEXT = t -> {
     };
+    JsonObject EMPTY_JS = new JsonObject(ImmutableMap.of());
 
     static Map<String, Object> copyValues(Map<String, Object> srcMap, Map<String, String> keyMapping) {
 
@@ -39,5 +41,9 @@ public interface TrackerUtils {
 
     static <T> Consumer<T> noopsDoOnNext() {
         return NOOPS_DO_ON_NEXT;
+    }
+
+    static JsonObject emptyJsonObject() {
+        return EMPTY_JS;
     }
 }

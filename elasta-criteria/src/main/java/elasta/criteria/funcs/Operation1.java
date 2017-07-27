@@ -1,7 +1,6 @@
 package elasta.criteria.funcs;
 
-import elasta.criteria.Func;import elasta.criteria.ParamsBuilder;import elasta.criteria.Func;
-import elasta.criteria.ParamsBuilder;
+import elasta.criteria.Func;import elasta.criteria.ParamsBuilder;
 
 import java.util.Objects;
 
@@ -21,6 +20,6 @@ final public class Operation1 implements Func {
 
     @Override
     public String get(ParamsBuilder paramsBuilder) {
-        return FnCnst.LP + operator + func.get(paramsBuilder) + FnCnst.RP;
+        return FuntionalOps.LP + operator + func.get(paramsBuilder) + FuntionalOps.RP;
     }
 }

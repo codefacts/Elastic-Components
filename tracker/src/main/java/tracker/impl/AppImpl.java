@@ -21,8 +21,10 @@ import io.vertx.core.json.JsonObject;
 import tracker.*;
 import tracker.entity_config.Entities;
 import tracker.message.handlers.AuthenticateMessageHandler;
+import tracker.message.handlers.ReplayMessageHandler;
 import tracker.message.handlers.impl.AuthenticateMessageHandlerImpl;
 import tracker.message.handlers.impl.DelegatingMessageHandlerImpl;
+import tracker.message.handlers.impl.ReplayMessageHandlerImpl;
 import tracker.model.AuthRequestModel;
 import tracker.model.BaseModel;
 import tracker.model.PositionModel;
@@ -99,6 +101,13 @@ final public class AppImpl implements App {
 
         addMessageHandler(
             createFindAllPositionsGroupByUserId()
+        );
+
+        addMessageHandler(
+            new MessageHandlersBuilder.AddressAndHandler(
+                Addresses.replayUserPositions,
+                module.require(ReplayMessageHandler.class)
+            )
         );
 
         return module;
