@@ -60,7 +60,7 @@ final public class ReplayMessageHandlerImpl implements ReplayMessageHandler {
 
     private void reqReplyLoop(LoopContext context) {
 
-        final int reqSlots = context.getReqSlots();
+        final int reqSlots = Math.min(context.getReqSlots(), context.getTotalSlots() - context.getSlotsReturned());
         final Message<JsonObject> message = context.getMessage();
 
         new ReplayServiceImpl(

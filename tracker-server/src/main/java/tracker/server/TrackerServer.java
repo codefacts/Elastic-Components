@@ -375,6 +375,13 @@ public class TrackerServer {
             new PermittedOptions().setAddress(BrowserEvents.userPositionTracking)
         ));
 
+        options.setOutboundPermitted(ImmutableList.of(
+            new PermittedOptions().setAddress(BrowserEvents.replayUserPositions)
+        ));
+        options.setInboundPermitted(ImmutableList.of(
+            new PermittedOptions().setAddress(BrowserEvents.replayUserPositions)
+        ));
+
         sockJSHandler.bridge(options);
 
         router.route("/eventbus/*").handler(sockJSHandler);

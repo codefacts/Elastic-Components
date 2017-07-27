@@ -7,4 +7,5 @@ import io.vertx.ext.web.handler.sockjs.PermittedOptions;
  */
 public interface BrowserEvents {
     String userPositionTracking = "user-position-tracking";
+    String replayUserPositions = "replay-user-positions";
 }
