@@ -4,6 +4,7 @@ import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.FieldExpression;
 import elasta.orm.query.expression.Query;
+import elasta.orm.query.expression.builder.ex.FieldExpressionResolverException;
 import elasta.orm.query.expression.impl.QueryImpl;
 import elasta.orm.query.expression.builder.*;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
@@ -55,7 +56,11 @@ final public class QueryBuilderImpl implements QueryBuilder {
     }
 
     @Override
-    public FieldExpressionHolderFunc select(FieldExpression fieldExpression) {
+    public FieldExpressionHolderFunc select(final FieldExpression fieldExpression) {
+
+        if (selectFieldExpressionResolver.containsKey(fieldExpression)) {
+            throw new FieldExpressionResolverException("Same fieldExpression '" + fieldExpression + "' more than once is not supported in selections");
+        }
 
         return new FieldExpressionHolderFuncImpl(
             fieldExpression,

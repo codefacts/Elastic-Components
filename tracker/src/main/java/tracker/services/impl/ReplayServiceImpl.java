@@ -42,9 +42,7 @@ final public class ReplayServiceImpl implements ReplayService {
         final TimeSlot timeSlot = new TimeSlot(timeStart, step);
         UserIdToPositionMapGenerator userIdToPositionMapGenerator = new UserIdToPositionMapGenerator();
 
-        Observable<JsonObject> dataObservable = loadData(timeStart + count * step);
-
-        return dataObservable
+        return loadData(timeStart + count * step)
             .flatMap(timeSlot::buffer)
             .map(userIdToPositionMapGenerator::produce)
             ;
@@ -60,8 +58,8 @@ final public class ReplayServiceImpl implements ReplayService {
                         .criteria(
                             JsonOps.and(
                                 ImmutableList.of(
-                                    JsonOps.gte("r.time", appDateTimeFormatter.format(new Date(timeStart))),
-                                    JsonOps.lt("r.time", appDateTimeFormatter.format(new Date(timeEnd)))
+                                    JsonOps.gte("r." + PositionModel.time, appDateTimeFormatter.format(new Date(timeStart))),
+                                    JsonOps.lt("r." + PositionModel.time, appDateTimeFormatter.format(new Date(timeEnd)))
                                 )
                             )
                         )

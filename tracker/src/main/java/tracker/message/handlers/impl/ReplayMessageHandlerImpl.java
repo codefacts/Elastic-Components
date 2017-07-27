@@ -85,39 +85,31 @@ final public class ReplayMessageHandlerImpl implements ReplayMessageHandler {
                             return;
                         }
 
-                        final Message<JsonObject> replyMessage = event.result();
-                        final JsonObject req = replyMessage.body();
-                        Objects.requireNonNull(req);
+                        try {
 
-                        reqReplyLoop(
-                            LoopContext.builder()
-                                .endTime(context.getEndTime())
-                                .step(context.getStep())
-                                .totalSlots(context.getTotalSlots())
-                                .message(replyMessage)
-                                .startTime(context.getStartTime() + context.getStep() * reqSlots)
-                                .slotsReturned(context.getSlotsReturned() + reqSlots)
-                                .build()
-                        );
+                            final Message<JsonObject> replyMessage = event.result();
+                            final JsonObject req = replyMessage.body();
+                            Objects.requireNonNull(req);
+
+                            reqReplyLoop(
+                                LoopContext.builder()
+                                    .endTime(context.getEndTime())
+                                    .step(context.getStep())
+                                    .totalSlots(context.getTotalSlots())
+                                    .message(replyMessage)
+                                    .startTime(context.getStartTime() + context.getStep() * reqSlots)
+                                    .slotsReturned(context.getSlotsReturned() + reqSlots)
+                                    .build()
+                            );
+                        } catch (Exception ex) {
+                            messageProcessingErrorHandler.handleError(ex, event.result());
+                        }
                     }
                 );
 
             }, throwable -> messageProcessingErrorHandler.handleError(throwable, message))
         ;
 
-    }
-
-    private int remainingSlots(long time, long timeStart, long timeEnd, long step) {
-        final long timeDiff = timeEnd - timeStart;
-        final int slotCount = (int) ((time - timeStart) / step) + 1;
-        final int division = (int) (timeDiff / step);
-        final int totalSlotCount = timeDiff % step == 0 ? (division) : (division) + 1;
-        return totalSlotCount - slotCount;
-    }
-
-    private boolean isInLastSlot(final long time, long timeEnd, long step) {
-
-        return (timeEnd - step) <= (time);
     }
 
     @Value
