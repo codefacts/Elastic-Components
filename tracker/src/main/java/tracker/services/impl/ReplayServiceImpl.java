@@ -43,6 +43,8 @@ final public class ReplayServiceImpl implements ReplayService {
         final TimeSlot timeSlot = new TimeSlot(timeStart, step);
         UserIdToPositionMapGenerator userIdToPositionMapGenerator = new UserIdToPositionMapGenerator();
 
+        System.out.println("### Loading Data...");
+
         return loadData(timeStart + count * step)
             .doOnNext(jsonObject -> System.out.println("#### loadData: " + jsonObject.size()))
             .flatMap(timeSlot::buffer)
@@ -53,7 +55,8 @@ final public class ReplayServiceImpl implements ReplayService {
     }
 
     private Observable<JsonObject> loadData(long timeEnd) {
-        return Observable.generate(
+        System.out.println("### Observable.create");
+        return Observable.create(
             emitter -> orm
                 .query(
                     QueryExecutor.QueryParams.builder()

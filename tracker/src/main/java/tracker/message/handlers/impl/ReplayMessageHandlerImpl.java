@@ -45,6 +45,8 @@ final public class ReplayMessageHandlerImpl implements ReplayMessageHandler {
         final int reqSlots = Math.min(request.getInteger(ReplayModel.requestedSlots), totalSlots);
         final long step = (endTime - startTime) / totalSlots;
 
+        System.out.println("### RequestReceived");
+
         reqReplyLoop(
             LoopContext.builder()
                 .message(message)
@@ -139,7 +141,6 @@ final public class ReplayMessageHandlerImpl implements ReplayMessageHandler {
             Preconditions.checkArgument(startTime > 0);
             Preconditions.checkArgument(endTime > 0);
             Preconditions.checkArgument(totalSlots > 0);
-            Preconditions.checkArgument(reqSlots > 0);
             Preconditions.checkArgument(step > 0);
             this.startTime = startTime;
             this.endTime = endTime;
