@@ -1,7 +1,9 @@
 package tracker;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.reactivex.functions.Consumer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
@@ -20,6 +22,7 @@ public interface TrackerUtils {
     Consumer NOOPS_DO_ON_NEXT = t -> {
     };
     JsonObject EMPTY_JS = new JsonObject(ImmutableMap.of());
+    JsonArray EMPTY_JSON_ARRAY = new JsonArray(ImmutableList.of());
 
     static Map<String, Object> copyValues(Map<String, Object> srcMap, Map<String, String> keyMapping) {
 
@@ -45,5 +48,9 @@ public interface TrackerUtils {
 
     static JsonObject emptyJsonObject() {
         return EMPTY_JS;
+    }
+
+    static JsonArray emptyJsonArray() {
+        return EMPTY_JSON_ARRAY;
     }
 }

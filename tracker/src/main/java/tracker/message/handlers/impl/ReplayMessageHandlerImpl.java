@@ -6,11 +6,11 @@ import elasta.composer.MessageProcessingErrorHandler;
 import elasta.orm.BaseOrm;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.impl.Arguments;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Value;
+import tracker.TrackerUtils;
 import tracker.message.handlers.ReplayMessageHandler;
 import tracker.model.request.ReplayModel;
 import tracker.services.impl.ReplayServiceImpl;
@@ -63,15 +63,23 @@ final public class ReplayMessageHandlerImpl implements ReplayMessageHandler {
         final int reqSlots = Math.min(context.getReqSlots(), context.getTotalSlots() - context.getSlotsReturned());
         final Message<JsonObject> message = context.getMessage();
 
+        if (reqSlots <= 0) {
+            message.reply(TrackerUtils.emptyJsonArray());
+            return;
+        }
+
         new ReplayServiceImpl(
             orm, appDateTimeFormatter, context.getStartTime(), context.getStep()
         )
             .next(reqSlots)
             .toList()
-            .subscribe(jsonObjects -> {
+            .doOnSuccess(jsonObjects -> {
 
-                if (reqSlots + context.getSlotsReturned() >= context.getTotalSlots()) {
+                System.out.println("#### size: " + jsonObjects.size());
 
+                if ((reqSlots + context.getSlotsReturned()) >= context.getTotalSlots()) {
+
+                    System.out.println("[[[ #### returning final reply #### ]]]");
                     message.reply(new JsonArray(jsonObjects));
                     return;
                 }
@@ -99,6 +107,7 @@ final public class ReplayMessageHandlerImpl implements ReplayMessageHandler {
                                     .message(replyMessage)
                                     .startTime(context.getStartTime() + context.getStep() * reqSlots)
                                     .slotsReturned(context.getSlotsReturned() + reqSlots)
+                                    .reqSlots(req.getInteger(ReplayModel.requestedSlots, 0))
                                     .build()
                             );
                         } catch (Exception ex) {
@@ -106,8 +115,11 @@ final public class ReplayMessageHandlerImpl implements ReplayMessageHandler {
                         }
                     }
                 );
-
-            }, throwable -> messageProcessingErrorHandler.handleError(throwable, message))
+            })
+            .subscribe(TrackerUtils.noopsDoOnNext(), throwable -> {
+                System.out.println("#### Error in reply.....");
+                messageProcessingErrorHandler.handleError(throwable, message);
+            })
         ;
 
     }

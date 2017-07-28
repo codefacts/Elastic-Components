@@ -366,23 +366,7 @@ public class TrackerServer {
 
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx);
 
-        BridgeOptions options = new BridgeOptions();
-
-        options.setOutboundPermitted(ImmutableList.of(
-            new PermittedOptions().setAddress(BrowserEvents.userPositionTracking)
-        ));
-        options.setInboundPermitted(ImmutableList.of(
-            new PermittedOptions().setAddress(BrowserEvents.userPositionTracking)
-        ));
-
-        options.setOutboundPermitted(ImmutableList.of(
-            new PermittedOptions().setAddress(BrowserEvents.replayUserPositions)
-        ));
-        options.setInboundPermitted(ImmutableList.of(
-            new PermittedOptions().setAddress(BrowserEvents.replayUserPositions)
-        ));
-
-        sockJSHandler.bridge(options);
+        sockJSHandler.bridge(eventBusBridgeOptions());
 
         router.route("/eventbus/*").handler(sockJSHandler);
 
@@ -395,6 +379,23 @@ public class TrackerServer {
         router.route().handler(sessionHandler);
 
         return router;
+    }
+
+    private static BridgeOptions eventBusBridgeOptions() {
+
+        BridgeOptions options = new BridgeOptions();
+
+        options.setInboundPermitted(ImmutableList.of(
+            new PermittedOptions().setAddress(BrowserEvents.userPositionTracking),
+            new PermittedOptions().setAddress(BrowserEvents.replayUserPositions)
+        ));
+
+        options.setOutboundPermitted(ImmutableList.of(
+            new PermittedOptions().setAddress(BrowserEvents.userPositionTracking),
+            new PermittedOptions().setAddress(BrowserEvents.replayUserPositions)
+        ));
+
+        return options;
     }
 
     static MessageBus messageBus(Vertx vertx) {

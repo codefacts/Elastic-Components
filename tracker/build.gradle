@@ -23,7 +23,7 @@ dependencies {
     compile group: 'io.vertx', name: 'vertx-core', version: '3.4.2'
     compile group: 'io.vertx', name: 'vertx-web', version: '3.4.2'
 
-    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.1'
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.2'
 
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
 

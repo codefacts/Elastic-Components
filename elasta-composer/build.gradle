@@ -23,7 +23,7 @@ dependencies {
     compile group: 'org.eclipse.persistence', name: 'org.eclipse.persistence.jpa', version: '2.6.4'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
 
-    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.1'
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.2'
 
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.8.2'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'

@@ -8,6 +8,7 @@ import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import elasta.sql.JsonOps;
 import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import io.vertx.core.json.JsonObject;
 import tracker.entity_config.Entities;
 import tracker.model.PositionModel;
@@ -43,14 +44,17 @@ final public class ReplayServiceImpl implements ReplayService {
         UserIdToPositionMapGenerator userIdToPositionMapGenerator = new UserIdToPositionMapGenerator();
 
         return loadData(timeStart + count * step)
+            .doOnNext(jsonObject -> System.out.println("#### loadData: " + jsonObject.size()))
             .flatMap(timeSlot::buffer)
             .map(userIdToPositionMapGenerator::produce)
+            .doOnNext(jsonObject -> System.out.println("### producer returned jsonObject.size() => " + jsonObject.size()))
+            .doOnError(throwable -> System.out.println("############ ERROR => " + throwable))
             ;
     }
 
     private Observable<JsonObject> loadData(long timeEnd) {
-        return Observable.fromPublisher(subscriber -> {
-            orm
+        return Observable.generate(
+            emitter -> orm
                 .query(
                     QueryExecutor.QueryParams.builder()
                         .entity(Entities.POSITION_ENTITY)
@@ -81,28 +85,27 @@ final public class ReplayServiceImpl implements ReplayService {
                 .then(jsonObjects -> {
 
                     if (jsonObjects.isEmpty()) {
-                        subscriber.onComplete();
+                        emitter.onComplete();
                         return;
                     }
 
                     for (int i = 0, end = jsonObjects.size() - 1; i < end; i++) {
-                        subscriber.onNext(jsonObjects.get(i));
+                        emitter.onNext(jsonObjects.get(i));
                     }
 
                     final JsonObject lastPosition = jsonObjects.get(jsonObjects.size() - 1);
 
-                    subscriber.onNext(new JsonObject(
+                    emitter.onNext(new JsonObject(
                         ImmutableMap.<String, Object>builder()
                             .putAll(lastPosition.getMap())
                             .put(KEY_IS_LAST, true)
                             .build()
                     ));
-                    subscriber.onComplete();
+                    emitter.onComplete();
 
                 })
-                .err(subscriber::onError)
-            ;
-        });
+                .err(emitter::onError)
+        );
     }
 
     private long time(JsonObject jsonObject) {
@@ -122,39 +125,50 @@ final public class ReplayServiceImpl implements ReplayService {
 
         public Observable<List<JsonObject>> buffer(JsonObject position) {
 
-            final boolean isLast = position.getBoolean(KEY_IS_LAST, false);
-            final long time = time(position);
+            return Observable.defer(() -> {
 
-            if (time < endTime) {
+                final boolean isLast = position.getBoolean(KEY_IS_LAST, false);
+                final long time = time(position);
+
+                System.out.println("### isLast: " + isLast);
+
+                if (time < endTime) {
+                    builder.add(position);
+                    System.out.println("### returning Observable.empty");
+                    return isLast ? Observable.just(builder.build()) : Observable.empty();
+                }
+
+                final List<JsonObject> list = builder.build();
+
+                final long emptySlots = (time - endTime) / step;
+
+                builder = ImmutableList.builder();
+                endTime = endTime + this.step * (emptySlots + 1);
+
                 builder.add(position);
-                return isLast ? Observable.just(builder.build()) : Observable.empty();
-            }
 
-            final List<JsonObject> list = builder.build();
+                if (isLast) {
 
-            final long emptySlots = (time - endTime) / step;
-
-            builder = ImmutableList.builder();
-            endTime = endTime + this.step * (emptySlots + 1);
-
-            builder.add(position);
-
-            if (isLast) {
-                return Observable.fromIterable(
-                    ImmutableList.<List<JsonObject>>builder()
+                    List<List<JsonObject>> lists = ImmutableList.<List<JsonObject>>builder()
                         .add(list)
                         .addAll(emptySlotsList(emptySlots))
                         .add(builder.build())
-                        .build()
-                );
-            }
+                        .build();
 
-            return Observable.fromIterable(
-                ImmutableList.<List<JsonObject>>builder()
+                    System.out.println("### returning buffer ## last elements: " + lists.size());
+                    return Observable.fromIterable(
+                        lists
+                    );
+                }
+
+                final List<List<JsonObject>> lists = ImmutableList.<List<JsonObject>>builder()
                     .add(list)
                     .addAll(emptySlotsList(emptySlots))
-                    .build()
-            );
+                    .build();
+
+                System.out.println("### returning buffer elements: " + lists.size());
+                return Observable.fromIterable(lists);
+            });
         }
 
         private List<List<JsonObject>> emptySlotsList(long emptySlots) {
@@ -171,6 +185,8 @@ final public class ReplayServiceImpl implements ReplayService {
 
         public JsonObject produce(List<JsonObject> jsonObjects) {
 
+            System.out.println("### producer input: " + jsonObjects.size());
+
             final HashMap<String, Object> map = new HashMap<>();
 
             jsonObjects.forEach(position -> {
@@ -178,11 +194,17 @@ final public class ReplayServiceImpl implements ReplayService {
                 map.put(userId, toUserPositionModel(position));
             });
 
+            final JsonObject jsonObject = new JsonObject(map);
+
             if (lastUserIdToPositionMap == null) {
-                return new JsonObject(map);
+                System.out.println("### producer output: " + jsonObject);
+                return jsonObject;
             }
 
-            return lastUserIdToPositionMap = differentiate(lastUserIdToPositionMap, new JsonObject(map));
+            lastUserIdToPositionMap = differentiate(lastUserIdToPositionMap, jsonObject);
+
+            System.out.println("### producer output: " + lastUserIdToPositionMap);
+            return lastUserIdToPositionMap;
         }
 
         private JsonObject differentiate(JsonObject prev, JsonObject curr) {
@@ -200,7 +222,7 @@ final public class ReplayServiceImpl implements ReplayService {
                     final JsonObject prevUser =
                         prev
                             .getJsonObject(userId)
-                            .put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$absent);
+                            .put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$absent.name());
 
                     curr.put(
                         userId, prevUser
@@ -210,11 +232,11 @@ final public class ReplayServiceImpl implements ReplayService {
 
                 user.put(
                     UserPositionModel.positionStatus,
-                    UserPositionModel.PositionStatus.$present
+                    UserPositionModel.PositionStatus.$present.name()
                 );
             });
 
-            curUserIds.forEach(userId -> curr.getJsonObject(userId).put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$new));
+            curUserIds.forEach(userId -> curr.getJsonObject(userId).put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$new.name()));
 
             return curr;
         }
@@ -226,14 +248,14 @@ final public class ReplayServiceImpl implements ReplayService {
             final JsonObject user = position.getJsonObject(PositionModel.createdBy);
 
             map.putAll(user.getMap());
-            map.put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$new);
+            map.put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$new.name());
 
             map.put(UserPositionModel.position, new JsonObject(
                 ImmutableMap.of(
-                    PositionModel.id, position.getDouble(PositionModel.id),
-                    PositionModel.lat, position.getDouble(PositionModel.lat),
-                    PositionModel.lng, position.getDouble(PositionModel.lng),
-                    PositionModel.time, position.getDouble(PositionModel.time)
+                    PositionModel.id, position.getValue(PositionModel.id),
+                    PositionModel.lat, position.getValue(PositionModel.lat),
+                    PositionModel.lng, position.getValue(PositionModel.lng),
+                    PositionModel.time, position.getValue(PositionModel.time)
                 )
             ));
 
