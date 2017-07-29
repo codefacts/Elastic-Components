@@ -4,7 +4,7 @@ package elasta.sql.core;
  * Created by Jango on 17/02/09.
  */
 public enum Order {
-    ASC("asc"), DESC("desc");
+    ASC("ASC"), DESC("DESC");
     private final String val;
 
     Order(String val) {
