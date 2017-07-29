@@ -9,11 +9,6 @@ public interface UserPositionModel {
     String username = UserModel.username;
     String firstName = UserModel.firstName;
     String lastName = UserModel.lastName;
-    String positionStatus = "positionStatus";
 
     String position = "position";
-
-    enum PositionStatus {
-        $new, $absent, $present
-    }
 }

@@ -7,9 +7,11 @@ import elasta.orm.BaseOrm;
 import elasta.orm.query.QueryExecutor;
 import elasta.orm.query.expression.impl.FieldExpressionImpl;
 import elasta.sql.JsonOps;
+import elasta.sql.core.Order;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.vertx.core.json.JsonObject;
+import tracker.TrackerUtils;
 import tracker.entity_config.Entities;
 import tracker.model.PositionModel;
 import tracker.model.UserModel;
@@ -17,6 +19,9 @@ import tracker.model.UserPositionModel;
 import tracker.services.ReplayService;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static tracker.TrackerUtils.filterOutNulls;
 
 /**
  * Created by sohan on 2017-07-26.
@@ -70,6 +75,12 @@ final public class ReplayServiceImpl implements ReplayService {
                                 )
                             )
                         )
+                        .orderBy(ImmutableList.of(
+                            new QueryExecutor.OrderTpl(
+                                new FieldExpressionImpl("r." + PositionModel.time),
+                                Order.ASC
+                            )
+                        ))
                         .selections(
                             ImmutableList.of(
                                 new FieldExpressionImpl("r." + PositionModel.id),
@@ -184,7 +195,6 @@ final public class ReplayServiceImpl implements ReplayService {
     }
 
     private final static class UserIdToPositionMapGenerator {
-        private JsonObject lastUserIdToPositionMap;
 
         public JsonObject produce(List<JsonObject> jsonObjects) {
 
@@ -197,63 +207,22 @@ final public class ReplayServiceImpl implements ReplayService {
                 map.put(userId, toUserPositionModel(position));
             });
 
-            final JsonObject jsonObject = new JsonObject(map);
-
-            if (lastUserIdToPositionMap == null) {
-                System.out.println("### producer output: " + jsonObject);
-                return jsonObject;
-            }
-
-            lastUserIdToPositionMap = differentiate(lastUserIdToPositionMap, jsonObject);
-
-            System.out.println("### producer output: " + lastUserIdToPositionMap);
-            return lastUserIdToPositionMap;
-        }
-
-        private JsonObject differentiate(JsonObject prev, JsonObject curr) {
-
-            HashSet<String> curUserIds = new HashSet<>(curr.fieldNames());
-
-            prev.fieldNames().forEach(userId -> {
-
-                curUserIds.remove(userId);
-
-                final JsonObject user = curr.getJsonObject(userId);
-
-                if (user == null) {
-
-                    final JsonObject prevUser =
-                        prev
-                            .getJsonObject(userId)
-                            .put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$absent.name());
-
-                    curr.put(
-                        userId, prevUser
-                    );
-                    return;
-                }
-
-                user.put(
-                    UserPositionModel.positionStatus,
-                    UserPositionModel.PositionStatus.$present.name()
-                );
-            });
-
-            curUserIds.forEach(userId -> curr.getJsonObject(userId).put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$new.name()));
-
-            return curr;
+            return new JsonObject(ImmutableMap.copyOf(map));
         }
 
         private JsonObject toUserPositionModel(JsonObject position) {
 
-            HashMap<String, Object> map = new HashMap<>();
+            final ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.builder();
 
             final JsonObject user = position.getJsonObject(PositionModel.createdBy);
 
-            map.putAll(user.getMap());
-            map.put(UserPositionModel.positionStatus, UserPositionModel.PositionStatus.$new.name());
+            mapBuilder.putAll(
+                user.getMap().entrySet().stream()
+                    .filter(filterOutNulls())
+                    .collect(Collectors.toList())
+            );
 
-            map.put(UserPositionModel.position, new JsonObject(
+            mapBuilder.put(UserPositionModel.position, new JsonObject(
                 ImmutableMap.of(
                     PositionModel.id, position.getValue(PositionModel.id),
                     PositionModel.lat, position.getValue(PositionModel.lat),
@@ -262,7 +231,7 @@ final public class ReplayServiceImpl implements ReplayService {
                 )
             ));
 
-            return new JsonObject(map);
+            return new JsonObject(mapBuilder.build());
         }
     }
 }

@@ -42,8 +42,6 @@ public interface Replay {
         PublishSubject<JsonObject> publishSubject = PublishSubject.create();
 
         publishSubject
-            .delay(0, TimeUnit.SECONDS)
-//            .filter(positionAndUserId -> positionAndUserId.getFloat(PositionModel.accuracy) < 38)
             .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
             .doOnNext(jsonObject -> {
 
@@ -54,7 +52,7 @@ public interface Replay {
                         new Request.Builder()
                             .url("http://192.168.0.102:152/api/positions")
                             .headers(Headers.of(ImmutableMap.of(
-                                "Authorization", "Bearer 09e19b01-4b9f-4831-a509-6eb1a509ce31"
+                                "Authorization", "Bearer d8e76f03-0d2b-4991-952c-5453225d4264"
                             )))
                             .post(
                                 RequestBody.create(

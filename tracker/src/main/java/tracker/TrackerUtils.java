@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Created by sohan on 6/25/2017.
@@ -52,5 +53,9 @@ public interface TrackerUtils {
 
     static JsonArray emptyJsonArray() {
         return EMPTY_JSON_ARRAY;
+    }
+
+    static Predicate<? super Map.Entry<String, Object>> filterOutNulls() {
+        return entry -> (entry.getKey() != null) && (entry.getValue() != null);
     }
 }
