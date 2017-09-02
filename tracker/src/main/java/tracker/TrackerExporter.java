@@ -34,7 +34,10 @@ import elasta.orm.OrmExporter;
 import elasta.orm.entity.EntityMappingHelper;
 import elasta.orm.idgenerator.LongIdGenerator;
 import elasta.orm.idgenerator.ObjectIdGenerator;
+import elasta.orm.idgenerator.StringIdGenerator;
 import elasta.orm.idgenerator.impl.LongObjectIdGeneratorImpl;
+import elasta.orm.idgenerator.impl.StringIdGeneratorImpl;
+import elasta.orm.idgenerator.impl.StringObjectIdGeneratorImpl;
 import elasta.orm.idgenerator.impl.TimestampBasedLongIdGenerator;
 import elasta.pipeline.MessageBundle;
 import elasta.pipeline.util.MessageBundleImpl;
@@ -280,14 +283,14 @@ public interface TrackerExporter extends ModuleExporter {
     static ModuleSystemBuilder exportObjectIdGenerator(ModuleSystemBuilder builder) {
 
         builder.export(ObjectIdGenerator.class, module -> module.export(
-            new LongObjectIdGeneratorImpl(
+            new StringObjectIdGeneratorImpl(
                 module.require(EntityMappingHelper.class),
-                module.require(LongIdGenerator.class),
+                module.require(StringIdGenerator.class),
                 TrackerUtils.isNewKey
             )
         ));
 
-        builder.export(LongIdGenerator.class, module -> module.export(new TimestampBasedLongIdGenerator()));
+        builder.export(StringIdGenerator.class, module -> module.export(new StringIdGeneratorImpl()));
 
         return builder;
     }

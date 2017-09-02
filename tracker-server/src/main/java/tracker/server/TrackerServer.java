@@ -52,6 +52,7 @@ import tracker.server.request.handlers.impl.LongDispatchingRequestHandlerImpl;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import static tracker.server.Uris.*;
@@ -259,7 +260,7 @@ public class TrackerServer {
         );
     }
 
-    static RequestHandler addAllHandler(String entity, ImmutableList<String> fields) {
+    static RequestHandler addAllHandler(String entity, List<String> fields) {
         return reqHanlder(
             new JaDispatchingRequestHandlerImpl(
                 module.require(MessageHeaderGenerator.class),

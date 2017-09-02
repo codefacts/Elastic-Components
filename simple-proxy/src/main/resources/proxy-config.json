@@ -1,0 +1,8 @@
+{
+  "targetScheme": "http",
+  "targetHost": "localhost",
+  "targetPort": 52054,
+  "targetPrefix": "",
+  "uri": "/api/*",
+  "port": 153
+}
